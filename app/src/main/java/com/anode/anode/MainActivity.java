@@ -1,5 +1,7 @@
 package com.anode.anode;
 
+import android.content.Intent;
+import android.net.VpnService;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -26,17 +28,21 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        cjdns = new anodeVPNService(this);
+        //cjdns = new anodeVPNService(this);
 
         button_start_test = findViewById(R.id.button_start_test);
         button_start_test.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Launching cjdroute...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                //Start cjdns
-                cjdns.LaunchCJDNS();
+                Intent intent = VpnService.prepare(getApplicationContext());
+                if (intent != null) {
+                    startActivityForResult(intent, 0);
+                } else {
+                    onActivityResult(0, RESULT_OK, null);
+                }
             }
         });
 
@@ -62,6 +68,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            Intent intent = new Intent(this, anodeVPNService.class);
+            startService(intent);
+        }
     }
 
 }
