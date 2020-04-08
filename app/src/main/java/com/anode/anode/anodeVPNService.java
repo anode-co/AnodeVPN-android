@@ -2,16 +2,21 @@ package com.anode.anode;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.BufferedReader;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -19,6 +24,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Random;
 
 public class anodeVPNService extends VpnService {
 
@@ -36,12 +42,12 @@ public class anodeVPNService extends VpnService {
     // Services interface
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LaunchCJDNS();
-
         // Start a new session by creating a new thread.
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
+
+                //DataOutputStream os = null;
                 ParcelFileDescriptor iface = null;
                 try {
                     //a. Configure the TUN and get the interface.
@@ -51,6 +57,7 @@ public class anodeVPNService extends VpnService {
                             .establish();
                     builder.addAllowedApplication("com.android.chrome");
                     builder.addAllowedApplication("org.mozilla.firefox");
+                    builder.addAllowedApplication("com.termux");
                     //b. Packets to be sent are queued in this input stream.
                     FileInputStream in = new FileInputStream(
                             mInterface.getFileDescriptor());
@@ -60,18 +67,42 @@ public class anodeVPNService extends VpnService {
                     //c. The UDP channel can be used to pass/get ip package to/from server
                     DatagramChannel tunnel = DatagramChannel.open();
                     //d. Protect this socket, so package send by it will not be feedback to the vpn service.
+
                     protect(tunnel.socket());
                     // Connect to the server
                     tunnel.connect(new InetSocketAddress("198.167.222.70",54673));
 
-                    //e. Use a loop to pass packets.
-                    while (true) {
-                        //TODO: Are we doing this or cjdroute?
+                    String socketName = (getApplication().getCacheDir().getAbsolutePath() + "/" + "cjdns.socket");
+
+                    LocalSocket localsocket = new LocalSocket();
+
+                    while (!localsocket.isConnected())
+                    {
+                        try {
+                            localsocket.connect(new LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM));
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                        Thread.sleep(500);
                     }
+
+                    FileDescriptor fd = ParcelFileDescriptor.fromDatagramSocket(tunnel.socket()).getFileDescriptor();
+                    FileDescriptor fda[] = {fd};
+
+                    localsocket.setFileDescriptorsForSend(fda);
+                    OutputStream os = localsocket.getOutputStream();
+                    os.write("test".getBytes("UTF-8"));
+                    os.flush();
+
+                    while(true)
+                    {}
                 } catch (Exception e) {
-                    // Catch any exception
                     e.printStackTrace();
                 } finally {
+
                     try {
                         if (mInterface != null) {
                             mInterface.close();
@@ -102,15 +133,26 @@ public class anodeVPNService extends VpnService {
     public void LaunchCJDNS() {
         DataOutputStream os = null;
         try {
-            Runtime rt = Runtime.getRuntime();
+            Process process = Runtime.getRuntime().exec("su");
             // Execute cjdroute.
-            rt.exec(String.format(CMD_EXECUTE_CJDROUTE, CJDROUTE_FILES_PATH, CJDROUTE_FILES_PATH));
+            //rt.exec(String.format(CMD_EXECUTE_CJDROUTE, CJDROUTE_FILES_PATH, CJDROUTE_FILES_PATH));
+            os = new DataOutputStream(process.getOutputStream());
+            os.writeBytes(String.format(CMD_EXECUTE_CJDROUTE, CJDROUTE_FILES_PATH, CJDROUTE_FILES_PATH));
+            os.writeBytes("\n");
+            //os.writeBytes(CMD_ADD_DEFAULT_ROUTE);
+            os.flush();
             //TODO: run it on DataOutputStream and get output to check for errors
         } catch (IOException  e) {
             Log.e(TAG, "Failed to execute cjdroute", e);
         }
         finally {
-            //
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    // Do nothing.
+                }
+            }
         }
     }
 

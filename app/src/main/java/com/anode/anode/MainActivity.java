@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //cjdns = new anodeVPNService(this);
+        //cjdns = new anodeVPNService();
 
         button_start_test = findViewById(R.id.button_start_test);
         button_start_test.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     onActivityResult(0, RESULT_OK, null);
                 }
+                //cjdns.LaunchCJDNS();
             }
         });
 
