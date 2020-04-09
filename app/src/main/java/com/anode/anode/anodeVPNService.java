@@ -9,15 +9,19 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
+import android.util.JsonReader;
 
 import java.io.DataOutputStream;
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -28,12 +32,18 @@ import java.nio.channels.SocketChannel;
 import java.util.Random;
 
 public class anodeVPNService extends VpnService {
-
-    private static final String TAG = "CJDROUTE";
-    private static final String CMD_EXECUTE_CJDROUTE = "/data/data/com.anode.anode/cjdroute/cjdroute < /data/data/com.anode.anode/cjdroute/socket_cjdroute.conf";
+    private String cjdroutePath = "/data/data/com.anode.anode/cjdroute/";
+    private String cjdrouteBinFile = "cjdroute";
+    private String cjdrouteConfFile = "cjdroute.conf";
+    private String cjdrouteLogFile = "cjdroute.log";
+    private String cjdrouteSocket = "cjdns.socket";
+    private String cjdnsIPv6Address;
     private Context mContext;
-
+    //Thread for VPNService
     private Thread mThread;
+    //Thread for launching cjdroute
+    private Thread cjdrouteThread;
+    //FD for the VPNService.builder
     private ParcelFileDescriptor mInterface;
     //a. Configure a builder for the interface.
     Builder builder = new Builder();
@@ -41,31 +51,46 @@ public class anodeVPNService extends VpnService {
     // Services interface
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //LaunchCJDNS();
+        cjdroutePath = getApplication().getFilesDir().getAbsolutePath();
+        //Read cjdroute conf file to extract the address
+        File confFile = new File(cjdroutePath + "/" + cjdrouteConfFile);
+        if (confFile.exists()) {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(confFile));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    int idx = line.indexOf("\"ipv6\":" );
+                    if ( idx > -1) {
+                        cjdnsIPv6Address = line.substring(idx+8).replace("\"","").replace(",","");
+                    }
+                }
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //TODO: create conf using cjdroute --genconf
+
+        }
+        LaunchCJDNS();
         // Start a new session by creating a new thread.
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
-
                 try {
                     prepare(getBaseContext());
-                    //a. Configure the TUN and get the interface.
+                    //Configure the TUN and get the interface.
                     mInterface = builder.setSession("anodeVPNService")
                             .allowFamily(OsConstants.AF_INET)
-                            .addAddress("fc94:2fb3:7052:f216:c993:b634:c299:2ad7", 128)
+                            //.addAddress("fc94:2fb3:7052:f216:c993:b634:c299:2ad7", 128)
+                            .addAddress(cjdnsIPv6Address, 128)
                             .addRoute("fc00::", 8)
                             .establish();
 
-                    /*
-                    DatagramChannel tunnel = DatagramChannel.open();
-                    protect(tunnel.socket());
-                    tunnel.connect(new InetSocketAddress("198.167.222.70",54673));
-                     */
-
-                    String socketName = (getApplication().getCacheDir().getAbsolutePath() + "/" + "cjdns.socket");
-
+                    String socketName = ( cjdroutePath + "/" + cjdrouteSocket);
                     LocalSocket localsocket = new LocalSocket();
 
+                    //Try a few times to connect to the socket that is created from cjdroute
                     while (!localsocket.isConnected())
                     {
                         try {
@@ -117,60 +142,48 @@ public class anodeVPNService extends VpnService {
         if (mThread != null) {
             mThread.interrupt();
         }
+        if (cjdrouteThread != null) {
+            cjdrouteThread.interrupt();
+        }
         super.onDestroy();
     }
 
     public void LaunchCJDNS() {
-        DataOutputStream os = null;
-        try {
-            //Runtime rt = Runtime.getRuntime();
-            Process process = Runtime.getRuntime().exec("sh");
-            //Process process = rt.exec(new String[]{"/data/data/com.anode.anode/cjdroute/cjdroute", '</data/data/com.anode.anode/cjdroute/sock_cjdroute.conf'});
-            //ProcessBuilder processBuilder = new ProcessBuilder("/data/data/com.anode.anode/cjdroute/cjdroute < /data/data/com.anode.anode/cjdroute/sock_cjdroute.conf");
-            //Process process = processBuilder.start();
-            os = new DataOutputStream(process.getOutputStream());
-            os.writeBytes(String.format(CMD_EXECUTE_CJDROUTE, "/data/data/com.anode.anode/cjdroute", "/data/data/com.anode.anode/cjdroute"));
-            os.writeBytes("\n");
-            os.flush();
-
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(process.getInputStream()));
-
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(process.getErrorStream()));
-            // Read the output from the command
-            String s = null;
-            /*while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }*/
-
-            // Read any errors from the attempted command
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
-            /*
-            Process process = Runtime.getRuntime().exec("sh");
-            // Execute cjdroute.
-            os = new DataOutputStream(process.getOutputStream());
-            os.writeBytes(String.format(CMD_EXECUTE_CJDROUTE, CJDROUTE_FILES_PATH, CJDROUTE_FILES_PATH));
-            os.writeBytes("\n");
-            os.flush();
-            */
-
-        } catch (IOException  e) {
-            Log.e(TAG, "Failed to execute cjdroute", e);
-        }
-        finally {
-            if (os != null) {
+        cjdrouteThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DataOutputStream os = null;
                 try {
-                    os.close();
-                } catch (IOException e) {
-                    // Do nothing.
+                    /**/
+                    ProcessBuilder processBuilder = new ProcessBuilder();
+                    processBuilder.command("whoami")
+                            .redirectOutput(new File("/data/data/com.anode.anode/cjdroute/", "process.log"));
+                    /**/
+                    processBuilder.command("/data/data/com.anode.anode/cjdroute/cjdroute")
+                            .redirectInput(new File("/data/data/com.anode.anode/cjdroute/", "socket_cjdroute.conf"))
+                            .redirectOutput(new File("/data/data/com.anode.anode/cjdroute/", "cjdroute.log"));
+                    /**/
+                    Process p = processBuilder.start();
+                    p.waitFor();
+                    /**/
+                    /*
+                    Process p=Runtime.getRuntime().exec("sh");
+                    DataOutputStream dos = new DataOutputStream(p.getOutputStream());
+                    dos.writeBytes("/data/data/com.anode.anode/cjdroute/cjdroute < /data/data/com.anode.anode/cjdroute/socket_cjdroute.conf\n");
+                    dos.flush();
+                    dos.close();
+                    p.waitFor();
+                    */
+                } catch (IOException | InterruptedException e) {
+                    Log.e("LAUNCH_CJDROUTE", "Failed to execute cjdroute", e);
+                } finally {
+
                 }
             }
-        }
+        }, "cjdrouteThread");
+        //start the service
+        cjdrouteThread.start();
     }
-
 
 }
 
