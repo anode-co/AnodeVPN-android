@@ -52,16 +52,15 @@ public class anodeVPNService extends VpnService {
                     //a. Configure the TUN and get the interface.
                     mInterface = builder.setSession("anodeVPNService")
                             .allowFamily(OsConstants.AF_INET)
-                            //.addAddress("10.66.6.62",32)
                             .addAddress("fc94:2fb3:7052:f216:c993:b634:c299:2ad7", 128)
                             .addRoute("fc00::", 8)
-                            //.addRoute("::", 0)
                             .establish();
 
+                    /*
                     DatagramChannel tunnel = DatagramChannel.open();
                     protect(tunnel.socket());
-                    // Connect to the server
                     tunnel.connect(new InetSocketAddress("198.167.222.70",54673));
+                     */
 
                     String socketName = (getApplication().getCacheDir().getAbsolutePath() + "/" + "cjdns.socket");
 
