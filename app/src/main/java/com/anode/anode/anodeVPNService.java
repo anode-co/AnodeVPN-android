@@ -7,6 +7,7 @@ import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
+import android.system.OsConstants;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -29,9 +30,7 @@ import java.util.Random;
 public class anodeVPNService extends VpnService {
 
     private static final String TAG = "CJDROUTE";
-    static final String FILENAME_CJDROUTE = "cjdroute";
-    private static final String CMD_EXECUTE_CJDROUTE = "%1$s/" + FILENAME_CJDROUTE + " < %2$s/android_cjdroute.conf";
-    private static final String CJDROUTE_FILES_PATH = "/data/data/com.anode.anode/files";
+    private static final String CMD_EXECUTE_CJDROUTE = "/data/data/com.anode.anode/cjdroute/cjdroute < /data/data/com.anode.anode/cjdroute/socket_cjdroute.conf";
     private Context mContext;
 
     private Thread mThread;
@@ -42,32 +41,24 @@ public class anodeVPNService extends VpnService {
     // Services interface
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        //LaunchCJDNS();
         // Start a new session by creating a new thread.
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
 
-                //DataOutputStream os = null;
-                ParcelFileDescriptor iface = null;
                 try {
+                    prepare(getBaseContext());
                     //a. Configure the TUN and get the interface.
                     mInterface = builder.setSession("anodeVPNService")
+                            .allowFamily(OsConstants.AF_INET)
+                            //.addAddress("10.66.6.62",32)
                             .addAddress("fc94:2fb3:7052:f216:c993:b634:c299:2ad7", 128)
                             .addRoute("fc00::", 8)
+                            //.addRoute("::", 0)
                             .establish();
-                    builder.addAllowedApplication("com.android.chrome");
-                    builder.addAllowedApplication("org.mozilla.firefox");
-                    builder.addAllowedApplication("com.termux");
-                    //b. Packets to be sent are queued in this input stream.
-                    FileInputStream in = new FileInputStream(
-                            mInterface.getFileDescriptor());
-                    //b. Packets received need to be written to this output stream.
-                    FileOutputStream out = new FileOutputStream(
-                            mInterface.getFileDescriptor());
-                    //c. The UDP channel can be used to pass/get ip package to/from server
-                    DatagramChannel tunnel = DatagramChannel.open();
-                    //d. Protect this socket, so package send by it will not be feedback to the vpn service.
 
+                    DatagramChannel tunnel = DatagramChannel.open();
                     protect(tunnel.socket());
                     // Connect to the server
                     tunnel.connect(new InetSocketAddress("198.167.222.70",54673));
@@ -85,20 +76,20 @@ public class anodeVPNService extends VpnService {
                         {
                             e.printStackTrace();
                         }
-
                         Thread.sleep(500);
                     }
 
-                    FileDescriptor fd = ParcelFileDescriptor.fromDatagramSocket(tunnel.socket()).getFileDescriptor();
-                    FileDescriptor fda[] = {fd};
+                    FileDescriptor fda[] = {mInterface.getFileDescriptor()};
 
                     localsocket.setFileDescriptorsForSend(fda);
                     OutputStream os = localsocket.getOutputStream();
-                    os.write("test".getBytes("UTF-8"));
-                    os.flush();
+                    os.write(" ".getBytes("UTF-8"));
+                    //os.flush();
 
                     while(true)
-                    {}
+                    {
+                        Thread.sleep(500);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -133,15 +124,40 @@ public class anodeVPNService extends VpnService {
     public void LaunchCJDNS() {
         DataOutputStream os = null;
         try {
-            Process process = Runtime.getRuntime().exec("su");
+            //Runtime rt = Runtime.getRuntime();
+            Process process = Runtime.getRuntime().exec("sh");
+            //Process process = rt.exec(new String[]{"/data/data/com.anode.anode/cjdroute/cjdroute", '</data/data/com.anode.anode/cjdroute/sock_cjdroute.conf'});
+            //ProcessBuilder processBuilder = new ProcessBuilder("/data/data/com.anode.anode/cjdroute/cjdroute < /data/data/com.anode.anode/cjdroute/sock_cjdroute.conf");
+            //Process process = processBuilder.start();
+            os = new DataOutputStream(process.getOutputStream());
+            os.writeBytes(String.format(CMD_EXECUTE_CJDROUTE, "/data/data/com.anode.anode/cjdroute", "/data/data/com.anode.anode/cjdroute"));
+            os.writeBytes("\n");
+            os.flush();
+
+            BufferedReader stdInput = new BufferedReader(new
+                    InputStreamReader(process.getInputStream()));
+
+            BufferedReader stdError = new BufferedReader(new
+                    InputStreamReader(process.getErrorStream()));
+            // Read the output from the command
+            String s = null;
+            /*while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }*/
+
+            // Read any errors from the attempted command
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
+            /*
+            Process process = Runtime.getRuntime().exec("sh");
             // Execute cjdroute.
-            //rt.exec(String.format(CMD_EXECUTE_CJDROUTE, CJDROUTE_FILES_PATH, CJDROUTE_FILES_PATH));
             os = new DataOutputStream(process.getOutputStream());
             os.writeBytes(String.format(CMD_EXECUTE_CJDROUTE, CJDROUTE_FILES_PATH, CJDROUTE_FILES_PATH));
             os.writeBytes("\n");
-            //os.writeBytes(CMD_ADD_DEFAULT_ROUTE);
             os.flush();
-            //TODO: run it on DataOutputStream and get output to check for errors
+            */
+
         } catch (IOException  e) {
             Log.e(TAG, "Failed to execute cjdroute", e);
         }
