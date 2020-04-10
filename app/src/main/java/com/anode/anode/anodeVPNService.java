@@ -161,13 +161,14 @@ public class anodeVPNService extends VpnService {
                          */
                         processBuilder.command(cjdroutePath + "/" + cjdrouteBinFile)
                                 .redirectInput(new File(cjdroutePath, cjdrouteConfFile))
-                                .redirectOutput(new File(cjdroutePath, cjdrouteLogFile));
+                                .redirectOutput(new File(cjdroutePath, cjdrouteLogFile))
+                                .redirectErrorStream(true);
                     }
 
                     Process p = processBuilder.start();
                     Thread.sleep(500);
                     //p.waitFor();
-                } catch (/*IOException |*/ InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     Log.e("LAUNCH_CJDROUTE", "Failed to execute cjdroute", e);
                 } finally {
 
