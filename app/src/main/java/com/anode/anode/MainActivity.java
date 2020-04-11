@@ -28,10 +28,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
+
     private static String LOGTAG = "MainActivity";
     private FloatingActionButton button_start_test;
     SharedPreferences prefs = null;
     anodeVPNService cjdns;
+
     protected void InitializeApp(){
         //Create files folder
         getApplication().getFilesDir().mkdir();
