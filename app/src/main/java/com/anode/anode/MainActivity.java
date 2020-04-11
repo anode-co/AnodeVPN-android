@@ -1,6 +1,8 @@
 package com.anode.anode;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.net.VpnService;
 import android.os.Bundle;
 
@@ -10,16 +12,58 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.Log;
 
 import com.anode.anode.anodeVPNService;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
+public class MainActivity extends AppCompatActivity {
+    private static String LOGTAG = "MainActivity";
     private FloatingActionButton button_start_test;
+    SharedPreferences prefs = null;
     anodeVPNService cjdns;
+    protected void InitializeApp(){
+        //Create files folder
+        getApplication().getFilesDir().mkdir();
+        //Copy cjdroute
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            AssetManager am = getBaseContext().getAssets();
+            in = am.open("x86/cjdroute");
+            out = new FileOutputStream(getApplication().getFilesDir()+"/cjdroute");
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1 ){
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            out.close();
+            //Set permissions
+            File file = new File(getApplication().getFilesDir()+"/cjdroute");
+            file.setExecutable(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(LOGTAG, "Failed to copy cjdroute file", e);
+        }
+
+        //Create conf
+        cjdns = new anodeVPNService();
+        cjdns.Genconf();
+
+        //Add peers
+        cjdns.Addpeers();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +71,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        prefs = getSharedPreferences("com.anode.anode", MODE_PRIVATE);
+        if (prefs.getBoolean("firstrun", true)) {
+            InitializeApp();
+            prefs.edit().putBoolean("firstrun", false).commit();
+        }
         //cjdns = new anodeVPNService();
 
         button_start_test = findViewById(R.id.button_start_test);
@@ -76,6 +124,13 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, anodeVPNService.class);
             startService(intent);
         }
+    }
+
+    public void showMessageSnackbar(String msg)
+    {
+        View view = findViewById(button_start_test.getId());
+        Snackbar.make(view, msg, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 
 }
