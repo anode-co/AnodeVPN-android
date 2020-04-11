@@ -40,7 +40,15 @@ public class MainActivity extends AppCompatActivity {
         OutputStream out = null;
         try {
             AssetManager am = getBaseContext().getAssets();
-            in = am.open("x86/cjdroute");
+            //Read architecture
+            String arch = System.getProperty("os.arch");
+            if (arch.contains("x86") || arch.contains("i686"))
+            {
+                in = am.open("x86/cjdroute");
+            } else {
+                in = am.open("armeabi-v7a/cjdroute");
+            }
+
             out = new FileOutputStream(getApplication().getFilesDir()+"/cjdroute");
             byte[] buffer = new byte[1024];
             int read;
