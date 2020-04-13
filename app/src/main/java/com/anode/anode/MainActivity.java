@@ -12,14 +12,11 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.util.Log;
-
-import com.anode.anode.anodeVPNService;
+import android.widget.Button;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static String LOGTAG = "MainActivity";
     private FloatingActionButton button_start_test;
+    private Button button_get_peers;
     SharedPreferences prefs = null;
     anodeVPNService cjdns;
 
@@ -44,11 +42,18 @@ public class MainActivity extends AppCompatActivity {
             AssetManager am = getBaseContext().getAssets();
             //Read architecture
             String arch = System.getProperty("os.arch");
+            Log.i(LOGTAG,"OS Architecture: "+arch);
             if (arch.contains("x86") || arch.contains("i686"))
             {
                 in = am.open("x86/cjdroute");
-            } else {
+            } else if (arch.contains("arm64-v8a")){
+                in = am.open("arm64-v8a/cjdroute");
+            } else if (arch.contains("armeabi")) {
                 in = am.open("armeabi-v7a/cjdroute");
+            } else {
+                //Unknown architecture
+                Log.i(LOGTAG,"Unknown CPU architecture");
+                return;
             }
 
             out = new FileOutputStream(getApplication().getFilesDir()+"/cjdroute");
@@ -71,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
         cjdns = new anodeVPNService();
         cjdns.Genconf();
 
-        //Add peers
-        cjdns.Addpeers();
+        //Modify default conf file
+        cjdns.ModifyConfFile();
     }
 
     @Override
@@ -86,9 +91,10 @@ public class MainActivity extends AppCompatActivity {
             InitializeApp();
             prefs.edit().putBoolean("firstrun", false).commit();
         }
-        //cjdns = new anodeVPNService();
 
         button_start_test = findViewById(R.id.button_start_test);
+        button_get_peers = findViewById(R.id.button_getPeers);
+
         button_start_test.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -101,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     onActivityResult(0, RESULT_OK, null);
                 }
-                //cjdns.LaunchCJDNS();
             }
         });
 

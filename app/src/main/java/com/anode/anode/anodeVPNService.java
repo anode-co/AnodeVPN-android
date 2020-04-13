@@ -2,38 +2,25 @@ package com.anode.anode;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.system.OsConstants;
 import android.util.Log;
-import android.util.JsonReader;
 
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.File;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
-import java.util.Random;
+import java.lang.Process;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -56,28 +43,27 @@ public class anodeVPNService extends VpnService {
     private ParcelFileDescriptor mInterface;
     //a. Configure a builder for the interface.
     Builder builder = new Builder();
-    MainActivity main = new MainActivity();
 
+    private boolean cjdrouteRunning = false;
     // Services interface
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         File confFile = new File(cjdroutePath + "/" + cjdrouteConfFile);
         if (confFile.exists()) {
             cjdnsIPv6Address = getIPv6Address();
         } else {
             Log.i(LOGTAG,"Trying to create new cjdroute.conf file...");
             Genconf();
-            Addpeers();
-            try{
+            ModifyConfFile();
+            try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             cjdnsIPv6Address = getIPv6Address();
             if (cjdnsIPv6Address == "") {
                 //TODO:handle error creating conf file...
+                return START_STICKY;
             }
         }
         //Launch cjdroute with configuration file
@@ -87,6 +73,7 @@ public class anodeVPNService extends VpnService {
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
+
                 try {
                     //Configure the TUN and get the interface.
                     mInterface = builder.setSession("anodeVPNService")
@@ -101,20 +88,24 @@ public class anodeVPNService extends VpnService {
 
                     //Try a few times to connect to the socket that is created from cjdroute
                     int tries = 0;
-                    while (!localsocket.isConnected() || tries < 5)
-                    {
+                    while (!localsocket.isConnected() || tries < 5) {
                         try {
-                            main.showMessageSnackbar("Connecting to socket...");
                             localsocket.connect(new LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM));
                             break;
                         }
-                        catch (Exception e)
-                        {
+                        catch (Exception e) {
                             Log.e(LOGTAG, "Failed to connect to "+socketName,e);
                             e.printStackTrace();
                         }
+                        /*
+                        if (!isCjdrouteRunning()) {
+                            LaunchCJDNS();
+                        } else {
+                            //TODO: cjdroute is running but can not connect socket?! What to do?
+                            //restart it?
+                        }
 
-                        LaunchCJDNS();
+                         */
                         tries++;
                     }
                     //TODO: log error of failing to launch cjdns and return
@@ -125,13 +116,13 @@ public class anodeVPNService extends VpnService {
                     OutputStream os = localsocket.getOutputStream();
                     os.write(" ".getBytes("UTF-8"));
                     //os.flush();
-                    main.showMessageSnackbar("CJDNS running...");
-                    while(true)
-                    {
+
+                    while(true) {
                         Thread.sleep(500);
                     }
                 } catch (Exception e) {
                     Log.e(LOGTAG,"Failed to connect to cjdroute...", e);
+                    //TODO: Handle bad address...
                     e.printStackTrace();
                 } finally {
 
@@ -175,7 +166,12 @@ public class anodeVPNService extends VpnService {
             Log.e(LOGTAG,"Failed to generate new configuration file", e);
             e.printStackTrace();
         }
-
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public void LaunchCJDNS() {
@@ -196,8 +192,9 @@ public class anodeVPNService extends VpnService {
                     //p.waitFor();
                 } catch (IOException e) {
                     Log.e(LOGTAG, "Failed to execute cjdroute", e);
+                    cjdrouteRunning = false;
                 } finally {
-
+                    cjdrouteRunning = true;
                 }
             }
         }, "cjdrouteThread");
@@ -233,8 +230,33 @@ public class anodeVPNService extends VpnService {
         return "";
     }
 
-    public void Addpeers(){
-        Log.i(LOGTAG,"Adding peers to cjdroute.conf file...");
+    public boolean isCjdrouteRunning() {
+        /*
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec("pgrep cjdroute");
+
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+
+            if (bufferedReader.readLine() != null) {
+                cjdrouteRunning = true;
+                return true;
+            } else {
+                cjdrouteRunning = false;
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+         */
+        return true;
+    }
+
+    public void ModifyConfFile() {
+        Log.i(LOGTAG,"Modifying cjdroute.conf file...");
         File confFile = new File(cjdroutePath + "/" + cjdrouteConfFile);
         File newconfFile = new File(cjdroutePath + "/" + cjdrouteConfFile+".new");
         if (confFile.exists()) {
@@ -243,12 +265,26 @@ public class anodeVPNService extends VpnService {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(newconfFile));
                 String line;
                 while ((line = br.readLine()) != null) {
-                    bw.write(line);
-                    bw.newLine();
-                    int idx = line.indexOf("// Ask somebody who is already connected." );
+                    int idx = line.indexOf("{ \"setuser\": \"nobody\", \"keepNetAdmin\": 1 },");
+                    if (idx > -1) { //Comment out setuser line and set it to 0
+                        bw.write("//"+line);
+                        bw.newLine();
+                        bw.write("{ \"setuser\": 0 },");
+                        bw.newLine();
+                    } else {//Copy all other lines
+                        bw.write(line);
+                        bw.newLine();
+                    }
+                    //Add peers
+                    idx = line.indexOf("// Ask somebody who is already connected." );
                     if ( idx > -1) {
                         bw.write(cjdnsPeers);
                         bw.write("\n");
+                    }
+                    //Add pipe path
+                    idx = line.indexOf("// \"pipe\": \"/data/local/tmp\"" );
+                    if ( idx > -1) {
+                        bw.write(line.replace("// \"pipe\": \"/data/local/tmp\""," \"pipe\": \""+cjdroutePath+"\","));
                     }
                 }
                 br.close();
@@ -264,8 +300,6 @@ public class anodeVPNService extends VpnService {
                 Log.e(LOGTAG,"Failed to copy new cjdroute.conf file: ", e);
                 e.printStackTrace();
             }
-
-            //TODO: delete original file and mv .conf.new to .conf
         }
     }
 }
