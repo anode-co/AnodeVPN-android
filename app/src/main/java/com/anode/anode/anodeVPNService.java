@@ -224,28 +224,14 @@ public class anodeVPNService extends VpnService {
         Log.i(LOGTAG,"Trying to read IPv6 address from cjdroute.conf file...");
         String address = "";
         //Read cjdroute conf file to extract the address
-        File confFile = new File(cjdroutePath + "/" + cjdrouteConfFile);
-        if (confFile.exists()) {
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(confFile));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    int idx = line.indexOf("\"ipv6\":");
-                    if (idx > -1) {
-                        address = line.substring(idx + 8).replace("\"", "").replace(",", "");
-                        br.close();
-                        Log.i(LOGTAG,"Read IPv6 address: "+address);
-                        return address;
-                    }
-                }
-                br.close();
-                return address;
-            } catch (IOException e) {
-                Log.e(LOGTAG,"Can not read address: ",e);
-                e.printStackTrace();
-            }
+        try {
+            String filecontent = ReadJSONFile(cjdroutePath + "/" + cjdrouteConfFile);
+            JSONObject json = new JSONObject(filecontent);
+            address = json.getString("ipv6");
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
         }
-        return "";
+        return address;
     }
 
     public boolean isCjdrouteRunning() {
@@ -272,8 +258,21 @@ public class anodeVPNService extends VpnService {
         return true;
     }
 
+    public String ReadJSONFile(String filename) throws IOException{
+        FileInputStream confFile = new FileInputStream(filename);
+        StringBuffer fileContent = new StringBuffer("");
+        byte[] buffer = new byte[1024];
+        int size;
+        while ((size = confFile.read(buffer)) != -1)
+        {
+            fileContent.append(new String(buffer, 0, size));
+        }
+        return  fileContent.toString();
+    }
+
     public void ModifyJSONConfFile() {
         try {
+            /*
             FileInputStream confFile = new FileInputStream(cjdroutePath + "/" + cjdrouteConfFile);
             StringBuffer fileContent = new StringBuffer("");
             byte[] buffer = new byte[1024];
@@ -282,7 +281,9 @@ public class anodeVPNService extends VpnService {
             {
                 fileContent.append(new String(buffer, 0, size));
             }
-            JSONObject json = new JSONObject(fileContent.toString());
+            */
+            String filecontent = ReadJSONFile(cjdroutePath + "/" + cjdrouteConfFile);
+            JSONObject json = new JSONObject(filecontent);
             JSONObject interfaces = json.getJSONObject("interfaces");
             JSONArray UDPInterface = interfaces.getJSONArray("UDPInterface");
 
