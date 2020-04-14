@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Create conf
-        cjdns = new anodeVPNService();
+
         cjdns.Genconf();
 
         //Modify default conf file
@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        cjdns = new anodeVPNService();
         prefs = getSharedPreferences("com.anode.anode", MODE_PRIVATE);
         if (prefs.getBoolean("firstrun", true)) {
             InitializeApp();
@@ -94,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
 
         button_start_test = findViewById(R.id.button_start_test);
         button_get_peers = findViewById(R.id.button_getPeers);
-
+        //DEBUG
+        cjdns.ModifyJSONConfFile();
         button_start_test.setOnClickListener(new View.OnClickListener() {
 
             @Override
