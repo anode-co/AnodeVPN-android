@@ -33,7 +33,8 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
     private var mInterface: ParcelFileDescriptor? = null
     private var cjdns: CjdnsSocket? = null
     private var myIp6: String = ""
-    fun configVpn() {
+
+    private fun configVpn() {
         val b = avpn.builder().setSession("AnodeVpnService")
                 .addRoute("fc00::", 8)
                 .addAddress(myIp6, 128)
@@ -44,8 +45,9 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         Log.i(LOGTAG, cjdns!!.Core_initTunfd(fdNum).toString())
         Log.i(LOGTAG, "vpn launched")
     }
-    fun init() {
-        cjdns = CjdnsSocket(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.CJDROUTE_SOCK)
+
+    private fun init() {
+        cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
         val info = cjdns!!.Core_nodeInfo()
         myIp6 = info["myIp6"].str()
         Log.i(LOGTAG, info.toString())
@@ -53,6 +55,7 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         Log.i(LOGTAG, "got local fd to protect " + protectFd)
         avpn.protect(protectFd);
     }
+
     fun main() {
         init()
         configVpn()

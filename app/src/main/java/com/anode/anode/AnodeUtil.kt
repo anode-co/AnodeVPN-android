@@ -4,18 +4,21 @@ import android.util.Log
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class AnodeUtil {
     private val LOGTAG = "anodeVPNService"
-    private val CJDNS_PATH = "/data/data/com.anode.anode/files"
+    val CJDNS_PATH = "/data/data/com.anode.anode/files"
+    val CJDROUTE_SOCK = "cjdns.sock"
     private val CJDROUTE_LOG = "cjdroute.log"
     private val cjdrouteBinFile = "cjdroute"
     private val cjdrouteTmpConfFile = "tempcjdroute.conf"
     private val cjdrouteConfFile = "cjdroute.conf"
 
     fun launch() {
-        var cjdnsIPv6Address = ""
-        val confFile = File(CJDNS_PATH + "/" + cjdrouteConfFile)
+        var cjdnsIPv6Address: String
+        val confFile = File("$CJDNS_PATH/$cjdrouteConfFile")
         if (confFile.exists()) {
             cjdnsIPv6Address = getIPv6Address()
         } else {
@@ -23,7 +26,7 @@ class AnodeUtil {
             generateConfFile()
             modifyJSONConfFile()
             cjdnsIPv6Address = getIPv6Address()
-            if (cjdnsIPv6Address === "") { //TODO:handle error creating conf file...
+            if (cjdnsIPv6Address === "") {
                 throw RuntimeException("Failed to create conf file")
             }
         }
@@ -57,16 +60,12 @@ class AnodeUtil {
             Log.e(LOGTAG, "Failed to generate new configuration file", e)
             e.printStackTrace()
         }
-        try {
-            Thread.sleep(300)
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
-        //TODO: Delete cjdrouteTmpConfFile
+
+        //Delete temp file
+        Files.delete(Paths.get("$CJDNS_PATH/$cjdrouteTmpConfFile"))
     }
 
     private fun launchCJDNS() {
-        val os: DataOutputStream? = null
         try {
             Log.e(LOGTAG, "Launching cjdroute (file size: " +
                     File("$CJDNS_PATH/$cjdrouteBinFile").length() + ")")
@@ -105,7 +104,6 @@ class AnodeUtil {
             val interfaces = json.getJSONObject("interfaces")
             val UDPInterface = interfaces.getJSONArray("UDPInterface")
             //Add Peers
-//JSONObject connectTo = UDPInterface.getJSONObject(0).getJSONObject("connectTo");
             val peer = JSONObject()
             val peervalues = JSONObject()
             peervalues.put("login", "cjd-snode")
@@ -121,13 +119,12 @@ class AnodeUtil {
             val router = json.getJSONObject("router")
             val interf = router.getJSONObject("interface")
             interf.put("tunfd", "android")
-            //interf.put("tunDevice",CJDNS_PATH+"/"+CJDROUTE_SOCK);
-//Set security user to 0
+            //Set security user to 0
             val security = json.getJSONArray("security")
             security.getJSONObject(0).put("setuser", 0)
             security.getJSONObject(0).remove("keepNetAdmin")
-            //json.put("pipe",CJDNS_PATH);
-//Save file
+
+            //Save file
             val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$cjdrouteConfFile"))
             val out = json.toString().replace("\\/", "/")
             writer.write(out)

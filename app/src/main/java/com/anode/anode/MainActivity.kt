@@ -23,8 +23,8 @@ class MainActivity : AppCompatActivity() {
         //Create files folder
         application.filesDir.mkdir()
         //Copy cjdroute
-        var `in`: InputStream? = null
-        var out: OutputStream? = null
+        var `in`: InputStream?
+        var out: OutputStream?
         try {
             val am = baseContext.assets
             //Read architecture
@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        var buttonStartTest: FloatingActionButton? = null
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -73,9 +72,9 @@ class MainActivity : AppCompatActivity() {
             InitializeApp()
             prefs.edit().putBoolean("firstrun", false).commit()
         }
-        buttonStartTest = findViewById(R.id.button_start_test)
+        var buttonStartTest: FloatingActionButton? = findViewById(R.id.button_start_test)
 
-        buttonStartTest.setOnClickListener(View.OnClickListener { view ->
+        buttonStartTest?.setOnClickListener(View.OnClickListener { view ->
             Snackbar.make(view, "Launching cjdroute...", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             val intent = VpnService.prepare(applicationContext)
