@@ -36,48 +36,51 @@ public class MainActivity extends AppCompatActivity {
         //Create files folder
         getApplication().getFilesDir().mkdir();
         //Copy cjdroute
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            AssetManager am = getBaseContext().getAssets();
-            //Read architecture
-            String arch = System.getProperty("os.arch");
-            Log.i(LOGTAG,"OS Architecture: "+arch);
-            if (arch.contains("x86") || arch.contains("i686"))
-            {
-                in = am.open("x86/cjdroute");
-            } else if (arch.contains("arm64-v8a")){
-                in = am.open("arm64-v8a/cjdroute");
-            } else if (arch.contains("armeabi")) {
-                in = am.open("armeabi-v7a/cjdroute");
-            } else {
-                //Unknown architecture
-                Log.i(LOGTAG,"Unknown CPU architecture");
-                return;
-            }
+        File cjdrouteExe = new File(getApplication().getFilesDir()+"/cjdroute");
+        if (!cjdrouteExe.exists()) {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                AssetManager am = getBaseContext().getAssets();
+                //Read architecture
+                String arch = System.getProperty("os.arch");
+                Log.i(LOGTAG, "OS Architecture: " + arch);
+                if (arch.contains("x86") || arch.contains("i686")) {
+                    in = am.open("x86/cjdroute");
+                } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
+                    in = am.open("arm64-v8a/cjdroute");
+                } else if (arch.contains("armeabi")) {
+                    in = am.open("armeabi-v7a/cjdroute");
+                } else {
+                    //Unknown architecture
+                    Log.i(LOGTAG, "Unknown CPU architecture");
+                    return;
+                }
 
-            out = new FileOutputStream(getApplication().getFilesDir()+"/cjdroute");
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1 ){
-                out.write(buffer, 0, read);
+                out = new FileOutputStream(getApplication().getFilesDir() + "/cjdroute");
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+                in.close();
+                out.close();
+                //Set permissions
+                File file = new File(getApplication().getFilesDir() + "/cjdroute");
+                file.setExecutable(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(LOGTAG, "Failed to copy cjdroute file", e);
             }
-            in.close();
-            out.close();
-            //Set permissions
-            File file = new File(getApplication().getFilesDir()+"/cjdroute");
-            file.setExecutable(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(LOGTAG, "Failed to copy cjdroute file", e);
         }
 
         //Create conf
-        util.Genconf();
-
-        //Modify default conf file
-        //cjdns.ModifyConfFile();
-        util.ModifyJSONConfFile();
+        if (!new File(getApplication().getFilesDir()+"/cjdroute.conf").exists()) {
+            util.Genconf();
+            //Modify default conf file
+            //cjdns.ModifyConfFile();
+            util.ModifyJSONConfFile();
+        }
     }
 
     @Override
@@ -87,11 +90,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         util = new AnodeUtil();
-        prefs = getSharedPreferences("com.anode.anode", MODE_PRIVATE);
-        if (prefs.getBoolean("firstrun", true)) {
-            InitializeApp();
-            prefs.edit().putBoolean("firstrun", false).commit();
-        }
+        InitializeApp();
+
 
         button_start_test = findViewById(R.id.button_start_test);
         button_get_peers = findViewById(R.id.button_getPeers);
