@@ -4,7 +4,6 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
 import java.io.FileDescriptor
-import java.io.InputStream
 
 val LOGTAG = "CjdnsSocket"
 
@@ -13,7 +12,7 @@ private fun setupSocket(socketName: String): LocalSocket {
     var tries = 0
     while (true) {
         try {
-            Log.i(AnodeUtil.LOGTAG, "Connecting to socket...")
+            Log.i(LOGTAG, "Connecting to socket...")
             ls.connect(LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM))
         } catch (e: java.lang.Exception) {
             if (tries > 100) {

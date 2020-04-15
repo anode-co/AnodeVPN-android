@@ -32,6 +32,11 @@ class AnodeUtil {
         launchCJDNS()
     }
 
+    fun initializeCjdrouteConfFile() {
+        generateConfFile()
+        modifyJSONConfFile()
+    }
+
     private fun generateConfFile() {
         val processBuilder = ProcessBuilder()
         try {
