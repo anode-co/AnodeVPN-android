@@ -3,13 +3,40 @@ package com.anode.anode
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
-import java.io.File
 import java.io.FileDescriptor
+import java.io.InputStream
 
 val LOGTAG = "CjdnsSocket"
 
-object CjdnsSocket {
-    fun read(ls: LocalSocket): String {
+private fun setupSocket(socketName: String): LocalSocket {
+    val ls = LocalSocket()
+    var tries = 0
+    while (true) {
+        try {
+            Log.i(AnodeUtil.LOGTAG, "Connecting to socket...")
+            ls.connect(LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM))
+        } catch (e: java.lang.Exception) {
+            if (tries > 100) {
+                throw Error("Unable to establish socket to cjdns")
+            }
+        }
+        if (ls.isConnected()) {
+            ls.sendBufferSize = 1024
+            break
+        }
+        try {
+            Thread.sleep(200)
+        } catch (e: java.lang.Exception) {
+        }
+        tries++
+    }
+    return ls
+}
+
+class CjdnsSocket(val ls: LocalSocket) {
+    constructor (path: String) : this(setupSocket(path))
+
+    fun read(): String {
         val istr = ls.inputStream
         var av: Int
         do {
@@ -21,18 +48,25 @@ object CjdnsSocket {
         return String(b)
     }
 
-    fun getUdpFd(ls: LocalSocket, ifNum: Int): Int {
-        Log.i(LOGTAG, "getUdpFd")
-        ls.outputStream.write(Benc.dict(
-                "q", "UDPInterface_getFd",
-                "args", Benc.dict("interfaceNumber", ifNum)
-        ).bytes())
-        val s = read(ls)
-        val dec = Benc(s).decode()
+    fun call(name: String, args: Benc.Bdict?): Benc.Obj {
+        val benc =
+                if (args != null) {
+                    Benc.dict("q", name, "args", args)
+                } else {
+                    Benc.dict("q", name)
+                }
+        ls.outputStream.write(benc.bytes())
+        val dec = Benc(read()).decode()
         val err = dec["error"]
         if (err is Benc.Bstr && err.str() != "none") {
-            throw Error("getUdpFd cjdns replied: " + err.str())
+            throw Error("cjdns replied: " + err.str())
         }
+        return dec
+    }
+
+    fun UDPInterface_getFd(ifNum: Int): Int {
+        Log.i(LOGTAG, "getUdpFd")
+        val dec = call("UDPInterface_getFd", Benc.dict("interfaceNumber", ifNum))
         val fd = dec["fd"]
         if (fd !is Benc.Bint) {
             throw Error("getUdpFd cjdns replied without fd " + dec.toString())
@@ -40,14 +74,8 @@ object CjdnsSocket {
         return fd.num()
     }
 
-    fun exportFd(ls: LocalSocket, fd: Int): FileDescriptor {
-        ls.outputStream.write(Benc.dict(
-                "q", "Admin_exportFd",
-                "args", Benc.dict("fd", fd)
-        ).bytes())
-        val reply = read(ls)
-        Log.i(LOGTAG, "Raw    : " + reply)
-        Log.i(LOGTAG, "Decoded: " + Benc(reply).decode())
+    fun Admin_exportFd(fd: Int): FileDescriptor {
+        call("Admin_exportFd", Benc.dict("fd", fd))
         val fds = ls.ancillaryFileDescriptors
         if (fds == null || fds.isEmpty()) {
             throw Error("Did not read back file descriptor")
@@ -55,31 +83,13 @@ object CjdnsSocket {
         return fds[0]
     }
 
-    fun exportUdp(ls: LocalSocket, ifNum: Int) = exportFd(ls, getUdpFd(ls, ifNum))
-
-    fun setupSocket(): LocalSocket {
-        val ls = LocalSocket()
-        var tries = 0
-        while (true) {
-            val socketName = AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.CJDROUTE_SOCK
-            try {
-                Log.i(AnodeUtil.LOGTAG, "Connecting to socket...")
-                ls.connect(LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM))
-            } catch (e: java.lang.Exception) {
-                if (tries > 100) {
-                    throw Error("Unable to establish socket to cjdns")
-                }
-            }
-            if (ls.isConnected()) {
-                ls.sendBufferSize = 1024
-                break
-            }
-            try {
-                Thread.sleep(200)
-            } catch (e: java.lang.Exception) {
-            }
-            tries++
-        }
-        return ls
+    fun Admin_importFd(fd: FileDescriptor): Int {
+        ls.setFileDescriptorsForSend(arrayOf(fd))
+        return call("Admin_importFd", null)["fd"].num()
     }
+
+    fun Core_nodeInfo(): Benc.Bdict = call("Core_nodeInfo", null) as Benc.Bdict
+
+    fun Core_initTunfd(fd: Int): Benc.Bdict =
+            call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict
 }
