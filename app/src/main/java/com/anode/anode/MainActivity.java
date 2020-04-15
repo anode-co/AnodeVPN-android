@@ -73,11 +73,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Create conf
-
         cjdns.Genconf();
 
         //Modify default conf file
-        cjdns.ModifyConfFile();
+        //cjdns.ModifyConfFile();
+        cjdns.ModifyJSONConfFile();
     }
 
     @Override
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         button_start_test = findViewById(R.id.button_start_test);
         button_get_peers = findViewById(R.id.button_getPeers);
         //DEBUG
-        cjdns.ModifyJSONConfFile();
+        //cjdns.ModifyJSONConfFile();
         button_start_test.setOnClickListener(new View.OnClickListener() {
 
             @Override
