@@ -6,10 +6,7 @@ import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
-import android.renderscript.ScriptGroup;
-import android.system.OsConstants;
 
-import android.util.JsonReader;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -21,28 +18,24 @@ import java.io.DataOutputStream;
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.File;
 import java.nio.file.Files;
-import java.util.Map;
 import java.lang.Process;
-import java.util.Iterator;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-public class anodeVPNService extends VpnService {
-    private static final String LOGTAG = "anodeVPNService";
-    private static final String CJDNS_PATH = "/data/data/com.anode.anode/files";
-    private static final String CJDROUTE_SOCK = "cjdroute.sock";
-    private static final String CJDROUTE_LOG = "cjdroute.log";
+public class AnodeUtil {
+    static final String LOGTAG = "anodeVPNService";
+    static final String CJDNS_PATH = "/data/data/com.anode.anode/files";
+    static final String CJDROUTE_SOCK = "cjdroute.sock";
+    static final String CJDROUTE_LOG = "cjdroute.log";
 
-    private static final BobjTools bobj = new BobjTools();
+//    private static final CjdnsSocket kCjdnsSocket = new CjdnsSocket();
 
     private String cjdrouteBinFile = "cjdroute";
     private String cjdrouteTmpConfFile = "tempcjdroute.conf";
@@ -58,8 +51,8 @@ public class anodeVPNService extends VpnService {
     //FD for the VPNService.builder
     private ParcelFileDescriptor mInterface;
     //a. Configure a builder for the interface.
-    Builder builder = new Builder();
-
+    //Builder builder = new Builder();
+/*
     private static String read(LocalSocket ls) throws Exception {
         Log.i(LOGTAG, "Reading time");
         InputStream is = ls.getInputStream();
@@ -82,59 +75,34 @@ public class anodeVPNService extends VpnService {
         Log.i(LOGTAG, "Got back: " + str);
         return 0;
     }
-
-    private static FileDescriptor exportFd(LocalSocket ls, int fd) throws Exception {
-        byte[] d = bobj.dict(
-            "q", "Admin_exportFd",
-                "args", bobj.dict(
-                    "fd", fd
-                )
-        ).bytes();
-        ls.getOutputStream().write(d);
-        Log.i(LOGTAG, "Got back: " + read(ls));
-        FileDescriptor[] fds = ls.getAncillaryFileDescriptors();
-        if (fds.length < 1) { throw new Exception("Did not read back file descriptor"); }
-        return fds[0];
-    }
-
-    private static int getUdpFd(LocalSocket ls, int ifNum) throws Exception {
-        Log.i(LOGTAG, "getUdpFd");
-        byte[] b = bobj.dict(
-            "q", "UDPInterface_getFd",
-            "args", bobj.dict(
-                "interfaceNumber", ifNum
-            )
-        ).bytes();
-        ls.getOutputStream().write(b);
-        String s = read(ls);
-        Log.i(LOGTAG, "Got back: " + s);
-        Bobj dec = new Benc(s).decode();
-        Log.i(LOGTAG, "Decoded: " + dec.toString());
-        Log.i(LOGTAG, "Error: " + dec.get("error"));
-        Log.i(LOGTAG, "Fd: " + dec.get("fd"));
-        return 0;
-    }
-
-    private static void runnerThread() throws Exception {
-        LocalSocket ls = new LocalSocket();
-        for (int tries = 0; ; tries++) {
-            String socketName = ( CJDNS_PATH + "/" + CJDROUTE_SOCK);
-            try {
-                Log.i(LOGTAG,"Connecting to socket...");
-                ls.connect(new LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM));
-                ls.setSendBufferSize(1024);
-            } catch (Exception e) {
-//                Log.e(LOGTAG, "Failed to connect to cjdns, trying again in 200ms",e);
-                if (tries > 100) {
-                    throw new RuntimeException("Unable to establish socket to cjdns");
-                }
-            }
-            if (ls.isConnected()) { break; }
-            try { Thread.sleep(200); } catch (Exception e) { }
-        }
-        getUdpFd(ls,0);
+*/
 
 
+//    private static void runnerThread() throws Exception {
+//        LocalSocket ls = new LocalSocket();
+//        for (int tries = 0; ; tries++) {
+//            String socketName = ( CJDNS_PATH + "/" + CJDROUTE_SOCK);
+//            try {
+//                Log.i(LOGTAG,"Connecting to socket...");
+//                ls.connect(new LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM));
+//                ls.setSendBufferSize(1024);
+//            } catch (Exception e) {
+////                Log.e(LOGTAG, "Failed to connect to cjdns, trying again in 200ms",e);
+//                if (tries > 100) {
+//                    throw new RuntimeException("Unable to establish socket to cjdns");
+//                }
+//            }
+//            if (ls.isConnected()) { break; }
+//            try { Thread.sleep(200); } catch (Exception e) { }
+//        }
+//        FileDescriptor num = kCjdnsSocket._exportUdp(ls,0);
+//        Log.i(LOGTAG,"Socketnum = " + num);
+//
+//        mInterface = builder.setSession("anodeVPNService")
+//                .allowFamily(OsConstants.AF_INET)
+//                .addAddress(cjdnsIPv6Address, 128)
+//                .addRoute("fc00::", 8)
+//
 
 //        //Configure the TUN and get the interface
 //        mInterface = builder.setSession("anodeVPNService")
@@ -158,12 +126,11 @@ public class anodeVPNService extends VpnService {
 //        {
 //            Thread.sleep(500);
 //        }
-    }
+//    }
 
     private boolean cjdrouteRunning = false;
-    // Services interface
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+
+    public void launch() {
         File confFile = new File(CJDNS_PATH + "/" + cjdrouteConfFile);
         if (confFile.exists()) {
             cjdnsIPv6Address = getIPv6Address();
@@ -174,44 +141,12 @@ public class anodeVPNService extends VpnService {
             cjdnsIPv6Address = getIPv6Address();
             if (cjdnsIPv6Address == "") {
                 //TODO:handle error creating conf file...
-                return START_STICKY;
+                throw new RuntimeException("Failed to create conf file");
             }
         }
         Log.i(LOGTAG,"Got ipv6 address: " + cjdnsIPv6Address);
         //Launch cjdroute with configuration file
         LaunchCJDNS();
-
-        // Start a new session by creating a new thread.
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runnerThread();
-                } catch (Exception e) {
-                    if (mInterface != null) {
-                        try { mInterface.close(); } catch (Exception ee) { }
-                        mInterface = null;
-                    }
-                    e.printStackTrace();
-                }
-            }
-        }, "MyVpnRunnable");
-
-        //start the service
-        mThread.start();
-        return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        // TODO Auto-generated method stub
-        if (mThread != null) {
-            mThread.interrupt();
-        }
-        if (cjdrouteThread != null) {
-            cjdrouteThread.interrupt();
-        }
-        super.onDestroy();
     }
 
     public void version() {

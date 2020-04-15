@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton button_start_test;
     private Button button_get_peers;
     SharedPreferences prefs = null;
-    anodeVPNService cjdns;
+    AnodeUtil util;
 
     protected void InitializeApp(){
         //Create files folder
@@ -73,11 +73,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Create conf
-        cjdns.Genconf();
+        util.Genconf();
 
         //Modify default conf file
         //cjdns.ModifyConfFile();
-        cjdns.ModifyJSONConfFile();
+        util.ModifyJSONConfFile();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        cjdns = new anodeVPNService();
+        util = new AnodeUtil();
         prefs = getSharedPreferences("com.anode.anode", MODE_PRIVATE);
         if (prefs.getBoolean("firstrun", true)) {
             InitializeApp();
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            Intent intent = new Intent(this, anodeVPNService.class);
+            Intent intent = new Intent(this, AnodeVpnService.class);
             startService(intent);
         }
     }
