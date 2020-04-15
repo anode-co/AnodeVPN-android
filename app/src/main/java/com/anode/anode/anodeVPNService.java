@@ -168,7 +168,7 @@ public class anodeVPNService extends VpnService {
         } else {
             Log.i(LOGTAG,"Trying to create new cjdroute.conf file...");
             Genconf();
-            ModifyConfFile();
+            ModifyJSONConfFile();
             cjdnsIPv6Address = getIPv6Address();
             if (cjdnsIPv6Address == "") {
                 //TODO:handle error creating conf file...
@@ -332,14 +332,14 @@ public class anodeVPNService extends VpnService {
             JSONObject router = json.getJSONObject("router");
             JSONObject interf = router.getJSONObject("interface");
             interf.put("tunfd","android");
-            interf.put("tunDevice",CJDNS_PATH+"/"+CJDROUTE_SOCK);
+            //interf.put("tunDevice",CJDNS_PATH+"/"+CJDROUTE_SOCK);
 
             //Set security user to 0
             JSONArray security = json.getJSONArray("security");
             security.getJSONObject(0).put("setuser",0);
             security.getJSONObject(0).remove("keepNetAdmin");
 
-            json.put("pipe",CJDNS_PATH);
+            //json.put("pipe",CJDNS_PATH);
             //Save file
             BufferedWriter writer = new BufferedWriter(new FileWriter(CJDNS_PATH + "/" + cjdrouteConfFile));
             String out = json.toString().replace("\\/","/");
@@ -347,55 +347,6 @@ public class anodeVPNService extends VpnService {
             writer.close();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void ModifyConfFile() {
-        Log.i(LOGTAG,"Modifying cjdroute.conf file...");
-        File confFile = new File(CJDNS_PATH + "/" + cjdrouteConfFile);
-        File newconfFile = new File(CJDNS_PATH + "/" + cjdrouteConfFile+".new");
-        if (confFile.exists()) {
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(confFile));
-                BufferedWriter bw = new BufferedWriter(new FileWriter(newconfFile));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    int idx = line.indexOf("{ \"setuser\": \"nobody\", \"keepNetAdmin\": 1 },");
-                    if (idx > -1) { //Comment out setuser line and set it to 0
-                        bw.write("//"+line);
-                        bw.newLine();
-                        bw.write("{ \"setuser\": 0 },");
-                        bw.newLine();
-                    } else {//Copy all other lines
-                        bw.write(line);
-                        bw.newLine();
-                    }
-                    //Add peers
-                    idx = line.indexOf("// Ask somebody who is already connected." );
-                    if ( idx > -1) {
-                        bw.write(cjdnsPeers);
-                        bw.write("\n");
-                    }
-                    //Add pipe path
-                    idx = line.indexOf("// \"pipe\": \"/data/local/tmp\"" );
-                    if ( idx > -1) {
-                        bw.write(line.replace("// \"pipe\": \"/data/local/tmp\""," \"pipe\": \""+CJDNS_PATH+"\","));
-                    }
-                    //TODO: Change tunfd and add socket to tundevice
-                }
-                br.close();
-                bw.close();
-            } catch (IOException e) {
-                Log.e(LOGTAG,"Failed to add peers to cjdroute.conf.new file: ", e);
-                e.printStackTrace();
-            }
-            try {
-                Files.move(newconfFile.toPath(),confFile.toPath(),REPLACE_EXISTING);
-            } catch (IOException e)
-            {
-                Log.e(LOGTAG,"Failed to copy new cjdroute.conf file: ", e);
-                e.printStackTrace();
-            }
         }
     }
 }
