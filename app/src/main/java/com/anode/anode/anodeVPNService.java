@@ -162,7 +162,7 @@ public class anodeVPNService extends VpnService {
         } else {
             Log.i(LOGTAG,"Trying to create new cjdroute.conf file...");
             Genconf();
-            Addpeers();
+            //Addpeers();
             cjdnsIPv6Address = getIPv6Address();
             if (cjdnsIPv6Address == "") {
                 throw new RuntimeException("Unable to get cjdns ipv6 address from conf file");
@@ -250,7 +250,7 @@ public class anodeVPNService extends VpnService {
                     .redirectInput(new File(CJDNS_PATH, cjdrouteConfFile))
                     .redirectOutput(new File(CJDNS_PATH, CJDROUTE_LOG))
                     .redirectErrorStream(true);
-            pb.environment().put("TEMP", CJDNS_PATH);
+            pb.environment().put("TMPDIR", CJDNS_PATH);
             Process p = processBuilder.start();
             p.waitFor();
             Log.e(LOGTAG, "cjdns exited with " + p.exitValue());
