@@ -108,8 +108,10 @@ public class anodeVPNService extends VpnService {
         ls.getOutputStream().write(b);
         String s = read(ls);
         Log.i(LOGTAG, "Got back: " + s);
-        Object dec = new Benc(s).decode();
-        Log.i(LOGTAG, "Decoded: " + dec);
+        Bobj dec = new Benc(s).decode();
+        Log.i(LOGTAG, "Decoded: " + dec.toString());
+        Log.i(LOGTAG, "Error: " + dec.get("error"));
+        Log.i(LOGTAG, "Fd: " + dec.get("fd"));
         return 0;
     }
 
