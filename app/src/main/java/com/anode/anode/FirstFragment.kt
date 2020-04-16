@@ -52,7 +52,7 @@ class FirstFragment : Fragment() {
             var count = 0
             override fun run() {
                 var cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
-                val info = cjdns!!.InterfaceController_peerStats(0)
+                val info = cjdns!!.getNumberofEstablishedPeers()
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "active $info connections established"
                 h.postDelayed(this, 1000) //ms

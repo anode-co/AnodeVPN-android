@@ -94,19 +94,32 @@ class CjdnsSocket(val ls: LocalSocket) {
     fun Core_initTunfd(fd: Int): Benc.Bdict =
             call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict
 
-    fun InterfaceController_peerStats(page: Int): String {
+    fun InterfaceController_peerStats(): ArrayList<Benc.Bdict> {
         var peerStats:Benc.Obj
+        var out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
         var totalPeers: Long = 0
-        var pageNum: Int = 0
+        var i = 0
         while(true) {
-            peerStats = call("InterfaceController_peerStats", Benc.dict("page", pageNum))
-            if (peerStats["peers"].toString() == "[]") {
-                break
+            peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
+            if(peerStats["peers"].toString() != "[]")
+            {
+                out.add(peerStats["peers"][i] as Benc.Bdict)
             } else {
-                totalPeers += peerStats["total"].num()
+                break
             }
-            pageNum++
+            i++
         }
-        return totalPeers.toString()
+        return out
+    }
+
+    fun getNumberofEstablishedPeers(): Int {
+        var peers:ArrayList<Benc.Bdict> = InterfaceController_peerStats()
+        var totalestablishedpeers: Int = 0
+        for (i in 0 until peers.count()) {
+            if (peers[i].get("state").toString() == "\"ESTABLISHED\"") {
+                totalestablishedpeers++
+            }
+        }
+        return totalestablishedpeers
     }
 }
