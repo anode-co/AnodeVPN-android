@@ -10,29 +10,23 @@ import java.nio.file.Paths
 class AnodeUtil {
     private val LOGTAG = "anodeVPNService"
     val CJDNS_PATH = "/data/data/com.anode.anode/files"
-    val CJDROUTE_SOCK = "cjdns.sock"
+    val CJDROUTE_SOCK = "cjdroute.sock"
+    val cjdrouteConfFile = "cjdroute.conf"
     private val CJDROUTE_LOG = "cjdroute.log"
     private val cjdrouteBinFile = "cjdroute"
     private val cjdrouteTmpConfFile = "tempcjdroute.conf"
-    private val cjdrouteConfFile = "cjdroute.conf"
+    private val CJDROUTE_BINFILE = "cjdroute"
+
 
     fun launch() {
-        var cjdnsIPv6Address: String
         val confFile = File("$CJDNS_PATH/$cjdrouteConfFile")
         if (confFile.exists()) {
-            cjdnsIPv6Address = getIPv6Address()
+            launchCJDNS()
         } else {
             Log.i(LOGTAG, "Trying to create new cjdroute.conf file...")
             generateConfFile()
             modifyJSONConfFile()
-            cjdnsIPv6Address = getIPv6Address()
-            if (cjdnsIPv6Address === "") {
-                throw RuntimeException("Failed to create conf file")
-            }
         }
-        Log.i(LOGTAG, "Got ipv6 address: $cjdnsIPv6Address")
-        //Launch cjdroute with configuration file
-        launchCJDNS()
     }
 
     fun initializeCjdrouteConfFile() {

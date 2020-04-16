@@ -19,7 +19,7 @@ private fun setupSocket(socketName: String): LocalSocket {
                 throw Error("Unable to establish socket to cjdns")
             }
         }
-        if (ls.isConnected()) {
+        if (ls.isConnected) {
             ls.sendBufferSize = 1024
             break
         }
@@ -91,4 +91,10 @@ class CjdnsSocket(val ls: LocalSocket) {
 
     fun Core_initTunfd(fd: Int): Benc.Bdict =
             call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict
+
+    fun InterfaceController_peerStats(page: Int): String {
+        val peerStats = call("InterfaceController_peerStats", Benc.dict("page", page))
+        val stats = peerStats["peerStats"]
+        return ""
+    }
 }
