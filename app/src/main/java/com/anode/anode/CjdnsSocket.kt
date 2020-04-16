@@ -10,7 +10,7 @@ val LOGTAG = "CjdnsSocket"
 private fun setupSocket(socketName: String): LocalSocket {
     val ls = LocalSocket()
     var tries = 0
-    while (true) {
+    while (tries < 10) {
         try {
             Log.i(LOGTAG, "Connecting to socket...")
             ls.connect(LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM))
@@ -90,6 +90,8 @@ class CjdnsSocket(val ls: LocalSocket) {
     }
 
     fun Core_nodeInfo(): Benc.Bdict = call("Core_nodeInfo", null) as Benc.Bdict
+
+    fun Core_stopTun(): Benc.Bdict = call("Core_stopTun", null) as Benc.Bdict
 
     fun Core_initTunfd(fd: Int): Benc.Bdict =
             call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict

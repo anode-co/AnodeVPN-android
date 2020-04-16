@@ -39,11 +39,13 @@ class MainActivity : AppCompatActivity() {
                 val arch = System.getProperty("os.arch")
                 Log.i(LOGTAG, "OS Architecture: $arch")
                 `in` = if (arch!!.contains("x86") || arch.contains("i686")) {
-                    am.open("x86/cjdroute")
+                    am.open("i686/16/cjdroute")
                 } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-                    am.open("arm64-v8a/cjdroute")
-                } else if (arch.contains("armeabi")) {
-                    am.open("armeabi-v7a/cjdroute")
+                    am.open("aarch64/21/cjdroute")
+                } else if (arch.contains("armeabi") || arch.contains("armv7a")) {
+                    am.open("armv7a/16/cjdroute")
+                } else if (arch.contains("x86_64")) {
+                    am.open("X86_64/21/cjdroute")
                 } else { //Unknown architecture
                     Log.i(LOGTAG, "Incompatible CPU architecture")
                     return
@@ -87,9 +89,6 @@ class MainActivity : AppCompatActivity() {
         if (prefs.getBoolean("firstrun", true)) {
             prefs.edit().putBoolean("firstrun", false).commit()
         } */
-
-        //Launch CJDROUTE
-        //AnodeUtil().launch()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.

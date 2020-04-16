@@ -30,6 +30,7 @@
 
     <Switch
         android:id="@+id/switchInternet"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -45,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:text="Log: "
+        android:text="Status: "
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/switchInternet" />
 
@@ -55,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginTop="32dp"
-        android:text="TextView"
+        android:text=""
         app:layout_constraintLeft_toRightOf="@id/textViewLabelLog"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textViewLabelLog"
