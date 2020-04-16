@@ -2,6 +2,7 @@ package com.anode.anode
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -12,7 +13,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.*
 
 
 class FirstFragment : Fragment() {
@@ -37,27 +37,39 @@ class FirstFragment : Fragment() {
             if (isChecked) {
                 Toast.makeText(this.context, "Turning on VPN", Toast.LENGTH_SHORT).show()
                 activity!!.startService(Intent(activity, AnodeVpnService::class.java))
+                updateStats()
             } else {
                 //TODO turn off VPN
             }}
 
         //Thread.sleep(3000)
-        updateStats()
+        //updateStats()
     }
 
     fun updateStats() {
-        //Update peerstats every second
-        val thread = object: Thread(){
-            override fun run(){
-                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLabelLog);
+        val h = Handler()
+        val r: Runnable = object : Runnable {
+            var count = 0
+            override fun run() {
                 var cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
                 val info = cjdns!!.InterfaceController_peerStats(0)
-                logText.text = info.toString()
-                sleep(1000)
+                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                logText.text = "active $info connections established"
+                h.postDelayed(this, 1000) //ms
             }
         }
+        h.postDelayed(r, 1000) // one second in ms
 
-        thread.start()
+        /*
+        //var cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
+        activity!!.runOnUiThread {
+            //Toast.makeText(activity, "any mesage", Toast.LENGTH_LONG).show()
+            val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLabelLog);
+            val info = cjdns!!.InterfaceController_peerStats(0)
+            logText.text = "active $info connections established"
+        }
+
+         */
     }
 
     companion object {

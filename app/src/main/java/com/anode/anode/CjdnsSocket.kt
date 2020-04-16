@@ -95,8 +95,18 @@ class CjdnsSocket(val ls: LocalSocket) {
             call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict
 
     fun InterfaceController_peerStats(page: Int): String {
-        val peerStats = call("InterfaceController_peerStats", Benc.dict("page", page))
-        val stats = peerStats["peerStats"]
-        return ""
+        var peerStats:Benc.Obj
+        var totalPeers: Long = 0
+        var pageNum: Int = 0
+        while(true) {
+            peerStats = call("InterfaceController_peerStats", Benc.dict("page", pageNum))
+            if (peerStats["peers"].toString() == "[]") {
+                break
+            } else {
+                totalPeers += peerStats["total"].num()
+            }
+            pageNum++
+        }
+        return totalPeers.toString()
     }
 }

@@ -11,7 +11,9 @@ import java.lang.reflect.Method
 
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
+    var isConnected: Boolean = false
     val anodeUtil: AnodeUtil = AnodeUtil()
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         anodeUtil.launch()
         mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
@@ -35,6 +37,7 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
     private var cjdns: CjdnsSocket? = null
     private var myIp6: String = ""
 
+
     private fun configVpn() {
         val b = avpn.builder().setSession("AnodeVpnService")
                 .addRoute("fc00::", 8)
@@ -47,6 +50,7 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         Log.i(LOGTAG, "imported vpn fd $fdNum")
         Log.i(LOGTAG, cjdns!!.Core_initTunfd(fdNum).toString())
         Log.i(LOGTAG, "vpn launched")
+        AnodeVpnService().isConnected = true
     }
 
     private fun init() {
@@ -69,6 +73,7 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         try {
             main()
         } catch (e: Exception) {
+            AnodeVpnService().isConnected = false
             if (mInterface != null) {
                 try {
                     mInterface!!.close()
