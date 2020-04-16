@@ -55,7 +55,9 @@ class CjdnsSocket(val ls: LocalSocket) {
                     Benc.dict("q", name)
                 }
         ls.outputStream.write(benc.bytes())
-        val dec = Benc(read()).decode()
+        val x = read()
+        Log.e(LOGTAG, x)
+        val dec = Benc(x).decode()
         val err = dec["error"]
         if (err is Benc.Bstr && err.str() != "none") {
             throw Error("cjdns replied: " + err.str())
@@ -70,7 +72,7 @@ class CjdnsSocket(val ls: LocalSocket) {
         if (fd !is Benc.Bint) {
             throw Error("getUdpFd cjdns replied without fd " + dec.toString())
         }
-        return fd.num()
+        return fd.num() as Int
     }
 
     fun Admin_exportFd(fd: Int): FileDescriptor {
@@ -84,7 +86,7 @@ class CjdnsSocket(val ls: LocalSocket) {
 
     fun Admin_importFd(fd: FileDescriptor): Int {
         ls.setFileDescriptorsForSend(arrayOf(fd))
-        return call("Admin_importFd", null)["fd"].num()
+        return call("Admin_importFd", null)["fd"].num() as Int
     }
 
     fun Core_nodeInfo(): Benc.Bdict = call("Core_nodeInfo", null) as Benc.Bdict

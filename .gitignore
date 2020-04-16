@@ -86,3 +86,10 @@ lint/tmp/
 
 # OSX turds
 .DS_Store
+
+## vscode crap
+.project
+.settings/
+app/.classpath
+app/.project
+app/.settings/

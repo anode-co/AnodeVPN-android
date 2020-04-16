@@ -1,6 +1,6 @@
 package com.anode.anode
 
-import kotlin.Int
+import kotlin.Long
 
 class Benc(val str: String) {
     var i: Int = 0
@@ -18,7 +18,7 @@ class Benc(val str: String) {
 
     abstract class Obj {
         open fun str(): String = throw Error("Not a string")
-        open fun num(): Int = throw Error("Not a number")
+        open fun num(): Long = throw Error("Not a number")
         open operator fun get(field: String): Obj = throw Error("Not an object")
         open operator fun get(field: Int): Obj = throw Error("Not a list")
         abstract fun bytes(): ByteArray
@@ -35,9 +35,9 @@ class Benc(val str: String) {
         override fun bytes(): ByteArray = ("" + str.toByteArray().size + ":" + str).toByteArray()
     }
 
-    class Bint(private val num: Int) : Obj() {
+    class Bint(private val num: Long) : Obj() {
         override fun toString(): String = "" + num
-        override fun num(): Int = num
+        override fun num(): Long = num
         override fun bytes(): ByteArray = ("i" + num + "e").toByteArray()
     }
 
@@ -71,7 +71,7 @@ class Benc(val str: String) {
     fun _decode(): Obj? {
         val chr = read(1)[0]
         return when (chr) {
-            'i' -> Bint(readUntil('e').toInt())
+            'i' -> Bint(readUntil('e').toLong())
             'l' -> Blist(ArrayList<Obj>().apply {
                 var obj = _decode()
                 while (obj != null) {
@@ -117,8 +117,8 @@ class Benc(val str: String) {
                 throw Error("found null"); }
             if (obj is Obj) {
                 return obj; }
-            if (obj is Int) {
-                return Bint(obj)
+            if (obj is Long || obj is Int) {
+                return Bint(obj.toString().toLong())
             }
             if (obj is String) {
                 return Bstr(obj)
