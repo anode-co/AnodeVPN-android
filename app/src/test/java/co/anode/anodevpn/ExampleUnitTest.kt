@@ -1,4 +1,4 @@
-package com.anode.anode
+package co.anode.anodevpn
 
 import org.junit.Assert
 import org.junit.Test

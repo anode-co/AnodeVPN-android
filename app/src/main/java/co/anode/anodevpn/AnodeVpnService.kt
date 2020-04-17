@@ -1,13 +1,11 @@
-package com.anode.anode
+package co.anode.anodevpn
 
 import android.content.Intent
-import android.net.Network
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.system.OsConstants.AF_INET
 import android.util.Log
 import java.io.FileDescriptor
-import java.lang.reflect.Method
 
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null

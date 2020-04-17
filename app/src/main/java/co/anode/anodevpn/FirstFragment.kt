@@ -1,4 +1,4 @@
-package com.anode.anode
+package co.anode.anodevpn
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,10 +13,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import co.anode.anodevpn.R
 
 
 class FirstFragment : Fragment() {
     val h = Handler()
+    private var cjdns: CjdnsSocket? = null
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -38,10 +40,11 @@ class FirstFragment : Fragment() {
             if (isChecked) {
                 Toast.makeText(this.context, "Turning ON VPN", Toast.LENGTH_SHORT).show()
                 activity!!.startService(Intent(activity, AnodeVpnService::class.java))
+                //cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
                 val runnable: Runnable = object : Runnable {
                     var count = 0
                     override fun run() {
-                        var cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
+                        cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
                         val info = cjdns!!.getNumberofEstablishedPeers()
                         val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                         logText.text = " $info active connection(s) established"

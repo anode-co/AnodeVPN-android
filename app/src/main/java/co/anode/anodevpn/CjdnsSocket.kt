@@ -1,4 +1,4 @@
-package com.anode.anode
+package co.anode.anodevpn
 
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
@@ -36,18 +36,20 @@ class CjdnsSocket(val ls: LocalSocket) {
     constructor (path: String) : this(setupSocket(path))
 
     fun read(): String {
+        var tries = 0
         val istr = ls.inputStream
         var av: Int
         do {
             av = istr.available()
             Thread.sleep(50)
-        } while (av < 1)
+            tries++;
+        } while ((av < 1) && (tries < 100))
         val b = ByteArray(av)
         istr.read(b)
         return String(b)
     }
 
-    fun call(name: String, args: Benc.Bdict?): Benc.Obj {
+    @Synchronized fun call(name: String, args: Benc.Bdict?): Benc.Obj {
         val benc =
                 if (args != null) {
                     Benc.dict("q", name, "args", args)
@@ -97,7 +99,7 @@ class CjdnsSocket(val ls: LocalSocket) {
             call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict
 
     fun InterfaceController_peerStats(): ArrayList<Benc.Bdict> {
-        var peerStats:Benc.Obj
+        var peerStats: Benc.Obj
         var out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
         var totalPeers: Long = 0
         var i = 0

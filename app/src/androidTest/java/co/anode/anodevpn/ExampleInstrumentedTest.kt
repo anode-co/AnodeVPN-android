@@ -1,4 +1,4 @@
-package com.anode.anode
+package co.anode.anodevpn
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

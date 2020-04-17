@@ -1,4 +1,4 @@
-package com.anode.anode
+package co.anode.anodevpn
 
 import android.util.Log
 import org.json.JSONException
@@ -9,7 +9,7 @@ import java.nio.file.Paths
 
 class AnodeUtil {
     private val LOGTAG = "anodeVPNService"
-    val CJDNS_PATH = "/data/data/com.anode.anode/files"
+    val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
     val CJDROUTE_SOCK = "cjdroute.sock"
     val cjdrouteConfFile = "cjdroute.conf"
     private val CJDROUTE_LOG = "cjdroute.log"
