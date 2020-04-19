@@ -13,12 +13,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
-import co.anode.anodevpn.R
 
 
 class FirstFragment : Fragment() {
     val h = Handler()
-    private var cjdns: CjdnsSocket? = null
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -29,7 +27,6 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val link: TextView = view.findViewById<TextView>(R.id.textViewLink);
         val text: Spanned = HtmlCompat.fromHtml("Open <a href='http://[fc50:71b5:aebf:7b70:6577:ec8:2542:9dd9]/'>CJDNS network</a>", HtmlCompat.FROM_HTML_MODE_LEGACY);
         link.movementMethod = LinkMovementMethod.getInstance();
@@ -40,12 +37,14 @@ class FirstFragment : Fragment() {
             if (isChecked) {
                 Toast.makeText(this.context, "Turning ON VPN", Toast.LENGTH_SHORT).show()
                 activity!!.startService(Intent(activity, AnodeVpnService::class.java))
-                //cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
                 val runnable: Runnable = object : Runnable {
-                    var count = 0
+                    var info = 0
                     override fun run() {
-                        cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
-                        val info = cjdns!!.getNumberofEstablishedPeers()
+                        info = if (CjdnsSocket.ls.isConnected) {
+                            CjdnsSocket.getNumberofEstablishedPeers()
+                        } else {
+                            0
+                        }
                         val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                         logText.text = " $info active connection(s) established"
                         h.postDelayed(this, 1000) //ms
@@ -55,11 +54,10 @@ class FirstFragment : Fragment() {
             } else {
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 h.removeCallbacksAndMessages(runnable)
-                //var cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
-                //cjdns!!.Core_stopTun()
+                CjdnsSocket.Core_stopTun()
                 activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
-                logText.text = "Disconnected..."
+                logText.text = "Disconnected"
             }}
     }
 

@@ -7,6 +7,7 @@ import android.system.OsConstants.AF_INET
 import android.util.Log
 import java.io.FileDescriptor
 
+
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
     val anodeUtil: AnodeUtil = AnodeUtil()
@@ -31,9 +32,8 @@ class AnodeVpnService : VpnService() {
 
 class VpnThread(val avpn: AnodeVpnService) : Runnable {
     private var mInterface: ParcelFileDescriptor? = null
-    private var cjdns: CjdnsSocket? = null
     private var myIp6: String = ""
-
+    var cjdns: CjdnsSocket? = null
 
     private fun configVpn() {
         val b = avpn.builder().setSession("AnodeVpnService")
@@ -50,11 +50,15 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
     }
 
     private fun init() {
-        cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
-        val info = cjdns!!.Core_nodeInfo()
+        //cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
+        CjdnsSocket.init(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
+
+        //val info = cjdns.Core_nodeInfo()
+        val info = CjdnsSocket.Core_nodeInfo()
         myIp6 = info["myIp6"].str()
         Log.i(LOGTAG, info.toString())
-        val protectFd = fdGetInt(cjdns!!.Admin_exportFd(cjdns!!.UDPInterface_getFd(0)))
+        //val protectFd = fdGetInt(cjdns!!.Admin_exportFd(cjdns!!.UDPInterface_getFd(0)))
+        val protectFd = fdGetInt(CjdnsSocket.Admin_exportFd(CjdnsSocket.UDPInterface_getFd(0)))
         Log.i(LOGTAG, "got local fd to protect " + protectFd)
         avpn.protect(protectFd);
     }

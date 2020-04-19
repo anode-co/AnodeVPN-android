@@ -7,33 +7,35 @@ import java.io.FileDescriptor
 
 val LOGTAG = "CjdnsSocket"
 
-private fun setupSocket(socketName: String): LocalSocket {
-    val ls = LocalSocket()
-    var tries = 0
-    while (tries < 10) {
-        try {
-            Log.i(LOGTAG, "Connecting to socket...")
-            ls.connect(LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM))
-        } catch (e: java.lang.Exception) {
-            if (tries > 100) {
-                throw Error("Unable to establish socket to cjdns")
-            }
-        }
-        if (ls.isConnected) {
-            ls.sendBufferSize = 1024
-            break
-        }
-        try {
-            Thread.sleep(200)
-        } catch (e: java.lang.Exception) {
-        }
-        tries++
-    }
-    return ls
-}
+object CjdnsSocket {
+    val ls: LocalSocket = LocalSocket()
 
-class CjdnsSocket(val ls: LocalSocket) {
-    constructor (path: String) : this(setupSocket(path))
+    fun init(path:String ) {
+        var tries = 0
+        while (tries < 10) {
+            try {
+                Log.i(LOGTAG, "Connecting to socket...")
+                ls.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
+            } catch (e: java.lang.Exception) {
+                if (tries > 100) {
+                    throw Error("Unable to establish socket to cjdns")
+                }
+            }
+            if (ls.isConnected) {
+                ls.sendBufferSize = 1024
+                break
+            }
+            try {
+                Thread.sleep(200)
+            } catch (e: java.lang.Exception) {
+            }
+            tries++
+        }
+    }
+
+    fun getSocket(): LocalSocket {
+        return this.ls
+    }
 
     fun read(): String {
         var tries = 0
@@ -59,7 +61,12 @@ class CjdnsSocket(val ls: LocalSocket) {
         ls.outputStream.write(benc.bytes())
         val x = read()
         Log.e(LOGTAG, x)
-        val dec = Benc(x).decode()
+        var dec: Benc.Obj
+        if (x.isEmpty()) {
+            throw Error("empty reply")
+            //return Benc("").decode()
+        }
+        dec = Benc(x).decode()
         val err = dec["error"]
         if (err is Benc.Bstr && err.str() != "none") {
             throw Error("cjdns replied: " + err.str())
@@ -125,5 +132,13 @@ class CjdnsSocket(val ls: LocalSocket) {
             }
         }
         return totalestablishedpeers
+    }
+
+    fun IpTunnel_connectTo(node: String) {
+        call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
+    }
+
+    fun RouteGen_getPrefixes() {
+        call("RouteGen_getPrefixes", null)
     }
 }
