@@ -3,6 +3,7 @@ package co.anode.anodevpn
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.VpnService
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -71,11 +72,12 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         util = AnodeUtil()
-        val prefs = getSharedPreferences("com.anode.anode", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
 
         //Initialize the app by copying cjdroute and generating the conf file
         initializeApp()
 
+        VpnService.prepare(baseContext)
         /* We may need the first run check in the future... */
         /*
         if (prefs.getBoolean("firstrun", true)) {

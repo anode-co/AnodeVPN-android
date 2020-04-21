@@ -33,10 +33,6 @@ object CjdnsSocket {
         }
     }
 
-    fun getSocket(): LocalSocket {
-        return this.ls
-    }
-
     fun read(): String {
         var tries = 0
         val istr = ls.inputStream
@@ -138,7 +134,11 @@ object CjdnsSocket {
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
-    fun RouteGen_getPrefixes() {
-        call("RouteGen_getPrefixes", null)
+    fun RouteGen_getPrefixes(fd: Int) {
+        var routes: Benc.Obj
+        //get routes
+        routes = call("RouteGen_getPrefixes", Benc.dict("tunfd", fd))
+        //TODO: recreate VPNService with these routes
+        //call Core_initTunfd()
     }
 }

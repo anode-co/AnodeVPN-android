@@ -50,14 +50,10 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
     }
 
     private fun init() {
-        //cjdns = CjdnsSocket(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
         CjdnsSocket.init(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
-
-        //val info = cjdns.Core_nodeInfo()
         val info = CjdnsSocket.Core_nodeInfo()
         myIp6 = info["myIp6"].str()
         Log.i(LOGTAG, info.toString())
-        //val protectFd = fdGetInt(cjdns!!.Admin_exportFd(cjdns!!.UDPInterface_getFd(0)))
         val protectFd = fdGetInt(CjdnsSocket.Admin_exportFd(CjdnsSocket.UDPInterface_getFd(0)))
         Log.i(LOGTAG, "got local fd to protect " + protectFd)
         avpn.protect(protectFd);

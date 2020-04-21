@@ -113,10 +113,6 @@ class AnodeUtil {
             val router = json.getJSONObject("router")
             val interf = router.getJSONObject("interface")
             interf.put("tunfd", "android")
-            //Set security user to 0
-            val security = json.getJSONArray("security")
-            security.getJSONObject(0).put("setuser", 0)
-            security.getJSONObject(0).remove("keepNetAdmin")
 
             //Save file
             val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$cjdrouteConfFile"))

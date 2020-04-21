@@ -53,12 +53,28 @@ class FirstFragment : Fragment() {
                 h.postDelayed(runnable, 1000) // one second in ms
             } else {
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
+                //Stop UI thread
                 h.removeCallbacksAndMessages(runnable)
-                CjdnsSocket.Core_stopTun()
+                //Call cjdroute to release tun
+                //TODO: stopTun
+                //CjdnsSocket.Core_stopTun()
+                //Stop VPN service
                 activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "Disconnected"
             }}
+        /*
+        val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
+        switchInternet?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                CjdnsSocket.RouteGen_getPrefixes(CjdnsSocket.vpnfdNum)
+            } else {
+
+            }
+        }
+
+         */
     }
 
     companion object {
