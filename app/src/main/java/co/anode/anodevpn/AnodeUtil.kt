@@ -126,19 +126,17 @@ class AnodeUtil {
         }
     }
 
-    private fun getIPv6Address(): String {
-        Log.i(LOGTAG, "Trying to read IPv6 address from cjdroute.conf file...")
-        var address = ""
-        //Read cjdroute conf file to extract the address
+    fun getPubKey(): String {
+        var pubkey:String = ""
         try {
             val filecontent = readJSONFile("$CJDNS_PATH/$cjdrouteConfFile")
             val json = JSONObject(filecontent)
-            address = json.getString("ipv6")
+            pubkey = json.getString("publicKey")
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: JSONException) {
             e.printStackTrace()
         }
-        return address
+        return pubkey
     }
 }

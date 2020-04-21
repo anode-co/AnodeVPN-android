@@ -16,7 +16,7 @@ import java.io.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var util: AnodeUtil? = null
+    private var anodeUtil: AnodeUtil? = null
 
     private fun initializeApp() {
         //Create files folder
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         }
         //Create and initialize conf file
         if (!File(application.filesDir.toString()+"/"+ AnodeUtil().cjdrouteConfFile).exists()) {
-            util!!.initializeCjdrouteConfFile()
+            anodeUtil!!.initializeCjdrouteConfFile()
         }
     }
 
@@ -71,13 +71,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        util = AnodeUtil()
+        anodeUtil = AnodeUtil()
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
 
         //Initialize the app by copying cjdroute and generating the conf file
         initializeApp()
 
         VpnService.prepare(baseContext)
+
+        anodeUtil!!.launch()
         /* We may need the first run check in the future... */
         /*
         if (prefs.getBoolean("firstrun", true)) {

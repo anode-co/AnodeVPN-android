@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.fragment_first.*
 
 
 class FirstFragment : Fragment() {
@@ -31,6 +32,8 @@ class FirstFragment : Fragment() {
         val text: Spanned = HtmlCompat.fromHtml("Open <a href='http://[fc50:71b5:aebf:7b70:6577:ec8:2542:9dd9]/'>CJDNS network</a>", HtmlCompat.FROM_HTML_MODE_LEGACY);
         link.movementMethod = LinkMovementMethod.getInstance();
         link.text = text;
+        val pubkey: TextView = view.findViewById<TextView>(R.id.textViewPubkey);
+        pubkey.text = "Public key: " + AnodeUtil().getPubKey()
         val runnable = null
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
         switchVpn?.setOnCheckedChangeListener { _, isChecked ->
@@ -51,6 +54,7 @@ class FirstFragment : Fragment() {
                     }
                 }
                 h.postDelayed(runnable, 1000) // one second in ms
+                switchInternet.isClickable = true
             } else {
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 //Stop UI thread
@@ -62,19 +66,30 @@ class FirstFragment : Fragment() {
                 activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "Disconnected"
+                switchInternet.isChecked = false
+                switchInternet.isClickable = false
             }}
-        /*
+
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
         switchInternet?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                //Connect to Internet
                 CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-                CjdnsSocket.RouteGen_getPrefixes(CjdnsSocket.vpnfdNum)
+                //Get ipv4 address
+                var ipv4address = CjdnsSocket.getCjdnsIpv4Address()
+                //getprefixes
+                var route = CjdnsSocket.RouteGen_getPrefixes()
+                //Restart Service
+                activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
+                activity!!.startService(Intent(activity, AnodeVpnService::class.java))
+                //add routes
+
+                //CjdnsSocket.RouteGen_getPrefixes(CjdnsSocket.vpnfdNum)
             } else {
 
             }
         }
 
-         */
     }
 
     companion object {

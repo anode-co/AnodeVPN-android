@@ -10,11 +10,13 @@ import java.io.FileDescriptor
 
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
-    val anodeUtil: AnodeUtil = AnodeUtil()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        anodeUtil.launch()
-        mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
+        var routes:MutableCollection<String> = mutableListOf("fc00::")
+        if (CjdnsSocket.ipv4Route != "") {
+            routes.add(CjdnsSocket.ipv4Route)
+        }
+        mThread = Thread(VpnThread(this, routes), "AnodeVpnService.VpnThread")
         //start the service
         mThread!!.start()
         return START_STICKY
@@ -30,17 +32,23 @@ class AnodeVpnService : VpnService() {
     fun builder(): Builder = Builder()
 }
 
-class VpnThread(val avpn: AnodeVpnService) : Runnable {
+class VpnThread(val avpn: AnodeVpnService, private val routes:Collection<String>) : Runnable {
     private var mInterface: ParcelFileDescriptor? = null
     private var myIp6: String = ""
     var cjdns: CjdnsSocket? = null
 
     private fun configVpn() {
         val b = avpn.builder().setSession("AnodeVpnService")
-                .addRoute("fc00::", 8)
                 .addAddress(myIp6, 128)
                 .allowFamily(AF_INET)
                 .allowBypass()
+
+        for (r in routes) {
+            b.addRoute(r, 8)
+            //ipv4 address
+            b.addAddress(CjdnsSocket.ipv4Address, 0)
+        }
+
         mInterface = b.establish()
         Log.i(LOGTAG, "interface vpn")
         val fdNum = cjdns!!.Admin_importFd(mInterface!!.fileDescriptor)

@@ -9,6 +9,8 @@ val LOGTAG = "CjdnsSocket"
 
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
+    var ipv4Address: String = ""
+    var ipv4Route: String = ""
 
     fun init(path:String ) {
         var tries = 0
@@ -134,11 +136,25 @@ object CjdnsSocket {
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
-    fun RouteGen_getPrefixes(fd: Int) {
+    fun RouteGen_getPrefixes(): String {
         var routes: Benc.Obj
         //get routes
-        routes = call("RouteGen_getPrefixes", Benc.dict("tunfd", fd))
-        //TODO: recreate VPNService with these routes
-        //call Core_initTunfd()
+        routes = call("RouteGen_getPrefixes", null)
+        this.ipv4Route = routes.get("routes").toString()
+        return this.ipv4Route
+    }
+
+    fun IpTunnel_showConnection(num: Int): Benc.Obj {
+        var conn: Benc.Obj
+        conn = call("IpTunnel_showConnection", Benc.dict("connection", num))
+        return conn
+    }
+
+    fun getCjdnsIpv4Address(): String {
+        var address:String
+        var connection = IpTunnel_showConnection(0)
+        address = connection.get("ip4Address").toString()
+        this.ipv4Address = address
+        return address
     }
 }
