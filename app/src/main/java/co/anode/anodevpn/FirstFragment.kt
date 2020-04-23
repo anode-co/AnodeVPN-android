@@ -34,31 +34,17 @@ class FirstFragment : Fragment() {
         link.text = text;
         val pubkey: TextView = view.findViewById<TextView>(R.id.textViewPubkey);
         pubkey.text = "Public key: " + AnodeUtil().getPubKey()
-        val runnable = null
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
+        //switchVpn.isChecked = true
         switchVpn?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 Toast.makeText(this.context, "Turning ON VPN", Toast.LENGTH_SHORT).show()
                 activity!!.startService(Intent(activity, AnodeVpnService::class.java))
-                val runnable: Runnable = object : Runnable {
-                    var info = 0
-                    override fun run() {
-                        info = if (CjdnsSocket.ls.isConnected) {
-                            CjdnsSocket.getNumberofEstablishedPeers()
-                        } else {
-                            0
-                        }
-                        val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
-                        logText.text = " $info active connection(s) established"
-                        h.postDelayed(this, 1000) //ms
-                    }
-                }
-                h.postDelayed(runnable, 1000) // one second in ms
                 switchInternet.isClickable = true
             } else {
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 //Stop UI thread
-                h.removeCallbacksAndMessages(runnable)
+                //h.removeCallbacksAndMessages(runnable)
                 //Call cjdroute to release tun
                 //TODO: stopTun
                 //CjdnsSocket.Core_stopTun()
@@ -73,23 +59,44 @@ class FirstFragment : Fragment() {
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
         switchInternet?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                logText.text = "Connecting..."
                 //Connect to Internet
                 CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                 //Get ipv4 address
-                var ipv4address = CjdnsSocket.getCjdnsIpv4Address()
-                //getprefixes
-                var route = CjdnsSocket.RouteGen_getPrefixes()
-                //Restart Service
-                activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
-                activity!!.startService(Intent(activity, AnodeVpnService::class.java))
-                //add routes
-
+                var ipv4address:String? = null
+                var tries = 0
+                while ((ipv4address == null) && (tries < 20)){
+                    ipv4address = CjdnsSocket.getCjdnsIpv4Address()
+                    tries++
+                    Thread.sleep(500)
+                }
+                if (ipv4address != null) {
+                    //Restart Service
+                    activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
+                    activity!!.startService(Intent(activity, AnodeVpnService::class.java))
+                } else {
+                    logText.text = "Can not connect to VPN. Authorization needed."
+                }
                 //CjdnsSocket.RouteGen_getPrefixes(CjdnsSocket.vpnfdNum)
             } else {
 
             }
         }
-
+        val runnable: Runnable = object : Runnable {
+            var info = 0
+            override fun run() {
+                info = if (CjdnsSocket.ls.isConnected) {
+                    CjdnsSocket.getNumberofEstablishedPeers()
+                } else {
+                    0
+                }
+                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                logText.text = " $info active connection(s) established"
+                h.postDelayed(this, 1000) //ms
+            }
+        }
+        h.postDelayed(runnable, 1000) // one second in ms
     }
 
     companion object {

@@ -1,7 +1,6 @@
 package co.anode.anodevpn
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import co.anode.anodevpn.R
 import java.io.*
 
 
@@ -72,12 +70,10 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         anodeUtil = AnodeUtil()
-        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        //val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
 
         //Initialize the app by copying cjdroute and generating the conf file
         initializeApp()
-
-        VpnService.prepare(baseContext)
 
         anodeUtil!!.launch()
         /* We may need the first run check in the future... */
@@ -85,6 +81,14 @@ class MainActivity : AppCompatActivity() {
         if (prefs.getBoolean("firstrun", true)) {
             prefs.edit().putBoolean("firstrun", false).commit()
         } */
+
+        val intent = VpnService.prepare(applicationContext)
+
+        if (intent != null) {
+            startActivityForResult(intent, 0)
+        } else {
+            onActivityResult(0, Activity.RESULT_OK, null)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -104,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             val intent = Intent(this, AnodeVpnService::class.java)
-            startService(intent)
+            //startService(intent)
         }
     }
 

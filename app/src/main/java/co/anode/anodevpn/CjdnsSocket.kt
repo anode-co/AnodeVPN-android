@@ -10,7 +10,9 @@ val LOGTAG = "CjdnsSocket"
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
     var ipv4Address: String = ""
+    var ipv4AddressPrefix: Int = 0
     var ipv4Route: String = ""
+    var ipv4RoutePrefix: Int = 0
 
     fun init(path:String ) {
         var tries = 0
@@ -79,7 +81,7 @@ object CjdnsSocket {
         if (fd !is Benc.Bint) {
             throw Error("getUdpFd cjdns replied without fd " + dec.toString())
         }
-        return fd.num() as Int
+        return fd.num().toInt()
     }
 
     fun Admin_exportFd(fd: Int): FileDescriptor {
@@ -93,7 +95,7 @@ object CjdnsSocket {
 
     fun Admin_importFd(fd: FileDescriptor): Int {
         ls.setFileDescriptorsForSend(arrayOf(fd))
-        return call("Admin_importFd", null)["fd"].num() as Int
+        return call("Admin_importFd", null)["fd"].num().toInt()
     }
 
     fun Core_nodeInfo(): Benc.Bdict = call("Core_nodeInfo", null) as Benc.Bdict
@@ -150,11 +152,20 @@ object CjdnsSocket {
         return conn
     }
 
-    fun getCjdnsIpv4Address(): String {
-        var address:String
+    fun getCjdnsIpv4Address(): String? {
         var connection = IpTunnel_showConnection(0)
-        address = connection.get("ip4Address").toString()
-        this.ipv4Address = address
-        return address
+
+        var address = connection["ip4Address"]
+        var addprefix = connection["ip4Prefix"]
+        var routeprefix = connection["ip4Alloc"]
+        //Authorization missing...
+        if (address.toString() == "null") {
+            return null
+        }
+        this.ipv4Address = address.str()
+        this.ipv4Route = address.str()
+        this.ipv4RoutePrefix = routeprefix.num().toInt()
+        this.ipv4AddressPrefix = addprefix.num().toInt()
+        return address.str()
     }
 }

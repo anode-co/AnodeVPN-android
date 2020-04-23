@@ -12,11 +12,7 @@ class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var routes:MutableCollection<String> = mutableListOf("fc00::")
-        if (CjdnsSocket.ipv4Route != "") {
-            routes.add(CjdnsSocket.ipv4Route)
-        }
-        mThread = Thread(VpnThread(this, routes), "AnodeVpnService.VpnThread")
+        mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
         //start the service
         mThread!!.start()
         return START_STICKY
@@ -32,10 +28,9 @@ class AnodeVpnService : VpnService() {
     fun builder(): Builder = Builder()
 }
 
-class VpnThread(val avpn: AnodeVpnService, private val routes:Collection<String>) : Runnable {
+class VpnThread(val avpn: AnodeVpnService) : Runnable {
     private var mInterface: ParcelFileDescriptor? = null
     private var myIp6: String = ""
-    var cjdns: CjdnsSocket? = null
 
     private fun configVpn() {
         val b = avpn.builder().setSession("AnodeVpnService")
@@ -43,17 +38,18 @@ class VpnThread(val avpn: AnodeVpnService, private val routes:Collection<String>
                 .allowFamily(AF_INET)
                 .allowBypass()
 
-        for (r in routes) {
-            b.addRoute(r, 8)
-            //ipv4 address
-            b.addAddress(CjdnsSocket.ipv4Address, 0)
+        if (CjdnsSocket.ipv4Address.isEmpty()) {
+            b.addRoute("fc00::",8)
+        } else {
+            b.addRoute(CjdnsSocket.ipv4Route,CjdnsSocket.ipv4RoutePrefix)
+            b.addAddress(CjdnsSocket.ipv4Address, CjdnsSocket.ipv4AddressPrefix)
         }
 
         mInterface = b.establish()
         Log.i(LOGTAG, "interface vpn")
-        val fdNum = cjdns!!.Admin_importFd(mInterface!!.fileDescriptor)
+        val fdNum = CjdnsSocket.Admin_importFd(mInterface!!.fileDescriptor)
         Log.i(LOGTAG, "imported vpn fd $fdNum")
-        Log.i(LOGTAG, cjdns!!.Core_initTunfd(fdNum).toString())
+        Log.i(LOGTAG, CjdnsSocket!!.Core_initTunfd(fdNum).toString())
         Log.i(LOGTAG, "vpn launched")
     }
 
