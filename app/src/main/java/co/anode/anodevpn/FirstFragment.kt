@@ -72,19 +72,16 @@ class FirstFragment : Fragment() {
                 h.removeCallbacks(runnable)
                 //Stop VPN service
                 activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                //Release tun device
-
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "Disconnected"
                 //Disable 2nd switch
+                switchInternet.isChecked = false
                 switchInternet.isClickable = false
             }}
 
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
         switchInternet?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                //h.postDelayed(runnable, 1000)
-                /*
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "Connecting..."
                 //Connect to Internet
@@ -99,17 +96,15 @@ class FirstFragment : Fragment() {
                 }
                 if (ipv4address != null) {
                     //Restart Service
-                    activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
-                    activity!!.startService(Intent(activity, AnodeVpnService::class.java))
-
-
+                    activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                    activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
                 } else {
+                    //Stop UI thread
+                    h.removeCallbacks(runnable)
                     logText.text = "Can not connect to VPN. Authorization needed."
                 }
-
-                 */
             } else {
-
+                //TODO: ...
             }
         }
 
