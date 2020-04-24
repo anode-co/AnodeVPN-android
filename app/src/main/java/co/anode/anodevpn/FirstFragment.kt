@@ -1,6 +1,8 @@
 package co.anode.anodevpn
 
+import android.app.Activity
 import android.content.Intent
+import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
 import android.text.Spanned
@@ -34,31 +36,55 @@ class FirstFragment : Fragment() {
         link.text = text;
         val pubkey: TextView = view.findViewById<TextView>(R.id.textViewPubkey);
         pubkey.text = "Public key: " + AnodeUtil().getPubKey()
+
+        //Start a thread to update the status of the peers on the screen
+        /*val runnable: Runnable = object : Runnable {
+            var info = 0
+            override fun run() {
+                info = if (CjdnsSocket.ls.isConnected) {
+                    CjdnsSocket.getNumberofEstablishedPeers()
+                } else {
+                    0
+                }
+                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                logText.text = " $info active connection(s) established"
+                h.postDelayed(this, 1000) //ms
+            }
+        }*/
+
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
-        //switchVpn.isChecked = true
+
+        //Listener for the Master switch
         switchVpn?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                //Inform user for action
                 Toast.makeText(this.context, "Turning ON VPN", Toast.LENGTH_SHORT).show()
-                activity!!.startService(Intent(activity, AnodeVpnService::class.java))
+                //Start the VPN service
+                activity!!.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                //Enable 2nd switch
                 switchInternet.isClickable = true
-            } else {
+                //Start thread for status of peers
+                //h.postDelayed(runnable, 1000)
+            } else {//Switch OFF
+                //Inform user for action
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 //Stop UI thread
-                //h.removeCallbacksAndMessages(runnable)
-                //Call cjdroute to release tun
-                //TODO: stopTun
-                //CjdnsSocket.Core_stopTun()
+                //h.removeCallbacks(runnable)
                 //Stop VPN service
-                activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
+                activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                //Release tun device
+
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "Disconnected"
-                switchInternet.isChecked = false
+                //Disable 2nd switch
                 switchInternet.isClickable = false
             }}
 
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
         switchInternet?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                //h.postDelayed(runnable, 1000)
+                /*
                 val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
                 logText.text = "Connecting..."
                 //Connect to Internet
@@ -75,28 +101,18 @@ class FirstFragment : Fragment() {
                     //Restart Service
                     activity!!.stopService(Intent(activity, AnodeVpnService::class.java))
                     activity!!.startService(Intent(activity, AnodeVpnService::class.java))
+
+
                 } else {
                     logText.text = "Can not connect to VPN. Authorization needed."
                 }
-                //CjdnsSocket.RouteGen_getPrefixes(CjdnsSocket.vpnfdNum)
+
+                 */
             } else {
 
             }
         }
-        val runnable: Runnable = object : Runnable {
-            var info = 0
-            override fun run() {
-                info = if (CjdnsSocket.ls.isConnected) {
-                    CjdnsSocket.getNumberofEstablishedPeers()
-                } else {
-                    0
-                }
-                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
-                logText.text = " $info active connection(s) established"
-                h.postDelayed(this, 1000) //ms
-            }
-        }
-        h.postDelayed(runnable, 1000) // one second in ms
+
     }
 
     companion object {

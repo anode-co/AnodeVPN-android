@@ -81,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         if (prefs.getBoolean("firstrun", true)) {
             prefs.edit().putBoolean("firstrun", false).commit()
         } */
-
         val intent = VpnService.prepare(applicationContext)
 
         if (intent != null) {
@@ -89,6 +88,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -109,6 +109,8 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             val intent = Intent(this, AnodeVpnService::class.java)
             //startService(intent)
+            //Initialize CJDNS socket
+            CjdnsSocket.init(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
         }
     }
 

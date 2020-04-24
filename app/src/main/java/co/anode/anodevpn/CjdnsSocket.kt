@@ -95,7 +95,9 @@ object CjdnsSocket {
 
     fun Admin_importFd(fd: FileDescriptor): Int {
         ls.setFileDescriptorsForSend(arrayOf(fd))
-        return call("Admin_importFd", null)["fd"].num().toInt()
+        val result = call("Admin_importFd", null)["fd"].num().toInt()
+        ls.setFileDescriptorsForSend(null)
+        return result
     }
 
     fun Core_nodeInfo(): Benc.Bdict = call("Core_nodeInfo", null) as Benc.Bdict
@@ -110,6 +112,9 @@ object CjdnsSocket {
         var out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
         var totalPeers: Long = 0
         var i = 0
+        peerStats = call("InterfaceController_peerStats", Benc.dict("page", 0))
+        out.add(peerStats["peers"][0] as Benc.Bdict)
+        /*
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
             if(peerStats["peers"].toString() != "[]")
@@ -120,6 +125,8 @@ object CjdnsSocket {
             }
             i++
         }
+
+         */
         return out
     }
 

@@ -10,19 +10,42 @@ import java.io.FileDescriptor
 
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
+    val ACTION_CONNECT = "co.anode.anodevpn.START"
+    val ACTION_DISCONNECT = "co.anode.anodevpn.STOP"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
-        //start the service
-        mThread!!.start()
+        if (intent != null && ACTION_DISCONNECT.equals(intent.getAction())) {
+            this.onDestroy()
+            return START_NOT_STICKY;
+        } else {
+            mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
+            //start the service
+            mThread!!.start()
+            return START_STICKY;
+        }
+
         return START_STICKY
     }
 
-    override fun onDestroy() { // TODO Auto-generated method stub
+    override fun onDestroy() {
         if (mThread != null) {
             mThread!!.interrupt()
         }
         super.onDestroy()
+    }
+
+    override fun stopService(name: Intent?): Boolean {
+        if (mThread != null) {
+            mThread!!.interrupt()
+        }
+        return super.stopService(name)
+    }
+
+    override fun onRevoke() {
+        if (mThread != null) {
+            mThread!!.interrupt()
+        }
+        super.onRevoke()
     }
 
     fun builder(): Builder = Builder()
@@ -54,7 +77,6 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
     }
 
     private fun init() {
-        CjdnsSocket.init(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
         val info = CjdnsSocket.Core_nodeInfo()
         myIp6 = info["myIp6"].str()
         Log.i(LOGTAG, info.toString())
@@ -66,19 +88,23 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
     fun main() {
         init()
         configVpn()
-        while (true) { Thread.sleep(1000); }
+    }
+
+    fun StopVPN() {
+        mInterface!!.close()
+        mInterface = null
+        CjdnsSocket.Core_stopTun()
     }
 
     override fun run() {
         try {
             main()
+            while (true) {
+                Thread.sleep(1000);
+            }
         } catch (e: Exception) {
             if (mInterface != null) {
-                try {
-                    mInterface!!.close()
-                } catch (ee: Exception) {
-                }
-                mInterface = null
+                StopVPN()
             }
             e.printStackTrace()
         }
