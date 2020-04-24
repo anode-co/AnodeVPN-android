@@ -19,40 +19,54 @@ class MainActivity : AppCompatActivity() {
     private fun initializeApp() {
         //Create files folder
         application.filesDir.mkdir()
-        val cjdrouteFile = File(AnodeUtil().CJDNS_PATH+"/"+ AnodeUtil().cjdrouteConfFile)
-        if (!cjdrouteFile.exists()) {
+        val cjdrouteFile = File(AnodeUtil().CJDNS_PATH+"/"+ AnodeUtil().CJDROUTE_BINFILE)
+
+        //Read architecture
+        val arch = System.getProperty("os.arch")
+        var `in`: InputStream? = null
+        var out: OutputStream?
+        try {
+            val am = baseContext.assets
+            Log.i(LOGTAG, "OS Architecture: $arch")
+            if (arch == "x86" || arch!!.contains("i686")) {
+                `in` = am.open("i686/16/cjdroute")
+            } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
+                `in` = am.open("aarch64/21/cjdroute")
+            } else if (arch.contains("armeabi") || arch.contains("armv7a")) {
+                `in` = am.open("armv7a/16/cjdroute")
+            } else if (arch.contains("x86_64")) {
+                `in` = am.open("X86_64/21/cjdroute")
+            } else { //Unknown architecture
+                Log.i(LOGTAG, "Incompatible CPU architecture")
+                return
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.e(LOGTAG, "Failed to open cjdroute file", e)
+        }
+
+        if (!cjdrouteFile.exists() ||
+            arch!!.contains("i686") ||
+            arch!!.contains("x86") ||
+            arch!!.contains("X86_64")){
             //Copy cjdroute
-            var `in`: InputStream?
-            var out: OutputStream?
             try {
-                val am = baseContext.assets
-                //Read architecture
-                val arch = System.getProperty("os.arch")
-                Log.i(LOGTAG, "OS Architecture: $arch")
-                `in` = if (arch!!.contains("x86") || arch.contains("i686")) {
-                    am.open("i686/16/cjdroute")
-                } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-                    am.open("aarch64/21/cjdroute")
-                } else if (arch.contains("armeabi") || arch.contains("armv7a")) {
-                    am.open("armv7a/16/cjdroute")
-                } else if (arch.contains("x86_64")) {
-                    am.open("X86_64/21/cjdroute")
-                } else { //Unknown architecture
-                    Log.i(LOGTAG, "Incompatible CPU architecture")
-                    return
+                if (!cjdrouteFile.exists()) {
+                    Log.i(LOGTAG,"cjdroute does not exists")
                 }
+                Log.i(LOGTAG,"Copying cjdroute")
                 out = FileOutputStream(application.filesDir.toString() + "/cjdroute")
                 val buffer = ByteArray(1024)
                 var read: Int
-                while (`in`.read(buffer).also { read = it } != -1) {
+                while (`in`!!.read(buffer).also { read = it } != -1) {
                     out.write(buffer, 0, read)
                 }
-                `in`.close()
+                `in`!!.close()
                 out.close()
                 //Set permissions
                 val file = File(application.filesDir.toString() + "/cjdroute")
                 file.setExecutable(true)
-            } catch (e: IOException) {
+            }catch (e: IOException) {
                 e.printStackTrace()
                 Log.e(LOGTAG, "Failed to copy cjdroute file", e)
             }

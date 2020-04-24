@@ -11,11 +11,12 @@ class AnodeUtil {
     private val LOGTAG = "anodeVPNService"
     val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
     val CJDROUTE_SOCK = "cjdroute.sock"
+    val CJDROUTE_BINFILE = "cjdroute"
     val cjdrouteConfFile = "cjdroute.conf"
     private val CJDROUTE_LOG = "cjdroute.log"
     private val cjdrouteBinFile = "cjdroute"
     private val cjdrouteTmpConfFile = "tempcjdroute.conf"
-    private val CJDROUTE_BINFILE = "cjdroute"
+
 
 
     fun launch() {
