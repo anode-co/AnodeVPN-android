@@ -14,7 +14,7 @@ class AnodeVpnService : VpnService() {
     val ACTION_DISCONNECT = "co.anode.anodevpn.STOP"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent != null && ACTION_DISCONNECT.equals(intent.getAction())) {
+        if (intent != null && ACTION_DISCONNECT == intent.action) {
             this.onDestroy()
             return START_NOT_STICKY;
         } else {
@@ -23,8 +23,6 @@ class AnodeVpnService : VpnService() {
             mThread!!.start()
             return START_STICKY;
         }
-
-        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -51,7 +49,7 @@ class AnodeVpnService : VpnService() {
     fun builder(): Builder = Builder()
 }
 
-class VpnThread(val avpn: AnodeVpnService) : Runnable {
+class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     private var mInterface: ParcelFileDescriptor? = null
     private var myIp6: String = ""
 
@@ -72,7 +70,7 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         Log.i(LOGTAG, "interface vpn")
         val fdNum = CjdnsSocket.Admin_importFd(mInterface!!.fileDescriptor)
         Log.i(LOGTAG, "imported vpn fd $fdNum")
-        Log.i(LOGTAG, CjdnsSocket!!.Core_initTunfd(fdNum).toString())
+        Log.i(LOGTAG, CjdnsSocket.Core_initTunfd(fdNum).toString())
         Log.i(LOGTAG, "vpn launched")
     }
 
@@ -81,16 +79,16 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         myIp6 = info["myIp6"].str()
         Log.i(LOGTAG, info.toString())
         val protectFd = fdGetInt(CjdnsSocket.Admin_exportFd(CjdnsSocket.UDPInterface_getFd(0)))
-        Log.i(LOGTAG, "got local fd to protect " + protectFd)
-        avpn.protect(protectFd);
+        Log.i(LOGTAG, "got local fd to protect $protectFd")
+        avpn.protect(protectFd)
     }
 
-    fun main() {
+    private fun main() {
         init()
         configVpn()
     }
 
-    fun StopVPN() {
+    private fun stopVPN() {
         mInterface!!.close()
         mInterface = null
         CjdnsSocket.Core_stopTun()
@@ -100,11 +98,11 @@ class VpnThread(val avpn: AnodeVpnService) : Runnable {
         try {
             main()
             while (true) {
-                Thread.sleep(1000);
+                Thread.sleep(1000)
             }
         } catch (e: Exception) {
             if (mInterface != null) {
-                StopVPN()
+                stopVPN()
             }
             e.printStackTrace()
         }

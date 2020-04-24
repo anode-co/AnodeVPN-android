@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         //Read architecture
         val arch = System.getProperty("os.arch")
         var `in`: InputStream? = null
-        var out: OutputStream?
+        val out: OutputStream?
         try {
             val am = baseContext.assets
             Log.i(LOGTAG, "OS Architecture: $arch")
@@ -47,8 +47,8 @@ class MainActivity : AppCompatActivity() {
 
         if (!cjdrouteFile.exists() ||
             arch!!.contains("i686") ||
-            arch!!.contains("x86") ||
-            arch!!.contains("X86_64")){
+            arch.contains("x86") ||
+            arch.contains("X86_64")){
             //Copy cjdroute
             try {
                 if (!cjdrouteFile.exists()) {
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                 while (`in`!!.read(buffer).also { read = it } != -1) {
                     out.write(buffer, 0, read)
                 }
-                `in`!!.close()
+                `in`.close()
                 out.close()
                 //Set permissions
                 val file = File(application.filesDir.toString() + "/cjdroute")
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //Create and initialize conf file
-        if (!File(application.filesDir.toString()+"/"+ AnodeUtil().cjdrouteConfFile).exists()) {
+        if (!File(application.filesDir.toString()+"/"+ AnodeUtil().CJDROUTE_CONFFILE).exists()) {
             anodeUtil!!.initializeCjdrouteConfFile()
         }
     }
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            val intent = Intent(this, AnodeVpnService::class.java)
+            //val intent = Intent(this, AnodeVpnService::class.java)
             //startService(intent)
             //Initialize CJDNS socket
             CjdnsSocket.init(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)

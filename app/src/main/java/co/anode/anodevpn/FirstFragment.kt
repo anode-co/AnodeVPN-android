@@ -1,8 +1,7 @@
 package co.anode.anodevpn
 
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
 import android.text.Spanned
@@ -28,17 +27,19 @@ class FirstFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_first, container, false)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val link: TextView = view.findViewById<TextView>(R.id.textViewLink);
-        val text: Spanned = HtmlCompat.fromHtml("Open <a href='http://[fc50:71b5:aebf:7b70:6577:ec8:2542:9dd9]/'>CJDNS network</a>", HtmlCompat.FROM_HTML_MODE_LEGACY);
-        link.movementMethod = LinkMovementMethod.getInstance();
-        link.text = text;
-        val pubkey: TextView = view.findViewById<TextView>(R.id.textViewPubkey);
+        var ipv4address:String? = null
+        val link: TextView = view.findViewById(R.id.textViewLink)
+        val text: Spanned = HtmlCompat.fromHtml("Open <a href='http://[fc50:71b5:aebf:7b70:6577:ec8:2542:9dd9]/'>CJDNS network</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        link.movementMethod = LinkMovementMethod.getInstance()
+        link.text = text
+        val pubkey: TextView = view.findViewById(R.id.textViewPubkey)
         pubkey.text = "Public key\n" + AnodeUtil().getPubKey()
 
         //Start a thread to update the status of the peers on the screen
-        val runnable: Runnable = object : Runnable {
+        val runnableUpdateUI: Runnable = object : Runnable {
             var info = 0
             override fun run() {
                 info = if (CjdnsSocket.ls.isConnected) {
@@ -46,14 +47,26 @@ class FirstFragment : Fragment() {
                 } else {
                     0
                 }
-                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                val logText: TextView = view.findViewById(R.id.textViewLog)
                 logText.text = " $info active connection(s) established"
                 h.postDelayed(this, 1000) //ms
             }
         }
+        //Start a thread to update the status of the peers on the screen
+        val runnablecheckingconnection: Runnable = object : Runnable {
+            override fun run() {
+                val newip4address = CjdnsSocket.getCjdnsIpv4Address()
+                if (ipv4address != newip4address) {
+                    ipv4address = newip4address
+                    //Restart Service
+                    activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                    activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                }
+                h.postDelayed(this, 10000) //ms
+            }
+        }
 
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
-
         //Listener for the Master switch
         switchVpn?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -64,15 +77,16 @@ class FirstFragment : Fragment() {
                 //Enable 2nd switch
                 switchInternet.isClickable = true
                 //Start thread for status of peers
-                h.postDelayed(runnable, 1000)
+                h.postDelayed(runnableUpdateUI, 1000)
             } else {//Switch OFF
                 //Inform user for action
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 //Stop UI thread
-                h.removeCallbacks(runnable)
+                h.removeCallbacks(runnableUpdateUI)
+                h.removeCallbacks(runnablecheckingconnection)
                 //Stop VPN service
                 activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                val logText: TextView = view.findViewById(R.id.textViewLog)
                 logText.text = "Disconnected"
                 //Disable 2nd switch
                 switchInternet.isChecked = false
@@ -82,14 +96,15 @@ class FirstFragment : Fragment() {
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
         switchInternet?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                val logText: TextView = view!!.findViewById<TextView>(R.id.textViewLog);
+                val logText: TextView = view.findViewById(R.id.textViewLog)
                 logText.text = "Connecting..."
                 //Connect to Internet
                 CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-                //Get ipv4 address
-                var ipv4address:String? = null
+
                 var tries = 0
+                //Check for ip adress given by cjdns try for 20 times, 10secs
                 while ((ipv4address == null) && (tries < 20)){
+                    //Get ipv4 address
                     ipv4address = CjdnsSocket.getCjdnsIpv4Address()
                     tries++
                     Thread.sleep(500)
@@ -98,9 +113,12 @@ class FirstFragment : Fragment() {
                     //Restart Service
                     activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                     activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                    //Start Thread for checking connection
+                    h.postDelayed(runnablecheckingconnection, 10000)
                 } else {
                     //Stop UI thread
-                    h.removeCallbacks(runnable)
+                    h.removeCallbacks(runnableUpdateUI)
+                    h.removeCallbacks(runnablecheckingconnection)
                     logText.text = "Can not connect to VPN. Authorization needed."
                 }
             } else {

@@ -37,7 +37,7 @@ object CjdnsSocket {
         }
     }
 
-    fun read(): String {
+    private fun read(): String {
         var tries = 0
         val istr = ls.inputStream
         var av: Int
@@ -60,8 +60,8 @@ object CjdnsSocket {
                 }
         ls.outputStream.write(benc.bytes())
         val x = read()
-        Log.e(LOGTAG, benc.toString() + "-->" + x)
-        var dec: Benc.Obj
+        Log.e(LOGTAG, "$benc-->$x")
+        val dec: Benc.Obj
         if (x.isEmpty()) {
             throw Error("empty reply")
             //return Benc("").decode()
@@ -79,7 +79,7 @@ object CjdnsSocket {
         val dec = call("UDPInterface_getFd", Benc.dict("interfaceNumber", ifNum))
         val fd = dec["fd"]
         if (fd !is Benc.Bint) {
-            throw Error("getUdpFd cjdns replied without fd " + dec.toString())
+            throw Error("getUdpFd cjdns replied without fd $dec")
         }
         return fd.num().toInt()
     }
@@ -109,12 +109,13 @@ object CjdnsSocket {
 
     fun InterfaceController_peerStats(): ArrayList<Benc.Bdict> {
         var peerStats: Benc.Obj
-        var out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
+        val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
         var totalPeers: Long = 0
         var i = 0
+        /*
         peerStats = call("InterfaceController_peerStats", Benc.dict("page", 0))
         out.add(peerStats["peers"][0] as Benc.Bdict)
-        /*
+        */
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
             if(peerStats["peers"].toString() != "[]")
@@ -125,16 +126,14 @@ object CjdnsSocket {
             }
             i++
         }
-
-         */
         return out
     }
 
     fun getNumberofEstablishedPeers(): Int {
-        var peers:ArrayList<Benc.Bdict> = InterfaceController_peerStats()
+        val peers:ArrayList<Benc.Bdict> = InterfaceController_peerStats()
         var totalestablishedpeers: Int = 0
         for (i in 0 until peers.count()) {
-            if (peers[i].get("state").toString() == "\"ESTABLISHED\"") {
+            if (peers[i]["state"].toString() == "\"ESTABLISHED\"") {
                 totalestablishedpeers++
             }
         }
@@ -146,15 +145,14 @@ object CjdnsSocket {
     }
 
     fun RouteGen_getPrefixes(): String {
-        var routes: Benc.Obj
         //get routes
-        routes = call("RouteGen_getPrefixes", null)
-        this.ipv4Route = routes.get("routes").toString()
+        val routes: Benc.Obj = call("RouteGen_getPrefixes", null)
+        this.ipv4Route = routes["routes"].toString()
         return this.ipv4Route
     }
 
     fun IpTunnel_showConnection(num: Int): Benc.Obj {
-        var conn: Benc.Obj
+        val conn: Benc.Obj
         conn = call("IpTunnel_showConnection", Benc.dict("connection", num))
         return conn
     }
