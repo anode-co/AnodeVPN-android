@@ -60,7 +60,7 @@ object CjdnsSocket {
                 }
         ls.outputStream.write(benc.bytes())
         val x = read()
-        Log.e(LOGTAG, x)
+        Log.e(LOGTAG, benc.toString() + "-->" + x)
         var dec: Benc.Obj
         if (x.isEmpty()) {
             throw Error("empty reply")

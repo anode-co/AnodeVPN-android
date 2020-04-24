@@ -35,10 +35,10 @@ class FirstFragment : Fragment() {
         link.movementMethod = LinkMovementMethod.getInstance();
         link.text = text;
         val pubkey: TextView = view.findViewById<TextView>(R.id.textViewPubkey);
-        pubkey.text = "Public key: " + AnodeUtil().getPubKey()
+        pubkey.text = "Public key\n" + AnodeUtil().getPubKey()
 
         //Start a thread to update the status of the peers on the screen
-        /*val runnable: Runnable = object : Runnable {
+        val runnable: Runnable = object : Runnable {
             var info = 0
             override fun run() {
                 info = if (CjdnsSocket.ls.isConnected) {
@@ -50,7 +50,7 @@ class FirstFragment : Fragment() {
                 logText.text = " $info active connection(s) established"
                 h.postDelayed(this, 1000) //ms
             }
-        }*/
+        }
 
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
 
@@ -64,12 +64,12 @@ class FirstFragment : Fragment() {
                 //Enable 2nd switch
                 switchInternet.isClickable = true
                 //Start thread for status of peers
-                //h.postDelayed(runnable, 1000)
+                h.postDelayed(runnable, 1000)
             } else {//Switch OFF
                 //Inform user for action
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 //Stop UI thread
-                //h.removeCallbacks(runnable)
+                h.removeCallbacks(runnable)
                 //Stop VPN service
                 activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 //Release tun device
