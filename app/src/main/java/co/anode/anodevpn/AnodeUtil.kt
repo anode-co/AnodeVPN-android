@@ -12,15 +12,14 @@ class AnodeUtil {
     val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
-    val cjdrouteConfFile = "cjdroute.conf"
+    val CJDROUTE_CONFFILE = "cjdroute.conf"
     private val CJDROUTE_LOG = "cjdroute.log"
-    private val cjdrouteBinFile = "cjdroute"
-    private val cjdrouteTmpConfFile = "tempcjdroute.conf"
+    private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
 
 
 
     fun launch() {
-        val confFile = File("$CJDNS_PATH/$cjdrouteConfFile")
+        val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         if (confFile.exists()) {
             launchCJDNS()
         } else {
@@ -38,14 +37,14 @@ class AnodeUtil {
     private fun generateConfFile() {
         val processBuilder = ProcessBuilder()
         try {
-            processBuilder.command("$CJDNS_PATH/$cjdrouteBinFile", "--genconf")
-                    .redirectOutput(File(CJDNS_PATH, cjdrouteTmpConfFile))
+            processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--genconf")
+                    .redirectOutput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
                     .start()
                     .waitFor()
             //Clean conf
-            processBuilder.command("$CJDNS_PATH/$cjdrouteBinFile", "--cleanconf")
-                    .redirectInput(File(CJDNS_PATH, cjdrouteTmpConfFile))
-                    .redirectOutput(File(CJDNS_PATH, cjdrouteConfFile))
+            processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--cleanconf")
+                    .redirectInput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
+                    .redirectOutput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor()
         } catch (e: InterruptedException) {
@@ -57,17 +56,17 @@ class AnodeUtil {
         }
 
         //Delete temp file
-        Files.delete(Paths.get("$CJDNS_PATH/$cjdrouteTmpConfFile"))
+        Files.delete(Paths.get("$CJDNS_PATH/$CJDROUTE_TEMPCONFFILE"))
     }
 
     private fun launchCJDNS() {
         try {
             Log.e(LOGTAG, "Launching cjdroute (file size: " +
-                    File("$CJDNS_PATH/$cjdrouteBinFile").length() + ")")
+                    File("$CJDNS_PATH/$CJDROUTE_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
             //Run cjdroute with existing conf file
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$cjdrouteBinFile")
-                    .redirectInput(File(CJDNS_PATH, cjdrouteConfFile))
+            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE")
+                    .redirectInput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
                     .redirectOutput(File(CJDNS_PATH, CJDROUTE_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = CJDNS_PATH
@@ -81,7 +80,7 @@ class AnodeUtil {
     }
 
     @Throws(IOException::class)
-    fun readJSONFile(filename: String?): String {
+    fun readJSONFile(filename: String): String {
         val confFile = FileInputStream(filename)
         val fileContent = StringBuffer("")
         val buffer = ByteArray(1024)
@@ -94,7 +93,7 @@ class AnodeUtil {
 
     private fun modifyJSONConfFile() {
         try {
-            val filecontent = readJSONFile("$CJDNS_PATH/$cjdrouteConfFile")
+            val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
             val interfaces = json.getJSONObject("interfaces")
             val UDPInterface = interfaces.getJSONArray("UDPInterface")
@@ -116,7 +115,7 @@ class AnodeUtil {
             interf.put("tunfd", "android")
 
             //Save file
-            val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$cjdrouteConfFile"))
+            val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$CJDROUTE_CONFFILE"))
             val out = json.toString().replace("\\/", "/")
             writer.write(out)
             writer.close()
@@ -128,9 +127,9 @@ class AnodeUtil {
     }
 
     fun getPubKey(): String {
-        var pubkey:String = ""
+        var pubkey = ""
         try {
-            val filecontent = readJSONFile("$CJDNS_PATH/$cjdrouteConfFile")
+            val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
             pubkey = json.getString("publicKey")
         } catch (e: IOException) {
