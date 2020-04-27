@@ -47,12 +47,8 @@ class AnodeUtil {
                     .redirectOutput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor()
-        } catch (e: InterruptedException) {
-            Log.e(LOGTAG, "Failed to generate new configuration file", e)
-            e.printStackTrace()
-        } catch (e: IOException) {
-            Log.e(LOGTAG, "Failed to generate new configuration file", e)
-            e.printStackTrace()
+        } catch (e: Exception) {
+            throw Error("Failed to generate new configuration file", e)
         }
 
         //Delete temp file
@@ -74,8 +70,7 @@ class AnodeUtil {
             p.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + p.exitValue())
         } catch (e: Exception) {
-            Log.e(LOGTAG, "Failed to execute cjdroute", e)
-        } finally {
+            throw Error("Failed to execute cjdroute", e)
         }
     }
 
@@ -119,10 +114,8 @@ class AnodeUtil {
             val out = json.toString().replace("\\/", "/")
             writer.write(out)
             writer.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: JSONException) {
-            e.printStackTrace()
+        } catch (e: Exception) {
+            throw Error("Failed to modify cjdroute.conf file", e)
         }
     }
 
@@ -132,10 +125,8 @@ class AnodeUtil {
             val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
             pubkey = json.getString("publicKey")
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: JSONException) {
-            e.printStackTrace()
+        } catch (e: Exception) {
+            Log.e(LOGTAG,"Failed to read pubkey",e)
         }
         return pubkey
     }

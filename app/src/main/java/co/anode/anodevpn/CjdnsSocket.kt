@@ -4,6 +4,7 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
 import java.io.FileDescriptor
+import java.lang.Exception
 
 val LOGTAG = "CjdnsSocket"
 
@@ -63,8 +64,7 @@ object CjdnsSocket {
         Log.e(LOGTAG, "$benc-->$x")
         val dec: Benc.Obj
         if (x.isEmpty()) {
-            throw Error("empty reply")
-            //return Benc("").decode()
+            throw Error("Empty reply, call to $name")
         }
         dec = Benc(x).decode()
         val err = dec["error"]

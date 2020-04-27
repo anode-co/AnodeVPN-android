@@ -4,12 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import java.io.*
+import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,12 +39,10 @@ class MainActivity : AppCompatActivity() {
             } else if (arch.contains("x86_64")) {
                 `in` = am.open("X86_64/21/cjdroute")
             } else { //Unknown architecture
-                Log.i(LOGTAG, "Incompatible CPU architecture")
-                return
+                throw Error("Incompatible CPU architecture")
             }
         } catch (e: IOException) {
-            e.printStackTrace()
-            Log.e(LOGTAG, "Failed to open cjdroute file", e)
+            throw Exception("Failed to copy cjdroute file", e)
         }
 
         if (!cjdrouteFile.exists() ||
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                 out = FileOutputStream(application.filesDir.toString() + "/cjdroute")
                 val buffer = ByteArray(1024)
                 var read: Int
-                while (`in`!!.read(buffer).also { read = it } != -1) {
+                while (`in`.read(buffer).also { read = it } != -1) {
                     out.write(buffer, 0, read)
                 }
                 `in`.close()
@@ -67,8 +67,7 @@ class MainActivity : AppCompatActivity() {
                 val file = File(application.filesDir.toString() + "/cjdroute")
                 file.setExecutable(true)
             }catch (e: IOException) {
-                e.printStackTrace()
-                Log.e(LOGTAG, "Failed to copy cjdroute file", e)
+                throw Error("Failed to copy cjdroute file", e)
             }
         }
         //Create and initialize conf file
@@ -78,13 +77,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         anodeUtil = AnodeUtil()
         //val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        //Error Handling
+        Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
+            //Exceptions should be logged and ignored
+            if (paramThrowable is Exception) {
+                //Toast message before exiting app
+                object : Thread() {
+                    override fun run() {
+                        Looper.prepare()
+                        Toast.makeText(baseContext, paramThrowable.cause!!.message, Toast.LENGTH_LONG).show()
+                        Looper.loop()
+                    }
+                }.start()
+                try {
+                    Thread.sleep(4000) // Let the Toast display before app will get shutdown
+                } catch (e: InterruptedException) {
+                }
+                Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
+            } else if (paramThrowable is Error) {
+                Log.e(LOGTAG,"ERROR from "+paramThread.name, paramThrowable)
+
+            }
+            exitProcess(2)//Unknown error
+        }
 
         //Initialize the app by copying cjdroute and generating the conf file
         initializeApp()
@@ -102,6 +123,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
+
 
     }
 
