@@ -14,6 +14,8 @@ object CjdnsSocket {
     var ipv4AddressPrefix: Int = 0
     var ipv4Route: String = ""
     var ipv4RoutePrefix: Int = 0
+    var ipv6Route: String = ""
+    var ipv6RoutePrefix: Int = 0
 
     fun init(path:String ) {
         var tries = 0
@@ -163,6 +165,8 @@ object CjdnsSocket {
         var address = connection["ip4Address"]
         var addprefix = connection["ip4Prefix"]
         var routeprefix = connection["ip4Alloc"]
+        var v6address = connection["ip6Address"]
+        var v6routeprefix = connection["ip6Alloc"]
         //Authorization missing...
         if (address.toString() == "null") {
             return null
@@ -171,6 +175,8 @@ object CjdnsSocket {
         this.ipv4Route = address.str()
         this.ipv4RoutePrefix = routeprefix.num().toInt()
         this.ipv4AddressPrefix = addprefix.num().toInt()
+        this.ipv6Route = v6address.str()
+        this.ipv6RoutePrefix = v6routeprefix.num().toInt()
         return address.str()
     }
 }
