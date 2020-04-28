@@ -88,13 +88,15 @@ class MainActivity : AppCompatActivity() {
             //Toast message before exiting app
             object : Thread() {
                 override fun run() {
-                    Looper.prepare()
-                    Toast.makeText(baseContext, paramThrowable.cause!!.message, Toast.LENGTH_LONG).show()
+                    Looper.prepare();
+                    Toast.makeText(baseContext, paramThrowable.message, Toast.LENGTH_LONG).show()
                     AnodeClient.mycontext = baseContext
                     if (AnodeClient.checkNetworkConnection()){
-                        val result = AnodeClient.httpPost("https://anode.co/api/error", "Error", paramThrowable.cause!!.message)
+                        //Trying to post error to server
+                        val result = AnodeClient.httpPost("https://anode.co/api/error", "Error", paramThrowable.message)
                     }
-                    Looper.loop()
+                    Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
+                    Looper.loop();
                 }
             }.start()
             try {
@@ -102,8 +104,7 @@ class MainActivity : AppCompatActivity() {
                 Thread.sleep(10000)
             } catch (e: InterruptedException) {
             }
-            Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
-            exitProcess(2)//Unknown error
+            exitProcess(1)
         }
 
         //Initialize the app by copying cjdroute and generating the conf file
@@ -122,8 +123,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
