@@ -85,25 +85,24 @@ class MainActivity : AppCompatActivity() {
         //val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
-            //Exceptions should be logged and ignored
-            if (paramThrowable is Exception) {
-                //Toast message before exiting app
-                object : Thread() {
-                    override fun run() {
-                        Looper.prepare()
-                        Toast.makeText(baseContext, paramThrowable.cause!!.message, Toast.LENGTH_LONG).show()
-                        Looper.loop()
+            //Toast message before exiting app
+            object : Thread() {
+                override fun run() {
+                    Looper.prepare()
+                    Toast.makeText(baseContext, paramThrowable.cause!!.message, Toast.LENGTH_LONG).show()
+                    AnodeClient.mycontext = baseContext
+                    if (AnodeClient.checkNetworkConnection()){
+                        val result = AnodeClient.httpPost("https://anode.co/api/error", "Error", paramThrowable.cause!!.message)
                     }
-                }.start()
-                try {
-                    Thread.sleep(4000) // Let the Toast display before app will get shutdown
-                } catch (e: InterruptedException) {
+                    Looper.loop()
                 }
-                Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
-            } else if (paramThrowable is Error) {
-                Log.e(LOGTAG,"ERROR from "+paramThread.name, paramThrowable)
-
+            }.start()
+            try {
+                // Let the Toast display and give some time to post to server before app will get shutdown
+                Thread.sleep(10000)
+            } catch (e: InterruptedException) {
             }
+            Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
             exitProcess(2)//Unknown error
         }
 
@@ -142,7 +141,8 @@ class MainActivity : AppCompatActivity() {
     }
 */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (resultCode == Activity.RESULT_OK) {
             //val intent = Intent(this, AnodeVpnService::class.java)
             //startService(intent)
             //Initialize CJDNS socket
