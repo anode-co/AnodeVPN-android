@@ -4,7 +4,6 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
 import java.io.FileDescriptor
-import java.lang.Exception
 
 val LOGTAG = "CjdnsSocket"
 
@@ -178,5 +177,14 @@ object CjdnsSocket {
         this.ipv6Route = v6address.str()
         this.ipv6RoutePrefix = v6routeprefix.num().toInt()
         return address.str()
+    }
+
+    fun clearRoutes() {
+        this.ipv4Address = ""
+        this.ipv4Route = ""
+        this.ipv4RoutePrefix = 0
+        this.ipv4AddressPrefix = 0
+        this.ipv6Route = ""
+        this.ipv6RoutePrefix = 0
     }
 }
