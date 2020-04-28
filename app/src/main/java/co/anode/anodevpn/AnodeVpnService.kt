@@ -60,10 +60,10 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
                 .allowFamily(AF_INET)
                 .allowBypass()
 
-        if (CjdnsSocket.ipv4Address.isNotEmpty()) {
-            b.addRoute(CjdnsSocket.ipv6Route,CjdnsSocket.ipv6RoutePrefix)
-            b.addRoute(CjdnsSocket.ipv4Route,CjdnsSocket.ipv4RoutePrefix)
-            b.addAddress(CjdnsSocket.ipv4Address, CjdnsSocket.ipv4AddressPrefix)
+        if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
+            b.addRoute(CjdnsSocket.ipv6Route,CjdnsSocket.ipv6RoutePrefix)//Route 0
+            b.addRoute(CjdnsSocket.ipv4Route,CjdnsSocket.ipv4RoutePrefix)//Route
+            b.addAddress(CjdnsSocket.ipv4Address, CjdnsSocket.ipv4AddressPrefix) //32
         }
 
         mInterface = b.establish()

@@ -2,6 +2,7 @@ package co.anode.anodevpn
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.text.Spanned
@@ -16,6 +17,7 @@ import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_first.*
+import java.net.URL
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -65,6 +67,9 @@ class FirstFragment : Fragment() {
                     activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                     activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
                 }
+                val ipText: TextView = view.findViewById(R.id.textViewPublicIP)
+                GetPublicIP(ipText).execute()
+
                 h.postDelayed(this, 10000) //ms
             }
         }
@@ -88,12 +93,15 @@ class FirstFragment : Fragment() {
                 activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
                 //Start Thread for checking connection
                 h.postDelayed(runnablecheckingconnection, 10000)
-                logText.post(Runnable { logText.text = "Connected" })
+                GetPublicIP(logText)
+                logText.post(Runnable { logText.text = "Connected Public IP:"} )
             } else {
                 //Stop UI thread
                 h.removeCallbacks(runnableUpdateUI)
                 h.removeCallbacks(runnablecheckingconnection)
                 logText.post(Runnable { logText.text = "Can not connect to VPN. Authorization needed" })
+                val ipText: TextView = view.findViewById(R.id.textViewPublicIP)
+                ipText.text = ""
             }
         }
 
@@ -134,12 +142,14 @@ class FirstFragment : Fragment() {
                 val logText: TextView = view.findViewById(R.id.textViewLog)
                 logText.text = "Connecting..."
                 Toast.makeText(this.context, "Turning ON Internet VPN", Toast.LENGTH_SHORT).show()
-                //Start connectin thread
+                //Start connecting thread
                 val executor: ExecutorService = Executors.newSingleThreadExecutor()
                 executor.submit(connectingThread)
             } else {
                 Log.i(LOGTAG,"Internet Switch unchecked")
                 Toast.makeText(this.context, "Turning OFF Internet VPN", Toast.LENGTH_SHORT).show()
+                val ipText: TextView = view.findViewById(R.id.textViewPublicIP)
+                ipText.text = "Disconnected..."
                 //Clear routes
                 CjdnsSocket.clearRoutes()
                 //Restart VPN Service
@@ -156,3 +166,24 @@ class FirstFragment : Fragment() {
         private const val LOGTAG = "FirstFragment"
     }
 }
+
+
+class GetPublicIP(private val ipText: TextView) : AsyncTask<Any?, Any?, String>() {
+
+    override fun doInBackground(objects: Array<Any?>): String {
+        var ip = ""
+        try {
+            // Create a URL for the desired page
+            ip = URL("https://api.ipify.org/").readText(Charsets.UTF_8)
+        } catch (e: Exception) {
+
+        }
+        return ip
+    }
+
+    override fun onPostExecute(result: String?) {
+        super.onPostExecute(result)
+        ipText.post(Runnable { ipText.text = "Connected Public IP: $result"} )
+    }
+}
+
