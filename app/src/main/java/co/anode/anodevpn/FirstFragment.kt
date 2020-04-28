@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,8 @@ import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_first.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 
 class FirstFragment : Fragment() {
@@ -66,19 +69,50 @@ class FirstFragment : Fragment() {
             }
         }
 
+        //Start a thread to update the status of the peers on the screen
+        val connectingThread = Thread {
+            val logText: TextView = view.findViewById(R.id.textViewLog)
+            //Connect to Internet
+            CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+            var tries = 0
+            //Check for ip adress given by cjdns try for 20 times, 10secs
+            while ((ipv4address == null) && (tries < 20)){
+                //Get ipv4 address
+                ipv4address = CjdnsSocket.getCjdnsIpv4Address()
+                tries++
+                Thread.sleep(500)
+            }
+            if (ipv4address != null) {
+                //Restart Service
+                activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                //Start Thread for checking connection
+                h.postDelayed(runnablecheckingconnection, 10000)
+                logText.post(Runnable { logText.text = "Connected" })
+            } else {
+                //Stop UI thread
+                h.removeCallbacks(runnableUpdateUI)
+                h.removeCallbacks(runnablecheckingconnection)
+                logText.post(Runnable { logText.text = "Can not connect to VPN. Authorization needed" })
+            }
+        }
+
+
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
         //Listener for the Master switch
         switchVpn?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                Log.i(LOGTAG,"Main Switch checked")
                 //Inform user for action
                 Toast.makeText(this.context, "Turning ON VPN", Toast.LENGTH_SHORT).show()
                 //Start the VPN service
-                activity!!.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                requireActivity().startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
                 //Enable 2nd switch
                 switchInternet.isClickable = true
                 //Start thread for status of peers
                 h.postDelayed(runnableUpdateUI, 1000)
             } else {//Switch OFF
+                Log.i(LOGTAG,"Main Switch unchecked")
                 //Inform user for action
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
                 //Stop UI thread
@@ -96,33 +130,23 @@ class FirstFragment : Fragment() {
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
         switchInternet?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                Log.i(LOGTAG,"Internet Switch checked")
                 val logText: TextView = view.findViewById(R.id.textViewLog)
                 logText.text = "Connecting..."
-                //Connect to Internet
-                CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-
-                var tries = 0
-                //Check for ip adress given by cjdns try for 20 times, 10secs
-                while ((ipv4address == null) && (tries < 20)){
-                    //Get ipv4 address
-                    ipv4address = CjdnsSocket.getCjdnsIpv4Address()
-                    tries++
-                    Thread.sleep(500)
-                }
-                if (ipv4address != null) {
-                    //Restart Service
-                    activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                    activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-                    //Start Thread for checking connection
-                    h.postDelayed(runnablecheckingconnection, 10000)
-                } else {
-                    //Stop UI thread
-                    h.removeCallbacks(runnableUpdateUI)
-                    h.removeCallbacks(runnablecheckingconnection)
-                    logText.text = "Can not connect to VPN. Authorization needed."
-                }
+                Toast.makeText(this.context, "Turning ON Internet VPN", Toast.LENGTH_SHORT).show()
+                //Start connectin thread
+                val executor: ExecutorService = Executors.newSingleThreadExecutor()
+                executor.submit(connectingThread)
             } else {
-                //TODO: ...
+                Log.i(LOGTAG,"Internet Switch unchecked")
+                Toast.makeText(this.context, "Turning OFF Internet VPN", Toast.LENGTH_SHORT).show()
+                //Clear routes
+                CjdnsSocket.clearRoutes()
+                //Restart VPN Service
+                activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                //Start UI thread
+                h.postDelayed(runnableUpdateUI, 1000)
             }
         }
 
