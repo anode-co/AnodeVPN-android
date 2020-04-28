@@ -13,7 +13,7 @@ class AnodeUtil {
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
-    private val CJDROUTE_LOG = "cjdroute.log"
+    val CJDROUTE_LOG = "cjdroute.log"
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
 
 

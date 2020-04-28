@@ -60,7 +60,7 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
                 .allowFamily(AF_INET)
                 .allowBypass()
 
-        if (!CjdnsSocket.ipv4Address.isEmpty()) {
+        if (CjdnsSocket.ipv4Address.isNotEmpty()) {
             b.addRoute(CjdnsSocket.ipv6Route,CjdnsSocket.ipv6RoutePrefix)
             b.addRoute(CjdnsSocket.ipv4Route,CjdnsSocket.ipv4RoutePrefix)
             b.addAddress(CjdnsSocket.ipv4Address, CjdnsSocket.ipv4AddressPrefix)
