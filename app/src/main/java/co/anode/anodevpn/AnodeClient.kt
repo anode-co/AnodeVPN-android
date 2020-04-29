@@ -2,6 +2,7 @@ package co.anode.anodevpn
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import org.json.JSONException
 import org.json.JSONObject
@@ -15,6 +16,7 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import javax.net.ssl.HttpsURLConnection
 
+
 object AnodeClient {
     lateinit var mycontext: Context
 
@@ -24,9 +26,7 @@ object AnodeClient {
 
     @Throws(IOException::class, JSONException::class)
     fun httpPost(myUrl: String, type: String, message: String?): String {
-
         val url = URL(myUrl)
-        // 1. create HttpURLConnection
         val conn = url.openConnection() as HttpsURLConnection
         conn.requestMethod = "POST"
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -36,29 +36,25 @@ object AnodeClient {
         return conn.responseMessage + ""
     }
 
-    fun checkNetworkConnection(): Boolean {
-        val connMgr = mycontext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val networkInfo = connMgr.activeNetworkInfo
-        val isConnected: Boolean = if(networkInfo != null) networkInfo.isConnected() else false
-        if (networkInfo != null && isConnected) {
-            Log.i("","Connected to AnodeServer")
-        } else {
-            Log.i("","Not Connected to AnodeServer")
+    fun checkNetworkConnection() =
+        with(mycontext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) {
+            getNetworkCapabilities(activeNetwork)?.run {
+                hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+            } ?: false
         }
-        return isConnected
-    }
 
     @Throws(JSONException::class)
     private fun buidJsonObject(type: String, message: String?): JSONObject {
-
+        val anodeUtil: AnodeUtil = AnodeUtil(null)
         val jsonObject = JSONObject()
-        jsonObject.accumulate("pubkey", AnodeUtil().getPubKey())
+        jsonObject.accumulate("pubkey", anodeUtil.getPubKey())
         jsonObject.accumulate("type", type)
         jsonObject.accumulate("message",message)
         jsonObject.accumulate("ip4address", CjdnsSocket.ipv4Address)
         jsonObject.accumulate("ip6address", CjdnsSocket.ipv6Route)
-        val logfile = File(AnodeUtil().CJDNS_PATH+"/"+ AnodeUtil().CJDROUTE_LOG)
+        val logfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         jsonObject.accumulate("cjdroute_log", logfile.readText(Charsets.UTF_8))
         jsonObject.accumulate("local_timestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
 
