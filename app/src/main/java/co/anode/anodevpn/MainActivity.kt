@@ -15,73 +15,14 @@ import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
-
     private var anodeUtil: AnodeUtil? = null
-
-    private fun initializeApp() {
-        //Create files folder
-        application.filesDir.mkdir()
-        val cjdrouteFile = File(AnodeUtil().CJDNS_PATH+"/"+ AnodeUtil().CJDROUTE_BINFILE)
-
-        //Read architecture
-        val arch = System.getProperty("os.arch")
-        var `in`: InputStream? = null
-        val out: OutputStream?
-        try {
-            val am = baseContext.assets
-            Log.i(LOGTAG, "OS Architecture: $arch")
-            if (arch == "x86" || arch!!.contains("i686")) {
-                `in` = am.open("i686/16/cjdroute")
-            } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-                `in` = am.open("aarch64/21/cjdroute")
-            } else if (arch.contains("armeabi") || arch.contains("armv7a")) {
-                `in` = am.open("armv7a/16/cjdroute")
-            } else if (arch.contains("x86_64")) {
-                `in` = am.open("X86_64/21/cjdroute")
-            } else { //Unknown architecture
-                throw Error("Incompatible CPU architecture")
-            }
-        } catch (e: IOException) {
-            throw Exception("Failed to copy cjdroute file", e)
-        }
-
-        if (!cjdrouteFile.exists() ||
-            arch!!.contains("i686") ||
-            arch.contains("x86") ||
-            arch.contains("X86_64")){
-            //Copy cjdroute
-            try {
-                if (!cjdrouteFile.exists()) {
-                    Log.i(LOGTAG,"cjdroute does not exists")
-                }
-                Log.i(LOGTAG,"Copying cjdroute")
-                out = FileOutputStream(application.filesDir.toString() + "/cjdroute")
-                val buffer = ByteArray(1024)
-                var read: Int
-                while (`in`.read(buffer).also { read = it } != -1) {
-                    out.write(buffer, 0, read)
-                }
-                `in`.close()
-                out.close()
-                //Set permissions
-                val file = File(application.filesDir.toString() + "/cjdroute")
-                file.setExecutable(true)
-            }catch (e: IOException) {
-                throw Error("Failed to copy cjdroute file", e)
-            }
-        }
-        //Create and initialize conf file
-        if (!File(application.filesDir.toString()+"/"+ AnodeUtil().CJDROUTE_CONFFILE).exists()) {
-            anodeUtil!!.initializeCjdrouteConfFile()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        anodeUtil = AnodeUtil()
+        anodeUtil = AnodeUtil(application)
         //val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
@@ -108,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //Initialize the app by copying cjdroute and generating the conf file
-        initializeApp()
+        anodeUtil!!.initializeApp()
 
         anodeUtil!!.launch()
         /* We may need the first run check in the future... */
@@ -145,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             //val intent = Intent(this, AnodeVpnService::class.java)
             //startService(intent)
             //Initialize CJDNS socket
-            CjdnsSocket.init(AnodeUtil().CJDNS_PATH + "/" + AnodeUtil().CJDROUTE_SOCK)
+            CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
         }
     }
 

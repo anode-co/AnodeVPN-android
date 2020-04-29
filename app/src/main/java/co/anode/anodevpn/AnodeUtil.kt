@@ -1,5 +1,6 @@
 package co.anode.anodevpn
 
+import android.content.Context
 import android.util.Log
 import org.json.JSONException
 import org.json.JSONObject
@@ -7,7 +8,7 @@ import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class AnodeUtil {
+class AnodeUtil(private val context: Context?) {
     private val LOGTAG = "anodeVPNService"
     val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
     val CJDROUTE_SOCK = "cjdroute.sock"
@@ -16,7 +17,63 @@ class AnodeUtil {
     val CJDROUTE_LOG = "cjdroute.log"
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
 
+    fun initializeApp() {
+        //Create files folder
+        context!!.filesDir.mkdir()
+        val cjdrouteFile = File("$CJDNS_PATH/$CJDROUTE_BINFILE")
 
+        //Read architecture
+        val arch = System.getProperty("os.arch")
+        var `in`: InputStream? = null
+        val out: OutputStream?
+        try {
+            val am = context.assets
+            Log.i(LOGTAG, "OS Architecture: $arch")
+            if (arch == "x86" || arch!!.contains("i686")) {
+                `in` = am.open("i686/16/cjdroute")
+            } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
+                `in` = am.open("aarch64/21/cjdroute")
+            } else if (arch.contains("armeabi") || arch.contains("armv7a")) {
+                `in` = am.open("armv7a/16/cjdroute")
+            } else if (arch.contains("x86_64")) {
+                `in` = am.open("X86_64/21/cjdroute")
+            } else { //Unknown architecture
+                throw Error("Incompatible CPU architecture")
+            }
+        } catch (e: IOException) {
+            throw Exception("Failed to copy cjdroute file", e)
+        }
+
+        if (!cjdrouteFile.exists() ||
+                arch!!.contains("i686") ||
+                arch.contains("x86") ||
+                arch.contains("X86_64")){
+            //Copy cjdroute
+            try {
+                if (!cjdrouteFile.exists()) {
+                    Log.i(LOGTAG,"cjdroute does not exists")
+                }
+                Log.i(LOGTAG,"Copying cjdroute")
+                out = FileOutputStream(context.filesDir.toString() + "/cjdroute")
+                val buffer = ByteArray(1024)
+                var read: Int
+                while (`in`.read(buffer).also { read = it } != -1) {
+                    out.write(buffer, 0, read)
+                }
+                `in`.close()
+                out.close()
+                //Set permissions
+                val file = File(context.filesDir.toString() + "/cjdroute")
+                file.setExecutable(true)
+            }catch (e: IOException) {
+                throw Error("Failed to copy cjdroute file", e)
+            }
+        }
+        //Create and initialize conf file
+        if (!File(context.filesDir.toString()+"/"+ CJDROUTE_CONFFILE).exists()) {
+            initializeCjdrouteConfFile()
+        }
+    }
 
     fun launch() {
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
