@@ -15,6 +15,8 @@ object CjdnsSocket {
     var ipv4RoutePrefix: Int = 0
     var ipv6Route: String = ""
     var ipv6RoutePrefix: Int = 0
+    var ipv6Address: String = ""
+    var ipv6AddressPrefix: Int = 0
 
     fun init(path:String ) {
         var tries = 0
@@ -24,7 +26,7 @@ object CjdnsSocket {
                 ls.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
             } catch (e: java.lang.Exception) {
                 if (tries > 100) {
-                    throw Error("Unable to establish socket to cjdns")
+                    throw CjdnsException("Unable to establish socket to cjdns")
                 }
             }
             if (ls.isConnected) {
@@ -65,12 +67,12 @@ object CjdnsSocket {
         Log.e(LOGTAG, "$benc-->$x")
         val dec: Benc.Obj
         if (x.isEmpty()) {
-            throw Error("Empty reply, call to $name")
+            throw CjdnsException("Empty reply, call to $name")
         }
         dec = Benc(x).decode()
         val err = dec["error"]
         if (err is Benc.Bstr && err.str() != "none") {
-            throw Error("cjdns replied: " + err.str())
+            throw CjdnsException("cjdns replied: " + err.str())
         }
         return dec
     }
@@ -80,7 +82,7 @@ object CjdnsSocket {
         val dec = call("UDPInterface_getFd", Benc.dict("interfaceNumber", ifNum))
         val fd = dec["fd"]
         if (fd !is Benc.Bint) {
-            throw Error("getUdpFd cjdns replied without fd $dec")
+            throw CjdnsException("getUdpFd cjdns replied without fd $dec")
         }
         return fd.num().toInt()
     }
@@ -89,7 +91,7 @@ object CjdnsSocket {
         call("Admin_exportFd", Benc.dict("fd", fd))
         val fds = ls.ancillaryFileDescriptors
         if (fds == null || fds.isEmpty()) {
-            throw Error("Did not read back file descriptor")
+            throw CjdnsException("Did not read back file descriptor")
         }
         return fds[0]
     }
@@ -159,24 +161,28 @@ object CjdnsSocket {
     }
 
     fun getCjdnsIpv4Address(): String? {
-        var connection = IpTunnel_showConnection(0)
+        val connection = IpTunnel_showConnection(0)
 
-        var address = connection["ip4Address"]
-        var addprefix = connection["ip4Prefix"]
-        var routeprefix = connection["ip4Alloc"]
-        var v6address = connection["ip6Address"]
-        var v6routeprefix = connection["ip6Alloc"]
+        val ip4Address = connection["ip4Address"]
+        val ip4Prefix = connection["ip4Prefix"]
+        val ip4Alloc = connection["ip4Alloc"]
+        val ip6Address = connection["ip6Address"]
+        val ip6Prefix = connection["ip6Prefix"]
+        val ip6Alloc = connection["ip6Alloc"]
         //Authorization missing...
-        if (address.toString() == "null") {
+        if (ip4Address.toString() == "null") {
             return null
         }
-        this.ipv4Address = address.str()
-        this.ipv4Route = address.str()
-        this.ipv4RoutePrefix = routeprefix.num().toInt()
-        this.ipv4AddressPrefix = addprefix.num().toInt()
-        this.ipv6Route = v6address.str()
-        this.ipv6RoutePrefix = v6routeprefix.num().toInt()
-        return address.str()
+        this.ipv4Address = ip4Address.str()
+        this.ipv4Route = ip4Address.str()
+        this.ipv4RoutePrefix = ip4Prefix.num().toInt()
+        this.ipv4AddressPrefix = ip4Alloc.num().toInt()
+        this.ipv6Route = ip6Address.str()
+        this.ipv6Address = ip6Address.str()
+        this.ipv6AddressPrefix = ip6Alloc.num().toInt()
+        this.ipv6RoutePrefix = ip6Prefix.num().toInt()
+
+        return ip4Address.str()
     }
 
     fun clearRoutes() {
@@ -186,5 +192,9 @@ object CjdnsSocket {
         this.ipv4AddressPrefix = 0
         this.ipv6Route = ""
         this.ipv6RoutePrefix = 0
+        this.ipv6Address = ""
+        this.ipv6AddressPrefix = 0
     }
 }
+
+class CjdnsException(message:String): Exception(message)

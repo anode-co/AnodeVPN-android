@@ -2,7 +2,6 @@ package co.anode.anodevpn
 
 import android.content.Context
 import android.util.Log
-import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
@@ -41,7 +40,7 @@ class AnodeUtil(private val context: Context?) {
                 throw Error("Incompatible CPU architecture")
             }
         } catch (e: IOException) {
-            throw Exception("Failed to copy cjdroute file", e)
+            throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
         }
 
         if (!cjdrouteFile.exists() ||
@@ -66,7 +65,7 @@ class AnodeUtil(private val context: Context?) {
                 val file = File(context.filesDir.toString() + "/cjdroute")
                 file.setExecutable(true)
             }catch (e: IOException) {
-                throw Error("Failed to copy cjdroute file", e)
+                throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
             }
         }
         //Create and initialize conf file
@@ -105,7 +104,7 @@ class AnodeUtil(private val context: Context?) {
                     .start()
                     .waitFor()
         } catch (e: Exception) {
-            throw Error("Failed to generate new configuration file", e)
+            throw AnodeUtilException("Failed to generate new configuration file "+e.message)
         }
 
         //Delete temp file
@@ -127,7 +126,7 @@ class AnodeUtil(private val context: Context?) {
             p.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + p.exitValue())
         } catch (e: Exception) {
-            throw Error("Failed to execute cjdroute", e)
+            throw AnodeUtilException("Failed to execute cjdroute "+e.message)
         }
     }
 
@@ -172,19 +171,18 @@ class AnodeUtil(private val context: Context?) {
             writer.write(out)
             writer.close()
         } catch (e: Exception) {
-            throw Error("Failed to modify cjdroute.conf file", e)
+            throw AnodeUtilException("Failed to modify cjdroute.conf file "+e.message)
         }
     }
 
     fun getPubKey(): String {
         var pubkey = ""
-        try {
-            val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
-            val json = JSONObject(filecontent)
-            pubkey = json.getString("publicKey")
-        } catch (e: Exception) {
-            Log.e(LOGTAG,"Failed to read pubkey",e)
-        }
+        val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
+        val json = JSONObject(filecontent)
+        pubkey = json.getString("publicKey")
+
         return pubkey
     }
 }
+
+class AnodeUtilException(message:String): Exception(message)

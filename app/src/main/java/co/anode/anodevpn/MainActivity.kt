@@ -32,9 +32,17 @@ class MainActivity : AppCompatActivity() {
                     Looper.prepare();
                     Toast.makeText(baseContext, paramThrowable.message, Toast.LENGTH_LONG).show()
                     AnodeClient.mycontext = baseContext
+                    var type = "unknown"
+                    //CJDNS socket error
+                    if (paramThrowable is CjdnsException) {
+                        type = "cjdns_crash"
+                    //CJDROUTE error
+                    } else if (paramThrowable is AnodeUtilException) {
+                        type = "cjdns_crash"
+                    }
                     if (AnodeClient.checkNetworkConnection()){
                         //Trying to post error to server
-                        val result = AnodeClient.httpPost("https://anode.co/api/error", "Error", paramThrowable.message)
+                        val result = AnodeClient.httpPost("https://vpn.anode.co/api/0.1/vpn/client/event/", type, paramThrowable.message)
                     }
                     Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
                     Looper.loop();

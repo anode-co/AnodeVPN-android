@@ -26,10 +26,12 @@ object AnodeClient {
 
     @Throws(IOException::class, JSONException::class)
     fun httpPost(myUrl: String, type: String, message: String?): String {
+        val apiKey = "hthiP3Gx.TLJRcZGpsHh8ImjtBCjpB7soD87qsaDb"
         val url = URL(myUrl)
         val conn = url.openConnection() as HttpsURLConnection
         conn.requestMethod = "POST"
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        conn.setRequestProperty("Authorization", "Api-Key $apiKey")
         val jsonObject = buidJsonObject(type, message)
         setPostRequestContent(conn, jsonObject)
         conn.connect()
@@ -49,17 +51,19 @@ object AnodeClient {
     private fun buidJsonObject(type: String, message: String?): JSONObject {
         val anodeUtil: AnodeUtil = AnodeUtil(null)
         val jsonObject = JSONObject()
-        jsonObject.accumulate("pubkey", anodeUtil.getPubKey())
-        jsonObject.accumulate("type", type)
-        jsonObject.accumulate("message",message)
-        jsonObject.accumulate("ip4address", CjdnsSocket.ipv4Address)
-        jsonObject.accumulate("ip6address", CjdnsSocket.ipv6Route)
-        val logfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
-        jsonObject.accumulate("cjdroute_log", logfile.readText(Charsets.UTF_8))
+        jsonObject.accumulate("public_key", anodeUtil.getPubKey())
+        jsonObject.accumulate("error", type)
+        jsonObject.accumulate("client_software_version", BuildConfig.VERSION_CODE)
+        jsonObject.accumulate("client_os", "Android")
+        jsonObject.accumulate("client_os_version", android.os.Build.VERSION.RELEASE)
         jsonObject.accumulate("local_timestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+        jsonObject.accumulate("ip4_address", CjdnsSocket.ipv4Address)
+        jsonObject.accumulate("ip6_address", CjdnsSocket.ipv6Route)
+        jsonObject.accumulate("message", message)
+        val logfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
+        jsonObject.accumulate("debugging_messages", logfile.readText(Charsets.UTF_8))
 
         return jsonObject
-
     }
 
     @Throws(IOException::class)

@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor
 import android.system.OsConstants.AF_INET
 import android.util.Log
 import java.io.FileDescriptor
+import java.lang.Exception
 
 
 class AnodeVpnService : VpnService() {
@@ -61,9 +62,12 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
                 .allowBypass()
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
-            b.addRoute(CjdnsSocket.ipv6Route,CjdnsSocket.ipv6RoutePrefix)//Route 0
-            b.addRoute(CjdnsSocket.ipv4Route,CjdnsSocket.ipv4RoutePrefix)//Route
+            b.addRoute(CjdnsSocket.ipv4Route, CjdnsSocket.ipv4RoutePrefix) //0
             b.addAddress(CjdnsSocket.ipv4Address, CjdnsSocket.ipv4AddressPrefix) //32
+        }
+        if (CjdnsSocket.ipv6Address.isNotEmpty() && CjdnsSocket.ipv6Address != "") {
+            b.addRoute(CjdnsSocket.ipv6Route, CjdnsSocket.ipv6RoutePrefix) //0
+            b.addAddress(CjdnsSocket.ipv6Address, CjdnsSocket.ipv6AddressPrefix) //64
         }
 
         mInterface = b.establish()
@@ -100,11 +104,13 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
             while (true) {
                 Thread.sleep(1000)
             }
-        } catch (e: Exception) {
+        } catch (e: InterruptedException) {
             if (mInterface != null) {
                 stopVPN()
             }
             e.printStackTrace()
+        } catch (e: Exception) {
+            throw CjdnsException("cjdns_error "+e.message)
         }
     }
 }
