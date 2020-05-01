@@ -4,6 +4,8 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
 import java.io.FileDescriptor
+import java.net.InetAddress
+import kotlin.experimental.and
 
 val LOGTAG = "CjdnsSocket"
 
@@ -173,14 +175,19 @@ object CjdnsSocket {
         if (ip4Address.toString() == "null") {
             return null
         }
-        this.ipv4Address = ip4Address.str()
-        this.ipv4Route = ip4Address.str()
-        this.ipv4RoutePrefix = ip4Prefix.num().toInt()
-        this.ipv4AddressPrefix = ip4Alloc.num().toInt()
-        this.ipv6Route = ip6Address.str()
-        this.ipv6Address = ip6Address.str()
-        this.ipv6AddressPrefix = ip6Alloc.num().toInt()
-        this.ipv6RoutePrefix = ip6Prefix.num().toInt()
+
+        ipv4RoutePrefix =  ip4Prefix.num().toInt()
+        ipv4AddressPrefix = ip4Alloc.num().toInt()
+        ipv6RoutePrefix = ip6Prefix.num().toInt()
+        ipv6AddressPrefix = ip6Alloc.num().toInt()
+        if (ipv4AddressPrefix < 32) {
+            ipv4Address = trimBitsforRoute(ip4Address.str(), ipv4AddressPrefix)
+        } else {
+            ipv4Address = ip4Address.str()
+        }
+        ipv4Route = trimBitsforRoute(ip4Address.str(), ipv4RoutePrefix)
+        ipv6Address = trimBitsforRoute(ip6Address.str(), ipv6AddressPrefix)
+        ipv6Route = trimBitsforRoute(ip6Address.str(), ipv6RoutePrefix)
 
         return ip4Address.str()
     }
@@ -194,6 +201,17 @@ object CjdnsSocket {
         this.ipv6RoutePrefix = 0
         this.ipv6Address = ""
         this.ipv6AddressPrefix = 0
+    }
+
+    fun trimBitsforRoute(addr: String?, prefix: Int): String {
+        var a = InetAddress.getByName(addr)
+        val bytes = a.address
+        bytes[prefix shr 3] = bytes[prefix shr 3].and( ((0xff shl 8 - prefix % 8).toByte()) )
+        for (i in (prefix shr 3) + 1 until bytes.size) {
+            bytes[i] = 0
+        }
+
+        return InetAddress.getByAddress(bytes).hostAddress
     }
 }
 
