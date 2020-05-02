@@ -66,7 +66,7 @@ object CjdnsSocket {
                 }
         ls.outputStream.write(benc.bytes())
         val x = read()
-        Log.e(LOGTAG, "$benc-->$x")
+        Log.i(LOGTAG, "$benc-->$x")
         val dec: Benc.Obj
         if (x.isEmpty()) {
             throw CjdnsException("Empty reply, call to $name")
@@ -115,12 +115,7 @@ object CjdnsSocket {
     fun InterfaceController_peerStats(): ArrayList<Benc.Bdict> {
         var peerStats: Benc.Obj
         val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
-        var totalPeers: Long = 0
         var i = 0
-        /*
-        peerStats = call("InterfaceController_peerStats", Benc.dict("page", 0))
-        out.add(peerStats["peers"][0] as Benc.Bdict)
-        */
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
             if(peerStats["peers"].toString() != "[]")
@@ -149,22 +144,11 @@ object CjdnsSocket {
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
-    fun RouteGen_getPrefixes(): String {
-        //get routes
-        val routes: Benc.Obj = call("RouteGen_getPrefixes", null)
-        this.ipv4Route = routes["routes"].toString()
-        return this.ipv4Route
-    }
+    fun IpTunnel_showConnection(num: Int): Benc.Obj =
+            call("IpTunnel_showConnection", Benc.dict("connection", num))
 
-    fun IpTunnel_showConnection(num: Int): Benc.Obj {
-        val conn: Benc.Obj
-        conn = call("IpTunnel_showConnection", Benc.dict("connection", num))
-        return conn
-    }
-
-    fun getCjdnsIpv4Address(): String? {
+    fun getCjdnsRoutes(): Boolean {
         val connection = IpTunnel_showConnection(0)
-
         val ip4Address = connection["ip4Address"]
         val ip4Prefix = connection["ip4Prefix"]
         val ip4Alloc = connection["ip4Alloc"]
@@ -172,24 +156,18 @@ object CjdnsSocket {
         val ip6Prefix = connection["ip6Prefix"]
         val ip6Alloc = connection["ip6Alloc"]
         //Authorization missing...
-        if (ip4Address.toString() == "null") {
-            return null
+        if ((ip4Address.toString() == "null") && (ip6Address.toString() == "null")){
+            return false
         }
-
         ipv4RoutePrefix =  ip4Prefix.num().toInt()
         ipv4AddressPrefix = ip4Alloc.num().toInt()
         ipv6RoutePrefix = ip6Prefix.num().toInt()
         ipv6AddressPrefix = ip6Alloc.num().toInt()
-        if (ipv4AddressPrefix < 32) {
-            ipv4Address = trimBitsforRoute(ip4Address.str(), ipv4AddressPrefix)
-        } else {
-            ipv4Address = ip4Address.str()
-        }
+        ipv4Address = trimBitsforRoute(ip4Address.str(), ipv4AddressPrefix)
         ipv4Route = trimBitsforRoute(ip4Address.str(), ipv4RoutePrefix)
         ipv6Address = trimBitsforRoute(ip6Address.str(), ipv6AddressPrefix)
         ipv6Route = trimBitsforRoute(ip6Address.str(), ipv6RoutePrefix)
-
-        return ip4Address.str()
+        return true
     }
 
     fun clearRoutes() {
@@ -203,9 +181,10 @@ object CjdnsSocket {
         this.ipv6AddressPrefix = 0
     }
 
-    fun trimBitsforRoute(addr: String?, prefix: Int): String {
+    fun trimBitsforRoute(addr: String, prefix: Int): String {
         var a = InetAddress.getByName(addr)
         val bytes = a.address
+        if ((prefix shr 3) >= bytes.size) { return addr }
         bytes[prefix shr 3] = bytes[prefix shr 3].and( ((0xff shl 8 - prefix % 8).toByte()) )
         for (i in (prefix shr 3) + 1 until bytes.size) {
             bytes[i] = 0
