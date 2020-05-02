@@ -28,19 +28,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Switch
-        android:id="@+id/switchInternet"
-        android:visibility="visible"
-        android:clickable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Internet access"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toStartOf="@id/switchVpn"
-        app:layout_constraintTop_toBottomOf="@id/switchVpn" />
-
     <TextView
         android:id="@+id/textViewLabelLog"
         android:layout_width="wrap_content"
@@ -49,7 +36,7 @@
         android:layout_marginTop="32dp"
         android:text="Status: "
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/switchInternet" />
+        app:layout_constraintTop_toBottomOf="@id/switchVpn" />
 
     <TextView
         android:id="@+id/textViewLog"
@@ -62,20 +49,29 @@
         app:layout_constraintLeft_toRightOf="@id/textViewLabelLog"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textViewLabelLog"
-        app:layout_constraintTop_toBottomOf="@id/switchInternet" />
+        app:layout_constraintTop_toBottomOf="@id/switchVpn" />
+
+    <Switch
+        android:id="@+id/switchInternet"
+        android:visibility="visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Internet access"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="@id/switchVpn"
+        app:layout_constraintTop_toBottomOf="@id/textViewLog" />
 
     <TextView
         android:id="@+id/textViewPublicIP"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="16dp"
         android:text="Public IP: "
-        app:layout_constraintLeft_toRightOf="@id/textViewLabelLog"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textViewLabelLog"
-        app:layout_constraintTop_toBottomOf="@id/textViewLog" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/switchInternet" />
 
     <TextView
         android:id="@+id/textViewLink"
