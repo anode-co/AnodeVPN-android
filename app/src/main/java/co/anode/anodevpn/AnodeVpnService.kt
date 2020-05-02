@@ -95,7 +95,6 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     private fun stopVPN() {
         mInterface!!.close()
         mInterface = null
-        CjdnsSocket.Core_stopTun()
     }
 
     override fun run() {
