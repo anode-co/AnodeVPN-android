@@ -23,6 +23,15 @@ android {
         }
     }
 
+    def isRunningOnTravis = System.getenv("CI") == "true"
+
+    if (isRunningOnTravis) {
+        // configure keystore
+        signingConfigs.release.storeFile = file("../tools/android_key")
+        signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
+        signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
+        signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
+    }
 }
 
 dependencies {
