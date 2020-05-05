@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AnodeVPN.iml" filepath="$PROJECT_DIR$/AnodeVPN.iml" group="AnodeVPN" />
-      <module fileurl="file://$PROJECT_DIR$/AnodeVPN-android-AnodeVPN.iml" filepath="$PROJECT_DIR$/AnodeVPN-android-AnodeVPN.iml" group="AnodeVPN" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="AnodeVPN/app" />
     </modules>
   </component>
