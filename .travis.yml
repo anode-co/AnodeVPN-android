@@ -1,5 +1,9 @@
 language: android
 jdk: oraclejdk8
+branches:
+  only:
+    - master
+    - develop
 env:
   global:
   - ANDROID_API=27
