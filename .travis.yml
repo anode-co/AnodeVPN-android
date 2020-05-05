@@ -1,13 +1,14 @@
 language: android
+dist: trusty
 jdk: oraclejdk8
 env:
   global:
   - ANDROID_API=29
 android:
   components:
-  - tools
-  - tools
-  - platform-tools
+  # - tools
+  # - tools
+  # - platform-tools
   - build-tools-29.0.3
   - android-${ANDROID_API}
   - extra-android-m2repository
