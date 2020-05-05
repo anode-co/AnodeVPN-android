@@ -6,19 +6,19 @@ branches:
     - develop
 env:
   global:
-  - ANDROID_API=27
+  - ANDROID_API=29
 android:
   components:
   - tools
   - tools
   - platform-tools
-  - build-tools-26.0.2
+  - build-tools-29.0.3
   - android-${ANDROID_API}
   - extra-android-m2repository
   licenses:
   - android-sdk-license-.+
 before_install:
-- yes | sdkmanager "platforms;android-27"
+- yes | sdkmanager "platforms;android-${ANDROID_API}"
 before_cache: "-rm -f $HOME/.gradle/caches/modules-2/modules-2.lock -rm -fr $HOME/.gradle/caches/*/plugin-resolution/"
 cache:
   directories:
