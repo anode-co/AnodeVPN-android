@@ -50,7 +50,9 @@ class FirstFragment : Fragment() {
 
         val switchVpn = view.findViewById<Switch>(R.id.switchVpn)
         //Listener for the Master switch
-        switchVpn?.setOnCheckedChangeListener { _, isChecked ->
+        //switchVpn?.setOnCheckedChangeListener { _, isChecked ->
+        switchVpn?.setOnClickListener {
+            val isChecked = switchVpn.isChecked
             if (isChecked) {
                 Log.i(LOGTAG,"Main Switch checked")
                 Toast.makeText(this.context, "Turning ON VPN", Toast.LENGTH_SHORT).show()
@@ -69,7 +71,9 @@ class FirstFragment : Fragment() {
             }}
 
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
-        switchInternet?.setOnCheckedChangeListener { _, isChecked ->
+        //switchInternet?.setOnCheckedChangeListener { _, isChecked ->
+        switchInternet?.setOnClickListener {
+            val isChecked = switchInternet.isChecked
             if (!switchVpn.isChecked) {
                 Toast.makeText(this.context, "You must first enable CJDNS VPN", Toast.LENGTH_SHORT).show()
                 switchInternet.isChecked = false
@@ -94,6 +98,11 @@ class FirstFragment : Fragment() {
                 }
             }
         }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
 
     }
 
@@ -142,10 +151,15 @@ object runnableUI: Runnable {
 
     var info = 0
     override fun run() {
-        info = if (CjdnsSocket.ls.isConnected) {
-            CjdnsSocket.getNumberofEstablishedPeers()
+        val switchVpn: Switch = v!!.findViewById(R.id.switchVpn)
+        if (CjdnsSocket.ls.isConnected) {
+            info = CjdnsSocket.getNumberofEstablishedPeers()
+            if (info > 0) {
+                switchVpn.isChecked = true
+            }
         } else {
-            0
+            info = 0
+            switchVpn.isChecked = false
         }
         val logText: TextView = v!!.findViewById(R.id.textViewLog)
         logText.text = " $info active connection(s) established"
@@ -168,12 +182,16 @@ object runnableConnection: Runnable {
     }
 
     override fun run() {
+        val switchInternet: Switch = v!!.findViewById(R.id.switchInternet)
+        CjdnsSocket.getCjdnsRoutes()
         val newip4address = CjdnsSocket.ipv4Address
         val newip6address = CjdnsSocket.ipv6Address
+        //Update UI
+        switchInternet.isChecked = (ipv4address != "") || (ipv6address != "")
+        //Reset VPN with new address
         if ((ipv4address != newip4address) || (ipv4address != newip4address)){
             ipv4address = newip4address
             ipv6address = newip6address
-
             //Restart Service
             CjdnsSocket.Core_stopTun()
             a?.startService(Intent(a, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
