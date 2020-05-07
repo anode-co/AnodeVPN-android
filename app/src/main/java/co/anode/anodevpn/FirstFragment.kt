@@ -62,12 +62,9 @@ class FirstFragment : Fragment() {
                 h.postDelayed(runnableUI, 1000)//Start thread for status of peers
             } else {//Switch OFF
                 Toast.makeText(this.context, "Turning OFF VPN", Toast.LENGTH_SHORT).show()
-                if (switchInternet.isChecked) {
-                    //Disable 2nd switch
-                    switchInternet.isChecked = false
-                } else {
-                    Disconnect()
-                }
+                Disconnect()
+                //Disable 2nd switch
+                switchInternet.isChecked = false
             }}
 
         val switchInternet = view.findViewById<Switch>(R.id.switchInternet)
@@ -208,7 +205,6 @@ object ConnectingThread: Runnable {
     private var v: View? = null
     private var activity: FragmentActivity? = null
     private var h: Handler? = null
-    private var iconnected: Boolean = false
 
     fun init(view: View, handler:Handler, a:FragmentActivity?) {
         v = view
@@ -217,6 +213,7 @@ object ConnectingThread: Runnable {
     }
 
     override fun run() {
+        var iconnected: Boolean = false
         val logText: TextView = v!!.findViewById(R.id.textViewLog)
         val ipText: TextView = v!!.findViewById(R.id.textViewPublicIP)
         //Connect to Internet
