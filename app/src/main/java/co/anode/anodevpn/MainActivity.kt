@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
                     Looper.prepare();
                     Toast.makeText(baseContext, paramThrowable.message, Toast.LENGTH_LONG).show()
                     AnodeClient.mycontext = baseContext
-                    var type = "unknown"
+                    var type = "other"
                     //CJDNS socket error
                     if (paramThrowable is CjdnsException) {
                         type = "cjdns_crash"
