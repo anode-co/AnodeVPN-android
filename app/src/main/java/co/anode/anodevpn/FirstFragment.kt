@@ -1,6 +1,7 @@
 package co.anode.anodevpn
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -96,6 +98,10 @@ class FirstFragment : Fragment() {
             }
         }
 
+        val buttonLog = view.findViewById<Button>(R.id.buttonLog)
+        buttonLog?.setOnClickListener {
+            postLogs(requireContext()).execute()
+        }
     }
 
     override fun onResume() {
@@ -120,7 +126,24 @@ class FirstFragment : Fragment() {
     }
 
     companion object {
-        private const val LOGTAG = "FirstFragment"
+        private const val LOGTAG = "co.anode.anodevpn"
+    }
+}
+
+class postLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
+
+    override fun doInBackground(objects: Array<Any?>): String? {
+        var result = ""
+        AnodeClient.mycontext = context
+        if (AnodeClient.checkNetworkConnection()) {
+            result = AnodeClient.httpPost("https://vpn.anode.co/api/0.1/vpn/client/event/", "other", "Submit logs")
+        }
+        return result
+    }
+
+    override fun onPostExecute(result: String?) {
+        super.onPostExecute(result)
+
     }
 }
 
