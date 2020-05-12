@@ -1,16 +1,18 @@
 package co.anode.anodevpn
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
 import android.os.Looper
+import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import java.io.*
 import kotlin.system.exitProcess
 
 
@@ -30,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             object : Thread() {
                 override fun run() {
                     Looper.prepare();
-                    Toast.makeText(baseContext, paramThrowable.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(baseContext, "ERROR: "+paramThrowable.message, Toast.LENGTH_LONG).show()
                     AnodeClient.mycontext = baseContext
                     var type = "other"
                     //CJDNS socket error
@@ -55,11 +57,13 @@ class MainActivity : AppCompatActivity() {
             }
             exitProcess(1)
         }
-
-        //Initialize the app by copying cjdroute and generating the conf file
+        //Start the log file
+        anodeUtil!!.logFile()
+        //Initialize App
         anodeUtil!!.initializeApp()
-
+        //Launch cjdroute
         anodeUtil!!.launch()
+
         /* We may need the first run check in the future... */
         /*
         if (prefs.getBoolean("firstrun", true)) {
@@ -72,6 +76,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
+    }
+
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+        return super.onCreateView(name, context, attrs)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -99,6 +107,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val LOGTAG = "MainActivity"
+        private const val LOGTAG = "co.anode.anodevpn"
     }
 }

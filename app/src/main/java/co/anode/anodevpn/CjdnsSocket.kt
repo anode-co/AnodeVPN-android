@@ -7,7 +7,7 @@ import java.io.FileDescriptor
 import java.net.InetAddress
 import kotlin.experimental.and
 
-val LOGTAG = "CjdnsSocket"
+val LOGTAG = "co.anode.anodevpn"
 
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
@@ -19,6 +19,8 @@ object CjdnsSocket {
     var ipv6RoutePrefix: Int = 0
     var ipv6Address: String = ""
     var ipv6AddressPrefix: Int = 0
+    var logpeerStats: String = ""
+    var logshowConnections: String = ""
 
     fun init(path:String ) {
         var tries = 0
@@ -66,7 +68,7 @@ object CjdnsSocket {
                 }
         ls.outputStream.write(benc.bytes())
         val x = read()
-        Log.i(LOGTAG, "$benc-->$x")
+        //Log.i(LOGTAG, "$benc-->$x")
         val dec: Benc.Obj
         if (x.isEmpty()) {
             throw CjdnsException("Empty reply, call to $name")
@@ -90,6 +92,7 @@ object CjdnsSocket {
     }
 
     fun Admin_exportFd(fd: Int): FileDescriptor {
+        Log.i(LOGTAG, "Admin_exportFd $fd")
         call("Admin_exportFd", Benc.dict("fd", fd))
         val fds = ls.ancillaryFileDescriptors
         if (fds == null || fds.isEmpty()) {
@@ -99,6 +102,7 @@ object CjdnsSocket {
     }
 
     fun Admin_importFd(fd: FileDescriptor): Int {
+        Log.i(LOGTAG, "Admin_importFd $fd")
         ls.setFileDescriptorsForSend(arrayOf(fd))
         val result = call("Admin_importFd", null)["fd"].num().toInt()
         ls.setFileDescriptorsForSend(null)
@@ -118,6 +122,7 @@ object CjdnsSocket {
         var i = 0
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
+            logpeerStats = peerStats.toString()
             if(peerStats["peers"].toString() != "[]")
             {
                 out.add(peerStats["peers"][i] as Benc.Bdict)
@@ -141,6 +146,7 @@ object CjdnsSocket {
     }
 
     fun IpTunnel_connectTo(node: String) {
+        Log.i(LOGTAG,"IpTunnel_connectTo: $node")
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
@@ -149,6 +155,7 @@ object CjdnsSocket {
 
     fun getCjdnsRoutes(): Boolean {
         val connection = IpTunnel_showConnection(0)
+        logshowConnections = connection.toString()
         val ip4Address = connection["ip4Address"]
         val ip4Prefix = connection["ip4Prefix"]
         val ip4Alloc = connection["ip4Alloc"]
@@ -171,6 +178,7 @@ object CjdnsSocket {
     }
 
     fun clearRoutes() {
+        Log.i(LOGTAG, "clear routes")
         this.ipv4Address = ""
         this.ipv4Route = ""
         this.ipv4RoutePrefix = 0
@@ -182,6 +190,7 @@ object CjdnsSocket {
     }
 
     fun trimBitsforRoute(addr: String, prefix: Int): String {
+        Log.i(LOGTAG, "trimBitsforRoute $addr with $prefix")
         var a = InetAddress.getByName(addr)
         val bytes = a.address
         if ((prefix shr 3) >= bytes.size) { return addr }
