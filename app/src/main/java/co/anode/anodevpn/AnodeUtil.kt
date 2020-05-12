@@ -6,9 +6,10 @@ import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 
 class AnodeUtil(private val context: Context?) {
-    private val LOGTAG = "anodeVPNService"
+    private val LOGTAG = "co.anode.anodevpn"
     val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
@@ -18,6 +19,7 @@ class AnodeUtil(private val context: Context?) {
 
     fun initializeApp() {
         //Create files folder
+        Log.i(LOGTAG, "Creating files directory")
         context!!.filesDir.mkdir()
         val cjdrouteFile = File("$CJDNS_PATH/$CJDROUTE_BINFILE")
 
@@ -37,7 +39,7 @@ class AnodeUtil(private val context: Context?) {
             } else if (arch.contains("x86_64")) {
                 `in` = am.open("X86_64/21/cjdroute")
             } else { //Unknown architecture
-                throw Error("Incompatible CPU architecture")
+                throw AnodeUtilException("Incompatible CPU architecture")
             }
         } catch (e: IOException) {
             throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
@@ -62,6 +64,7 @@ class AnodeUtil(private val context: Context?) {
                 `in`.close()
                 out.close()
                 //Set permissions
+                Log.i(LOGTAG, "set new cjdroute permissions")
                 val file = File(context.filesDir.toString() + "/cjdroute")
                 file.setExecutable(true)
             }catch (e: IOException) {
@@ -73,6 +76,7 @@ class AnodeUtil(private val context: Context?) {
             initializeCjdrouteConfFile()
         }
     }
+
 
     fun launch() {
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
@@ -91,23 +95,27 @@ class AnodeUtil(private val context: Context?) {
     }
 
     private fun generateConfFile() {
+        Log.i(LOGTAG,"Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
             processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--genconf")
                     .redirectOutput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
                     .start()
-                    .waitFor()
+                    .waitFor(2, TimeUnit.SECONDS)
+
             //Clean conf
+            Log.i(LOGTAG,"Clean conf file with cjdroute")
             processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--cleanconf")
                     .redirectInput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
                     .redirectOutput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
                     .start()
-                    .waitFor()
+                    .waitFor(2, TimeUnit.SECONDS)
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to generate new configuration file "+e.message)
         }
 
         //Delete temp file
+        Log.i(LOGTAG,"Delete temp conf file")
         Files.delete(Paths.get("$CJDNS_PATH/$CJDROUTE_TEMPCONFFILE"))
     }
 
@@ -132,6 +140,7 @@ class AnodeUtil(private val context: Context?) {
 
     @Throws(IOException::class)
     fun readJSONFile(filename: String): String {
+        Log.i(LOGTAG, "reading $filename")
         val confFile = FileInputStream(filename)
         val fileContent = StringBuffer("")
         val buffer = ByteArray(1024)
@@ -143,6 +152,7 @@ class AnodeUtil(private val context: Context?) {
     }
 
     private fun modifyJSONConfFile() {
+        Log.i(LOGTAG, "modifying conf file")
         try {
             val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
@@ -183,6 +193,26 @@ class AnodeUtil(private val context: Context?) {
 
         return pubkey
     }
+
+    fun logFile() {
+        val filename: String = "$CJDNS_PATH/anodevpn.log"
+        if (File(filename).exists()) {
+            if (File("$CJDNS_PATH/last_anodevpn.log").exists()) {
+                Files.delete(Paths.get("$CJDNS_PATH/last_anodevpn.log"))
+            }
+            Files.move(Paths.get(filename),Paths.get("$CJDNS_PATH/last_anodevpn.log"))
+        }
+        val command = "logcat -f $filename -v time co.anode.anodevpn:V"
+        try {
+            Runtime.getRuntime().exec(command)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
 }
+
+
+
+
 
 class AnodeUtilException(message:String): Exception(message)
