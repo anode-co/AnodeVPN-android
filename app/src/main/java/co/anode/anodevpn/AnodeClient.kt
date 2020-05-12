@@ -63,8 +63,12 @@ object AnodeClient {
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
         val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodevpn.log")
-        jsonObject.accumulate("debugging_messages", "peerStats: "+CjdnsSocket.logpeerStats+"showConnections: "+CjdnsSocket.logshowConnections+"\n\nCURRENT LOG"+currlogfile.readText(Charsets.UTF_8)+"\n\nLAST LOG: "+lastlogfile.readText(Charsets.UTF_8)+"\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8))
-
+        if (message!! == "Submit logs")
+        {
+            jsonObject.accumulate("debugging_messages", "peerStats: "+CjdnsSocket.logpeerStats+"showConnections: "+CjdnsSocket.logshowConnections+"\n\nCURRENT LOG"+currlogfile.readText(Charsets.UTF_8)+"\n\nLAST LOG: "+lastlogfile.readText(Charsets.UTF_8)+"\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8))
+        } else {
+            jsonObject.accumulate("debugging_messages", "peerStats: "+CjdnsSocket.logpeerStats+"showConnections: "+CjdnsSocket.logshowConnections+"\n\nCURRENT LOG"+currlogfile.readText(Charsets.UTF_8)+"\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8))
+        }
         return jsonObject
     }
 
