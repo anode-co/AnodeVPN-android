@@ -31,8 +31,8 @@ object AnodeClient {
         val conn = url.openConnection() as HttpsURLConnection
         conn.requestMethod = "POST"
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        conn.setRequestProperty("Authorization", "Api-Key $apiKey")
-        val jsonObject = buidJsonObject(type, message)
+        //conn.setRequestProperty("Authorization", "Api-Key $apiKey")
+        val jsonObject = errorJsonObj(type, message)
         setPostRequestContent(conn, jsonObject)
         conn.connect()
         return conn.responseMessage + ""
@@ -48,7 +48,7 @@ object AnodeClient {
         }
 
     @Throws(JSONException::class)
-    private fun buidJsonObject(type: String, message: String?): JSONObject {
+    private fun errorJsonObj(type: String, message: String?): JSONObject {
         val anodeUtil: AnodeUtil = AnodeUtil(null)
         val jsonObject = JSONObject()
         jsonObject.accumulate("public_key", anodeUtil.getPubKey())
@@ -60,8 +60,18 @@ object AnodeClient {
         jsonObject.accumulate("ip4_address", CjdnsSocket.ipv4Address)
         jsonObject.accumulate("ip6_address", CjdnsSocket.ipv6Route)
         jsonObject.accumulate("message", message)
-        val logfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
-        jsonObject.accumulate("debugging_messages", logfile.readText(Charsets.UTF_8))
+        val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
+        val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
+        val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodevpn.log")
+        jsonObject.accumulate("debugging_messages", "peerStats: "+CjdnsSocket.logpeerStats+"showConnections: "+CjdnsSocket.logshowConnections+"\n\nCURRENT LOG"+currlogfile.readText(Charsets.UTF_8)+"\n\nLAST LOG: "+lastlogfile.readText(Charsets.UTF_8)+"\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8))
+
+        return jsonObject
+    }
+
+    @Throws(JSONException::class)
+    private fun requpdateJsonObj(type: String, message: String?): JSONObject {
+        val jsonObject = JSONObject()
+        //jsonObject.accumulate("public_key", anodeUtil.getPubKey())
 
         return jsonObject
     }
@@ -75,5 +85,13 @@ object AnodeClient {
         writer.flush()
         writer.close()
         os.close()
+    }
+
+    fun getLatestAPK() {
+        //TODO: send device arch to receive latest APK URL
+    }
+
+    fun getListofServers() {
+
     }
 }
