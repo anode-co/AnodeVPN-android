@@ -101,7 +101,7 @@ class FirstFragment : Fragment() {
 
         val buttonLog = view.findViewById<Button>(R.id.buttonLog)
         buttonLog?.setOnClickListener {
-            PostLogs(requireContext()).execute()
+            this.context?.let { it1 -> PostLogs(it1).execute() }
         }
     }
 
@@ -144,7 +144,11 @@ class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
 
     override fun onPostExecute(result: String?) {
         super.onPostExecute(result)
-
+        if (result == "OK") {
+            Toast.makeText(this.context, "Logs submitted successfully", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this.context, "Logs could not be submitted", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
@@ -153,7 +157,7 @@ class GetPublicIP(private val ipText: TextView) : AsyncTask<Any?, Any?, String>(
 
     override fun doInBackground(objects: Array<Any?>): String {
         return try {
-            URL("http://api.ipify.org").readText(Charsets.UTF_8)
+            URL("https://api.ipify.org").readText(Charsets.UTF_8)
         } catch (e: Exception) {
             "error in getting public ip"
         }
