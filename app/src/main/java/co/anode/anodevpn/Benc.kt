@@ -21,6 +21,7 @@ class Benc(val str: String) {
         open fun num(): Long = throw Error("Not a number")
         open operator fun get(field: String): Obj = throw Error("Not an object")
         open operator fun get(field: Int): Obj = throw Error("Not a list")
+        open fun size(): Int = throw Error("Not a list")
         abstract fun bytes(): ByteArray
     }
 
@@ -44,6 +45,7 @@ class Benc(val str: String) {
     class Blist(private val l: List<Obj>) : Obj() {
         override fun toString(): String = "[" + l.joinToString { x -> x.toString() } + "]"
         override fun get(num: Int): Obj = l[num]
+        override fun size(): Int = l.size
         override fun bytes(): ByteArray = "l".toByteArray() +
                 l.map { el: Obj -> el.bytes() }.reduce { a, b -> a + b } +
                 "e".toByteArray()
