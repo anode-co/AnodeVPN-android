@@ -20,6 +20,7 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import kotlinx.android.synthetic.main.fragment_first.*
+import java.lang.Exception
 import java.net.URL
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -100,7 +101,7 @@ class FirstFragment : Fragment() {
 
         val buttonLog = view.findViewById<Button>(R.id.buttonLog)
         buttonLog?.setOnClickListener {
-            postLogs(requireContext()).execute()
+            PostLogs(requireContext()).execute()
         }
     }
 
@@ -130,7 +131,7 @@ class FirstFragment : Fragment() {
     }
 }
 
-class postLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
+class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
 
     override fun doInBackground(objects: Array<Any?>): String? {
         var result = ""
@@ -151,7 +152,11 @@ class postLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
 class GetPublicIP(private val ipText: TextView) : AsyncTask<Any?, Any?, String>() {
 
     override fun doInBackground(objects: Array<Any?>): String {
-        return URL("https://api.ipify.org/").readText(Charsets.UTF_8)
+        return try {
+            URL("http://api.ipify.org").readText(Charsets.UTF_8)
+        } catch (e: Exception) {
+            "error in getting public ip"
+        }
     }
 
     override fun onPostExecute(result: String?) {
