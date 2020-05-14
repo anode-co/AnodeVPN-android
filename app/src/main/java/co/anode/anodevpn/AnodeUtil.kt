@@ -196,10 +196,10 @@ class AnodeUtil(private val context: Context?) {
 
     fun logFile() {
         val filename: String = "$CJDNS_PATH/anodevpn.log"
+        if (File("$CJDNS_PATH/last_anodevpn.log").exists()) {
+            Files.delete(Paths.get("$CJDNS_PATH/last_anodevpn.log"))
+        }
         if (File(filename).exists()) {
-            if (File("$CJDNS_PATH/last_anodevpn.log").exists()) {
-                Files.delete(Paths.get("$CJDNS_PATH/last_anodevpn.log"))
-            }
             Files.move(Paths.get(filename),Paths.get("$CJDNS_PATH/last_anodevpn.log"))
         }
         val command = "logcat -f $filename -v time co.anode.anodevpn:V"

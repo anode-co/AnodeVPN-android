@@ -253,10 +253,10 @@ object ConnectingThread: Runnable {
         var tries = 0
         logText.post(Runnable { logText.text = "Connecting..." })
         //Check for ip address given by cjdns try for 20 times, 10secs
-        while (!iconnected && (tries < 20)) {
+        while (!iconnected && (tries < 10)) {
             iconnected = CjdnsSocket.getCjdnsRoutes()
             tries++
-            Thread.sleep(500)
+            Thread.sleep(2000)
         }
         if (iconnected) {
             //Restart Service

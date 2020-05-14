@@ -10,6 +10,7 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.Instant
@@ -26,16 +27,20 @@ object AnodeClient {
 
     @Throws(IOException::class, JSONException::class)
     fun httpPost(myUrl: String, type: String, message: String?): String {
-        val apiKey = "hthiP3Gx.TLJRcZGpsHh8ImjtBCjpB7soD87qsaDb"
-        val url = URL(myUrl)
-        val conn = url.openConnection() as HttpsURLConnection
-        conn.requestMethod = "POST"
-        conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        //conn.setRequestProperty("Authorization", "Api-Key $apiKey")
-        val jsonObject = errorJsonObj(type, message)
-        setPostRequestContent(conn, jsonObject)
-        conn.connect()
-        return conn.responseMessage + ""
+        try {
+            val apiKey = "hthiP3Gx.TLJRcZGpsHh8ImjtBCjpB7soD87qsaDb"
+            val url = URL(myUrl)
+            val conn = url.openConnection() as HttpsURLConnection
+            conn.requestMethod = "POST"
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            //conn.setRequestProperty("Authorization", "Api-Key $apiKey")
+            val jsonObject = errorJsonObj(type, message)
+            setPostRequestContent(conn, jsonObject)
+            conn.connect()
+            return conn.responseMessage + ""
+        }catch (e:Exception) {
+            return "Error: $e"
+        }
     }
 
     fun checkNetworkConnection() =
