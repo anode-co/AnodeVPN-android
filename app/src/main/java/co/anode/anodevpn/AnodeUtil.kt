@@ -209,6 +209,37 @@ class AnodeUtil(private val context: Context?) {
             e.printStackTrace()
         }
     }
+
+    fun readCPUUsage(): Float {
+        try {
+            val reader = RandomAccessFile("/proc/stat", "r")
+            var load = reader.readLine()
+            var toks = load.split(" +").toTypedArray() // Split on one or more spaces
+            val idle1 = toks[4].toLong()
+            val cpu1 = toks[2].toLong() + toks[3].toLong() + toks[5].toLong() + toks[6].toLong() + toks[7].toLong() + toks[8].toLong()
+            try {
+                Thread.sleep(360)
+            } catch (e: java.lang.Exception) {
+            }
+            reader.seek(0)
+            load = reader.readLine()
+            reader.close()
+            toks = load.split(" +").toTypedArray()
+            val idle2 = toks[4].toLong()
+            val cpu2 = toks[2].toLong() + toks[3].toLong() + toks[5].toLong() + toks[6].toLong() + toks[7].toLong() + toks[8].toLong()
+            return (cpu2 - cpu1).toFloat() / (cpu2 + idle2 - (cpu1 + idle1))
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+        }
+        return 0f
+    }
+
+    fun readMemUsage(): String {
+        val runtime = Runtime.getRuntime();
+        val usedMemInMB=(runtime.totalMemory() - runtime.freeMemory()) / 1048576L;
+        val maxHeapSizeInMB=runtime.maxMemory() / 1048576L;
+        return (maxHeapSizeInMB - usedMemInMB).toString();
+    }
 }
 
 

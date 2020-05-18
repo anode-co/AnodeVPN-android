@@ -137,7 +137,7 @@ class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
         var result = ""
         AnodeClient.mycontext = context
         if (AnodeClient.checkNetworkConnection()) {
-            result = AnodeClient.httpPost("https://vpn.anode.co/api/0.1/vpn/client/event/", "other", "Submit logs")
+            result = AnodeClient.httpPost("https://vpn.anode.co/api/0.2/vpn/clients/events/", "other", "Submit logs")
         }
         return result
     }
@@ -153,9 +153,11 @@ class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
 }
 
 
-class GetPublicIP(private val ipText: TextView) : AsyncTask<Any?, Any?, String>() {
+class GetPublicIP(): AsyncTask<TextView, Void, String>() {
+    var ipText:TextView? = null
 
-    override fun doInBackground(objects: Array<Any?>): String {
+    override fun doInBackground(vararg params: TextView?): String {
+        ipText = params[0]
         return try {
             URL("https://api.ipify.org").readText(Charsets.UTF_8)
         } catch (e: Exception) {
@@ -165,7 +167,7 @@ class GetPublicIP(private val ipText: TextView) : AsyncTask<Any?, Any?, String>(
 
     override fun onPostExecute(result: String?) {
         super.onPostExecute(result)
-        ipText.post(Runnable { ipText.text = "Public IP: $result"} )
+        ipText?.post(Runnable { ipText?.text  = "Public IP: $result"} )
     }
 }
 
@@ -227,7 +229,7 @@ object runnableConnection: Runnable {
             a?.startService(Intent(a, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
         }
         val ipText: TextView = v!!.findViewById(R.id.textViewPublicIP)
-        GetPublicIP(ipText).execute()
+        GetPublicIP().execute(ipText)
 
         h!!.postDelayed(this, 10000) //ms
     }

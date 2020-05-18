@@ -57,7 +57,9 @@ object AnodeClient {
     private fun errorJsonObj(type: String, message: String?): JSONObject {
         val anodeUtil: AnodeUtil = AnodeUtil(null)
         val jsonObject = JSONObject()
-        jsonObject.accumulate("public_key", anodeUtil.getPubKey())
+        var pubkey = anodeUtil.getPubKey()
+        if (pubkey == "") { pubkey = "unknown" }
+        jsonObject.accumulate("public_key", pubkey)
         jsonObject.accumulate("error", type)
         jsonObject.accumulate("client_software_version", BuildConfig.VERSION_CODE)
         jsonObject.accumulate("client_os", "Android")
@@ -65,6 +67,8 @@ object AnodeClient {
         jsonObject.accumulate("local_timestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
         jsonObject.accumulate("ip4_address", CjdnsSocket.ipv4Address)
         jsonObject.accumulate("ip6_address", CjdnsSocket.ipv6Route)
+        jsonObject.accumulate("cpu_utilization_percent", anodeUtil.readCPUUsage().toString())
+        jsonObject.accumulate("available_memory_bytes", anodeUtil.readMemUsage())
         jsonObject.accumulate("message", message)
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")

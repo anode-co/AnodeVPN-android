@@ -37,14 +37,17 @@ class MainActivity : AppCompatActivity() {
                     var type = "other"
                     //CJDNS socket error
                     if (paramThrowable is CjdnsException) {
-                        type = "cjdns_crash"
+                        type = "cjdns_socket"
                     //CJDROUTE error
                     } else if (paramThrowable is AnodeUtilException) {
-                        type = "cjdns_crash"
+                        type = "cjdroute"
+                    } else if (paramThrowable is AnodeVPNException) {
+                        type = "VPNService"
                     }
+
                     if (AnodeClient.checkNetworkConnection()){
                         //Trying to post error to server
-                        val result = AnodeClient.httpPost("https://vpn.anode.co/api/0.1/vpn/client/event/", type, paramThrowable.message)
+                        val result = AnodeClient.httpPost("https://vpn.anode.co/api/0.2/vpn/clients/events/", type, paramThrowable.message)
                     }
                     Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
                     Looper.loop();
@@ -63,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         anodeUtil!!.initializeApp()
         //Launch cjdroute
         anodeUtil!!.launch()
-
         /* We may need the first run check in the future... */
         /*
         if (prefs.getBoolean("firstrun", true)) {
