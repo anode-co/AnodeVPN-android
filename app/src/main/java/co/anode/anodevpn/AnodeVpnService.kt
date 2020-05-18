@@ -109,10 +109,12 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
             }
             e.printStackTrace()
         } catch (e: Exception) {
-            throw CjdnsException("cjdns_error "+e.message)
+            throw AnodeVPNException("VPNService error "+e.message)
         }
     }
 }
+
+class AnodeVPNException(message:String): Exception(message)
 
 private fun fdGetInt(fd: FileDescriptor) =
         FileDescriptor::class.java.getDeclaredMethod("getInt$").invoke(fd) as Int

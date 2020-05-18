@@ -2,10 +2,13 @@ package co.anode.anodevpn
 
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
+import android.os.Handler
 import android.util.Log
 import org.json.JSONObject
 import java.io.FileDescriptor
 import java.net.InetAddress
+import java.util.concurrent.Executors
+import kotlin.concurrent.thread
 import kotlin.experimental.and
 
 val LOGTAG = "co.anode.anodevpn"
@@ -204,12 +207,16 @@ object CjdnsSocket {
         Log.i(LOGTAG, "trimBitsforRoute $addr with $prefix")
         var a = InetAddress.getByName(addr)
         val bytes = a.address
-        if ((prefix shr 3) >= bytes.size) { return addr }
-        bytes[prefix shr 3] = bytes[prefix shr 3].and( ((0xff shl 8 - prefix % 8).toByte()) )
-        for (i in (prefix shr 3) + 1 until bytes.size) {
-            bytes[i] = 0
-        }
-
+        thread {
+            if ((prefix shr 3) >= bytes.size) {
+                return@thread
+            }
+            bytes[prefix shr 3] = bytes[prefix shr 3].and( ((0xff shl 8 - prefix % 8).toByte()) )
+            for (i in (prefix shr 3) + 1 until bytes.size) {
+                bytes[i] = 0
+            }
+            return@thread
+        }.run()
         return InetAddress.getByAddress(bytes).hostAddress
     }
 }
