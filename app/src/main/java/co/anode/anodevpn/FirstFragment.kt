@@ -46,7 +46,7 @@ class FirstFragment : Fragment() {
         link.movementMethod = LinkMovementMethod.getInstance()
         link.text = text
         val pubkey: TextView = view.findViewById(R.id.textViewPubkey)
-        pubkey.text = R.string.public_key.toString() + AnodeUtil(null).getPubKey()
+        pubkey.text = context?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(null).getPubKey()
         //Show version number
         val welcomemsg: TextView = view.findViewById(R.id.textview_first)
         welcomemsg.text = welcomemsg.text.toString()+"\nv"+BuildConfig.VERSION_NAME
@@ -60,13 +60,13 @@ class FirstFragment : Fragment() {
             val isChecked = switchVpn.isChecked
             if (isChecked) {
                 Log.i(LOGTAG,"Main Switch checked")
-                Toast.makeText(this.context, R.string.main_switch_on_msg, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this.context, context?.resources?.getString(R.string.main_switch_on_msg), Toast.LENGTH_SHORT).show()
                 //Start the VPN service
                 requireActivity().startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
                 switchInternet.isClickable = true
                 h.postDelayed(runnableUI, 1000)//Start thread for status of peers
             } else {//Switch OFF
-                Toast.makeText(this.context, R.string.main_switch_off_msg, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this.context, context?.resources?.getString(R.string.main_switch_off_msg), Toast.LENGTH_SHORT).show()
                 Disconnect()
                 //Disable 2nd switch
                 switchInternet.isChecked = false
@@ -76,21 +76,21 @@ class FirstFragment : Fragment() {
         switchInternet?.setOnClickListener {
             val isChecked = switchInternet.isChecked
             if (!switchVpn.isChecked) {
-                Toast.makeText(this.context, R.string.main_switch_enable_msg, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this.context, context?.resources?.getString(R.string.main_switch_enable_msg), Toast.LENGTH_SHORT).show()
                 switchInternet.isChecked = false
             } else {
                 if (isChecked) {
                     Log.i(LOGTAG, "Internet Switch checked")
                     val ipText: TextView = view.findViewById(R.id.textViewPublicIP)
                     ipText.text = R.string.connecting.toString()
-                    Toast.makeText(this.context, R.string.internet_switch_on_msg, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this.context, context?.resources?.getString(R.string.internet_switch_on_msg), Toast.LENGTH_SHORT).show()
                     //Start connecting thread
                     val executor: ExecutorService = Executors.newSingleThreadExecutor()
                     ConnectingThread.init(view, h, activity)
                     executor.submit(ConnectingThread)
                 } else {
                     Log.i(LOGTAG, "Internet Switch unchecked")
-                    Toast.makeText(this.context, R.string.internet_switch_off_msg, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this.context, context?.resources?.getString(R.string.internet_switch_off_msg), Toast.LENGTH_SHORT).show()
                     Disconnect()
                     if (switchVpn.isChecked) {
                         activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
@@ -116,9 +116,9 @@ class FirstFragment : Fragment() {
     fun Disconnect() {
         CjdnsSocket.Core_stopTun()
         val logText: TextView = requireView().findViewById(R.id.textViewLog)
-        logText.text = R.string.disconnected.toString()
+        logText.text = context?.resources?.getString(R.string.disconnected)
         val ipText: TextView = requireView().findViewById(R.id.textViewPublicIP)
-        ipText.text = R.string.disconnected.toString()
+        ipText.text = context?.resources?.getString(R.string.disconnected)
         stopThreads()
         CjdnsSocket.clearRoutes()
         activity?.startService(Intent(activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
@@ -159,7 +159,7 @@ class GetPublicIP(): AsyncTask<TextView, Void, String>() {
     @SuppressLint("SetTextI18n")
     override fun onPostExecute(result: String?) {
         super.onPostExecute(result)
-        ipText?.post(Runnable { ipText?.text  = R.string.public_ip.toString()+ result} )
+        ipText?.post(Runnable { ipText?.text  = "Public IP: $result" } )
     }
 }
 
@@ -186,7 +186,7 @@ object runnableUI: Runnable {
             switchVpn.isChecked = false
         }
         val logText: TextView = v!!.findViewById(R.id.textViewLog)
-        logText.text = " $info"+R.string.active_connections
+        logText.text = " $info active connection(s) established"
         h!!.postDelayed(this, 1000) //ms
     }
 }
@@ -239,6 +239,7 @@ object ConnectingThread: Runnable {
         activity = a
     }
 
+    @SuppressLint("SetTextI18n")
     override fun run() {
         var iconnected: Boolean = false
         val logText: TextView = v!!.findViewById(R.id.textViewLog)
@@ -246,7 +247,7 @@ object ConnectingThread: Runnable {
         //Connect to Internet
         CjdnsSocket.IpTunnel_connectTo("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
         var tries = 0
-        logText.post(Runnable { logText.text = R.string.connecting.toString() })
+        logText.post(Runnable { logText.text = "Connecting..." })
         //Check for ip address given by cjdns try for 20 times, 10secs
         while (!iconnected && (tries < 10)) {
             iconnected = CjdnsSocket.getCjdnsRoutes()
@@ -264,7 +265,7 @@ object ConnectingThread: Runnable {
             //Stop UI thread
             h!!.removeCallbacks(runnableUI)
             h!!.removeCallbacks(runnableConnection)
-            logText.post(Runnable { logText.text = R.string.authorization_needed.toString() })
+            logText.post(Runnable { logText.text = "Can not connect to VPN. Authorization needed" })
             ipText.text = ""
         }
     }
