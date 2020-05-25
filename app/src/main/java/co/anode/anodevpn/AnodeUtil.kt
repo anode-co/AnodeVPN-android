@@ -8,6 +8,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
+
 class AnodeUtil(private val context: Context?) {
     private val LOGTAG = "co.anode.anodevpn"
     val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
@@ -113,7 +114,6 @@ class AnodeUtil(private val context: Context?) {
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to generate new configuration file "+e.message)
         }
-
         //Delete temp file
         Log.i(LOGTAG,"Delete temp conf file")
         Files.delete(Paths.get("$CJDNS_PATH/$CJDROUTE_TEMPCONFFILE"))
@@ -190,18 +190,13 @@ class AnodeUtil(private val context: Context?) {
         val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         val json = JSONObject(filecontent)
         pubkey = json.getString("publicKey")
-
         return pubkey
     }
 
     fun logFile() {
         val filename: String = "$CJDNS_PATH/anodevpn.log"
-        if (File("$CJDNS_PATH/last_anodevpn.log").exists()) {
-            Files.delete(Paths.get("$CJDNS_PATH/last_anodevpn.log"))
-        }
-        if (File(filename).exists()) {
-            Files.move(Paths.get(filename),Paths.get("$CJDNS_PATH/last_anodevpn.log"))
-        }
+        if (File("$CJDNS_PATH/last_anodevpn.log").exists())  Files.delete(Paths.get("$CJDNS_PATH/last_anodevpn.log"))
+        if (File(filename).exists()) Files.move(Paths.get(filename),Paths.get("$CJDNS_PATH/last_anodevpn.log"))
         val command = "logcat -f $filename -v time co.anode.anodevpn:V"
         try {
             Runtime.getRuntime().exec(command)
@@ -219,8 +214,7 @@ class AnodeUtil(private val context: Context?) {
             val cpu1 = toks[2].toLong() + toks[3].toLong() + toks[5].toLong() + toks[6].toLong() + toks[7].toLong() + toks[8].toLong()
             try {
                 Thread.sleep(360)
-            } catch (e: java.lang.Exception) {
-            }
+            } catch (e: java.lang.Exception) {}
             reader.seek(0)
             load = reader.readLine()
             reader.close()
@@ -240,10 +234,7 @@ class AnodeUtil(private val context: Context?) {
         val maxHeapSizeInMB=runtime.maxMemory() / 1048576L;
         return (maxHeapSizeInMB - usedMemInMB).toString();
     }
+
 }
-
-
-
-
 
 class AnodeUtilException(message:String): Exception(message)
