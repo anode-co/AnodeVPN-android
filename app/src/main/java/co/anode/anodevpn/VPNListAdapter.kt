@@ -20,7 +20,7 @@ class VPNListAdapter(private val context: Context,
 
         val rowView = inflater.inflate(R.layout.list_row, parent, false)
         rowView.findViewById<TextView>(R.id.row_name).text = dataitem.get("name")
-        rowView.findViewById<TextView>(R.id.row_country).text = dataitem.get("country_code")
+        rowView.findViewById<TextView>(R.id.row_country).text = dataitem.get("countryCode")
         rowView.findViewById<TextView>(R.id.row_speed).text = dataitem.get("speed")
 
         rowView.tag = position
