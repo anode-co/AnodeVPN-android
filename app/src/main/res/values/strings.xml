@@ -6,7 +6,22 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
+    <string name="check_update">Checking for updates…</string>
+    <string name="downloading_update">Downloading new version…</string>
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_vpn_servers_list">VpnServersList</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="public_key">Public key:</string>
+    <string name="public_ip">Public IP:</string>
+    <string name="main_switch_on_msg">Turning ON VPN</string>
+    <string name="main_switch_off_msg">Turning OFF VPN</string>
+    <string name="internet_switch_on_msg">Turning ON Internet VPN</string>
+    <string name="internet_switch_off_msg">Turning OFF Internet VPN</string>
+    <string name="main_switch_enable_msg">You must first enable CJDNS VPN</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="connecting">Connecting…</string>
+    <string name="authorization_needed">Can not connect to VPN. Authorization needed</string>
+    <string name="active_connections"> active connection(s) established</string>
+
 </resources>
