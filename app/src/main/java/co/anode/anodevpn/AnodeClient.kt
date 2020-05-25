@@ -72,16 +72,16 @@ object AnodeClient {
         val jsonObject = JSONObject()
         var pubkey = anodeUtil.getPubKey()
         if (pubkey == "") pubkey = "unknown"
-        jsonObject.accumulate("public_key", pubkey)
+        jsonObject.accumulate("publicKey", pubkey)
         jsonObject.accumulate("error", type)
-        jsonObject.accumulate("client_software_version", BuildConfig.VERSION_CODE)
-        jsonObject.accumulate("client_os", "Android")
-        jsonObject.accumulate("client_os_version", android.os.Build.VERSION.RELEASE)
-        jsonObject.accumulate("local_timestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
-        jsonObject.accumulate("ip4_address", CjdnsSocket.ipv4Address)
-        jsonObject.accumulate("ip6_address", CjdnsSocket.ipv6Route)
-        jsonObject.accumulate("cpu_utilization_percent", anodeUtil.readCPUUsage().toString())
-        jsonObject.accumulate("available_memory_bytes", anodeUtil.readMemUsage())
+        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_CODE)
+        jsonObject.accumulate("clientOs", "Android")
+        jsonObject.accumulate("clientOsVersion", android.os.Build.VERSION.RELEASE)
+        jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+        jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address)
+        jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route)
+        jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString())
+        jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage())
         jsonObject.accumulate("message", message)
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
@@ -96,7 +96,7 @@ object AnodeClient {
             if(currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
             if(cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8)
         }
-        jsonObject.accumulate("debugging_messages", debugmsg)
+        jsonObject.accumulate("debuggingMessages", debugmsg)
         return jsonObject
     }
 
@@ -193,19 +193,19 @@ object AnodeClient {
             val revision_number = versionName.split(".")[2].toInt()
             try {
                 val json = JSONObject(URL("https://vpn.anode.co/api/0.2/vpn/clients/versions/android/").readText(Charsets.UTF_8))
-                if (json.get("client_os") != "android") {
+                if (json.get("clientOs") != "android") {
                     result = "wrong os returned"
                     return result
                 }
                 //TODO: check for client_cpu_architecture
-                if ((json.get("major_number").toString().toInt() > major_number) ||
-                        ((json.get("major_number").toString().toInt() == major_number) &&
-                                (json.get("minor_number").toString().toInt() > minor_number)) ||
-                        ((json.get("major_number").toString().toInt() == major_number) &&
-                                (json.get("minor_number").toString().toInt() == minor_number) &&
-                                (json.get("revision_number").toString().toInt() > revision_number))
+                if ((json.get("majorNumber").toString().toInt() > major_number) ||
+                        ((json.get("majorNumber").toString().toInt() == major_number) &&
+                                (json.get("minorNumber").toString().toInt() > minor_number)) ||
+                        ((json.get("majorNumber").toString().toInt() == major_number) &&
+                                (json.get("minorNumber").toString().toInt() == minor_number) &&
+                                (json.get("revisionNumber").toString().toInt() > revision_number))
                 ){
-                    return json.getString("binary_download_url")
+                    return json.getString("binaryDownloadUrl")
                 } else {
                     Log.i(LOGTAG,"NO update needed")
                     return "none"

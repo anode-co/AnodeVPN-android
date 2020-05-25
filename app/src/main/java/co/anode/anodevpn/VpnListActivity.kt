@@ -46,12 +46,14 @@ class VpnListActivity : AppCompatActivity() {
             val nextUrl = jsonObj.getString("next")
             val serversArr = jsonObj.getJSONArray("results")
             for (i in 0 until serversArr.length()) {
-                val singleUser = serversArr.getJSONObject(i)
+                val serverdetails = serversArr.getJSONObject(i)
                 val map = HashMap<String, String>()
-                map["name"] = singleUser.getString("name")
-                map["country_code"] = singleUser.getString("country_code")
-                map["speed"] = "100"
-                dataList.add(map)
+                if (!serverdetails.getBoolean("isFake")) {
+                    map["name"] = serverdetails.getString("name")
+                    map["countryCode"] = serverdetails.getString("countryCode")
+                    map["speed"] = "100"
+                    dataList.add(map)
+                }
             }
             if (nextUrl == "null") findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, dataList)
             else fetchVpnServers().execute(nextUrl)
