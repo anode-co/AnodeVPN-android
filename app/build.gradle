@@ -1,17 +1,27 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-android-extensions")
+}
+
+ext.versionMajor = null
+ext.versionMinor = 0
+ext.versionPatch = 1
+ext.versionClassifier = null
+ext.isSnapshot = true
+ext.minimumSdkVersion = 26
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
     defaultConfig {
+        setVersionNumberByTag()
         applicationId 'co.anode.anodevpn'
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 2
-        versionName "0.0.11"
+        versionCode = generateVersionCode()
+        versionName = generateVersionName()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,4 +66,36 @@ dependencies {
 }
 repositories {
     mavenCentral()
+}
+
+private Integer generateVersionCode() {
+    return ext.minimumSdkVersion * 10000000 + ext.versionMajor * 10000 + ext.versionMinor * 100 + ext.versionPatch
+}
+private String generateVersionName() {
+    String versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+    if (ext.versionClassifier == null) {
+        if (isSnapshot) {
+            versionClassifier = "SNAPSHOT"
+        }
+    }
+
+    if (ext.versionClassifier != null) {
+        versionName += "-" + versionClassifier
+    }
+    return versionName;
+}
+private String setVersionNumberByTag() {
+    /*
+ * Gets the version name from the latest Git tag
+ */
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', 'HEAD'
+        standardOutput = stdout
+    }
+    def String verByGit = stdout.toString().tokenize("-")[1].trim()
+    def (major, minor, patch) = verByGit.tokenize(".");
+    ext.versionMajor = Integer.parseInt(major);
+    ext.versionMinor = Integer.parseInt(minor);
+    ext.versionPatch = Integer.parseInt(patch);
 }
