@@ -20,6 +20,8 @@ import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -33,7 +35,7 @@ object AnodeClient {
     private const val MIME_TYPE = "application/vnd.android.package-archive"
     private const val PROVIDER_PATH = ".provider"
     private const val API_ERROR_URL = "https://vpn.anode.co/api/0.2/vpn/clients/events/"
-
+    private const val API_UPDATE_APK = "https://vpn.anode.co/api/0.2/vpn/clients/versions/android/"
     fun init(context: Context)  {
         mycontext= context
     }
@@ -192,7 +194,7 @@ object AnodeClient {
             val minor_number = versionName.split(".")[1].toInt()
             val revision_number = versionName.split(".")[2].toInt()
             try {
-                val json = JSONObject(URL("https://vpn.anode.co/api/0.2/vpn/clients/versions/android/").readText(Charsets.UTF_8))
+                val json = JSONObject(URL(API_UPDATE_APK).readText(Charsets.UTF_8))
                 if (json.get("clientOs") != "android") {
                     result = "wrong os returned"
                     return result
