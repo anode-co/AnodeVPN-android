@@ -45,33 +45,35 @@ class AnodeUtil(private val context: Context?) {
         } catch (e: IOException) {
             throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
         }
-
+        /*Copy the file everytime */
+        /*
         if (!cjdrouteFile.exists() ||
                 arch!!.contains("i686") ||
                 arch.contains("x86") ||
                 arch.contains("X86_64")){
+         */
             //Copy cjdroute
-            try {
-                if (!cjdrouteFile.exists()) {
-                    Log.i(LOGTAG,"cjdroute does not exists")
-                }
-                Log.i(LOGTAG,"Copying cjdroute")
-                out = FileOutputStream(context.filesDir.toString() + "/cjdroute")
-                val buffer = ByteArray(1024)
-                var read: Int
-                while (`in`.read(buffer).also { read = it } != -1) {
-                    out.write(buffer, 0, read)
-                }
-                `in`.close()
-                out.close()
-                //Set permissions
-                Log.i(LOGTAG, "set new cjdroute permissions")
-                val file = File(context.filesDir.toString() + "/cjdroute")
-                file.setExecutable(true)
-            }catch (e: IOException) {
-                throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
+        try {
+            if (!cjdrouteFile.exists()) {
+                Log.i(LOGTAG,"cjdroute does not exists")
             }
+            Log.i(LOGTAG,"Copying cjdroute")
+            out = FileOutputStream(context.filesDir.toString() + "/cjdroute")
+            val buffer = ByteArray(1024)
+            var read: Int
+            while (`in`.read(buffer).also { read = it } != -1) {
+                out.write(buffer, 0, read)
+            }
+            `in`.close()
+            out.close()
+            //Set permissions
+            Log.i(LOGTAG, "set new cjdroute permissions")
+            val file = File(context.filesDir.toString() + "/cjdroute")
+            file.setExecutable(true)
+        }catch (e: IOException) {
+            throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
         }
+        //}
         //Create and initialize conf file
         if (!File(context.filesDir.toString()+"/"+ CJDROUTE_CONFFILE).exists()) {
             initializeCjdrouteConfFile()
