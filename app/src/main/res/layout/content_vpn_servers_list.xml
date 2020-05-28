@@ -8,27 +8,22 @@
     android:layout_height="match_parent"
     android:layout_marginTop="@dimen/app_bar_height">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:text="Choose an exit" />
-
-    <EditText
+    <SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+        android:id="@+id/searchText"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_margin="@dimen/text_margin" />
     <ListView
         android:id="@+id/listview_servers"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
-        android:layout_below="@id/editText"
-        android:layout_alignStart="@id/editText"
+        android:layout_below="@id/searchText"
+        android:layout_alignStart="@id/searchText"
         />
 </RelativeLayout>

@@ -1,18 +1,19 @@
 package co.anode.anodevpn
 
-import android.annotation.SuppressLint
+//import kotlin.collections.ArrayList
 import android.os.AsyncTask
 import android.os.Bundle
-import android.widget.ListView
-import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_vpn_servers_list.*
 import org.json.JSONObject
 import java.net.URL
 
+
 class VpnListActivity : AppCompatActivity() {
     var dataList = ArrayList<HashMap<String, String>>()
+    var adapter: VPNListAdapter? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +21,18 @@ class VpnListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         //Retrieve Servers list
         fetchVpnServers().execute()
+        val searchView = findViewById<SearchView>(R.id.searchText)
+
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter!!.setFilter(newText)
+                return false
+            }
+        })
     }
 
     inner class fetchVpnServers() : AsyncTask<String, Void, String>() {
@@ -55,8 +68,11 @@ class VpnListActivity : AppCompatActivity() {
                     dataList.add(map)
                 }
             }
-            if (nextUrl == "null") findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, dataList)
-            else fetchVpnServers().execute(nextUrl)
+            if (nextUrl == "null") {
+                dataList.sortWith(compareBy {it.get("countryCode")})
+                adapter = VPNListAdapter(this@VpnListActivity, dataList)
+                findViewById<ListView>(R.id.listview_servers).adapter = adapter
+            } else fetchVpnServers().execute(nextUrl)
         }
     }
 }
