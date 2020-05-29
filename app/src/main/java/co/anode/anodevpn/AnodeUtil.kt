@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 class AnodeUtil(private val context: Context?) {
     private val LOGTAG = "co.anode.anodevpn"
-    val CJDNS_PATH = "/data/data/co.anode.anodevpn/files"
+    val CJDNS_PATH = context!!.filesDir.toString()
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
@@ -58,7 +58,7 @@ class AnodeUtil(private val context: Context?) {
                 Log.i(LOGTAG,"cjdroute does not exists")
             }
             Log.i(LOGTAG,"Copying cjdroute")
-            out = FileOutputStream(context.filesDir.toString() + "/cjdroute")
+            out = FileOutputStream("$CJDNS_PATH/$CJDROUTE_BINFILE")
             val buffer = ByteArray(1024)
             var read: Int
             while (`in`.read(buffer).also { read = it } != -1) {
@@ -68,7 +68,7 @@ class AnodeUtil(private val context: Context?) {
             out.close()
             //Set permissions
             Log.i(LOGTAG, "set new cjdroute permissions")
-            val file = File(context.filesDir.toString() + "/cjdroute")
+            val file = File("$CJDNS_PATH/$CJDROUTE_BINFILE")
             file.setExecutable(true)
         }catch (e: IOException) {
             throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
