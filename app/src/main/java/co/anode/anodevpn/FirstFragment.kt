@@ -133,7 +133,7 @@ class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
     override fun doInBackground(objects: Array<Any?>): String? {
         var result = ""
         AnodeClient.mycontext = context
-        if (AnodeClient.checkNetworkConnection()) result = AnodeClient.httpPost( "other", "Submit logs")
+        if (AnodeClient.checkNetworkConnection()) result = AnodeClient.httpPostError( "other", "Submit logs")
         return result
     }
 

@@ -35,13 +35,14 @@ object AnodeClient {
     private const val MIME_TYPE = "application/vnd.android.package-archive"
     private const val PROVIDER_PATH = ".provider"
     private const val API_ERROR_URL = "https://vpn.anode.co/api/0.2/vpn/clients/events/"
+    private const val API_REGISTRATION_URL = "https://api.anode.co/api/0.3/vpn/client/accounts/"
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/0.2/vpn/clients/versions/android/"
     fun init(context: Context)  {
         mycontext= context
     }
 
     @Throws(IOException::class, JSONException::class)
-    fun httpPost(type: String, message: String?): String {
+    fun httpPostError(type: String, message: String?): String {
         try {
             val apiKey = "hthiP3Gx.TLJRcZGpsHh8ImjtBCjpB7soD87qsaDb"
             val url = URL(API_ERROR_URL)
@@ -50,6 +51,23 @@ object AnodeClient {
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             //conn.setRequestProperty("Authorization", "Api-Key $apiKey")
             val jsonObject = errorJsonObj(type, message)
+            setPostRequestContent(conn, jsonObject)
+            conn.connect()
+            return conn.responseMessage + ""
+        }catch (e:Exception) {
+            return "Error: $e"
+        }
+    }
+
+    @Throws(IOException::class, JSONException::class)
+    fun httpPostRegistration(email: String): String {
+        try {
+            val url = URL(API_REGISTRATION_URL)
+            val conn = url.openConnection() as HttpsURLConnection
+            conn.requestMethod = "POST"
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("email", email)
             setPostRequestContent(conn, jsonObject)
             conn.connect()
             return conn.responseMessage + ""
