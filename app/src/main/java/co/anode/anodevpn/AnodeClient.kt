@@ -1,5 +1,6 @@
 package co.anode.anodevpn
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,16 +16,15 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.BufferedWriter
-import java.io.File
-import java.io.IOException
-import java.io.OutputStreamWriter
+import java.io.*
 import java.net.HttpURLConnection
-import java.net.InetSocketAddress
-import java.net.Socket
 import java.net.URL
+import java.security.*
+import java.security.spec.PKCS8EncodedKeySpec
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.util.*
+import javax.crypto.Cipher
 import javax.net.ssl.HttpsURLConnection
 
 
@@ -37,6 +37,9 @@ object AnodeClient {
     private const val API_ERROR_URL = "https://vpn.anode.co/api/0.2/vpn/clients/events/"
     private const val API_REGISTRATION_URL = "https://api.anode.co/api/0.3/vpn/client/accounts/"
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/0.2/vpn/clients/versions/android/"
+    private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/0.3/vpn/clients/publickeys/"
+    private const val API_TEST_AUTHORIZATION = "https://vpn.anode.co/api/0.3/tests/auth/"
+
     fun init(context: Context)  {
         mycontext= context
     }
@@ -44,12 +47,10 @@ object AnodeClient {
     @Throws(IOException::class, JSONException::class)
     fun httpPostError(type: String, message: String?): String {
         try {
-            val apiKey = "hthiP3Gx.TLJRcZGpsHh8ImjtBCjpB7soD87qsaDb"
             val url = URL(API_ERROR_URL)
             val conn = url.openConnection() as HttpsURLConnection
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            //conn.setRequestProperty("Authorization", "Api-Key $apiKey")
             val jsonObject = errorJsonObj(type, message)
             setPostRequestContent(conn, jsonObject)
             conn.connect()
@@ -57,6 +58,36 @@ object AnodeClient {
         }catch (e:Exception) {
             return "Error: $e"
         }
+    }
+
+    @SuppressLint("CommitPrefEdits")
+    @Throws(IOException::class, JSONException::class)
+    fun httpPostPubKeyRegistration(type: String, message: String?): String {
+        try {
+            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            val pubkeyId = prefs!!.getString("publicKeyID","")
+            //Check existing pubkeyID
+            if (pubkeyId.isNullOrEmpty()) {
+                val keypair = generateKeys()
+                val encoder = Base64.getEncoder()
+                val strpubkey = encoder.encodeToString(keypair?.public?.encoded)
+                val strprikey = encoder.encodeToString(keypair?.private?.encoded)
+                //Store public, private keys
+                with (prefs.edit()) {
+                    putString("publicKey",strpubkey)
+                    putString("privateKey",strprikey)
+                    commit()
+                }
+                //Get public key ID from API
+                fetchpublicKeyID().execute(strpubkey)
+            } else {
+                sendAuthTest()
+            }
+
+        }catch (e:Exception) {
+            return "Error: $e"
+        }
+        return ""
     }
 
     @Throws(IOException::class, JSONException::class)
@@ -133,6 +164,17 @@ object AnodeClient {
         val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
         writer.write(jsonObject.toString())
         Log.i(MainActivity::class.java.toString(), jsonObject.toString())
+        writer.flush()
+        writer.close()
+        os.close()
+    }
+
+    @Throws(IOException::class)
+    private fun setPostRequestContent(conn: HttpURLConnection, content: String) {
+        val os = conn.outputStream
+        val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
+        writer.write(content)
+        Log.i(MainActivity::class.java.toString(),content)
         writer.flush()
         writer.close()
         os.close()
@@ -250,6 +292,128 @@ object AnodeClient {
                 } else {
                     //DO NOTHING
                 }
+            }
+        }
+    }
+
+    private fun generateKeys(): KeyPair? {
+        Log.i(LOGTAG,"Generating key pair")
+        try {
+            // creating the object of KeyPairGenerator
+            val kpg = KeyPairGenerator.getInstance("RSA")
+            // initializing with 1024
+            kpg.initialize(1024)
+            // getting key pairs
+            return kpg.generateKeyPair()
+        } catch (e: NoSuchAlgorithmException) {
+            Log.e(LOGTAG,"ERROR - Failed to generate key pair: $e")
+            return null
+        }
+    }
+
+    class fetchpublicKeyID() : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String? {
+            return try {
+                var result = StringBuilder()
+                val url = URL(API_PUBLICKEY_REGISTRATION)
+                val conn = url.openConnection() as HttpsURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                val jsonObject = JSONObject()
+                jsonObject.accumulate("publicKey", "-----BEGIN PUBLIC KEY-----\n"+params[0]+"\n-----END PUBLIC KEY-----")
+                jsonObject.accumulate("algorithm", "rsa-sha256")
+                setPostRequestContent(conn, jsonObject)
+                conn.connect()
+                val `in`: InputStream = BufferedInputStream(conn.getInputStream())
+                val reader = BufferedReader(InputStreamReader(`in`))
+
+                var line = reader.readLine()
+                while (!line.isNullOrEmpty()) {
+                    result.append(line);
+                    line = reader.readLine()
+                }
+
+                return result.toString()
+            } catch (e: Exception) {
+                Log.i(LOGTAG,"Failed to get publick key ID from API $e")
+                null
+            }
+        }
+
+        @SuppressLint("CommitPrefEdits")
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            if (result.isNullOrBlank()) {
+                return
+            }
+            val jsonObj = JSONObject(result)
+            val pubkeyID = jsonObj.getString("publicKeyId")
+            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            //Store pubkeyID
+            with (prefs.edit()) {
+                putString("publicKeyID",pubkeyID)
+                commit()
+            }
+
+            sendAuthTest()
+        }
+    }
+
+    fun sendAuthTest() {
+        sendAuth().execute()
+    }
+
+    class sendAuth() : AsyncTask<Void, Void, String>() {
+        @ExperimentalStdlibApi
+        override fun doInBackground(vararg params: Void?): String? {
+            return try {
+                var result = StringBuilder()
+                val url = URL(API_TEST_AUTHORIZATION)
+                val conn = url.openConnection() as HttpsURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+
+                val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                val pubkeyId = prefs!!.getString("publicKeyID","")
+                val privateKey = prefs!!.getString("privateKey","")
+                val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey))
+                val fact: KeyFactory = KeyFactory.getInstance("RSA")
+                val priv: PrivateKey = fact.generatePrivate(keySpec)
+                //Digest
+                val md = MessageDigest.getInstance("SHA-256")
+                val requestBody = "Testing this"
+                //val digest: ByteArray = md.digest(requestBody.encodeToByteArray())
+                // Signature
+                var signatureProvider: Signature? = null
+                signatureProvider = Signature.getInstance("SHA256WithRSA")
+                signatureProvider!!.initSign(priv)
+                signatureProvider.update(requestBody.encodeToByteArray())
+                val signature = signatureProvider.sign()
+                val b64signature = Base64.getEncoder().encode(signature)
+                conn.setRequestProperty("Authorization","Signature keyId=$pubkeyId,algorithm=rsa-sha256,signature="+b64signature.decodeToString())
+                setPostRequestContent(conn, requestBody)
+                conn.connect()
+
+                return conn.responseMessage
+            } catch (e: Exception) {
+                Log.i(LOGTAG,"Failed to get public key ID from API $e")
+                null
+            }
+        }
+
+        @SuppressLint("CommitPrefEdits")
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            if (result.isNullOrBlank()) {
+                return
+            }
+            val jsonObj = JSONObject(result)
+            val pubkeyID = jsonObj.getString("publicKeyID")
+            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            //Store pubkeyID
+            with (prefs.edit()) {
+                putString("publicKeyID",pubkeyID)
+                commit()
             }
         }
     }
