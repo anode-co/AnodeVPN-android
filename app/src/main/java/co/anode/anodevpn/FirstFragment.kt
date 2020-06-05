@@ -46,7 +46,7 @@ class FirstFragment : Fragment() {
         link.movementMethod = LinkMovementMethod.getInstance()
         link.text = text
         val pubkey: TextView = view.findViewById(R.id.textViewPubkey)
-        pubkey.text = context?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(null).getPubKey()
+        pubkey.text = context?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(context).getPubKey()
         //Show version number
         val welcomemsg: TextView = view.findViewById(R.id.textview_first)
         welcomemsg.text = welcomemsg.text.toString()+"\nv"+BuildConfig.VERSION_NAME

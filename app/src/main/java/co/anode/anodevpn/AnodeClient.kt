@@ -30,15 +30,16 @@ import javax.net.ssl.HttpsURLConnection
 
 object AnodeClient {
     lateinit var mycontext: Context
+    private const val API_VERSION = "0.3"
     private const val FILE_NAME = "anodevpn-latest.apk"
     private const val FILE_BASE_PATH = "file://"
     private const val MIME_TYPE = "application/vnd.android.package-archive"
     private const val PROVIDER_PATH = ".provider"
-    private const val API_ERROR_URL = "https://vpn.anode.co/api/0.2/vpn/clients/events/"
-    private const val API_REGISTRATION_URL = "https://api.anode.co/api/0.3/vpn/client/accounts/"
-    private const val API_UPDATE_APK = "https://vpn.anode.co/api/0.2/vpn/clients/versions/android/"
-    private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/0.3/vpn/clients/publickeys/"
-    private const val API_TEST_AUTHORIZATION = "https://vpn.anode.co/api/0.3/tests/auth/"
+    private const val API_ERROR_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/events/"
+    private const val API_REGISTRATION_URL = "https://api.anode.co/api/$API_VERSION/vpn/client/accounts/"
+    private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
+    private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
+    private const val API_TEST_AUTHORIZATION = "https://vpn.anode.co/api/$API_VERSION/tests/auth/"
 
     fun init(context: Context)  {
         mycontext= context

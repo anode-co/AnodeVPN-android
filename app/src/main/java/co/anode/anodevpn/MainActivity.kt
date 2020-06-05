@@ -13,6 +13,7 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         anodeUtil = AnodeUtil(application)
-        //val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
             //Toast message before exiting app
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                     else if (paramThrowable is AnodeVPNException) type = "VPNService"
                     if (AnodeClient.checkNetworkConnection()){
                         //Trying to post error to server
-                        AnodeClient.httpPost(type, paramThrowable.message)
+                        AnodeClient.httpPostError(type, paramThrowable.message)
                     }
                     Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
                     Looper.loop();
@@ -77,6 +78,10 @@ class MainActivity : AppCompatActivity() {
         //Check for new version
         AnodeClient.mycontext = baseContext
 
+        //Get Public Key ID for API Authorization
+        //AnodeClient.httpPostPubKeyRegistration("test","test")
+
+
         checkStoragePermission()
         button.setOnClickListener {
             Toast.makeText(baseContext, R.string.check_update, Toast.LENGTH_LONG).show()
@@ -87,11 +92,7 @@ class MainActivity : AppCompatActivity() {
             val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
             startActivity(vpnListActivity)
         }
-        /* We may need the first run check in the future... */
-        /*
-        if (prefs.getBoolean("firstrun", true)) {
-            prefs.edit().putBoolean("firstrun", false).commit()
-        } */
+
         val intent = VpnService.prepare(applicationContext)
 
         if (intent != null) {
@@ -120,16 +121,18 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-/*
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean { // Handle action bar item clicks here. The action bar will
 // automatically handle clicks on the Home/Up button, so long
 // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
-        return if (id == R.id.action_settings) {
+        return if (id == R.id.action_login) {
+            //val loginActivity = Intent(applicationContext, LoginActivity::class.java)
+            //startActivity(loginActivity)
             true
         } else super.onOptionsItemSelected(item)
     }
-*/
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (resultCode == Activity.RESULT_OK) {
