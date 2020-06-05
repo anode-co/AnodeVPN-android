@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.Filter
-import android.widget.Filterable
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+
 
 class VPNListAdapter(private val context: Context,
                      private var dataList: ArrayList<HashMap<String, String>>) : BaseAdapter() {
@@ -25,14 +25,40 @@ class VPNListAdapter(private val context: Context,
 
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view: View
         var dataitem = dataList[position]
-        val rowView = inflater.inflate(R.layout.list_row, parent, false)
-        rowView.findViewById<TextView>(R.id.row_name).text = dataitem.get("name")
-        rowView.findViewById<TextView>(R.id.row_country).text = dataitem.get("countryCode")
-        rowView.findViewById<TextView>(R.id.row_speed).text = dataitem.get("speed")
+        val holder: ViewHolder
 
-        rowView.tag = position
-        return rowView
+        if (convertView == null) {
+            view = inflater.inflate(R.layout.list_row, parent, false)
+
+            holder = ViewHolder()
+            holder.nameTextView = view.findViewById(R.id.row_name)
+            holder.nameTextView.text = dataitem["name"]
+            holder.countryTextView = view.findViewById(R.id.row_country)
+            holder.countryTextView.text = dataitem["countryCode"]
+            holder.speedTextView = view.findViewById(R.id.row_speed)
+            holder.speedTextView.text = dataitem["speed"]
+            holder.connectButton = view.findViewById(R.id.row_button)
+
+            holder.connectButton.setOnClickListener {
+                Toast.makeText(context, "Button "+dataitem["name"]+" clicked", Toast.LENGTH_LONG).show()
+            }
+
+            view.tag = holder
+        } else {
+            view = convertView
+            holder = convertView.tag as ViewHolder
+        }
+
+        return view
+    }
+
+    private class ViewHolder {
+        lateinit var countryTextView: TextView
+        lateinit var nameTextView: TextView
+        lateinit var speedTextView: TextView
+        lateinit var connectButton: Button
     }
 
     fun setFilter(text: String?) {

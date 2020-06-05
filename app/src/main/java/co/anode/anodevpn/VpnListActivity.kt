@@ -13,7 +13,7 @@ import java.net.URL
 class VpnListActivity : AppCompatActivity() {
     var dataList = ArrayList<HashMap<String, String>>()
     var adapter: VPNListAdapter? = null
-
+    private val API_SERVERS_LIST = "https://vpn.anode.co/api/0.3/vpn/servers/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +38,7 @@ class VpnListActivity : AppCompatActivity() {
     inner class fetchVpnServers() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             try {
-                var url = "https://vpn.anode.co/api/0.2/vpn/servers/"
+                var url = API_SERVERS_LIST
                 if (params.isNotEmpty()) url = params[0].toString()
                 return URL(url).readText(Charsets.UTF_8)
             } catch (e: Exception) {
@@ -61,12 +61,20 @@ class VpnListActivity : AppCompatActivity() {
             for (i in 0 until serversArr.length()) {
                 val serverdetails = serversArr.getJSONObject(i)
                 val map = HashMap<String, String>()
-                if (!serverdetails.getBoolean("isFake")) {
-                    map["name"] = serverdetails.getString("name")
-                    map["countryCode"] = serverdetails.getString("countryCode")
-                    map["speed"] = "100"
-                    dataList.add(map)
-                }
+                //if (!serverdetails.getBoolean("isFake")) {
+                map["name"] = serverdetails.getString("name")
+                map["publicKey"] = serverdetails.getString("publicKey")
+                map["bandwidthBps"] = serverdetails.getString("bandwidthBps")
+                map["region"] = serverdetails.getString("region")
+                map["countryCode"] = serverdetails.getString("countryCode")
+                map["onlineSinceDatetime"] = serverdetails.getString("onlineSinceDatetime")
+                map["lastSeenDatetime"] = serverdetails.getString("lastSeenDatetime")
+                map["speed"] = "100"
+                val networkdetails = serverdetails.getJSONObject("networkSettings")
+                map["network_usesNat"] = networkdetails.getString("usesNat")
+
+                dataList.add(map)
+                //}
             }
             if (nextUrl == "null") {
                 dataList.sortWith(compareBy {it.get("countryCode")})
