@@ -1,6 +1,7 @@
 package co.anode.anodevpn
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,10 +17,12 @@ class AccountNicknameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_accountnickname)
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefsnickname = prefs!!.getString("nickname","nickname")
+        val nicknameText: EditText = findViewById(R.id.editTextNickname)
+        nicknameText.setText(prefsnickname)
 
         val continueButton: Button = findViewById(R.id.button_continue)
         continueButton.setOnClickListener() {
-            val nicknameText: EditText = findViewById(R.id.editTextNickname)
             val nickname = nicknameText.text.toString()
             if (nickname.isNullOrEmpty()) {
                 Toast.makeText(this,"Nickname can not be empty", Toast.LENGTH_SHORT).show()
@@ -29,17 +32,10 @@ class AccountNicknameActivity : AppCompatActivity() {
                     putString("nickname",nickname)
                     commit()
                 }
-                //TODO: Start new activity
+                //Start activity
+                val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
+                startActivity(accountMainActivity)
             }
         }
-    }
-
-    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-        val nickname = prefs!!.getString("nickname","nickname")
-        val nicknameText: EditText = findViewById(R.id.editTextNickname)
-        nicknameText.setText(nickname)
-
-        return super.onCreateView(name, context, attrs)
     }
 }
