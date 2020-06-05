@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="co.anode.anodevpn.MainActivity">
 
-    <!--<item
-        android:id="@+id/action_settings"
+    <item
+        android:id="@+id/action_account_settings"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />-->
+        android:title="@string/action_account_settings"
+        app:showAsAction="never" />
 </menu>

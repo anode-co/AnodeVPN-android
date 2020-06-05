@@ -126,9 +126,9 @@ class MainActivity : AppCompatActivity() {
 // automatically handle clicks on the Home/Up button, so long
 // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
-        return if (id == R.id.action_login) {
-            //val loginActivity = Intent(applicationContext, LoginActivity::class.java)
-            //startActivity(loginActivity)
+        return if (id == R.id.action_account_settings) {
+            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+            startActivity(accountNicknameActivity)
             true
         } else super.onOptionsItemSelected(item)
     }
