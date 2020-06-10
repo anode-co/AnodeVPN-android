@@ -34,8 +34,16 @@ class AccountNicknameActivity : AppCompatActivity() {
                 }
                 //Start activity
                 val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
-                startActivity(accountMainActivity)
+                startActivityForResult(accountMainActivity, 0)
+//                startActivity(accountMainActivity)
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 0) {
+            this.finish()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

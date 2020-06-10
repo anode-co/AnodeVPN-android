@@ -160,7 +160,7 @@ object AnodeClient {
     }
 
     @Throws(IOException::class)
-    private fun setPostRequestContent(conn: HttpURLConnection, jsonObject: JSONObject) {
+    fun setPostRequestContent(conn: HttpURLConnection, jsonObject: JSONObject) {
         val os = conn.outputStream
         val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
         writer.write(jsonObject.toString())
