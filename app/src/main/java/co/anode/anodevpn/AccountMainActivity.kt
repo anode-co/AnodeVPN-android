@@ -4,15 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.text.Spannable
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.core.text.HtmlCompat
 import org.json.JSONObject
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
+
 
 class AccountMainActivity : AppCompatActivity() {
     private val API_VERSION = "0.3"
@@ -23,7 +30,10 @@ class AccountMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_main)
-
+        val signin: TextView = findViewById(R.id.textSignIn)
+        val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        signin.movementMethod = LinkMovementMethod.getInstance()
+        signin.text = link
         val createAccountButton: Button = findViewById(R.id.buttonCreateAccount)
         createAccountButton.setOnClickListener() {
 
@@ -50,6 +60,36 @@ class AccountMainActivity : AppCompatActivity() {
             setResult(0)
             finish()
         }
+
+        val signinLink = findViewById<TextView>(R.id.textSignIn)
+        signinLink.setMovementMethod(object : TextViewLinkHandler() {
+            override fun onLinkClick(url: String?) {
+                val signInActivity = Intent(applicationContext, SignInActivity::class.java)
+                startActivityForResult(signInActivity, 0)
+            }
+        })
+    }
+
+    abstract class TextViewLinkHandler : LinkMovementMethod() {
+        override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
+            if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
+            var x = event.x.toInt()
+            var y = event.y.toInt()
+            x -= widget.totalPaddingLeft
+            y -= widget.totalPaddingTop
+            x += widget.scrollX
+            y += widget.scrollY
+            val layout = widget.layout
+            val line = layout.getLineForVertical(y)
+            val off = layout.getOffsetForHorizontal(line, x.toFloat())
+            val link = buffer.getSpans(off, off, URLSpan::class.java)
+            if (link.size != 0) {
+                onLinkClick(link[0].url)
+            }
+            return true
+        }
+
+        abstract fun onLinkClick(url: String?)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
