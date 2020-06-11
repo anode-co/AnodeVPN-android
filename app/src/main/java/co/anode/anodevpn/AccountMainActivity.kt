@@ -101,20 +101,11 @@ class AccountMainActivity : AppCompatActivity() {
 
     inner class emailRegistration() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            return try {
-                val url = URL(API_REGISTRATION_URL)
-                val conn = url.openConnection() as HttpsURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                val jsonObject = JSONObject()
-                jsonObject.accumulate("email", params[0])
-                AnodeClient.setPostRequestContent(conn, jsonObject)
-                conn.connect()
-                return conn.responseMessage
-            } catch (e: Exception) {
-                Log.i(LOGTAG,"Failed to get publick key ID from API $e")
-                null
-            }
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("email", params[0])
+            val resp = AnodeClient.httpReq(API_REGISTRATION_URL, jsonObject.toString())
+            Log.i(LOGTAG, resp)
+            return resp
         }
 
         override fun onPostExecute(result: String?) {

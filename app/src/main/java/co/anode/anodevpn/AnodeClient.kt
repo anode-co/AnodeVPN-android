@@ -364,6 +364,23 @@ object AnodeClient {
         sendAuth().execute()
     }
 
+    fun httpReq(url: String, str: String): String {
+        val url = URL("http://94.23.31.145:8000") // TODO: set to (url)
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "POST"
+        conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        val md = MessageDigest.getInstance("SHA-256")
+        val bytes = str.toByteArray()
+        val digest: ByteArray = md.digest(bytes)
+        val digestStr = Base64.getEncoder().encodeToString(digest)
+        val res = CjdnsSocket.Sign_sign(digestStr)
+        var sig = res["signature"].str()
+        conn.setRequestProperty("Authorization", "cjdns $sig")
+        conn.connect()
+        conn.outputStream.write(bytes)
+        return conn.inputStream.bufferedReader().readText()
+    }
+
     class sendAuth() : AsyncTask<Void, Void, String>() {
         @ExperimentalStdlibApi
         override fun doInBackground(vararg params: Void?): String? {
