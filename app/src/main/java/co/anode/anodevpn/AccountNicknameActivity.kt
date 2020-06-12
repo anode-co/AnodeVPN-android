@@ -35,7 +35,6 @@ class AccountNicknameActivity : AppCompatActivity() {
                 //Start activity
                 val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
                 startActivityForResult(accountMainActivity, 0)
-//                startActivity(accountMainActivity)
             }
         }
     }

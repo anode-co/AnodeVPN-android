@@ -1,7 +1,9 @@
 package co.anode.anodevpn
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
 import android.text.Spannable
@@ -17,19 +19,20 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import org.json.JSONObject
-import java.net.URL
-import javax.net.ssl.HttpsURLConnection
+import java.util.*
 
 
 class AccountMainActivity : AppCompatActivity() {
     private val API_VERSION = "0.3"
-    private val API_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
+    private var API_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
     private var anodeUtil: AnodeUtil? = null
+    var prefs: SharedPreferences? = null
 
     @SuppressLint("WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_main)
+        prefs = baseContext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
         val signin: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signin.movementMethod = LinkMovementMethod.getInstance()
@@ -52,6 +55,23 @@ class AccountMainActivity : AppCompatActivity() {
             }
             else {
                 AnodeClient.mycontext = baseContext
+                //Check for pubkeyid
+                val pubkeyId = prefs!!.getString("publicKeyID","")
+                //Check existing pubkeyID
+                if (pubkeyId.isNullOrEmpty()) {
+                    val keypair = AnodeClient.generateKeys()
+                    val encoder = Base64.getEncoder()
+                    val strpubkey = encoder.encodeToString(keypair?.public?.encoded)
+                    val strprikey = encoder.encodeToString(keypair?.private?.encoded)
+                    //Store public, private keys
+                    with (prefs!!.edit()) {
+                        putString("publicKey",strpubkey)
+                        putString("privateKey",strprikey)
+                        commit()
+                    }
+                    //Get public key ID from API
+                    AnodeClient.fetchpublicKeyID().execute(strpubkey)
+                }
                 emailRegistration().execute(email.text.toString())
             }
         }
@@ -101,46 +121,26 @@ class AccountMainActivity : AppCompatActivity() {
 
     inner class emailRegistration() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            return try {
-                val url = URL(API_REGISTRATION_URL)
-                val conn = url.openConnection() as HttpsURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                val jsonObject = JSONObject()
-                jsonObject.accumulate("email", params[0])
-                AnodeClient.setPostRequestContent(conn, jsonObject)
-                conn.connect()
-                return conn.responseMessage
-            } catch (e: Exception) {
-                Log.i(LOGTAG,"Failed to get publick key ID from API $e")
-                null
-            }
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("email", params[0])
+            val resp = AnodeClient.httpAuthReq(API_REGISTRATION_URL, jsonObject.toString(), "POST")
+            Log.i(LOGTAG, resp)
+            return resp
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_REGISTRATION_URL: $result")
-            if (result.isNullOrBlank()) {
+            if ((result.isNullOrBlank()) || ((result == "Internal Server Error"))) {
                 finish()
-            } else if (result == "Created") {
-                val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
-                startActivityForResult(verificationActivity, 0)
-            } else if (result == "Internal Server Error") {
-                Toast.makeText(baseContext, "Error registering: $result", Toast.LENGTH_SHORT).show()
-                Thread.sleep(1000)
-                finish()
+            } else if (result == "exists") {
+                Toast.makeText(baseContext, "Email already registered", Toast.LENGTH_SHORT).show()
             } else {
-                try {
-                    val jsonObj = JSONObject(result)
-                    val msg = jsonObj.getString("email")
-                    if (!msg.isNullOrEmpty()) {
-                        Toast.makeText(baseContext, "Error registering: $result", Toast.LENGTH_SHORT).show()
-                        Thread.sleep(1000)
-                        finish()
-                    }
-                } catch (e: Exception) {
-                  Log.i(LOGTAG,"Error: $e")
-                }
+                val jsonObj = JSONObject(result)
+                val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
+                val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
+                verificationActivity.putExtra("accountConfirmationStatusUrl",accountConfirmation)
+                startActivityForResult(verificationActivity, 0)
             }
         }
     }

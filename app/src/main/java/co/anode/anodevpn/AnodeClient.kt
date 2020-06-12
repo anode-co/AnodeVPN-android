@@ -24,7 +24,6 @@ import java.security.spec.PKCS8EncodedKeySpec
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
-import javax.crypto.Cipher
 import javax.net.ssl.HttpsURLConnection
 
 
@@ -63,7 +62,7 @@ object AnodeClient {
 
     @SuppressLint("CommitPrefEdits")
     @Throws(IOException::class, JSONException::class)
-    fun httpPostPubKeyRegistration(type: String, message: String?): String {
+    fun httpPostPubKeyRegistration(): String {
         try {
             val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
             val pubkeyId = prefs!!.getString("publicKeyID","")
@@ -81,10 +80,7 @@ object AnodeClient {
                 }
                 //Get public key ID from API
                 fetchpublicKeyID().execute(strpubkey)
-            } else {
-                sendAuthTest()
             }
-
         }catch (e:Exception) {
             return "Error: $e"
         }
@@ -171,7 +167,7 @@ object AnodeClient {
     }
 
     @Throws(IOException::class)
-    private fun setPostRequestContent(conn: HttpURLConnection, content: String) {
+    fun setPostRequestContent(conn: HttpURLConnection, content: String) {
         val os = conn.outputStream
         val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
         writer.write(content)
@@ -297,7 +293,7 @@ object AnodeClient {
         }
     }
 
-    private fun generateKeys(): KeyPair? {
+    fun generateKeys(): KeyPair? {
         Log.i(LOGTAG,"Generating key pair")
         try {
             // creating the object of KeyPairGenerator
@@ -356,17 +352,41 @@ object AnodeClient {
                 commit()
             }
 
-            sendAuthTest()
+            //sendAuthTest()
         }
     }
 
-    fun sendAuthTest() {
-        sendAuth().execute()
+    fun sendwithAuthTest(url: String, body: String) {
+        sendAuth().execute(url, body)
     }
 
-    class sendAuth() : AsyncTask<Void, Void, String>() {
+    fun httpAuthReq(urladdr: String, str: String, method: String): String {
+        val url = URL(urladdr) // TODO: set to (url)
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = method
+        conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        val md = MessageDigest.getInstance("SHA-256")
+        val bytes = str.toByteArray()
+        val digest: ByteArray = md.digest(bytes)
+        val digestStr = Base64.getEncoder().encodeToString(digest)
+        val res = CjdnsSocket.Sign_sign(digestStr)
+        var sig = res["signature"].str()
+        conn.setRequestProperty("Authorization", "cjdns $sig")
+        conn.connect()
+        if (method == "POST") conn.outputStream.write(bytes)
+
+        if (conn.responseCode == 400) {
+            //email exists
+            return "exists"
+        } else if ((conn.responseCode == 201) || (conn.responseCode == 200)) {
+            return conn.inputStream.bufferedReader().readText()
+        }
+        return ""
+    }
+
+    class sendAuth() : AsyncTask<String, Void, String>() {
         @ExperimentalStdlibApi
-        override fun doInBackground(vararg params: Void?): String? {
+        override fun doInBackground(vararg params: String?): String? {
             return try {
                 var result = StringBuilder()
                 val url = URL(API_TEST_AUTHORIZATION)
@@ -382,7 +402,10 @@ object AnodeClient {
                 val priv: PrivateKey = fact.generatePrivate(keySpec)
                 //Digest
                 val md = MessageDigest.getInstance("SHA-256")
-                val requestBody = "Testing this"
+                var requestBody = ""
+                if (params[0] != null) {
+                    requestBody = params[0]!!
+                }
                 //val digest: ByteArray = md.digest(requestBody.encodeToByteArray())
                 // Signature
                 var signatureProvider: Signature? = null

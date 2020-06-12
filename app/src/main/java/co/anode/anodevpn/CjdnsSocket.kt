@@ -165,6 +165,9 @@ object CjdnsSocket {
     fun IpTunnel_showConnection(num: Int): Benc.Obj =
             call("IpTunnel_showConnection", Benc.dict("connection", num))
 
+    fun Sign_sign(b64Digest: String): Benc.Obj =
+            call("Sign_sign", Benc.dict("msgHash", b64Digest))
+
     fun getCjdnsRoutes(): Boolean {
         val connection = IpTunnel_showConnection(0)
         logshowConnections = connection.toString()
