@@ -76,6 +76,7 @@ private Integer generateVersionCode() {
 
 private String generateVersionName() {
     String versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+    /*
     if (ext.versionClassifier == null) {
         if (isSnapshot) {
             versionClassifier = "SNAPSHOT"
@@ -85,6 +86,7 @@ private String generateVersionName() {
     if (ext.versionClassifier != null) {
         versionName += "-" + versionClassifier
     }
+     */
     return versionName;
 }
 
@@ -101,5 +103,5 @@ private String setVersionNumberByTag() {
     def (major, minor, patch) = verByGit.tokenize(".");
     ext.versionMajor = Integer.parseInt(major);
     ext.versionMinor = Integer.parseInt(minor);
-    ext.versionPatch = Integer.parseInt(patch);
+    ext.versionPatch = Integer.parseInt(patch)+1;
 }

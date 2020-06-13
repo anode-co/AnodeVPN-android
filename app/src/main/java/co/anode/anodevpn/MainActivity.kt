@@ -80,13 +80,16 @@ class MainActivity : AppCompatActivity() {
 
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
-
-
+        //Automatic update
         checkStoragePermission()
+        AnodeClient.checkNewVersion()
+
+        /*
         button.setOnClickListener {
             Toast.makeText(baseContext, R.string.check_update, Toast.LENGTH_LONG).show()
             AnodeClient.checkNewVersion()
         }
+        */
 
         buttonlistvpns.setOnClickListener {
             val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
