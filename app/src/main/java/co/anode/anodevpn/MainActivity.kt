@@ -1,6 +1,7 @@
 package co.anode.anodevpn
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -20,6 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -90,13 +92,20 @@ class MainActivity : AppCompatActivity() {
             AnodeClient.checkNewVersion()
         }
         */
-
+        /*
         buttonlistvpns.setOnClickListener {
             val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
             startActivity(vpnListActivity)
+        }*/
+
+        buttonconnectvpns.setOnClickListener() {
+            //TODO: authorize VPN Server
+            AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
         }
 
         val intent = VpnService.prepare(applicationContext)
+        //Connect to CJDNS
+        startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
 
         if (intent != null) {
             startActivityForResult(intent, 0)
@@ -208,4 +217,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+
 }
+
