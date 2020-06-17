@@ -40,7 +40,7 @@ class FirstFragment : Fragment() {
     @SuppressLint("SetTextI18n", "UseRequireInsteadOfGet")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+/*
         val link: TextView = view.findViewById(R.id.textViewLink)
         val text: Spanned = HtmlCompat.fromHtml("Open <a href='http://[fc50:71b5:aebf:7b70:6577:ec8:2542:9dd9]/'>CJDNS network</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         link.movementMethod = LinkMovementMethod.getInstance()
@@ -104,10 +104,12 @@ class FirstFragment : Fragment() {
         buttonLog?.setOnClickListener {
             this.context?.let { it1 -> PostLogs(it1).execute() }
         }
+
+ */
     }
 
     override fun onResume() { super.onResume() }
-
+/*
     fun stopThreads() {
         h.removeCallbacks(runnableUI)
         h.removeCallbacks(runnableConnection)
@@ -127,8 +129,10 @@ class FirstFragment : Fragment() {
     companion object {
         private const val LOGTAG = "co.anode.anodevpn"
     }
-}
 
+ */
+}
+/*
 class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
     override fun doInBackground(objects: Array<Any?>): String? {
         var result = ""
@@ -270,3 +274,5 @@ object ConnectingThread: Runnable {
         }
     }
 }
+
+ */

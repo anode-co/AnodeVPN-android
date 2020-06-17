@@ -21,11 +21,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.FragmentActivity
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.URL
 import kotlin.system.exitProcess
 
 
@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         private const val API_UPDATE_URL = "http://anode.co/assets/downloads/anode-vpn.apk"
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -79,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         anodeUtil!!.launch()
         //Check for new version
         AnodeClient.mycontext = baseContext
+        AnodeClient.status = findViewById(R.id.textview_status)
 
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
@@ -99,8 +101,15 @@ class MainActivity : AppCompatActivity() {
         }*/
 
         buttonconnectvpns.setOnClickListener() {
-            //TODO: authorize VPN Server
-            AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+            val status: TextView = findViewById(R.id.textview_status)
+            if (buttonconnectvpns.text == "CONNECT") {
+                status.text = "Connecting to VPN..."
+                AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                buttonconnectvpns.text = "DISCONNECT"
+            } else {
+                status.text = "Disconnect from VPN"
+                disconnectVPN()
+            }
         }
 
         val intent = VpnService.prepare(applicationContext)
@@ -113,20 +122,18 @@ class MainActivity : AppCompatActivity() {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
 
+        val pubkey: TextView = findViewById(R.id.textViewPubkey)
+        pubkey.text = baseContext?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(this).getPubKey()
+
         //Check for internet connectivity every 15 seconds
         val mHandler = Handler();
         val mHandlerTask: Runnable = object : Runnable {
             override fun run() {
-                checkInternetConnection().execute(findViewById(R.id.textview_internetconnectivity))
-                mHandler.postDelayed(this, 15000)
+                checkInternetConnection().execute(findViewById(R.id.textview_status))
+                mHandler.postDelayed(this, 19000)
             }
         }
         mHandlerTask.run()
-    }
-
-    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-        return super.onCreateView(name, context, attrs)
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -145,6 +152,10 @@ class MainActivity : AppCompatActivity() {
         } else if (id == R.id.action_signin) {
             val signinActivity = Intent(applicationContext, SignInActivity::class.java)
             startActivity(signinActivity)
+            return true
+        } else if (id == R.id.action_vpnlist) {
+            val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
+            startActivity(vpnListActivity)
             return true
         } else {
             super.onOptionsItemSelected(item)
@@ -218,6 +229,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
+    fun disconnectVPN() {
+        buttonconnectvpns.text = "CONNECT"
+        CjdnsSocket.clearRoutes()
+        startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+    }
 }
 

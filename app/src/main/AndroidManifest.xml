@@ -7,7 +7,6 @@
         android:allowBackup="true"
         android:icon="@mipmap/anode"
         android:label="@string/app_name"
-        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/anode"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
