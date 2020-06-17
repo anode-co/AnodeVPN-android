@@ -11,6 +11,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Environment
+import android.os.Handler
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
@@ -21,7 +22,6 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.*
-import java.security.spec.PKCS8EncodedKeySpec
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -30,20 +30,21 @@ import javax.net.ssl.HttpsURLConnection
 
 object AnodeClient {
     lateinit var mycontext: Context
+    lateinit var status: TextView
     private const val API_VERSION = "0.3"
     private const val FILE_NAME = "anodevpn-latest.apk"
     private const val FILE_BASE_PATH = "file://"
-    private const val MIME_TYPE = "application/vnd.android.package-archive"
     private const val PROVIDER_PATH = ".provider"
     private const val API_ERROR_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/events/"
     private const val API_REGISTRATION_URL = "https://api.anode.co/api/$API_VERSION/vpn/client/accounts/"
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
-    private const val API_TEST_AUTHORIZATION = "https://vpn.anode.co/api/$API_VERSION/tests/auth/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
+    val h = Handler()
 
-    fun init(context: Context)  {
-        mycontext= context
+    fun init(context: Context, textview: TextView)  {
+        mycontext = context
+        status = textview
     }
 
     @Throws(IOException::class, JSONException::class)
@@ -150,30 +151,12 @@ object AnodeClient {
         return jsonObject
     }
 
-    @Throws(JSONException::class)
-    private fun requpdateJsonObj(type: String, message: String?): JSONObject {
-        val jsonObject = JSONObject()
-        //jsonObject.accumulate("public_key", anodeUtil.getPubKey())
-        return jsonObject
-    }
-
     @Throws(IOException::class)
     fun setPostRequestContent(conn: HttpURLConnection, jsonObject: JSONObject) {
         val os = conn.outputStream
         val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
         writer.write(jsonObject.toString())
         Log.i(MainActivity::class.java.toString(), jsonObject.toString())
-        writer.flush()
-        writer.close()
-        os.close()
-    }
-
-    @Throws(IOException::class)
-    fun setPostRequestContent(conn: HttpURLConnection, content: String) {
-        val os = conn.outputStream
-        val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
-        writer.write(content)
-        Log.i(MainActivity::class.java.toString(),content)
         writer.flush()
         writer.close()
         os.close()
@@ -358,18 +341,13 @@ object AnodeClient {
         }
     }
 
-    fun sendwithAuthTest(url: String, body: String) {
-        sendAuth().execute(url, body)
-    }
-
     class AuthorizeVPN() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val pubkey = params[0]
-            //val jsonObject = JSONObject()
+            val jsonObject = JSONObject()
             //jsonObject.accumulate("clientPublicKey", "lbqr0rzyc2tuysw3w8gfr95u68kujzlq7zht5hyf452u8yshr120.k")
-            //jsonObject.accumulate("date", 1592229520)
-            //val resp = AuthVPNHttpReq("http://198.167.222.70:8099/api/0.3/server/authorize/", jsonObject.toString())
-            val resp = AuthVPNHttpReq(pubkey!!)
+            jsonObject.accumulate("date", System.currentTimeMillis())
+            val resp = AuthVPNHttpReq(pubkey!!, jsonObject.toString())
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -377,10 +355,10 @@ object AnodeClient {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_AUTH_VPN: $result")
+            //if 200 or 201 then connect to VPN
             if (result!!.contains("200:") || result!!.contains("201:")) {
                 cjdnsConnectVPN("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
             } else if (result.isNullOrBlank() || result.contains(":")) {
-                //if 200 or 201 then connect to VPN
                 Toast.makeText(mycontext, result, Toast.LENGTH_LONG).show()
             } else {
                 try {
@@ -394,6 +372,7 @@ object AnodeClient {
 
     fun cjdnsConnectVPN(node: String) {
         var iconnected: Boolean = false
+        runnableConnection.init(h)
         //Connect to Internet
         CjdnsSocket.IpTunnel_connectTo(node)
         var tries = 0
@@ -406,16 +385,13 @@ object AnodeClient {
         if (iconnected) {
             //Restart Service
             CjdnsSocket.Core_stopTun()
-            //startService(Intent(ConnectingThread.activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-            //startService(Intent(ConnectingThread.activity, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
             //Start Thread for checking connection
-            //ConnectingThread.h!!.postDelayed(runnableConnection, 10000)
+            h.postDelayed(runnableConnection, 10000)
         } else {
             //Stop UI thread
-            //ConnectingThread.h!!.removeCallbacks(runnableUI)
-            //ConnectingThread.h!!.removeCallbacks(runnableConnection)
-            //logText.post(Runnable { logText.text = "Can not connect to VPN. Authorization needed" })
-            //ipText.text = ""
+            h.removeCallbacks(runnableConnection)
         }
     }
 
@@ -443,25 +419,24 @@ object AnodeClient {
         return ""
     }
 
-    fun AuthVPNHttpReq(ServerPubkey: String): String {
-    //fun AuthVPNHttpReq(url: String, body: String): String {
-        //val str = body
-        val str = ""
+    //fun AuthVPNHttpReq(ServerPubkey: String): String {
+    fun AuthVPNHttpReq(ServerPubkey: String, body: String): String {
+        //val str = ""
         val url = URL("$API_AUTH_VPN$ServerPubkey/authorize/")
         //val url = URL(url)
         val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "GET"
-        //conn.requestMethod = "POST"
+        //conn.requestMethod = "GET"
+        conn.requestMethod = "POST"
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
         val md = MessageDigest.getInstance("SHA-256")
-        val bytes = str.toByteArray()
+        val bytes = body.toByteArray()
         val digest: ByteArray = md.digest(bytes)
         val digestStr = Base64.getEncoder().encodeToString(digest)
         val res = CjdnsSocket.Sign_sign(digestStr)
-        var sig = res["signature"].str()
+        val sig = res["signature"].str()
         conn.setRequestProperty("Authorization", "cjdns $sig")
         conn.connect()
-        //conn.outputStream.write(bytes)
+        conn.outputStream.write(bytes)
         if (conn.responseCode == 201) {
             //Created
             return conn.responseMessage
@@ -484,61 +459,48 @@ object AnodeClient {
         return ""
     }
 
-    class sendAuth() : AsyncTask<String, Void, String>() {
-        @ExperimentalStdlibApi
-        override fun doInBackground(vararg params: String?): String? {
+    object runnableConnection: Runnable {
+        private var h: Handler? = null
+        private var ipv4address: String? = null
+        private var ipv6address: String? = null
+
+        fun init(handler: Handler)  {
+            h = handler
+        }
+
+        override fun run() {
+            CjdnsSocket.getCjdnsRoutes()
+            val newip4address = CjdnsSocket.ipv4Address
+            val newip6address = CjdnsSocket.ipv6Address
+            //Reset VPN with new address
+            if ((ipv4address != newip4address) || (ipv4address != newip4address)){
+                ipv4address = newip4address
+                ipv6address = newip6address
+                //Restart Service
+                CjdnsSocket.Core_stopTun()
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+            }
+            GetPublicIP().execute(status)
+            h!!.postDelayed(this, 10000) //ms
+        }
+    }
+
+    class GetPublicIP(): AsyncTask<TextView, Void, String>() {
+        var text:TextView? = null
+        override fun doInBackground(vararg params: TextView?): String {
+            text = params[0]
             return try {
-                var result = StringBuilder()
-                val url = URL(API_TEST_AUTHORIZATION)
-                val conn = url.openConnection() as HttpsURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-
-                val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-                val pubkeyId = prefs!!.getString("publicKeyID","")
-                val privateKey = prefs!!.getString("privateKey","")
-                val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey))
-                val fact: KeyFactory = KeyFactory.getInstance("RSA")
-                val priv: PrivateKey = fact.generatePrivate(keySpec)
-                //Digest
-                val md = MessageDigest.getInstance("SHA-256")
-                var requestBody = ""
-                if (params[0] != null) {
-                    requestBody = params[0]!!
-                }
-                //val digest: ByteArray = md.digest(requestBody.encodeToByteArray())
-                // Signature
-                var signatureProvider: Signature? = null
-                signatureProvider = Signature.getInstance("SHA256WithRSA")
-                signatureProvider!!.initSign(priv)
-                signatureProvider.update(requestBody.encodeToByteArray())
-                val signature = signatureProvider.sign()
-                val b64signature = Base64.getEncoder().encode(signature)
-                conn.setRequestProperty("Authorization","Signature keyId=$pubkeyId,algorithm=rsa-sha256,signature="+b64signature.decodeToString())
-                setPostRequestContent(conn, requestBody)
-                conn.connect()
-
-                return conn.responseMessage
+                URL("https://api.ipify.org").readText(Charsets.UTF_8)
             } catch (e: Exception) {
-                Log.i(LOGTAG,"Failed to get public key ID from API $e")
-                null
+                "error in getting public ip"
             }
         }
 
-        @SuppressLint("CommitPrefEdits")
+        @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            if (result.isNullOrBlank()) {
-                return
-            }
-            val jsonObj = JSONObject(result)
-            val pubkeyID = jsonObj.getString("publicKeyID")
-            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-            //Store pubkeyID
-            with (prefs.edit()) {
-                putString("publicKeyID",pubkeyID)
-                commit()
-            }
+            text?.post(Runnable { text?.text  = "Public IP: $result" } )
         }
     }
 }
