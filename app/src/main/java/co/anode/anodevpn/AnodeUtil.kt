@@ -9,14 +9,21 @@ import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 
-class AnodeUtil(private val context: Context?) {
+class AnodeUtil(c: Context?) {
     private val LOGTAG = "co.anode.anodevpn"
-    val CJDNS_PATH = context!!.filesDir.toString()
+    var context: Context? = null
+    var CJDNS_PATH = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
     val CJDROUTE_LOG = "cjdroute.log"
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
+
+    init {
+        context = c
+        if (context != null)
+            CJDNS_PATH = context!!.filesDir.toString()
+    }
 
     fun initializeApp() {
         //Create files folder
@@ -29,7 +36,7 @@ class AnodeUtil(private val context: Context?) {
         var `in`: InputStream? = null
         val out: OutputStream?
         try {
-            val am = context.assets
+            val am = context!!.assets
             Log.i(LOGTAG, "OS Architecture: $arch")
             if (arch == "x86" || arch!!.contains("i686")) {
                 `in` = am.open("i686/16/cjdroute")
@@ -79,7 +86,7 @@ class AnodeUtil(private val context: Context?) {
         }
         //}
         //Create and initialize conf file
-        if (!File(context.filesDir.toString()+"/"+ CJDROUTE_CONFFILE).exists()) {
+        if (!File(context!!.filesDir.toString()+"/"+ CJDROUTE_CONFFILE).exists()) {
             initializeCjdrouteConfFile()
         }
     }

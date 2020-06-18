@@ -48,10 +48,10 @@ object AnodeClient {
     }
 
     // Returns true if there was some kind of error posting
-    fun httpPostError(): Boolean {
+    fun httpPostError(dir: File): Boolean {
         try {
-            val anodeUtil: AnodeUtil = AnodeUtil(null)
-            val files = File(anodeUtil.CJDNS_PATH).listFiles { file ->
+            if (!dir.exists()) { return false; }
+            val files = dir.listFiles { file ->
                 file.name.startsWith("error-uploadme-")
             }
             if (files.isEmpty()) { return false; }
@@ -137,17 +137,17 @@ object AnodeClient {
             } ?: false
         }
 
-    fun storeError(type: String, message: String?) {
+    fun storeError(dir: File, type: String, message: String?) {
         var err = errorJsonObj(type, message).toString(1)
-        val anodeUtil: AnodeUtil = AnodeUtil(null)
-        val f = File(anodeUtil.CJDNS_PATH +
-                "/error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json")
-        f.appendText(err)
+        val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
+        File(dir,fname).appendText(err)
     }
 
     fun hasErrors(): Boolean {
         val anodeUtil: AnodeUtil = AnodeUtil(null)
-        return File(anodeUtil.CJDNS_PATH).listFiles { file ->
+        val f = File(anodeUtil.CJDNS_PATH)
+        return f.exists() && f.listFiles { file ->
+            Log.i(LOGTAG, "File $file")
             file.name.startsWith("error-uploadme-")
         }.isNotEmpty()
     }
@@ -419,12 +419,20 @@ object AnodeClient {
         }
         if (iconnected) {
             //Restart Service
-            CjdnsSocket.Core_stopTun()
+            //CjdnsSocket.Core_stopTun()
             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+            status.post(Runnable {
+                status.text  = "VPN Connected"
+                status.setBackgroundColor(0xFF00FF00.toInt())
+            } )
             //Start Thread for checking connection
             h.postDelayed(runnableConnection, 10000)
         } else {
+            status.post(Runnable {
+                status.text  = "VPN Authorization required"
+                status.setBackgroundColor(0xFFFF0000.toInt())
+            } )
             //Stop UI thread
             h.removeCallbacks(runnableConnection)
         }
@@ -509,6 +517,10 @@ object AnodeClient {
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
             if ((ipv4address != newip4address) || (ipv4address != newip4address)){
+                status.post(Runnable {
+                    status.text  = "VPN Reconnecting..."
+                    status.setBackgroundColor(0xFF00FF00.toInt())
+                } )
                 ipv4address = newip4address
                 ipv6address = newip6address
                 //Restart Service
@@ -516,7 +528,7 @@ object AnodeClient {
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
             }
-            GetPublicIP().execute(status)
+            //GetPublicIP().execute(status)
             h!!.postDelayed(this, 10000) //ms
         }
     }
@@ -537,5 +549,9 @@ object AnodeClient {
             super.onPostExecute(result)
             text?.post(Runnable { text?.text  = "Public IP: $result" } )
         }
+    }
+
+    fun stopThreads() {
+        h.removeCallbacks(runnableConnection)
     }
 }

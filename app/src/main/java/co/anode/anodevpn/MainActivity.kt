@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             else if (paramThrowable is AnodeUtilException) type = "cjdroute"
             else if (paramThrowable is AnodeVPNException) type = "VPNService"
             // we'll post the error on next startup
-            AnodeClient.storeError(type, paramThrowable.message)
+            AnodeClient.storeError(application.filesDir, type, paramThrowable.message)
 
             object : Thread() {
                 override fun run() {
@@ -101,18 +101,17 @@ class MainActivity : AppCompatActivity() {
         buttonconnectvpns.setOnClickListener() {
             val status: TextView = findViewById(R.id.textview_status)
             if (buttonconnectvpns.text == "CONNECT") {
-                status.text = "Connecting to VPN..."
+                status.text = "VPN Connecting..."
                 AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                 buttonconnectvpns.text = "DISCONNECT"
             } else {
-                status.text = "Disconnect from VPN"
                 disconnectVPN()
             }
         }
 
         val intent = VpnService.prepare(applicationContext)
         //Connect to CJDNS
-        startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+        //startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
 
         if (intent != null) {
             startActivityForResult(intent, 0)
@@ -120,10 +119,12 @@ class MainActivity : AppCompatActivity() {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
 
-        val pubkey: TextView = findViewById(R.id.textViewPubkey)
-        pubkey.text = baseContext?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(this).getPubKey()
+        // Removed public key from main
+        // val pubkey: TextView = findViewById(R.id.textViewPubkey)
+        //pubkey.text = baseContext?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(this).getPubKey()
 
         //Check for internet connectivity every 15 seconds
+        /* Disable internet connectivity check
         val mHandler = Handler();
         val mHandlerTask: Runnable = object : Runnable {
             override fun run() {
@@ -132,24 +133,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
         mHandlerTask.run()
+        */
 
         val erHandler = Handler()
         val erHandlerTask: Runnable = object : Runnable {
             override fun run() {
                 if (!AnodeClient.hasErrors()) {
                     // Wait for errors for 30 seconds
-                    mHandler.postDelayed(this, 30000)
+                    erHandler.postDelayed(this, 30000)
                     if (!AnodeClient.checkNetworkConnection()) {
                         // try again in a second, waiting for internet
-                        mHandler.postDelayed(this, 1000)
-                    } else if (AnodeClient.httpPostError()) {
-                        // There was an error posting, lets wait 1 minut so as not to generate
+                        erHandler.postDelayed(this, 1000)
+                    } else if (AnodeClient.httpPostError(application.filesDir)) {
+                        // There was an error posting, lets wait 1 minute so as not to generate
                         // tons of crap
-                        mHandler.postDelayed(this, 60000)
+                        erHandler.postDelayed(this, 60000)
                     }
                 }
             }
         }
+        erHandlerTask.run()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -246,7 +249,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun disconnectVPN() {
+        AnodeClient.stopThreads()
+        val status = findViewById<TextView>(R.id.textview_status)
+        status.setBackgroundColor(0xFFFF0000.toInt())
+        status.text = "VPN disconnected"
         buttonconnectvpns.text = "CONNECT"
+        CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
         startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
     }
