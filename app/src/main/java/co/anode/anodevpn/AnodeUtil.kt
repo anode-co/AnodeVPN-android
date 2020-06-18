@@ -56,6 +56,10 @@ class AnodeUtil(private val context: Context?) {
         try {
             if (!cjdrouteFile.exists()) {
                 Log.i(LOGTAG,"cjdroute does not exists")
+            } else {
+                // You can't overwrite a file while the program is running,
+                // but delete and replace works
+                File("$CJDNS_PATH/$CJDROUTE_BINFILE").delete()
             }
             Log.i(LOGTAG,"Copying cjdroute")
             out = FileOutputStream("$CJDNS_PATH/$CJDROUTE_BINFILE")
