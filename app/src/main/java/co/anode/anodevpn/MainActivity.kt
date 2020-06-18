@@ -103,18 +103,17 @@ class MainActivity : AppCompatActivity() {
         buttonconnectvpns.setOnClickListener() {
             val status: TextView = findViewById(R.id.textview_status)
             if (buttonconnectvpns.text == "CONNECT") {
-                status.text = "Connecting to VPN..."
+                status.text = "VPN Connecting..."
                 AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                 buttonconnectvpns.text = "DISCONNECT"
             } else {
-                status.text = "Disconnect from VPN"
                 disconnectVPN()
             }
         }
 
         val intent = VpnService.prepare(applicationContext)
         //Connect to CJDNS
-        startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+        //startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
 
         if (intent != null) {
             startActivityForResult(intent, 0)
@@ -122,10 +121,12 @@ class MainActivity : AppCompatActivity() {
             onActivityResult(0, Activity.RESULT_OK, null)
         }
 
-        val pubkey: TextView = findViewById(R.id.textViewPubkey)
-        pubkey.text = baseContext?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(this).getPubKey()
+        // Removed public key from main
+        // val pubkey: TextView = findViewById(R.id.textViewPubkey)
+        //pubkey.text = baseContext?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(this).getPubKey()
 
         //Check for internet connectivity every 15 seconds
+        /* Disable internet connectivity check
         val mHandler = Handler();
         val mHandlerTask: Runnable = object : Runnable {
             override fun run() {
@@ -134,6 +135,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         mHandlerTask.run()
+         */
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -230,7 +232,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun disconnectVPN() {
+        AnodeClient.stopThreads()
+        val status = findViewById<TextView>(R.id.textview_status)
+        status.setBackgroundColor(0xFFFF0000.toInt())
+        status.text = "VPN disconnected"
         buttonconnectvpns.text = "CONNECT"
+        CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
         startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
     }
