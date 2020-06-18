@@ -3,7 +3,7 @@ dist: trusty
 jdk: oraclejdk8
 env:
   global:
-  - ANDROID_API=29
+  - ANDROID_API=28
 android:
   components:
   # - tools
