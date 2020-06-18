@@ -6,7 +6,7 @@ fi
 
 file=$(mktemp)
 GIT_ID=$(git describe --tags HEAD)
-echo "$GIT_ID" | sed 's/anodevpn-\|\./\n/g' | awk '
+echo "$GIT_ID" | sed 's/anodevpn-\|\.\|-/\n/g' | awk '
   BEGIN {
     M=-1;
     m=-1;
@@ -18,16 +18,16 @@ echo "$GIT_ID" | sed 's/anodevpn-\|\./\n/g' | awk '
       M = $0;
     } else if (m == -1) {
       m = $0;
-    } else {
+    } else if (p == -1) {
       p = $0;
     }
   }
   END {
     print("MAJOR="M"\nMINOR="m"\nPATCH="p);
-  }' > $file
+  }' > "$file"
 
-source $file
-rm $file
+source "$file"
+rm "$file"
 
 DOWNLOAD_URL="https://github.com/anode-co/AnodeVPN-android/releases/download/anodevpn-$MAJOR.$MINOR.$PATCH/app-release.apk"
 CERT_URL="https://anode.co/nonexistant/nonesuch"
