@@ -47,20 +47,18 @@ class MainActivity : AppCompatActivity() {
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
             //Toast message before exiting app
+            var type = "other"
+            if (paramThrowable is CjdnsException) type = "cjdns_socket"
+            else if (paramThrowable is AnodeUtilException) type = "cjdroute"
+            else if (paramThrowable is AnodeVPNException) type = "VPNService"
+            // we'll post the error on next startup
+            AnodeClient.storeError(type, paramThrowable.message)
+
             object : Thread() {
                 override fun run() {
                     Looper.prepare();
                     Toast.makeText(baseContext, "ERROR: "+paramThrowable.message, Toast.LENGTH_LONG).show()
                     AnodeClient.mycontext = baseContext
-                    var type = "other"
-                    //CJDNS socket error
-                    if (paramThrowable is CjdnsException) type = "cjdns_socket"
-                    else if (paramThrowable is AnodeUtilException) type = "cjdroute"
-                    else if (paramThrowable is AnodeVPNException) type = "VPNService"
-                    if (AnodeClient.checkNetworkConnection()){
-                        //Trying to post error to server
-                        AnodeClient.httpPostError(type, paramThrowable.message)
-                    }
                     Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
                     Looper.loop();
                 }
@@ -134,6 +132,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
         mHandlerTask.run()
+
+        val erHandler = Handler()
+        val erHandlerTask: Runnable = object : Runnable {
+            override fun run() {
+                if (!AnodeClient.hasErrors()) {
+                    // Wait for errors for 30 seconds
+                    mHandler.postDelayed(this, 30000)
+                    if (!AnodeClient.checkNetworkConnection()) {
+                        // try again in a second, waiting for internet
+                        mHandler.postDelayed(this, 1000)
+                    } else if (AnodeClient.httpPostError()) {
+                        // There was an error posting, lets wait 1 minut so as not to generate
+                        // tons of crap
+                        mHandler.postDelayed(this, 60000)
+                    }
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.

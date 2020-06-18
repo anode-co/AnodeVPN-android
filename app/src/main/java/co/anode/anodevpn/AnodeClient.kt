@@ -47,20 +47,40 @@ object AnodeClient {
         status = textview
     }
 
-    @Throws(IOException::class, JSONException::class)
-    fun httpPostError(type: String, message: String?): String {
+    // Returns true if there was some kind of error posting
+    fun httpPostError(): Boolean {
         try {
-            val url = URL(API_ERROR_URL)
-            val conn = url.openConnection() as HttpsURLConnection
+            val anodeUtil: AnodeUtil = AnodeUtil(null)
+            val files = File(anodeUtil.CJDNS_PATH).listFiles { file ->
+                file.name.startsWith("error-uploadme-")
+            }
+            if (files.isEmpty()) { return false; }
+            val file = files[0]
+            val conn = URL(API_ERROR_URL).openConnection() as HttpsURLConnection
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            val jsonObject = errorJsonObj(type, message)
-            setPostRequestContent(conn, jsonObject)
-            conn.connect()
-            return conn.responseMessage + ""
-        }catch (e:Exception) {
-            return "Error: $e"
+            file.inputStream().copyTo(conn.outputStream, 4096)
+            if (conn.responseCode != 200) {
+                Log.e(LOGTAG, "Unable to post error ${file.name}: ${conn.responseMessage}")
+                return true
+            }
+            val resp = conn.inputStream.bufferedReader().readText()
+            try {
+                val json = JSONObject(resp)
+                if (json.getString("status") != "success") {
+                    Log.e(LOGTAG, "Invalid status posting ${file.name}: $resp")
+                    return true
+                }
+                // ok, it looks like everything worked, we can delete the file now
+                file.delete()
+                return false
+            } catch (e:Exception) {
+                Log.e(LOGTAG, "Error posting ${file.name}: $resp")
+            }
+        } catch (e:Exception) {
+            Log.e(LOGTAG, "Error reporting error: ${e.message}")
         }
+        return true
     }
 
     @SuppressLint("CommitPrefEdits")
@@ -116,6 +136,21 @@ object AnodeClient {
                         || hasTransport(NetworkCapabilities.TRANSPORT_VPN)
             } ?: false
         }
+
+    fun storeError(type: String, message: String?) {
+        var err = errorJsonObj(type, message).toString(1)
+        val anodeUtil: AnodeUtil = AnodeUtil(null)
+        val f = File(anodeUtil.CJDNS_PATH +
+                "/error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json")
+        f.appendText(err)
+    }
+
+    fun hasErrors(): Boolean {
+        val anodeUtil: AnodeUtil = AnodeUtil(null)
+        return File(anodeUtil.CJDNS_PATH).listFiles { file ->
+            file.name.startsWith("error-uploadme-")
+        }.isNotEmpty()
+    }
 
     @Throws(JSONException::class)
     private fun errorJsonObj(type: String, message: String?): JSONObject {
