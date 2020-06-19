@@ -193,17 +193,17 @@ object AnodeClient {
         if (err.message!! == "Submit logs")
         {
             ignoreErr {
-                if (currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
+                if (currlogfile.exists()) jsonObject.accumulate("newAndroidLog", currlogfile.readText(Charsets.UTF_8))
             }
             ignoreErr {
-                if (lastlogfile.exists()) jsonObject.accumulate("previous_android_log", lastlogfile.readText(Charsets.UTF_8))
+                if (lastlogfile.exists()) jsonObject.accumulate("previousAndroidLog", lastlogfile.readText(Charsets.UTF_8))
             }
             ignoreErr {
                 if (cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:" + cjdroutelogfile.readText(Charsets.UTF_8)
             }
         } else {
             ignoreErr {
-                if (currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
+                if (currlogfile.exists()) jsonObject.accumulate("newAndroidLog", currlogfile.readText(Charsets.UTF_8))
             }
             ignoreErr {
                 if (cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:" + cjdroutelogfile.readText(Charsets.UTF_8)
