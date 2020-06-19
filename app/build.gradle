@@ -103,5 +103,5 @@ private String setVersionNumberByTag() {
     def (major, minor, patch) = verByGit.tokenize(".");
     ext.versionMajor = Integer.parseInt(major);
     ext.versionMinor = Integer.parseInt(minor);
-    ext.versionPatch = Integer.parseInt(patch)+1;
+    ext.versionPatch = Integer.parseInt(patch);
 }
