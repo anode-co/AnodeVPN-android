@@ -76,9 +76,9 @@ class MainActivity : AppCompatActivity() {
         anodeUtil!!.initializeApp()
         //Launch cjdroute
         anodeUtil!!.launch()
-        //Check for new version
+        //Initialize AnodeClient
         AnodeClient.mycontext = baseContext
-        AnodeClient.status = findViewById(R.id.textview_status)
+        AnodeClient.statustv = findViewById(R.id.textview_status)
 
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
@@ -165,16 +165,23 @@ class MainActivity : AppCompatActivity() {
 // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
         if (id == R.id.action_account_settings) {
+            Log.i(LOGTAG,"Start nickname activity")
             val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
             startActivity(accountNicknameActivity)
             return true
         } else if (id == R.id.action_signin) {
+            Log.i(LOGTAG,"Start sign in activity")
             val signinActivity = Intent(applicationContext, SignInActivity::class.java)
             startActivity(signinActivity)
             return true
         } else if (id == R.id.action_vpnlist) {
+            Log.i(LOGTAG,"Start VPN list activity")
             val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
             startActivity(vpnListActivity)
+            return true
+        } else if (id == R.id.action_submitlogs) {
+            AnodeClient.mycontext = baseContext
+            AnodeClient.PostLogs().execute()
             return true
         } else {
             super.onOptionsItemSelected(item)
@@ -185,8 +192,6 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (resultCode == Activity.RESULT_OK) {
-            //val intent = Intent(this, AnodeVpnService::class.java)
-            //startService(intent)
             //Initialize CJDNS socket
             CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
         }
