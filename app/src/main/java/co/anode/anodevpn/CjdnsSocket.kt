@@ -79,7 +79,9 @@ object CjdnsSocket {
         }
         dec = Benc(x).decode()
         val err = dec["error"]
-        if (err is Benc.Bstr && err.str() != "none") {
+        if (err.str().contains("no tun currently")) {
+            //Ignore it
+        } else if (err is Benc.Bstr && err.str() != "none") {
             throw CjdnsException("cjdns replied: " + err.str())
         }
         return dec
