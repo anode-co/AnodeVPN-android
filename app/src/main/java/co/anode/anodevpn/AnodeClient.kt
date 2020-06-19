@@ -30,7 +30,7 @@ import javax.net.ssl.HttpsURLConnection
 
 object AnodeClient {
     lateinit var mycontext: Context
-    lateinit var status: TextView
+    lateinit var statustv: TextView
     private const val API_VERSION = "0.3"
     private const val FILE_NAME = "anodevpn-latest.apk"
     private const val FILE_BASE_PATH = "file://"
@@ -44,7 +44,7 @@ object AnodeClient {
 
     fun init(context: Context, textview: TextView)  {
         mycontext = context
-        status = textview
+        statustv = textview
     }
 
     fun stackString(e: Throwable): String {
@@ -422,6 +422,10 @@ object AnodeClient {
                 cjdnsConnectVPN("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
             } else if (result.isNullOrBlank() || result.contains(":")) {
                 Toast.makeText(mycontext, result, Toast.LENGTH_LONG).show()
+                statustv.post(Runnable {
+                    statustv.text  = "VPN Authorization failed: $result"
+                    statustv.setBackgroundColor(0x00000000)
+                } )
             } else {
                 try {
                     val jsonObj = JSONObject(result)
@@ -449,16 +453,16 @@ object AnodeClient {
             //CjdnsSocket.Core_stopTun()
             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-            status.post(Runnable {
-                status.text  = "VPN Connected"
-                status.setBackgroundColor(0xFF00FF00.toInt())
+            statustv.post(Runnable {
+                statustv.text  = "VPN Connected"
+                statustv.setBackgroundColor(0xFF00FF00.toInt())
             } )
             //Start Thread for checking connection
             h.postDelayed(runnableConnection, 10000)
         } else {
-            status.post(Runnable {
-                status.text  = "VPN Authorization required"
-                status.setBackgroundColor(0xFFFF0000.toInt())
+            statustv.post(Runnable {
+                statustv.text  = "VPN Authorization required"
+                statustv.setBackgroundColor(0xFFFF0000.toInt())
             } )
             //Stop UI thread
             h.removeCallbacks(runnableConnection)
@@ -466,7 +470,8 @@ object AnodeClient {
     }
 
     fun httpAuthReq(urladdr: String, str: String, method: String): String {
-        val url = URL(urladdr) // TODO: set to (url)
+        Log.i(LOGTAG, "httpAuthReq $urladdr")
+        val url = URL(urladdr)
         val conn = url.openConnection() as HttpURLConnection
         conn.requestMethod = method
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -482,8 +487,10 @@ object AnodeClient {
 
         if (conn.responseCode == 400) {
             //email exists
+            Log.i(LOGTAG, "httpAuthReq response: 400 ${conn.responseMessage}")
             return "exists"
         } else if ((conn.responseCode == 201) || (conn.responseCode == 200)) {
+            Log.i(LOGTAG, "httpAuthReq response: ${conn.inputStream.bufferedReader().readText()}")
             return conn.inputStream.bufferedReader().readText()
         }
         return ""
@@ -491,6 +498,7 @@ object AnodeClient {
 
     //fun AuthVPNHttpReq(ServerPubkey: String): String {
     fun AuthVPNHttpReq(ServerPubkey: String, body: String): String {
+        Log.i(LOGTAG,"AuthVPNHttpReq with $ServerPubkey")
         //val str = ""
         val url = URL("$API_AUTH_VPN$ServerPubkey/authorize/")
         //val url = URL(url)
@@ -522,11 +530,15 @@ object AnodeClient {
         } else if ((conn.responseCode == 403) || ((conn.responseCode == 401))){
             //client not authorized
             return "403:Not Authorized"
+        } else if (conn.responseCode == 400) {
+            return "400:Bad request"
+        } else if (conn.responseCode == 500) {
+            return "400:${conn.responseMessage}"
         } else if (conn.responseCode == 503) {
             //VPN server out of available addresses
             return "503:Not available addresses"
         }
-        return ""
+        return "unknown"
     }
 
     object runnableConnection: Runnable {
@@ -544,9 +556,9 @@ object AnodeClient {
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
             if ((ipv4address != newip4address) || (ipv4address != newip4address)){
-                status.post(Runnable {
-                    status.text  = "VPN Reconnecting..."
-                    status.setBackgroundColor(0xFF00FF00.toInt())
+                statustv.post(Runnable {
+                    statustv.text  = "VPN Reconnecting..."
+                    statustv.setBackgroundColor(0xFF00FF00.toInt())
                 } )
                 ipv4address = newip4address
                 ipv6address = newip6address
@@ -580,5 +592,20 @@ object AnodeClient {
 
     fun stopThreads() {
         h.removeCallbacks(runnableConnection)
+    }
+
+    class PostLogs() : AsyncTask<Any?, Any?, String>() {
+        override fun doInBackground(objects: Array<Any?>): String? {
+            var result = false
+            if (checkNetworkConnection())
+                result = httpPostError( mycontext.filesDir)
+            return result.toString()
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            if (result == "True") Toast.makeText(mycontext, "Logs submitted successfully", Toast.LENGTH_SHORT).show()
+            else Toast.makeText(mycontext, "Logs could not be submitted", Toast.LENGTH_SHORT).show()
+        }
     }
 }

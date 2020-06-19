@@ -25,7 +25,6 @@ import java.util.*
 class AccountMainActivity : AppCompatActivity() {
     private val API_VERSION = "0.3"
     private var API_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
-    private var anodeUtil: AnodeUtil? = null
     var prefs: SharedPreferences? = null
 
     @SuppressLint("WrongViewCast")

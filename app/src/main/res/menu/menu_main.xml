@@ -18,4 +18,9 @@
         android:orderInCategory="100"
         android:title="VPN List"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_submitlogs"
+        android:orderInCategory="100"
+        android:title="Submit Logs"
+        app:showAsAction="never"/>
 </menu>
