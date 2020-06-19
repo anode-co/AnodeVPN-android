@@ -36,6 +36,38 @@ class MainActivity : AppCompatActivity() {
         private const val API_UPDATE_URL = "http://anode.co/assets/downloads/anode-vpn.apk"
     }
 
+    fun exception(paramThrowable: Throwable) {
+        //Toast message before exiting app
+        var type = "other"
+        if (paramThrowable is CjdnsException) type = "cjdnsSocket"
+        else if (paramThrowable is AnodeUtilException) type = "cjdroute"
+        else if (paramThrowable is AnodeVPNException) type = "vpnService"
+        // we'll post the error on next startup
+        AnodeClient.storeError(application, type, paramThrowable)
+
+        object : Thread() {
+            override fun run() {
+                Looper.prepare();
+                Toast.makeText(baseContext, "ERROR: "+paramThrowable.message, Toast.LENGTH_LONG).show()
+                AnodeClient.mycontext = baseContext
+                Looper.loop();
+            }
+        }.start()
+        try {
+            // Let the Toast display and give some time to post to server before app will get shutdown
+            Thread.sleep(10000)
+        } catch (e: InterruptedException) {}
+        exitProcess(1)
+    }
+
+    fun checked(l: ()->Unit) {
+        try {
+            l()
+        } catch (t: Throwable) {
+            exception(t)
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,29 +77,8 @@ class MainActivity : AppCompatActivity() {
         anodeUtil = AnodeUtil(application)
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
         //Error Handling
-        Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
-            //Toast message before exiting app
-            var type = "other"
-            if (paramThrowable is CjdnsException) type = "cjdns_socket"
-            else if (paramThrowable is AnodeUtilException) type = "cjdroute"
-            else if (paramThrowable is AnodeVPNException) type = "VPNService"
-            // we'll post the error on next startup
-            AnodeClient.storeError(application.filesDir, type, paramThrowable.message)
-
-            object : Thread() {
-                override fun run() {
-                    Looper.prepare();
-                    Toast.makeText(baseContext, "ERROR: "+paramThrowable.message, Toast.LENGTH_LONG).show()
-                    AnodeClient.mycontext = baseContext
-                    Log.e(LOGTAG,"Exception from "+paramThread.name, paramThrowable)
-                    Looper.loop();
-                }
-            }.start()
-            try {
-                // Let the Toast display and give some time to post to server before app will get shutdown
-                Thread.sleep(10000)
-            } catch (e: InterruptedException) {}
-            exitProcess(1)
+        Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
+            exception(paramThrowable)
         }
 
         //Start the log file
@@ -99,13 +110,15 @@ class MainActivity : AppCompatActivity() {
         }*/
 
         buttonconnectvpns.setOnClickListener() {
-            val status: TextView = findViewById(R.id.textview_status)
-            if (buttonconnectvpns.text == "CONNECT") {
-                status.text = "VPN Connecting..."
-                AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-                buttonconnectvpns.text = "DISCONNECT"
-            } else {
-                disconnectVPN()
+            checked {
+                val status: TextView = findViewById(R.id.textview_status)
+                if (buttonconnectvpns.text == "CONNECT") {
+                    status.text = "VPN Connecting..."
+                    AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                    buttonconnectvpns.text = "DISCONNECT"
+                } else {
+                    disconnectVPN()
+                }
             }
         }
 
@@ -135,24 +148,31 @@ class MainActivity : AppCompatActivity() {
         mHandlerTask.run()
         */
 
-        val erHandler = Handler()
-        val erHandlerTask: Runnable = object : Runnable {
-            override fun run() {
-                if (!AnodeClient.hasErrors()) {
-                    // Wait for errors for 30 seconds
-                    erHandler.postDelayed(this, 30000)
-                    if (!AnodeClient.checkNetworkConnection()) {
+        Thread(Runnable {
+            Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
+            while (true) {
+                AnodeClient.ignoreErr {
+                    val erCount = AnodeClient.errorCount(application)
+                    if (erCount == 0) {
+                        // Wait for errors for 30 seconds
+                        Log.d(LOGTAG, "No errors to report, sleeping")
+                        Thread.sleep(30000)
+                    } else if (!AnodeClient.checkNetworkConnection()) {
                         // try again in a second, waiting for internet
-                        erHandler.postDelayed(this, 1000)
-                    } else if (AnodeClient.httpPostError(application.filesDir)) {
-                        // There was an error posting, lets wait 1 minute so as not to generate
-                        // tons of crap
-                        erHandler.postDelayed(this, 60000)
+                        Log.i(LOGTAG, "Waiting for internet connection to report $erCount errors")
+                        Thread.sleep(1000)
+                    } else {
+                        Log.i(LOGTAG, "Reporting a random error out of $erCount")
+                        if (AnodeClient.httpPostError(application.filesDir)) {
+                            // There was an error posting, lets wait 1 minute so as not to generate
+                            // tons of crap
+                            Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")
+                            Thread.sleep(60000)
+                        }
                     }
                 }
             }
-        }
-        erHandlerTask.run()
+        }, "MainActivity.UploadErrorsThread").start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.

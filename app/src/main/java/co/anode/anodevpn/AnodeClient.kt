@@ -47,38 +47,48 @@ object AnodeClient {
         status = textview
     }
 
+    fun stackString(e: Throwable): String {
+        val sw = StringWriter()
+        e.printStackTrace(PrintWriter(sw))
+        return sw.toString()
+    }
+
     // Returns true if there was some kind of error posting
     fun httpPostError(dir: File): Boolean {
         try {
             if (!dir.exists()) { return false; }
-            val files = dir.listFiles { file ->
-                file.name.startsWith("error-uploadme-")
-            }
+            val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
             if (files.isEmpty()) { return false; }
-            val file = files[0]
+            val file = files.random()
             val conn = URL(API_ERROR_URL).openConnection() as HttpsURLConnection
+            conn.setDoOutput(true);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            file.inputStream().copyTo(conn.outputStream, 4096)
-            if (conn.responseCode != 200) {
-                Log.e(LOGTAG, "Unable to post error ${file.name}: ${conn.responseMessage}")
-                return true
+            val ins = file.inputStream().readBytes()
+            conn.outputStream.write(ins)
+            conn.connect()
+            val resp = if (conn.responseCode != 200) {
+                conn.errorStream.bufferedReader().readText()
+            } else {
+                conn.inputStream.bufferedReader().readText()
             }
-            val resp = conn.inputStream.bufferedReader().readText()
             try {
                 val json = JSONObject(resp)
-                if (json.getString("status") != "success") {
+                if (conn.responseCode != 200 || json.getString("status") != "success") {
                     Log.e(LOGTAG, "Invalid status posting ${file.name}: $resp")
                     return true
                 }
                 // ok, it looks like everything worked, we can delete the file now
+                Log.e(LOGTAG, "Posted error ${file.name} to server")
                 file.delete()
                 return false
             } catch (e:Exception) {
                 Log.e(LOGTAG, "Error posting ${file.name}: $resp")
             }
-        } catch (e:Exception) {
-            Log.e(LOGTAG, "Error reporting error: ${e.message}")
+        } catch (e: Exception) {
+            Log.e(LOGTAG, "Error reporting error: ${e.message}\n${stackString(e)}")
         }
         return true
     }
@@ -137,50 +147,67 @@ object AnodeClient {
             } ?: false
         }
 
-    fun storeError(dir: File, type: String, message: String?) {
-        var err = errorJsonObj(type, message).toString(1)
+    fun storeError(ctx: Context, type: String, e: Throwable) {
+        var err = errorJsonObj(ctx, type, e).toString(1)
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
-        File(dir,fname).appendText(err)
+        File(ctx.filesDir,fname).appendText(err)
+        Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
     }
 
-    fun hasErrors(): Boolean {
-        val anodeUtil: AnodeUtil = AnodeUtil(null)
-        val f = File(anodeUtil.CJDNS_PATH)
-        return f.exists() && f.listFiles { file ->
-            Log.i(LOGTAG, "File $file")
+    fun errorCount(ctx: Context): Int {
+        return ctx.filesDir.listFiles { file ->
             file.name.startsWith("error-uploadme-")
-        }.isNotEmpty()
+        }.size
     }
+
+    fun ignoreErr(l: ()->Unit) = try { l() } catch (t: Throwable) { }
 
     @Throws(JSONException::class)
-    private fun errorJsonObj(type: String, message: String?): JSONObject {
-        val anodeUtil: AnodeUtil = AnodeUtil(null)
+    private fun errorJsonObj(ctx: Context, type: String, err: Throwable): JSONObject {
+        val anodeUtil: AnodeUtil = AnodeUtil(ctx)
         val jsonObject = JSONObject()
-        var pubkey = anodeUtil.getPubKey()
+        var pubkey = ""
+        ignoreErr{ pubkey = anodeUtil.getPubKey() }
         if (pubkey == "") pubkey = "unknown"
         jsonObject.accumulate("publicKey", pubkey)
         jsonObject.accumulate("error", type)
         jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_CODE)
         jsonObject.accumulate("clientOs", "Android")
         jsonObject.accumulate("clientOsVersion", android.os.Build.VERSION.RELEASE)
-        jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
-        jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address)
-        jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route)
-        jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString())
-        jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage())
-        jsonObject.accumulate("message", message)
+        ignoreErr{ jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now())) }
+        ignoreErr{ jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address) }
+        ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
+        ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString()) }
+        ignoreErr{ jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
+        jsonObject.accumulate("message", err.message)
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
         val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodevpn.log")
-        var debugmsg = "peerStats: "+CjdnsSocket.logpeerStats+"\nshowConnections: "+CjdnsSocket.logshowConnections
-        if (message!! == "Submit logs")
+        var debugmsg = "";
+        ignoreErr {
+            debugmsg += "Error stack: " + stackString(err) + "\n";
+        }
+        ignoreErr {
+            debugmsg += "peerStats: " + CjdnsSocket.logpeerStats + "\nshowConnections: " + CjdnsSocket.logshowConnections
+        }
+        if (err.message!! == "Submit logs")
         {
-            if(currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
-            if(lastlogfile.exists()) jsonObject.accumulate("previous_android_log", lastlogfile.readText(Charsets.UTF_8))
-            if(cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8)
+            ignoreErr {
+                if (currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
+            }
+            ignoreErr {
+                if (lastlogfile.exists()) jsonObject.accumulate("previous_android_log", lastlogfile.readText(Charsets.UTF_8))
+            }
+            ignoreErr {
+                if (cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:" + cjdroutelogfile.readText(Charsets.UTF_8)
+            }
         } else {
-            if(currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
-            if(cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:"+cjdroutelogfile.readText(Charsets.UTF_8)
+            ignoreErr {
+                if (currlogfile.exists()) jsonObject.accumulate("new_android_log", currlogfile.readText(Charsets.UTF_8))
+            }
+            ignoreErr {
+                if (cjdroutelogfile.exists()) debugmsg += "\n\nCDJROUTE LOG:" + cjdroutelogfile.readText(Charsets.UTF_8)
+            }
         }
         jsonObject.accumulate("debuggingMessages", debugmsg)
         return jsonObject
