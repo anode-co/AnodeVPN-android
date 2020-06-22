@@ -93,9 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
-        //Automatic update
-        checkStoragePermission()
-        AnodeClient.checkNewVersion()
+
 
         /*
         button.setOnClickListener {
@@ -173,6 +171,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, "MainActivity.UploadErrorsThread").start()
+
+        //Automatic update
+        //Get storage permission for downloading APK
+        checkStoragePermission()
+        //Check for updates every 5min
+        Thread(Runnable {
+            Log.i(LOGTAG,"MainActivity.CheckUpdates")
+            while (true) {
+                AnodeClient.checkNewVersion()
+                Thread.sleep(5*60000)
+            }
+        }, "MainActivity.CheckUpdates").start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -202,6 +212,9 @@ class MainActivity : AppCompatActivity() {
         } else if (id == R.id.action_submitlogs) {
             AnodeClient.mycontext = baseContext
             AnodeClient.PostLogs().execute()
+            return true
+        } else if (id == R.id.action_checkupdates) {
+            AnodeClient.checkNewVersion()
             return true
         } else {
             super.onOptionsItemSelected(item)

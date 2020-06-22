@@ -23,4 +23,9 @@
         android:orderInCategory="100"
         android:title="Submit Logs"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_checkupdates"
+        android:orderInCategory="100"
+        android:title="Check for update"
+        app:showAsAction="never"/>
 </menu>
