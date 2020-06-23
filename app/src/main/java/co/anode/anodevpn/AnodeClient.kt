@@ -120,23 +120,6 @@ object AnodeClient {
         return ""
     }
 
-    @Throws(IOException::class, JSONException::class)
-    fun httpPostRegistration(email: String): String {
-        try {
-            val url = URL(API_REGISTRATION_URL)
-            val conn = url.openConnection() as HttpsURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            val jsonObject = JSONObject()
-            jsonObject.accumulate("email", email)
-            setPostRequestContent(conn, jsonObject)
-            conn.connect()
-            return conn.responseMessage + ""
-        }catch (e:Exception) {
-            return "Error: $e"
-        }
-    }
-
     fun checkNetworkConnection() =
         with(mycontext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) {
             getNetworkCapabilities(activeNetwork)?.run {
@@ -407,7 +390,6 @@ object AnodeClient {
         override fun doInBackground(vararg params: String?): String? {
             val pubkey = params[0]
             val jsonObject = JSONObject()
-            //jsonObject.accumulate("clientPublicKey", "lbqr0rzyc2tuysw3w8gfr95u68kujzlq7zht5hyf452u8yshr120.k")
             jsonObject.accumulate("date", System.currentTimeMillis())
             val resp = AuthVPNHttpReq(pubkey!!, jsonObject.toString())
             Log.i(LOGTAG, resp)
@@ -418,20 +400,27 @@ object AnodeClient {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_AUTH_VPN: $result")
             //if 200 or 201 then connect to VPN
-            if (result!!.contains("200:") || result!!.contains("201:")) {
-                cjdnsConnectVPN("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-            } else if (result.isNullOrBlank() || result.contains(":")) {
-                Toast.makeText(mycontext, result, Toast.LENGTH_LONG).show()
+            if (result.isNullOrBlank()) {
                 statustv.post(Runnable {
-                    statustv.text  = "VPN Authorization failed: $result"
+                    statustv.text  = "VPN Authorization failed with unknown reason"
                     statustv.setBackgroundColor(0x00000000)
                 } )
             } else {
-                try {
-                    val jsonObj = JSONObject(result)
-                    val status = jsonObj.getString("status")
-                    val expiresAt = jsonObj.getString("expiresAt")
-                }catch (e: java.lang.Exception) {}
+                val jsonObj = JSONObject(result)
+                if (jsonObj.has("status")) {
+                    if (jsonObj.getString("status") == "success") {
+                        statustv.post(Runnable {
+                            statustv.text  = "VPN Authorization success"
+                            statustv.setBackgroundColor(0x00000000)
+                        } )
+                        cjdnsConnectVPN("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                    } else {
+                        statustv.post(Runnable {
+                            statustv.text  = "VPN Authorization failed: ${jsonObj.getString("message")}"
+                            statustv.setBackgroundColor(0x00000000)
+                        } )
+                    }
+                }
             }
         }
     }
@@ -450,7 +439,7 @@ object AnodeClient {
         }
         if (iconnected) {
             //Restart Service
-            //CjdnsSocket.Core_stopTun()
+            CjdnsSocket.Core_stopTun()
             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
             statustv.post(Runnable {
@@ -471,6 +460,7 @@ object AnodeClient {
 
     fun httpAuthReq(urladdr: String, str: String, method: String): String {
         Log.i(LOGTAG, "httpAuthReq $urladdr")
+        var result = ""
         val url = URL(urladdr)
         val conn = url.openConnection() as HttpURLConnection
         conn.requestMethod = method
@@ -485,25 +475,18 @@ object AnodeClient {
         conn.connect()
         if (method == "POST") conn.outputStream.write(bytes)
 
-        if (conn.responseCode == 400) {
-            //email exists
-            Log.i(LOGTAG, "httpAuthReq response: 400 ${conn.responseMessage}")
-            return "exists"
-        } else if ((conn.responseCode == 201) || (conn.responseCode == 200)) {
-            Log.i(LOGTAG, "httpAuthReq response: ${conn.inputStream.bufferedReader().readText()}")
-            return conn.inputStream.bufferedReader().readText()
+        result = try {
+            conn.inputStream.bufferedReader().readText()
+        } catch (e: Exception) {
+            conn.responseCode.toString() + ": " + conn.responseMessage
         }
-        return ""
+        return result
     }
 
-    //fun AuthVPNHttpReq(ServerPubkey: String): String {
     fun AuthVPNHttpReq(ServerPubkey: String, body: String): String {
         Log.i(LOGTAG,"AuthVPNHttpReq with $ServerPubkey")
-        //val str = ""
         val url = URL("$API_AUTH_VPN$ServerPubkey/authorize/")
-        //val url = URL(url)
         val conn = url.openConnection() as HttpURLConnection
-        //conn.requestMethod = "GET"
         conn.requestMethod = "POST"
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
         val md = MessageDigest.getInstance("SHA-256")
@@ -515,30 +498,13 @@ object AnodeClient {
         conn.setRequestProperty("Authorization", "cjdns $sig")
         conn.connect()
         conn.outputStream.write(bytes)
-        if (conn.responseCode == 201) {
-            //Created
-            return conn.responseMessage
-        } else if (conn.responseCode == 200) {
-            //address renewed
-            return "200:Renewed"
-        } else if (conn.responseCode == 408) {
-            //timed out
-            return "408:Timed out"
-        } else if (conn.responseCode == 404) {
-            //not registered with the API
-            return "404:Not registered"
-        } else if ((conn.responseCode == 403) || ((conn.responseCode == 401))){
-            //client not authorized
-            return "403:Not Authorized"
-        } else if (conn.responseCode == 400) {
-            return "400:Bad request"
-        } else if (conn.responseCode == 500) {
-            return "400:${conn.responseMessage}"
-        } else if (conn.responseCode == 503) {
-            //VPN server out of available addresses
-            return "503:Not available addresses"
+
+        val result = try {
+            conn.inputStream.bufferedReader().readText()
+        } catch (e: Exception) {
+            conn.responseCode.toString() + ": " + conn.responseMessage
         }
-        return "unknown"
+        return result
     }
 
     object runnableConnection: Runnable {

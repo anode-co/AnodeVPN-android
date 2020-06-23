@@ -45,35 +45,33 @@ class checkstatusURL(context: Context?, handler: Handler?) : AsyncTask<String, V
 
     override fun onPostExecute(result: String?) {
         super.onPostExecute(result)
-
+        Log.i(LOGTAG,"Received: $result")
         if (result.isNullOrEmpty()) {
             h?.postDelayed(statuschecker, 10000)
             return
-        } else if (result == "complete") {
+        } else if (result == "202") {
             val signInActivity = Intent(c, SignInActivity::class.java)
             signInActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
             c?.startActivity(signInActivity)
         }
-        try {
-            val jsonObj = JSONObject(result)
-            if (jsonObj["status"] == "complete") {
-                val token = jsonObj.getString("appSecretToken")
+        val jsonObj = JSONObject(result)
+        if (jsonObj.has("status")) {
+            val status = jsonObj.getString("status")
+            if (status == "pending") {
+                h?.postDelayed(statuschecker, 10000)
+                return
+            } else if (status == "complete") {
                 h?.removeCallbacks(statuschecker)
-
+                val backupWalletPassword = jsonObj.getString("backupWalletPassword")
                 val prefs = c?.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
                 with(prefs!!.edit()) {
-                    putString("appSecretToken", token)
+                    putString("backupWalletPassword", backupWalletPassword)
                     commit()
                 }
                 val signInActivity = Intent(c, SignInActivity::class.java)
                 signInActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
                 c?.startActivity(signInActivity)
-            } else if (jsonObj["status"] == "pending") {
-                //TODO: do something with the UI?
-                h?.postDelayed(statuschecker, 10000)
             }
-        }catch (e: java.lang.Exception) {
-            Log.i(LOGTAG, "Failed to parse response: $e")
         }
     }
 }

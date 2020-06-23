@@ -30,7 +30,8 @@
     <string name="authorization_needed">Can not connect to VPN. Authorization needed</string>
     <string name="active_connections"> active connection(s) established</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="prompt_email">Email</string>
+    <string name="prompt_email">enter email</string>
+    <string name="prompt_emailusername">enter email or username</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="welcome">"Welcome !"</string>

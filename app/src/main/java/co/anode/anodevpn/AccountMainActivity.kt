@@ -24,7 +24,8 @@ import java.util.*
 
 class AccountMainActivity : AppCompatActivity() {
     private val API_VERSION = "0.3"
-    private var API_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
+    private var API_EMAIL_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<username>/initialemail/"
+    private var API_PASSWORD_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<username>/initialpassword/"
     var prefs: SharedPreferences? = null
 
     @SuppressLint("WrongViewCast")
@@ -41,15 +42,12 @@ class AccountMainActivity : AppCompatActivity() {
 
             val emailPattern: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
             val email = findViewById<EditText>(R.id.editTextTextEmailAddress)
+            //val passwordPattern: String = "(?=.*\\d)(?=.*[A-Za-z]).{9,}"
             val password = findViewById<EditText>(R.id.editTextTextPassword)
-            //Check email and passwords fields
+            //Check email field
             if (email.text.isNullOrEmpty()) {
                 Toast.makeText(baseContext, "Please fill in email field", Toast.LENGTH_SHORT).show()
-            }
-            else if (password.text.isNullOrEmpty()) {
-                Toast.makeText(baseContext, "Please fill in password field", Toast.LENGTH_SHORT).show()
-            }
-            else if (!email.text.toString().trim().matches(emailPattern.toRegex())) {
+            } else if (!email.text.toString().trim().matches(emailPattern.toRegex())) {
                 Toast.makeText(baseContext, "Email is not valid", Toast.LENGTH_SHORT).show()
             }
             else {
@@ -71,7 +69,10 @@ class AccountMainActivity : AppCompatActivity() {
                     //Get public key ID from API
                     AnodeClient.fetchpublicKeyID().execute(strpubkey)
                 }
-                emailRegistration().execute(email.text.toString())
+                val username = prefs!!.getString("username","")
+                if (password.text.toString().isNotEmpty())
+                    fieldRegistration().execute("password",password.text.toString(),username)
+                fieldRegistration().execute("email",email.text.toString(),username)
             }
         }
         val skipButton: Button = findViewById(R.id.buttonSkip)
@@ -118,28 +119,51 @@ class AccountMainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    inner class emailRegistration() : AsyncTask<String, Void, String>() {
+    inner class fieldRegistration() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val jsonObject = JSONObject()
-            jsonObject.accumulate("email", params[0])
-            val resp = AnodeClient.httpAuthReq(API_REGISTRATION_URL, jsonObject.toString(), "POST")
+            val username = params[2]
+            var url = ""
+            if (username.isNullOrEmpty()) {
+                Log.i(LOGTAG, "Error empty username")
+                return ""
+            }
+            when {
+                params[0] == "email" -> {
+                    url = API_EMAIL_REGISTRATION_URL.replace("<username>",username,false)
+                    jsonObject.accumulate("email", params[1])
+                }
+                params[0] == "password" -> {
+                    url = API_PASSWORD_REGISTRATION_URL.replace("<username>",username,false)
+                    jsonObject.accumulate("password", params[1])
+                }
+                else -> {
+                    Log.i(LOGTAG, "Error unknown field: ${params[0]}")
+                }
+            }
+            val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
             Log.i(LOGTAG, resp)
             return resp
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_REGISTRATION_URL: $result")
+            Log.i(LOGTAG,"Received: $result")
             if ((result.isNullOrBlank()) || ((result == "Internal Server Error"))) {
                 finish()
-            } else if (result == "exists") {
-                Toast.makeText(baseContext, "Email already registered", Toast.LENGTH_SHORT).show()
+            } else if (result.contains("400") || result.contains("401")) {
+                Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
             } else {
                 val jsonObj = JSONObject(result)
-                val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
-                val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
-                verificationActivity.putExtra("accountConfirmationStatusUrl",accountConfirmation)
-                startActivityForResult(verificationActivity, 0)
+                if (jsonObj.has("status")) {//initial password response
+                    val msg = jsonObj.getString("message")
+                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                } else if (jsonObj.has("accountConfirmationStatusUrl")){ //initial email response
+                    val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
+                    val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
+                    verificationActivity.putExtra("accountConfirmationStatusUrl", accountConfirmation)
+                    startActivityForResult(verificationActivity, 0)
+                }
             }
         }
     }

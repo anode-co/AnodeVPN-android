@@ -15,7 +15,7 @@
         android:layout_marginTop="200dp"
         android:ems="10"
         android:inputType="textEmailAddress"
-        android:text="@string/prompt_email"
+        android:hint="@string/prompt_email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +37,7 @@
             android:layout_marginTop="24dp"
             android:ems="10"
             android:inputType="textPassword"
-            android:text="@string/prompt_password" />
+            android:text="" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
