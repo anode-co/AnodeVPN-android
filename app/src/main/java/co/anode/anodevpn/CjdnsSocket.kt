@@ -79,10 +79,12 @@ object CjdnsSocket {
         }
         dec = Benc(x).decode()
         val err = dec["error"]
-        if (err.str().contains("no tun currently")) {
-            //Ignore it
-        } else if (err is Benc.Bstr && err.str() != "none") {
-            throw CjdnsException("cjdns replied: " + err.str())
+        if (err.toString() != "null") {
+            if (err.str().contains("no tun currently")) {
+                //Ignore it
+            } else if (err is Benc.Bstr && err.str() != "none") {
+                throw CjdnsException("cjdns replied: " + err.str())
+            }
         }
         return dec
     }
@@ -128,7 +130,7 @@ object CjdnsSocket {
         var i = 0
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
-            logpeerStats = peerStats.toString()
+            //logpeerStats = peerStats.str()
             if(peerStats["peers"].toString() != "[]") {
                 var x =0
                 try {
