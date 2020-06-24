@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DebugActivity">
+
+    <TextView
+        android:id="@+id/textAppVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="App Version: "
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/textIpv4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="IPv4:"
+        app:layout_constraintTop_toBottomOf="@id/textAppVersion"
+        app:layout_constraintStart_toStartOf="@id/textAppVersion"/>
+
+    <TextView
+        android:id="@+id/textIpv6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Ipv6: "
+        app:layout_constraintTop_toBottomOf="@id/textIpv4"
+        app:layout_constraintStart_toStartOf="@id/textIpv4"/>
+
+    <TextView
+        android:id="@+id/textPubkey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Public Key:"
+        app:layout_constraintTop_toBottomOf="@id/textIpv6"
+        app:layout_constraintStart_toStartOf="@id/textIpv6"/>
+
+    <TextView
+        android:id="@+id/lableConnections"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="CJDNS Connections:"
+        app:layout_constraintTop_toBottomOf="@id/textPubkey"
+        app:layout_constraintStart_toStartOf="@id/textPubkey"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

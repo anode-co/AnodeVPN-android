@@ -28,4 +28,9 @@
         android:orderInCategory="100"
         android:title="Check for update"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_debug"
+        android:orderInCategory="100"
+        android:title="Debug screen"
+        app:showAsAction="never"/>
 </menu>
