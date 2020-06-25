@@ -7,49 +7,75 @@
     tools:context=".DebugActivity">
 
     <TextView
-        android:id="@+id/textAppVersion"
+        android:id="@+id/text_AppVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="App Version: "
-        android:layout_marginTop="100dp"
         android:layout_marginStart="24dp"
+        android:layout_marginTop="50dp"
+        android:text="App Version: "
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
+        app:layout_constraintTop_toTopOf="parent" />
     <TextView
-        android:id="@+id/textIpv4"
+        android:id="@+id/text_ipv4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="IPv4:"
-        app:layout_constraintTop_toBottomOf="@id/textAppVersion"
-        app:layout_constraintStart_toStartOf="@id/textAppVersion"/>
-
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="IPv4: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_AppVersion" />
     <TextView
-        android:id="@+id/textIpv6"
+        android:id="@+id/text_ipv6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Ipv6: "
-        app:layout_constraintTop_toBottomOf="@id/textIpv4"
-        app:layout_constraintStart_toStartOf="@id/textIpv4"/>
-
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="IPv6: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_ipv4" />
     <TextView
-        android:id="@+id/textPubkey"
+        android:id="@+id/text_pubkey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Public Key:"
-        app:layout_constraintTop_toBottomOf="@id/textIpv6"
-        app:layout_constraintStart_toStartOf="@id/textIpv6"/>
-
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Public Key: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_ipv6" />
     <TextView
-        android:id="@+id/lableConnections"
+        android:id="@+id/text_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="CJDNS Connections:"
-        app:layout_constraintTop_toBottomOf="@id/textPubkey"
-        app:layout_constraintStart_toStartOf="@id/textPubkey"/>
-
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Username: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_pubkey" />
+    <TextView
+        android:id="@+id/text_node"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Last Node: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_username" />
+    <TextView
+        android:id="@+id/text_publicIP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Public IP: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_node" />
+    <TextView
+        android:id="@+id/text_peerstats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Peer stats: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_publicIP" />
 </androidx.constraintlayout.widget.ConstraintLayout>
