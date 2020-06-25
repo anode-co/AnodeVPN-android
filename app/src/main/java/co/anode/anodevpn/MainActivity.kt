@@ -216,6 +216,11 @@ class MainActivity : AppCompatActivity() {
         } else if (id == R.id.action_checkupdates) {
             AnodeClient.checkNewVersion()
             return true
+        } else if (id == R.id.action_debug) {
+            Log.i(LOGTAG,"Start debug activity")
+            val debugActivity = Intent(applicationContext, DebugActivity::class.java)
+            startActivity(debugActivity)
+            return true
         } else {
             super.onOptionsItemSelected(item)
             return false

@@ -446,6 +446,11 @@ object AnodeClient {
                 statustv.text  = "VPN Connected"
                 statustv.setBackgroundColor(0xFF00FF00.toInt())
             } )
+            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            with (prefs.edit()) {
+                putString("ServerPublicKey",node)
+                commit()
+            }
             //Start Thread for checking connection
             h.postDelayed(runnableConnection, 10000)
         } else {
