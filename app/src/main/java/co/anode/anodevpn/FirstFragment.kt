@@ -133,20 +133,7 @@ class FirstFragment : Fragment() {
  */
 }
 /*
-class PostLogs(val context: Context) : AsyncTask<Any?, Any?, String>() {
-    override fun doInBackground(objects: Array<Any?>): String? {
-        var result = ""
-        AnodeClient.mycontext = context
-        if (AnodeClient.checkNetworkConnection()) result = AnodeClient.httpPostError( "other", "Submit logs")
-        return result
-    }
 
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-        if (result == "OK") Toast.makeText(this.context, "Logs submitted successfully", Toast.LENGTH_SHORT).show()
-        else Toast.makeText(this.context, "Logs could not be submitted", Toast.LENGTH_SHORT).show()
-    }
-}
 
 class GetPublicIP(): AsyncTask<TextView, Void, String>() {
     var ipText:TextView? = null
