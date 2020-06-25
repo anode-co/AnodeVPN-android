@@ -51,7 +51,6 @@ class DebugActivity : AppCompatActivity() {
                 "error in getting public ip"
             }
         }
-
         @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
