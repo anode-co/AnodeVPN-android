@@ -32,7 +32,6 @@ object AnodeClient {
     lateinit var mycontext: Context
     lateinit var statustv: TextView
     private const val API_VERSION = "0.3"
-    private const val FILE_NAME = "anodevpn-latest.apk"
     private const val FILE_BASE_PATH = "file://"
     private const val PROVIDER_PATH = ".provider"
     private const val API_ERROR_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/events/"
@@ -213,30 +212,31 @@ object AnodeClient {
         return false
     }
 
-    fun downloadFile(uri: Uri): Long {
+    fun downloadFile(uri: Uri, version: String): Long {
         Log.i(LOGTAG, "download file from $uri")
+        val filename = "anodevpn-$version.apk"
         var downloadReference: Long = 0
         val downloadManager = mycontext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         var destination = mycontext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"
-        destination += FILE_NAME
+        destination += filename
         val destinationuri = Uri.parse("${FILE_BASE_PATH}$destination")
         try {
             val file = File(destination)
-            if (file.exists()) file.delete()
-            val request = DownloadManager.Request(uri)
-            //Setting title of request
-            request.setTitle(FILE_NAME)
-            request.setMimeType("application/vnd.android.package-archive")
-            //Setting description of request
-            request.setDescription("Your file is downloading")
-            //set notification when download completed
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            //Set the local destination for the downloaded file to a path within the application's external files directory
-            //request.setDestinationInExternalPublicDir(destination, FILE_NAME) //WORKS
-            request.setDestinationUri(destinationuri)
-            //Enqueue download and save the referenceId
-            downloadReference = downloadManager.enqueue(request)
-
+            if (!file.exists()) {
+                val request = DownloadManager.Request(uri)
+                //Setting title of request
+                request.setTitle(filename)
+                request.setMimeType("application/vnd.android.package-archive")
+                //Setting description of request
+                request.setDescription("Your file is downloading")
+                //set notification when download completed
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                //Set the local destination for the downloaded file to a path within the application's external files directory
+                //request.setDestinationInExternalPublicDir(destination, FILE_NAME) //WORKS
+                request.setDestinationUri(destinationuri)
+                //Enqueue download and save the referenceId
+                downloadReference = downloadManager.enqueue(request)
+            }
             showInstallOption(destination, uri)
         } catch (e: IllegalArgumentException) {
             Log.e(LOGTAG, "ERROR downloading file ${e.message}")
@@ -294,9 +294,10 @@ object AnodeClient {
                                 (json.get("minorNumber").toString().toInt() == minor_number) &&
                                 (json.get("revisionNumber").toString().toInt() > revision_number))
                 ){
-                    return json.getString("binaryDownloadUrl")
+                    return json.getString("binaryDownloadUrl")+"|"+json.get("majorNumber").toString()+"_"+json.get("minorNumber").toString()+"_"+json.get("revisionNumber").toString()
                 } else {
                     Log.i(LOGTAG,"NO update needed")
+                    Toast.makeText(mycontext,"Application already at latest version", Toast.LENGTH_LONG).show()
                     return "none"
                 }
             } catch (e: Exception) {
@@ -312,7 +313,9 @@ object AnodeClient {
                 if (result.contains("http")) {
                     Log.i(LOGTAG, "Updating APK from $result")
                     Toast.makeText(mycontext,R.string.downloading_update, Toast.LENGTH_LONG).show()
-                    downloadFile(Uri.parse(result))
+                    val url = result.split("|")[0]
+                    val version = result.split("|")[1]
+                    downloadFile(Uri.parse(url), version)
                 } else if (result.contains("error")) {
                     //TODO: submit it? show to user?
                     Log.i(LOGTAG, "ERROR updating APK from $result")
