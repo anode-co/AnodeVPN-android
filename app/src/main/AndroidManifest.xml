@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="q">
-        <activity android:name=".DebugActivity"></activity>
+        <activity android:name=".DebugActivity"/>
         <activity android:name=".VerificationActivity" />
         <activity android:name=".SignInActivity" />
         <activity android:name=".AccountMainActivity" />
