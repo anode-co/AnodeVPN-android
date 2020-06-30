@@ -21,7 +21,10 @@ import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
-import java.security.*
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -206,13 +209,26 @@ object AnodeClient {
         os.close()
     }
 
+
+    fun deleteFiles(folder: String, ext: String) {
+        val dir = File(folder)
+        if (!dir.exists()) return
+        val files: Array<File> = dir.listFiles()
+        for (file in files) {
+            if ((!file.isDirectory) and (file.endsWith(ext))) {
+                file.delete()
+            }
+        }
+    }
+
+
     fun checkNewVersion(): Boolean {
         Log.i(LOGTAG, "Checking for latest APK")
         getLatestAPK().execute()
         return false
     }
 
-    fun downloadFile(uri: Uri, version: String): Long {
+    fun downloadFile(uri: Uri, version: String, filesize: Long): Long {
         Log.i(LOGTAG, "download file from $uri")
         val filename = "anodevpn-$version.apk"
         var downloadReference: Long = 0
@@ -222,7 +238,7 @@ object AnodeClient {
         val destinationuri = Uri.parse("${FILE_BASE_PATH}$destination")
         try {
             val file = File(destination)
-            if (!file.exists()) {
+            if (!file.exists() or (file.length() < filesize)) {
                 val request = DownloadManager.Request(uri)
                 //Setting title of request
                 request.setTitle(filename)
@@ -294,7 +310,8 @@ object AnodeClient {
                                 (json.get("minorNumber").toString().toInt() == minor_number) &&
                                 (json.get("revisionNumber").toString().toInt() > revision_number))
                 ){
-                    return json.getString("binaryDownloadUrl")+"|"+json.get("majorNumber").toString()+"_"+json.get("minorNumber").toString()+"_"+json.get("revisionNumber").toString()
+                    val filesize = json.get("fileSizeBytes")
+                    return json.getString("binaryDownloadUrl")+"|"+json.get("majorNumber").toString()+"_"+json.get("minorNumber").toString()+"_"+json.get("revisionNumber").toString()+"|$filesize"
                 } else {
                     Log.i(LOGTAG,"NO update needed")
                     Toast.makeText(mycontext,"Application already at latest version", Toast.LENGTH_LONG).show()
@@ -315,7 +332,8 @@ object AnodeClient {
                     Toast.makeText(mycontext,R.string.downloading_update, Toast.LENGTH_LONG).show()
                     val url = result.split("|")[0]
                     val version = result.split("|")[1]
-                    downloadFile(Uri.parse(url), version)
+                    val filesize = result.split("|")[2].toLong()
+                    downloadFile(Uri.parse(url), version, filesize)
                 } else if (result.contains("error")) {
                     //TODO: submit it? show to user?
                     Log.i(LOGTAG, "ERROR updating APK from $result")
@@ -478,10 +496,14 @@ object AnodeClient {
         conn.connect()
         if (method == "POST") conn.outputStream.write(bytes)
 
-        result = try {
-            conn.inputStream.bufferedReader().readText()
+        try {
+            result = conn.inputStream.bufferedReader().readText()
         } catch (e: Exception) {
-            conn.responseCode.toString() + ": " + conn.responseMessage
+            if (conn.responseCode == 400) {
+                result = conn.responseCode.toString()+"|"+ conn.errorStream.reader().readText()
+            } else {
+                result = conn.responseCode.toString() + ": " + conn.responseMessage
+            }
         }
         return result
     }
@@ -535,6 +557,11 @@ object AnodeClient {
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+            } else if (ipv6address != "") {
+                statustv.post(Runnable {
+                    statustv.text  = "VPN Connected"
+                    statustv.setBackgroundColor(0xFF00FF00.toInt())
+                } )
             }
             //GetPublicIP().execute(status)
             h!!.postDelayed(this, 10000) //ms
