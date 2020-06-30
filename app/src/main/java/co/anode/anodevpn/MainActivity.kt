@@ -7,10 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.VpnService
-import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
@@ -171,7 +168,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, "MainActivity.UploadErrorsThread").start()
-
+        //Delete old APK files
+        AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
         //Automatic update
         //Get storage permission for downloading APK
         checkStoragePermission()
@@ -183,6 +181,7 @@ class MainActivity : AppCompatActivity() {
                 Thread.sleep(5*60000)
             }
         }, "MainActivity.CheckUpdates").start()
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -204,7 +203,7 @@ class MainActivity : AppCompatActivity() {
             val signinActivity = Intent(applicationContext, SignInActivity::class.java)
             startActivity(signinActivity)
             return true
-        } else if (id == R.id.action_vpnlist) {
+        /*} else if (id == R.id.action_vpnlist) {
             Log.i(LOGTAG,"Start VPN list activity")
             val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
             startActivity(vpnListActivity)
@@ -212,7 +211,7 @@ class MainActivity : AppCompatActivity() {
         } else if (id == R.id.action_submitlogs) {
             AnodeClient.mycontext = baseContext
             AnodeClient.PostLogs().execute()
-            return true
+            return true*/
         } else if (id == R.id.action_checkupdates) {
             AnodeClient.checkNewVersion()
             return true
