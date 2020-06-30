@@ -14,16 +14,6 @@
         android:title="@string/action_sign_in"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_vpnlist"
-        android:orderInCategory="100"
-        android:title="VPN List"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_submitlogs"
-        android:orderInCategory="100"
-        android:title="Submit Logs"
-        app:showAsAction="never"/>
-    <item
         android:id="@+id/action_checkupdates"
         android:orderInCategory="100"
         android:title="Check for update"
@@ -33,4 +23,16 @@
         android:orderInCategory="100"
         android:title="Debug screen"
         app:showAsAction="never"/>
+    <!--
+     <item
+        android:id="@+id/action_vpnlist"
+        android:orderInCategory="100"
+        android:title="VPN List"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_submitlogs"
+        android:orderInCategory="100"
+        android:title="Submit Logs"
+        app:showAsAction="never"/>
+    -->
 </menu>
