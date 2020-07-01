@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.Cursor
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -236,6 +237,7 @@ object AnodeClient {
         var destination = mycontext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"
         destination += filename
         val destinationuri = Uri.parse("${FILE_BASE_PATH}$destination")
+        var flag = true
         try {
             val file = File(destination)
             if (!file.exists() or (file.length() < filesize)) {
@@ -252,8 +254,32 @@ object AnodeClient {
                 request.setDestinationUri(destinationuri)
                 //Enqueue download and save the referenceId
                 downloadReference = downloadManager.enqueue(request)
+                var query: DownloadManager.Query? = null
+                query = DownloadManager.Query()
+                var c: Cursor? = null
+                query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
+                var downloading = true
+                while (downloading) {
+                    c = downloadManager.query(query)
+                    if (c.moveToFirst()) {
+                        var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                        if (status == DownloadManager.STATUS_FAILED) {
+                            flag = false
+                            downloading = false
+                            break
+                        } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            downloading = false
+                            flag = true
+                            break
+                        }
+                    }
+                }
             }
-            showInstallOption(destination, uri)
+            if (flag) {
+                showInstallOption(destination, uri)
+            } else {
+                Toast.makeText(mycontext,"ERROR downloading", Toast.LENGTH_LONG).show()
+            }
         } catch (e: IllegalArgumentException) {
             Log.e(LOGTAG, "ERROR downloading file ${e.message}")
             Toast.makeText(mycontext,"ERROR downloading file ${e.message}", Toast.LENGTH_LONG).show()
