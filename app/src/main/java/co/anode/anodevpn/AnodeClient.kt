@@ -43,6 +43,7 @@ object AnodeClient {
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
+    var downloadFails = 0
     val h = Handler()
 
     fun init(context: Context, textview: TextView)  {
@@ -276,8 +277,10 @@ object AnodeClient {
                 }
             }
             if (flag) {
+                downloadFails = 0
                 showInstallOption(destination, uri)
             } else {
+                downloadFails++
                 Toast.makeText(mycontext,"ERROR downloading", Toast.LENGTH_LONG).show()
             }
         } catch (e: IllegalArgumentException) {

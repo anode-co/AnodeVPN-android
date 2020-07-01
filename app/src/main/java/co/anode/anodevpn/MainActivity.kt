@@ -170,6 +170,7 @@ class MainActivity : AppCompatActivity() {
         }, "MainActivity.UploadErrorsThread").start()
         //Delete old APK files
         AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
+        AnodeClient.downloadFails = 0
         //Automatic update
         //Get storage permission for downloading APK
         checkStoragePermission()
@@ -178,7 +179,14 @@ class MainActivity : AppCompatActivity() {
             Log.i(LOGTAG,"MainActivity.CheckUpdates")
             while (true) {
                 AnodeClient.checkNewVersion()
-                Thread.sleep(5*60000)
+                if (AnodeClient.downloadFails > 1) {
+                    //In case of >1 failure delete old apk files and retry after 20min
+                    AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
+                    Thread.sleep(20 * 60000)
+                } else {
+                    //check for new version every 5min
+                    Thread.sleep(5 * 60000)
+                }
             }
         }, "MainActivity.CheckUpdates").start()
 
