@@ -40,19 +40,22 @@ class DebugActivity : AppCompatActivity() {
                     appversion.text = "App Version: "+BuildConfig.VERSION_NAME
                     val ipv4 = findViewById<TextView>(R.id.text_ipv4)
                     ipv4.text = "IPv4: "+CjdnsSocket.ipv4Address
-                    val ipv6 = findViewById<TextView>(R.id.text_ipv6)
-                    ipv6.text = "IPv6: "+CjdnsSocket.ipv6Address
+                    val cjdnsipv6 = findViewById<TextView>(R.id.text_cjdnsipv6)
+                    val nodeinfo = CjdnsSocket.Core_nodeInfo()
+                    cjdnsipv6.text = "cjdns IPv6: "+nodeinfo["myIp6"].str()
+                    val internetipv6 = findViewById<TextView>(R.id.text_internetipv6)
+                    internetipv6.text = "internet IPv6: "+CjdnsSocket.ipv6Address
                     val pubkey = findViewById<TextView>(R.id.text_pubkey)
                     pubkey.text = "Public Key: "+anodeUtil.getPubKey()
                     val nodeLink = findViewById<TextView>(R.id.text_nodes)
-                    val link: Spanned = HtmlCompat.fromHtml("<a href='http://h.snode.cjd.li/#'"+CjdnsSocket.ipv6Address+">Node map</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    val link: Spanned = HtmlCompat.fromHtml("<a href='http://h.snode.cjd.li/#'"+nodeinfo["myIp6"].str()+">Find yourself on the map</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
                     nodeLink.movementMethod = LinkMovementMethod.getInstance()
                     nodeLink.text = link
                     val username = findViewById<TextView>(R.id.text_username)
                     val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
                     username.text = "Username: "+prefs.getString("username","")
                     val node = findViewById<TextView>(R.id.text_node)
-                    node.text = "Last Node: "+prefs.getString("ServerPublicKey","")
+                    node.text = "VPN exit key: "+prefs.getString("ServerPublicKey","")
                     val peerstats = findViewById<TextView>(R.id.text_peerstats)
                     val peers:ArrayList<Benc.Bdict> = CjdnsSocket.InterfaceController_peerStats()
                     var info = ""

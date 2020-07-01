@@ -460,7 +460,13 @@ object AnodeClient {
                             statustv.text  = "VPN Authorization success"
                             statustv.setBackgroundColor(0x00000000)
                         } )
-                        cjdnsConnectVPN("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                        val node = "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"
+                        cjdnsConnectVPN(node)
+                        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                        with (prefs.edit()) {
+                            putString("ServerPublicKey",node)
+                            commit()
+                        }
                     } else {
                         statustv.post(Runnable {
                             statustv.text  = "VPN Authorization failed: ${jsonObj.getString("message")}"
