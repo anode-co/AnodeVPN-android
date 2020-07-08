@@ -224,6 +224,11 @@ object CjdnsSocket {
         }.run()
         return InetAddress.getByAddress(bytes).hostAddress
     }
+
+    fun isCjdnsConnected(): Boolean {
+        val conn = getNumberofEstablishedPeers()
+        return conn > 1
+    }
 }
 
 class CjdnsException(message:String): Exception(message)
