@@ -39,8 +39,7 @@ class checkstatusURL(context: Context?, handler: Handler?) : AsyncTask<String, V
     }
 
     override fun doInBackground(vararg params: String?): String? {
-        val result = AnodeClient.httpAuthReq(params[0]!!, "", "GET")
-        return result
+        return AnodeClient.APIHttpReq(params[0]!!, "", "GET", true)
     }
 
     override fun onPostExecute(result: String?) {

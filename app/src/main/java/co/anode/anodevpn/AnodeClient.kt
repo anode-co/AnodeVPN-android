@@ -43,6 +43,7 @@ object AnodeClient {
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
+    private var notifyUser = false
     var downloadFails = 0
     val h = Handler()
 
@@ -64,23 +65,28 @@ object AnodeClient {
             val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
             if (files.isEmpty()) { return false; }
             val file = files.random()
+
+            val resp = APIHttpReq(API_ERROR_URL,file.readText(), "POST", false)
+            /*
             val conn = URL(API_ERROR_URL).openConnection() as HttpsURLConnection
-            conn.setDoOutput(true);
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
+            conn.doOutput = true;
+            conn.readTimeout = 10000;
+            conn.connectTimeout = 15000;
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             val ins = file.inputStream().readBytes()
             conn.outputStream.write(ins)
             conn.connect()
-            val resp = if (conn.responseCode != 200) {
+            resp = if (conn.responseCode != 200) {
                 conn.errorStream.bufferedReader().readText()
             } else {
                 conn.inputStream.bufferedReader().readText()
             }
+             */
+
             try {
                 val json = JSONObject(resp)
-                if (conn.responseCode != 200 || json.getString("status") != "success") {
+                if (json.has("status") and (json.getString("status") != "success")) {
                     Log.e(LOGTAG, "Invalid status posting ${file.name}: $resp")
                     return true
                 }
@@ -95,33 +101,6 @@ object AnodeClient {
             Log.e(LOGTAG, "Error reporting error: ${e.message}\n${stackString(e)}")
         }
         return true
-    }
-
-    @SuppressLint("CommitPrefEdits")
-    @Throws(IOException::class, JSONException::class)
-    fun httpPostPubKeyRegistration(): String {
-        try {
-            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-            val pubkeyId = prefs!!.getString("publicKeyID","")
-            //Check existing pubkeyID
-            if (pubkeyId.isNullOrEmpty()) {
-                val keypair = generateKeys()
-                val encoder = Base64.getEncoder()
-                val strpubkey = encoder.encodeToString(keypair?.public?.encoded)
-                val strprikey = encoder.encodeToString(keypair?.private?.encoded)
-                //Store public, private keys
-                with (prefs.edit()) {
-                    putString("publicKey",strpubkey)
-                    putString("privateKey",strprikey)
-                    commit()
-                }
-                //Get public key ID from API
-                fetchpublicKeyID().execute(strpubkey)
-            }
-        }catch (e:Exception) {
-            return "Error: $e"
-        }
-        return ""
     }
 
     fun checkNetworkConnection() =
@@ -200,16 +179,7 @@ object AnodeClient {
         return jsonObject
     }
 
-    @Throws(IOException::class)
-    fun setPostRequestContent(conn: HttpURLConnection, jsonObject: JSONObject) {
-        val os = conn.outputStream
-        val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
-        writer.write(jsonObject.toString())
-        Log.i(MainActivity::class.java.toString(), jsonObject.toString())
-        writer.flush()
-        writer.close()
-        os.close()
-    }
+
 
 
     fun deleteFiles(folder: String, ext: String) {
@@ -224,7 +194,8 @@ object AnodeClient {
     }
 
 
-    fun checkNewVersion(): Boolean {
+    fun checkNewVersion(notify: Boolean): Boolean {
+        notifyUser = notify
         Log.i(LOGTAG, "Checking for latest APK")
         getLatestAPK().execute()
         return false
@@ -343,7 +314,6 @@ object AnodeClient {
                     return json.getString("binaryDownloadUrl")+"|"+json.get("majorNumber").toString()+"_"+json.get("minorNumber").toString()+"_"+json.get("revisionNumber").toString()+"|$filesize"
                 } else {
                     Log.i(LOGTAG,"NO update needed")
-                    Toast.makeText(mycontext,"Application already at latest version", Toast.LENGTH_LONG).show()
                     return "none"
                 }
             } catch (e: Exception) {
@@ -366,8 +336,8 @@ object AnodeClient {
                 } else if (result.contains("error")) {
                     //TODO: submit it? show to user?
                     Log.i(LOGTAG, "ERROR updating APK from $result")
-                } else {
-                    //DO NOTHING
+                } else if (result == "none"){
+                    if (notifyUser) Toast.makeText(mycontext,"Application already at latest version", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -388,60 +358,12 @@ object AnodeClient {
         }
     }
 
-    class fetchpublicKeyID() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
-            return try {
-                var result = StringBuilder()
-                val url = URL(API_PUBLICKEY_REGISTRATION)
-                val conn = url.openConnection() as HttpsURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                val jsonObject = JSONObject()
-                jsonObject.accumulate("publicKey", "-----BEGIN PUBLIC KEY-----\n"+params[0]+"\n-----END PUBLIC KEY-----")
-                jsonObject.accumulate("algorithm", "rsa-sha256")
-                setPostRequestContent(conn, jsonObject)
-                conn.connect()
-                val `in`: InputStream = BufferedInputStream(conn.getInputStream())
-                val reader = BufferedReader(InputStreamReader(`in`))
-
-                var line = reader.readLine()
-                while (!line.isNullOrEmpty()) {
-                    result.append(line);
-                    line = reader.readLine()
-                }
-
-                return result.toString()
-            } catch (e: Exception) {
-                Log.i(LOGTAG,"Failed to get publick key ID from API $e")
-                null
-            }
-        }
-
-        @SuppressLint("CommitPrefEdits")
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            if (result.isNullOrBlank()) {
-                return
-            }
-            val jsonObj = JSONObject(result)
-            val pubkeyID = jsonObj.getString("publicKeyId")
-            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-            //Store pubkeyID
-            with (prefs.edit()) {
-                putString("publicKeyID",pubkeyID)
-                commit()
-            }
-
-            //sendAuthTest()
-        }
-    }
-
     class AuthorizeVPN() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val pubkey = params[0]
             val jsonObject = JSONObject()
             jsonObject.accumulate("date", System.currentTimeMillis())
-            val resp = AuthVPNHttpReq(pubkey!!, jsonObject.toString())
+            val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true )
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -514,27 +436,45 @@ object AnodeClient {
         }
     }
 
-    fun httpAuthReq(urladdr: String, str: String, method: String): String {
-        Log.i(LOGTAG, "httpAuthReq $urladdr")
+    fun APIHttpReq(address: String, body: String, method: String, needsAuth: Boolean): String {
+        Log.i(LOGTAG,"HttpReq at $address with $body and Auth:$needsAuth")
         var result = ""
-        val url = URL(urladdr)
+        var url: URL
+        //If connected to cjdns then use internal ipv6 address for API calls
+        if (CjdnsSocket.isCjdnsConnected()) {
+            val cjdnsurl = address.replace("vpn.anode.co","[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]")
+            url = URL(cjdnsurl)
+        } else {
+            url = URL(address)
+        }
         val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = method
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        val md = MessageDigest.getInstance("SHA-256")
-        val bytes = str.toByteArray()
-        val digest: ByteArray = md.digest(bytes)
-        val digestStr = Base64.getEncoder().encodeToString(digest)
-        val res = CjdnsSocket.Sign_sign(digestStr)
-        var sig = res["signature"].str()
-        conn.setRequestProperty("Authorization", "cjdns $sig")
+        //Do a GET request if there is no body and does not need authorization
+        /*if ((body.isEmpty()) and (!needsAuth)){
+            conn.requestMethod = "GET"
+        } else {
+            conn.requestMethod = "POST"
+        }*/
+        conn.requestMethod = method
+
+        val bytes = body.toByteArray()
+        if (needsAuth) {
+            val md = MessageDigest.getInstance("SHA-256")
+            val digest: ByteArray = md.digest(bytes)
+            val digestStr = Base64.getEncoder().encodeToString(digest)
+            val res = CjdnsSocket.Sign_sign(digestStr)
+            val sig = res["signature"].str()
+            conn.setRequestProperty("Authorization", "cjdns $sig")
+        }
+
         conn.connect()
-        if (method == "POST") conn.outputStream.write(bytes)
+        //Send body
+        if (conn.requestMethod == "POST") conn.outputStream.write(bytes)
 
         try {
             result = conn.inputStream.bufferedReader().readText()
         } catch (e: Exception) {
-            if (conn.responseCode == 400) {
+            if ((conn.responseCode == 400) or (conn.responseCode == 403)){
                 result = conn.responseCode.toString()+"|"+ conn.errorStream.reader().readText()
             } else {
                 result = conn.responseCode.toString() + ": " + conn.responseMessage
@@ -543,29 +483,6 @@ object AnodeClient {
         return result
     }
 
-    fun AuthVPNHttpReq(ServerPubkey: String, body: String): String {
-        Log.i(LOGTAG,"AuthVPNHttpReq with $ServerPubkey")
-        val url = URL("$API_AUTH_VPN$ServerPubkey/authorize/")
-        val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "POST"
-        conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        val md = MessageDigest.getInstance("SHA-256")
-        val bytes = body.toByteArray()
-        val digest: ByteArray = md.digest(bytes)
-        val digestStr = Base64.getEncoder().encodeToString(digest)
-        val res = CjdnsSocket.Sign_sign(digestStr)
-        val sig = res["signature"].str()
-        conn.setRequestProperty("Authorization", "cjdns $sig")
-        conn.connect()
-        conn.outputStream.write(bytes)
-
-        val result = try {
-            conn.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            conn.responseCode.toString() + ": " + conn.responseMessage
-        }
-        return result
-    }
 
     object runnableConnection: Runnable {
         private var h: Handler? = null

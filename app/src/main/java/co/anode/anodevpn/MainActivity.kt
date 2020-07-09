@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         Thread(Runnable {
             Log.i(LOGTAG,"MainActivity.CheckUpdates")
             while (true) {
-                AnodeClient.checkNewVersion()
+                AnodeClient.checkNewVersion(false)
                 if (AnodeClient.downloadFails > 1) {
                     //In case of >1 failure delete old apk files and retry after 20min
                     AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
@@ -221,7 +221,8 @@ class MainActivity : AppCompatActivity() {
             AnodeClient.PostLogs().execute()
             return true*/
         } else if (id == R.id.action_checkupdates) {
-            AnodeClient.checkNewVersion()
+            Toast.makeText(baseContext, "Checking for newer AnodeVPN version...", Toast.LENGTH_LONG).show()
+            AnodeClient.checkNewVersion(true)
             return true
         } else if (id == R.id.action_debug) {
             Log.i(LOGTAG,"Start debug activity")

@@ -52,23 +52,6 @@ class AccountMainActivity : AppCompatActivity() {
             }
             else {
                 AnodeClient.mycontext = baseContext
-                //Check for pubkeyid
-                val pubkeyId = prefs!!.getString("publicKeyID","")
-                //Check existing pubkeyID
-                if (pubkeyId.isNullOrEmpty()) {
-                    val keypair = AnodeClient.generateKeys()
-                    val encoder = Base64.getEncoder()
-                    val strpubkey = encoder.encodeToString(keypair?.public?.encoded)
-                    val strprikey = encoder.encodeToString(keypair?.private?.encoded)
-                    //Store public, private keys
-                    with (prefs!!.edit()) {
-                        putString("publicKey",strpubkey)
-                        putString("privateKey",strprikey)
-                        commit()
-                    }
-                    //Get public key ID from API
-                    AnodeClient.fetchpublicKeyID().execute(strpubkey)
-                }
                 val username = prefs!!.getString("username","")
                 if (password.text.toString().isNotEmpty())
                     fieldRegistration().execute("password",password.text.toString(),username)
@@ -141,7 +124,8 @@ class AccountMainActivity : AppCompatActivity() {
                     Log.i(LOGTAG, "Error unknown field: ${params[0]}")
                 }
             }
-            val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
+            //val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
+            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -151,7 +135,7 @@ class AccountMainActivity : AppCompatActivity() {
             Log.i(LOGTAG,"Received: $result")
             if ((result.isNullOrBlank()) || ((result == "Internal Server Error"))) {
                 finish()
-            } else if (result.contains("400") || result.contains("401")) {
+            } else if (result.contains("400") or result.contains("401") or result.contains("403")) {
                 Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
             } else {
                 val jsonObj = JSONObject(result)

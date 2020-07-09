@@ -7,12 +7,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.apache.commons.text.RandomStringGenerator
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 
 class AccountNicknameActivity : AppCompatActivity() {
@@ -54,7 +51,7 @@ class AccountNicknameActivity : AppCompatActivity() {
 
     inner class usernameGenerate() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val resp = AnodeClient.httpAuthReq(API_USERNAME_GENERATE, "", "GET")
+            val resp = AnodeClient.APIHttpReq(API_USERNAME_GENERATE,"", "GET",true)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -69,6 +66,8 @@ class AccountNicknameActivity : AppCompatActivity() {
                 val jsonObj = JSONObject(json)
                 val msg = jsonObj.getString("username")
                 Toast.makeText(baseContext, "Error: $msg", Toast.LENGTH_SHORT).show()
+            } else if (result.contains("403")) {
+                Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
             } else {
                 //{"username":"flattop-fence"}
                 val jsonObj = JSONObject(result)
@@ -83,7 +82,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String?): String? {
             val jsonObject = JSONObject()
             jsonObject.accumulate("username", params[0])
-            val resp = AnodeClient.httpAuthReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST")
+            val resp = AnodeClient.APIHttpReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST", true)
             Log.i(LOGTAG, resp)
             return resp
         }

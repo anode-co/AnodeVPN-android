@@ -227,7 +227,7 @@ object CjdnsSocket {
 
     fun isCjdnsConnected(): Boolean {
         val conn = getNumberofEstablishedPeers()
-        return conn > 1
+        return conn > 0
     }
 }
 
