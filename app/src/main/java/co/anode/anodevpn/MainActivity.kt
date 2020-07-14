@@ -20,6 +20,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.IOException
+import java.lang.reflect.InvocationTargetException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.URL
@@ -30,15 +31,14 @@ class MainActivity : AppCompatActivity() {
     private var anodeUtil: AnodeUtil? = null
     companion object {
         private const val LOGTAG = "co.anode.anodevpn"
-        private const val API_UPDATE_URL = "http://anode.co/assets/downloads/anode-vpn.apk"
     }
 
     fun exception(paramThrowable: Throwable) {
         //Toast message before exiting app
         var type = "other"
-        if (paramThrowable is CjdnsException) type = "cjdnsSocket"
-        else if (paramThrowable is AnodeUtilException) type = "cjdroute"
-        else if (paramThrowable is AnodeVPNException) type = "vpnService"
+        if ((paramThrowable.cause as InvocationTargetException).targetException is CjdnsException) type = "cjdnsSocket"
+        else if ((paramThrowable.cause as InvocationTargetException).targetException is AnodeUtilException) type = "cjdroute"
+        else if ((paramThrowable.cause as InvocationTargetException).targetException is AnodeVPNException) type = "vpnService"
         // we'll post the error on next startup
         AnodeClient.storeError(application, type, paramThrowable)
 
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         exitProcess(1)
     }
 
-    fun checked(l: ()->Unit) {
+    private fun checked(l: ()->Unit) {
         try {
             l()
         } catch (t: Throwable) {
@@ -87,6 +87,7 @@ class MainActivity : AppCompatActivity() {
         //Initialize AnodeClient
         AnodeClient.mycontext = baseContext
         AnodeClient.statustv = findViewById(R.id.textview_status)
+        AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
 
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
@@ -108,6 +109,7 @@ class MainActivity : AppCompatActivity() {
             checked {
                 val status: TextView = findViewById(R.id.textview_status)
                 if (buttonconnectvpns.text == "CONNECT") {
+                    //CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
                     status.text = "VPN Connecting..."
                     AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                     buttonconnectvpns.text = "DISCONNECT"
@@ -158,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                         Thread.sleep(1000)
                     } else {
                         Log.i(LOGTAG, "Reporting a random error out of $erCount")
-                        if (AnodeClient.httpPostError(application.filesDir)) {
+                        if (AnodeClient.httpPostError(application.filesDir).contains("Error")) {
                             // There was an error posting, lets wait 1 minute so as not to generate
                             // tons of crap
                             Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")

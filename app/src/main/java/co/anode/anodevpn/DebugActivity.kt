@@ -28,7 +28,8 @@ class DebugActivity : AppCompatActivity() {
         buttonSubmitLogs.setOnClickListener {
             Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
             AnodeClient.mycontext = baseContext
-            AnodeClient.PostLogs().execute()
+            AnodeClient.storeError(baseContext,"other", Throwable("User submitted logs"))
+            AnodeClient.PostLogs()
         }
 
         Thread(Runnable {
@@ -48,7 +49,7 @@ class DebugActivity : AppCompatActivity() {
                     val pubkey = findViewById<TextView>(R.id.text_pubkey)
                     pubkey.text = "Public Key: "+anodeUtil.getPubKey()
                     val nodeLink = findViewById<TextView>(R.id.text_nodes)
-                    val link: Spanned = HtmlCompat.fromHtml("<a href='http://h.snode.cjd.li/#'"+nodeinfo["myIp6"].str()+">Find yourself on the map</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    val link: Spanned = HtmlCompat.fromHtml("<a href='http://h.snode.cjd.li/#"+nodeinfo["myIp6"].str()+"'>Find yourself on the map</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
                     nodeLink.movementMethod = LinkMovementMethod.getInstance()
                     nodeLink.text = link
                     val username = findViewById<TextView>(R.id.text_username)
@@ -90,3 +91,5 @@ class DebugActivity : AppCompatActivity() {
         }
     }
 }
+
+class DebugException(message:String): Exception(message)

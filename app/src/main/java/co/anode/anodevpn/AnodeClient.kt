@@ -14,9 +14,11 @@ import android.os.AsyncTask
 import android.os.Environment
 import android.os.Handler
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import kotlinx.android.synthetic.main.content_main.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
@@ -35,6 +37,7 @@ import javax.net.ssl.HttpsURLConnection
 object AnodeClient {
     lateinit var mycontext: Context
     lateinit var statustv: TextView
+    lateinit var connectButton: Button
     private const val API_VERSION = "0.3"
     private const val FILE_BASE_PATH = "file://"
     private const val PROVIDER_PATH = ".provider"
@@ -47,9 +50,10 @@ object AnodeClient {
     var downloadFails = 0
     val h = Handler()
 
-    fun init(context: Context, textview: TextView)  {
+    fun init(context: Context, textview: TextView, button: Button)  {
         mycontext = context
         statustv = textview
+        connectButton = button
     }
 
     fun stackString(e: Throwable): String {
@@ -58,49 +62,37 @@ object AnodeClient {
         return sw.toString()
     }
 
-    // Returns true if there was some kind of error posting
-    fun httpPostError(dir: File): Boolean {
+    fun httpPostError(dir: File): String {
         try {
-            if (!dir.exists()) { return false; }
+            if (!dir.exists()) { return "No log files to be submitted"; }
             val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
-            if (files.isEmpty()) { return false; }
+            if (files.isEmpty()) { return "No log files to be submitted"; }
             val file = files.random()
 
             val resp = APIHttpReq(API_ERROR_URL,file.readText(), "POST", false)
-            /*
-            val conn = URL(API_ERROR_URL).openConnection() as HttpsURLConnection
-            conn.doOutput = true;
-            conn.readTimeout = 10000;
-            conn.connectTimeout = 15000;
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            val ins = file.inputStream().readBytes()
-            conn.outputStream.write(ins)
-            conn.connect()
-            resp = if (conn.responseCode != 200) {
-                conn.errorStream.bufferedReader().readText()
-            } else {
-                conn.inputStream.bufferedReader().readText()
-            }
-             */
 
             try {
                 val json = JSONObject(resp)
-                if (json.has("status") and (json.getString("status") != "success")) {
-                    Log.e(LOGTAG, "Invalid status posting ${file.name}: $resp")
-                    return true
+                if (json.has("status") and (json.getString("status") == "success")) {
+                    // ok, it looks like everything worked, we can delete the file now
+                    Log.e(LOGTAG, "Log submitted successfully ${file.name}")
+                    file.delete()
+                    return "Log submitted successfully"
                 }
-                // ok, it looks like everything worked, we can delete the file now
-                Log.e(LOGTAG, "Posted error ${file.name} to server")
-                file.delete()
-                return false
+                else if (json.has("status") and (json.getString("status") != "success")) {
+                    Log.e(LOGTAG, "Error invalid status posting ${file.name}: $resp")
+                    return "Error invalid status posting ${file.name}: $resp"
+                } else {
+                    return "Error posting ${file.name} to server: $resp"
+                }
             } catch (e:Exception) {
                 Log.e(LOGTAG, "Error posting ${file.name}: $resp")
+                return "Error posting ${file.name}: $resp"
             }
         } catch (e: Exception) {
             Log.e(LOGTAG, "Error reporting error: ${e.message}\n${stackString(e)}")
+            return "Error reporting error: ${e.message}\n${stackString(e)}"
         }
-        return true
     }
 
     fun checkNetworkConnection() =
@@ -114,7 +106,7 @@ object AnodeClient {
         }
 
     fun storeError(ctx: Context, type: String, e: Throwable) {
-        var err = errorJsonObj(ctx, type, e).toString(1)
+        val err = errorJsonObj(ctx, type, e).toString(1)
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
         File(ctx.filesDir,fname).appendText(err)
         Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
@@ -442,7 +434,8 @@ object AnodeClient {
         var url: URL
         //If connected to cjdns then use internal ipv6 address for API calls
         if (CjdnsSocket.isCjdnsConnected()) {
-            val cjdnsurl = address.replace("vpn.anode.co","[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]")
+            var cjdnsurl = address.replace("vpn.anode.co","[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]")
+            cjdnsurl = cjdnsurl.replace("https:","http:")
             url = URL(cjdnsurl)
         } else {
             url = URL(address)
@@ -494,7 +487,18 @@ object AnodeClient {
         }
 
         override fun run() {
-            CjdnsSocket.getCjdnsRoutes()
+            if (!CjdnsSocket.getCjdnsRoutes()) {
+                //Disconnect
+                stopThreads()
+                statustv.post(Runnable {
+                    statustv.text  = "VPN disconnected"
+                    statustv.setBackgroundColor(0xFFFF0000.toInt())
+                } )
+                CjdnsSocket.Core_stopTun()
+                CjdnsSocket.clearRoutes()
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                connectButton.text = "CONNECT"
+            }
             val newip4address = CjdnsSocket.ipv4Address
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
@@ -544,16 +548,14 @@ object AnodeClient {
 
     class PostLogs() : AsyncTask<Any?, Any?, String>() {
         override fun doInBackground(objects: Array<Any?>): String? {
-            var result = false
             if (checkNetworkConnection())
-                result = httpPostError( mycontext.filesDir)
-            return result.toString()
+                return httpPostError( mycontext.filesDir)
+            return "no connection"
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            if (result == "True") Toast.makeText(mycontext, "Logs submitted successfully", Toast.LENGTH_SHORT).show()
-            else Toast.makeText(mycontext, "Logs could not be submitted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
         }
     }
 }
