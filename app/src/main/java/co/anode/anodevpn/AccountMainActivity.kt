@@ -125,7 +125,7 @@ class AccountMainActivity : AppCompatActivity() {
                 }
             }
             //val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
-            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true)
+            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }

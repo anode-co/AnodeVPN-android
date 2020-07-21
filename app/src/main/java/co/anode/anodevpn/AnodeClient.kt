@@ -18,11 +18,14 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import kotlinx.android.synthetic.main.content_main.*
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.*
+import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.net.HttpURLConnection
+import java.net.NetworkInterface
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -32,6 +35,7 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
+import kotlin.collections.ArrayList
 
 
 object AnodeClient {
@@ -64,12 +68,12 @@ object AnodeClient {
 
     fun httpPostError(dir: File): String {
         try {
-            if (!dir.exists()) { return "No log files to be submitted"; }
+            if (!dir.exists()) { return "No log files to be submitted" }
             val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
-            if (files.isEmpty()) { return "No log files to be submitted"; }
+            if (files.isEmpty()) { return "No log files to be submitted" }
             val file = files.random()
 
-            val resp = APIHttpReq(API_ERROR_URL,file.readText(), "POST", false)
+            val resp = APIHttpReq(API_ERROR_URL,file.readText(), "POST", false, false)
 
             try {
                 val json = JSONObject(resp)
@@ -137,6 +141,9 @@ object AnodeClient {
         ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
         ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString()) }
         ignoreErr{ jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
+        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val username = prefs!!.getString("username","")
+        ignoreErr{ jsonObject.accumulate("username", username) }
         jsonObject.accumulate("message", err.message)
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
@@ -355,7 +362,7 @@ object AnodeClient {
             val pubkey = params[0]
             val jsonObject = JSONObject()
             jsonObject.accumulate("date", System.currentTimeMillis())
-            val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true )
+            val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -389,6 +396,10 @@ object AnodeClient {
                             statustv.text  = "VPN Authorization failed: ${jsonObj.getString("message")}"
                             statustv.setBackgroundColor(0x00000000)
                         } )
+                        connectButton.text = "CONNECT"
+                        CjdnsSocket.Core_stopTun()
+                        CjdnsSocket.clearRoutes()
+                        mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                     }
                 }
             }
@@ -428,26 +439,28 @@ object AnodeClient {
         }
     }
 
-    fun APIHttpReq(address: String, body: String, method: String, needsAuth: Boolean): String {
+    fun APIHttpReq(address: String, body: String, method: String, needsAuth: Boolean,isRetry: Boolean): String {
+        var useHttps = true
         Log.i(LOGTAG,"HttpReq at $address with $body and Auth:$needsAuth")
+        val cjdnsServerAddress = "h.vpn.anode.co" //"[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]"
         var result = ""
         var url: URL
-        //If connected to cjdns then use internal ipv6 address for API calls
-        if (CjdnsSocket.isCjdnsConnected()) {
-            var cjdnsurl = address.replace("vpn.anode.co","[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]")
+
+        url = URL(address)
+        //if connection failed and we are connected to cjdns try with ipv6 address
+        if(isRetry and isVpnActive()) {
+            var cjdnsurl = address.replace("vpn.anode.co",cjdnsServerAddress)
             cjdnsurl = cjdnsurl.replace("https:","http:")
+            useHttps = false
             url = URL(cjdnsurl)
-        } else {
-            url = URL(address)
         }
-        val conn = url.openConnection() as HttpURLConnection
+        val conn: HttpURLConnection
+        if (useHttps)
+            conn = url.openConnection() as HttpsURLConnection
+        else
+            conn = url.openConnection() as HttpURLConnection
+        conn.connectTimeout = 5000
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        //Do a GET request if there is no body and does not need authorization
-        /*if ((body.isEmpty()) and (!needsAuth)){
-            conn.requestMethod = "GET"
-        } else {
-            conn.requestMethod = "POST"
-        }*/
         conn.requestMethod = method
 
         val bytes = body.toByteArray()
@@ -459,8 +472,14 @@ object AnodeClient {
             val sig = res["signature"].str()
             conn.setRequestProperty("Authorization", "cjdns $sig")
         }
-
-        conn.connect()
+        try {
+            conn.connect()
+        } catch (e: SocketTimeoutException) {
+            if (url.toString().contains(cjdnsServerAddress)) {
+                APIHttpReq(address,body,method,needsAuth,true)
+                return ""
+            }
+        }
         //Send body
         if (conn.requestMethod == "POST") conn.outputStream.write(bytes)
 
@@ -557,5 +576,18 @@ object AnodeClient {
             super.onPostExecute(result)
             Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    fun isVpnActive(): Boolean {
+        val networkList:ArrayList<String> = ArrayList()
+        try {
+            for (networkInterface in Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                if (networkInterface.isUp()) networkList.add(networkInterface.getName())
+            }
+        } catch (ex: java.lang.Exception) {
+            return false
+        }
+
+        return networkList.contains("tun0")
     }
 }

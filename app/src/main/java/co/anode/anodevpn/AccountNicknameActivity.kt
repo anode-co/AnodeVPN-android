@@ -51,7 +51,7 @@ class AccountNicknameActivity : AppCompatActivity() {
 
     inner class usernameGenerate() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val resp = AnodeClient.APIHttpReq(API_USERNAME_GENERATE,"", "GET",true)
+            val resp = AnodeClient.APIHttpReq(API_USERNAME_GENERATE,"", "GET",true, false)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -82,7 +82,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String?): String? {
             val jsonObject = JSONObject()
             jsonObject.accumulate("username", params[0])
-            val resp = AnodeClient.APIHttpReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST", true)
+            val resp = AnodeClient.APIHttpReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }

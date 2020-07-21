@@ -171,19 +171,21 @@ class AnodeUtil(c: Context?) {
             val json = JSONObject(filecontent)
             val interfaces = json.getJSONObject("interfaces")
             val UDPInterface = interfaces.getJSONArray("UDPInterface")
+            //Peers now added with RPC call
             //Add Peers
+            /*
             val peer = JSONObject()
             val peervalues = JSONObject()
-            /*peervalues.put("login", "cjd-snode")
+            peervalues.put("login", "cjd-snode")
             peervalues.put("password", "wwbn34yhxhtubtghq6y2pksyt7c9mm8")
             peervalues.put("publicKey", "9syly12vuwr1jh5qpktmjc817y38bc9ytsvs8d5qwcnvn6c2lwq0.k")
             peer.put("94.23.31.145:17102", peervalues)
-             */
             peervalues.put("login", "ipredator.se/cjdns_public_node")
             peervalues.put("password", "use_more_bandwidth")
             peervalues.put("publicKey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
             peer.put("198.167.222.70:54673", peervalues)
             UDPInterface.getJSONObject(0).put("connectTo", peer)
+             */
             //Add tunfd and tunnel socket
             val router = json.getJSONObject("router")
             val interf = router.getJSONObject("interface")

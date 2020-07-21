@@ -86,7 +86,7 @@ class SignInActivity : AppCompatActivity() {
             val jsonObject = JSONObject()
             jsonObject.accumulate("emailOrUsername", params[0])
             jsonObject.accumulate("password", params[1])
-            val resp = AnodeClient.APIHttpReq(API_SIGNIN_URL, jsonObject.toString(), "POST", true)
+            val resp = AnodeClient.APIHttpReq(API_SIGNIN_URL, jsonObject.toString(), "POST", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }

@@ -39,7 +39,7 @@ class checkstatusURL(context: Context?, handler: Handler?) : AsyncTask<String, V
     }
 
     override fun doInBackground(vararg params: String?): String? {
-        return AnodeClient.APIHttpReq(params[0]!!, "", "GET", true)
+        return AnodeClient.APIHttpReq(params[0]!!, "", "GET", true, false)
     }
 
     override fun onPostExecute(result: String?) {
