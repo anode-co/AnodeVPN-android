@@ -127,6 +127,8 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, 0)
         } else {
             onActivityResult(0, Activity.RESULT_OK, null)
+            //Add peers
+            CjdnsSocket.UDPInterface_beginConnection()
         }
 
         // Removed public key from main
