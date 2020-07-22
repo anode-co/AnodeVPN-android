@@ -50,6 +50,7 @@ object AnodeClient {
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
+    private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
     var downloadFails = 0
     val h = Handler()
@@ -384,10 +385,14 @@ object AnodeClient {
                             statustv.text  = "VPN Authorization success"
                             statustv.setBackgroundColor(0x00000000)
                         } )
+                        //do not try to reconnect while re-authorization
                         val node = "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"
-                        cjdnsConnectVPN(node)
+                        if (!isVpnActive()) {
+                            cjdnsConnectVPN(node)
+                        }
                         val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
                         with (prefs.edit()) {
+                            putLong("LastAuthorized", System.currentTimeMillis())
                             putString("ServerPublicKey",node)
                             commit()
                         }
@@ -396,6 +401,11 @@ object AnodeClient {
                             statustv.text  = "VPN Authorization failed: ${jsonObj.getString("message")}"
                             statustv.setBackgroundColor(0x00000000)
                         } )
+                        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                        with (prefs.edit()) {
+                            putLong("LastAuthorized", 0)
+                            commit()
+                        }
                         connectButton.text = "CONNECT"
                         CjdnsSocket.Core_stopTun()
                         CjdnsSocket.clearRoutes()
@@ -537,6 +547,12 @@ object AnodeClient {
                     statustv.text  = "VPN Connected"
                     statustv.setBackgroundColor(0xFF00FF00.toInt())
                 } )
+            }
+            //Check for needed authorization call
+            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            val Authtimestamp = prefs.getLong("LastAuthorized",0)
+            if ((System.currentTimeMillis() - Authtimestamp) > Auth_TIMEOUT) {
+                AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
             }
             //GetPublicIP().execute(status)
             h!!.postDelayed(this, 10000) //ms
