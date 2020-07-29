@@ -37,14 +37,14 @@
             android:hint="@string/prompt_password" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
+    <!--<TextView
         android:id="@+id/textForgotPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="forgot password?"
         android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="@id/passwordLayout"
-        app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+        app:layout_constraintTop_toBottomOf="@id/passwordLayout" />-->
 
     <Button
         android:id="@+id/buttonSingIn"

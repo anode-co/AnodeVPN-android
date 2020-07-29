@@ -89,6 +89,10 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.statustv = findViewById(R.id.textview_status)
         AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
 
+        with (prefs.edit()) {
+            putBoolean("SignedIn", false)
+            commit()
+        }
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
 
@@ -194,6 +198,19 @@ class MainActivity : AppCompatActivity() {
             }
         }, "MainActivity.CheckUpdates").start()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val signedin = prefs.getBoolean("SignedIn", false)
+        val topUsername: TextView = findViewById(R.id.top_username)
+        if (signedin) {
+            val username = prefs.getString("username","")
+            topUsername.text = username
+        } else {
+            topUsername.text = ""
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.

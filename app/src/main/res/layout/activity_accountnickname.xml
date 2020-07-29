@@ -20,6 +20,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/button_generateusername"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="0dp"
+        android:background="@drawable/ic_refresh"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextNickname"
+        app:layout_constraintStart_toEndOf="@+id/editTextNickname"/>
 
     <CheckBox
         android:id="@+id/checkBoxDataPolicy"
@@ -30,16 +39,6 @@
         app:layout_constraintStart_toStartOf="@id/editTextNickname"
         tools:layout_editor_absoluteX="103dp"
         tools:layout_editor_absoluteY="311dp" />
-
-    <Button
-        android:id="@+id/button_generateusername"
-        android:text="GENERATE USERNAME"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="24dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_continue"/>
 
     <Button
         android:id="@+id/button_continue"

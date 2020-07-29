@@ -1,5 +1,6 @@
 package co.anode.anodevpn
 
+import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -19,22 +20,22 @@ import org.json.JSONObject
 
 class SignInActivity : AppCompatActivity() {
     private val API_VERSION = "0.3"
-    private var API_SIGNIN_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize"
+    private var API_SIGNIN_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
 
         val signup: TextView = findViewById(R.id.textSignUp)
-        val link: Spanned = HtmlCompat.fromHtml("don't have an account yer? <a href='#'>Sign Up</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val link: Spanned = HtmlCompat.fromHtml("don't have an account yet? <a href='#'>Sign Up</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signup.movementMethod = LinkMovementMethod.getInstance()
         signup.text = link
 
         val signUpLink = findViewById<TextView>(R.id.textSignUp)
         signUpLink.setMovementMethod(object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
-                val accountActivity = Intent(applicationContext, AccountMainActivity::class.java)
-                startActivityForResult(accountActivity, 0)
+                val nicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+                startActivityForResult(nicknameActivity, 0)
             }
         })
 
@@ -94,13 +95,19 @@ class SignInActivity : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received: $result")
-            if ((result.isNullOrBlank()) || (result.contains("Internal Server Error"))) {
+            if (result.isNullOrBlank()) {
+                Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
+                val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                with (prefs.edit()) {
+                    putBoolean("SignedIn", true)
+                    commit()
+                }
+                thread.start();
+            }
+            else if (result.contains("Internal Server Error")) {
                 finish()
             } else if (result.contains("400") || result.contains("401")) {
                 Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
-                thread.start();
             }
         }
     }

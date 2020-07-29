@@ -23,9 +23,14 @@ class AccountNicknameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_accountnickname)
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-        val prefsusername = prefs!!.getString("username","username")
+        val prefsusername = prefs!!.getString("username","")
         usernameText = findViewById(R.id.editTextNickname)
-        usernameText?.setText(prefsusername)
+        if (prefsusername.isEmpty()) {
+            usernameGenerate().execute()
+        } else {
+            usernameText?.setText(prefsusername)
+        }
+
         val generateusername: Button = findViewById(R.id.button_generateusername)
         generateusername.setOnClickListener() {
             usernameGenerate().execute()
