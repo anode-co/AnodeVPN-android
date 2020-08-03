@@ -169,8 +169,8 @@ class AnodeUtil(c: Context?) {
         try {
             val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
-            val interfaces = json.getJSONObject("interfaces")
-            val UDPInterface = interfaces.getJSONArray("UDPInterface")
+            //val interfaces = json.getJSONObject("interfaces")
+            //val UDPInterface = interfaces.getJSONArray("UDPInterface")
             //Peers now added with RPC call
             //Add Peers
             /*
@@ -190,7 +190,9 @@ class AnodeUtil(c: Context?) {
             val router = json.getJSONObject("router")
             val interf = router.getJSONObject("interface")
             interf.put("tunfd", "android")
-
+            val security = json.getJSONArray("security")
+            if (security.getJSONObject(3).has("noforks"))
+                security.getJSONObject(3).put("noforks",0)
             //Save file
             val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$CJDROUTE_CONFFILE"))
             val out = json.toString().replace("\\/", "/")
