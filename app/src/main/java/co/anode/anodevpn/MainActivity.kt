@@ -197,7 +197,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, "MainActivity.CheckUpdates").start()
-
+        //On first run show nickname activity
+        if (prefs.getBoolean("FirstRun",true)) {
+            Log.i(LOGTAG,"First run: Start nickname activity")
+            with (prefs.edit()) {
+                putBoolean("FirstRun", false)
+                commit()
+            }
+            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+            startActivity(accountNicknameActivity)
+        }
     }
 
     override fun onResume() {
