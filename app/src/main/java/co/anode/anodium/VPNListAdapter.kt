@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater

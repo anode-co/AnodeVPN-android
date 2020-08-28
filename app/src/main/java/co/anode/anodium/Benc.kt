@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import kotlin.Long
 

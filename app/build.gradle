@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         setVersionNumberByTag()
-        applicationId 'co.anode.anodevpn'
+        applicationId 'co.anode.anodium'
         minSdkVersion 26
         targetSdkVersion 28
         versionCode = generateVersionCode()

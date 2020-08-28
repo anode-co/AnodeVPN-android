@@ -6,7 +6,7 @@ fi
 
 file=$(mktemp)
 GIT_ID=$(git describe --tags HEAD)
-echo "$GIT_ID" | sed 's/anodevpn-\|\.\|-/\n/g' | awk '
+echo "$GIT_ID" | sed 's/anodium-\|\.\|-/\n/g' | awk '
   BEGIN {
     M=-1;
     m=-1;

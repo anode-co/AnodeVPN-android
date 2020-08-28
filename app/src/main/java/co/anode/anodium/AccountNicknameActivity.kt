@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.content.Context
 import android.content.Intent
@@ -56,7 +56,7 @@ class AccountNicknameActivity : AppCompatActivity() {
 
     inner class usernameGenerate() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val resp = AnodeClient.APIHttpReq(API_USERNAME_GENERATE,"", "GET",true, false)
+            val resp = AnodeClient.APIHttpReq(API_USERNAME_GENERATE, "", "GET", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }

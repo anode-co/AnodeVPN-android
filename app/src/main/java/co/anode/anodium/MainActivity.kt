@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -8,11 +8,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.*
-import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,14 +21,13 @@ import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.net.URL
 import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
     private var anodeUtil: AnodeUtil? = null
     companion object {
-        private const val LOGTAG = "co.anode.anodevpn"
+        private const val LOGTAG = "co.anode.anodium"
     }
 
     fun exception(paramThrowable: Throwable) {
@@ -197,16 +194,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, "MainActivity.CheckUpdates").start()
-        //On first run show nickname activity
-        if (prefs.getBoolean("FirstRun",true)) {
-            Log.i(LOGTAG,"First run: Start nickname activity")
-            with (prefs.edit()) {
-                putBoolean("FirstRun", false)
-                commit()
-            }
-            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-            startActivity(accountNicknameActivity)
-        }
+
     }
 
     override fun onResume() {
@@ -269,7 +257,18 @@ class MainActivity : AppCompatActivity() {
     super.onActivityResult(requestCode, resultCode, data)
     if (resultCode == Activity.RESULT_OK) {
             //Initialize CJDNS socket
-            CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
+        CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
+        }
+        //On first run show nickname activity
+        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("FirstRun",true)) {
+            Log.i(LOGTAG,"First run: Start nickname activity")
+            with (prefs.edit()) {
+                putBoolean("FirstRun", false)
+                commit()
+            }
+            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+            startActivity(accountNicknameActivity)
         }
     }
 
@@ -281,7 +280,7 @@ class MainActivity : AppCompatActivity() {
             //Do nothing
         } else {
             // Permission is missing
-            Log.i(co.anode.anodevpn.LOGTAG, "Missing permission WRITE_EXTERNAL_STORAGE")
+            Log.i(co.anode.anodium.LOGTAG, "Missing permission WRITE_EXTERNAL_STORAGE")
             requestStoragePermission()
         }
     }

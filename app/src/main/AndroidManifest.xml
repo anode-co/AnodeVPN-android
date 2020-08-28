@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="co.anode.anodevpn">
+    package="co.anode.anodium">
 
     <application
         android:allowBackup="true"
@@ -12,17 +12,17 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="q">
-        <activity android:name=".DebugActivity"/>
-        <activity android:name=".VerificationActivity" />
-        <activity android:name=".SignInActivity" />
-        <activity android:name=".AccountMainActivity" />
-        <activity android:name=".AccountNicknameActivity" />
+        <activity android:name="co.anode.anodium.DebugActivity"/>
+        <activity android:name="co.anode.anodium.VerificationActivity" />
+        <activity android:name="co.anode.anodium.SignInActivity" />
+        <activity android:name="co.anode.anodium.AccountMainActivity" />
+        <activity android:name="co.anode.anodium.AccountNicknameActivity" />
         <activity
-            android:name=".VpnListActivity"
+            android:name="co.anode.anodium.VpnListActivity"
             android:label="@string/title_activity_vpn_servers_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".MainActivity"
+            android:name="co.anode.anodium.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -43,7 +43,7 @@
         </provider>
 
         <service
-            android:name=".AnodeVpnService"
+            android:name="co.anode.anodium.AnodeVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService" />

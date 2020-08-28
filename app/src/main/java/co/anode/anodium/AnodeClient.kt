@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
@@ -148,7 +148,7 @@ object AnodeClient {
         jsonObject.accumulate("message", err.message)
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
-        val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodevpn.log")
+        val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodium.log")
         var debugmsg = "";
         ignoreErr {
             debugmsg += "Error stack: " + stackString(err) + "\n";
@@ -203,12 +203,12 @@ object AnodeClient {
 
     fun downloadFile(uri: Uri, version: String, filesize: Long): Long {
         Log.i(LOGTAG, "download file from $uri")
-        val filename = "anodevpn-$version.apk"
+        val filename = "anodium-$version.apk"
         var downloadReference: Long = 0
         val downloadManager = mycontext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         var destination = mycontext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"
         destination += filename
-        val destinationuri = Uri.parse("${FILE_BASE_PATH}$destination")
+        val destinationuri = Uri.parse("$FILE_BASE_PATH$destination")
         var flag = true
         try {
             val file = File(destination)
@@ -328,7 +328,7 @@ object AnodeClient {
             if (result != null) {
                 if (result.contains("http")) {
                     Log.i(LOGTAG, "Updating APK from $result")
-                    Toast.makeText(mycontext,R.string.downloading_update, Toast.LENGTH_LONG).show()
+                    Toast.makeText(mycontext, R.string.downloading_update, Toast.LENGTH_LONG).show()
                     val url = result.split("|")[0]
                     val version = result.split("|")[1]
                     val filesize = result.split("|")[2].toLong()

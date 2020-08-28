@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.content.Intent
 import android.net.VpnService
@@ -11,8 +11,8 @@ import java.lang.Exception
 
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
-    val ACTION_CONNECT = "co.anode.anodevpn.START"
-    val ACTION_DISCONNECT = "co.anode.anodevpn.STOP"
+    val ACTION_CONNECT = "co.anode.anodium.START"
+    val ACTION_DISCONNECT = "co.anode.anodium.STOP"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent != null && ACTION_DISCONNECT == intent.action) {

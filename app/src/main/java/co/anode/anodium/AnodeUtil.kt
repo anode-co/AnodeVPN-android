@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.content.Context
 import android.util.Log
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 
 class AnodeUtil(c: Context?) {
-    private val LOGTAG = "co.anode.anodevpn"
+    private val LOGTAG = "co.anode.anodium"
     var context: Context? = null
     var CJDNS_PATH = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
@@ -212,10 +212,10 @@ class AnodeUtil(c: Context?) {
     }
 
     fun logFile() {
-        val filename: String = "$CJDNS_PATH/anodevpn.log"
+        val filename: String = "$CJDNS_PATH/anodium.log"
         if (File("$CJDNS_PATH/last_anodevpn.log").exists())  Files.delete(Paths.get("$CJDNS_PATH/last_anodevpn.log"))
         if (File(filename).exists()) Files.move(Paths.get(filename),Paths.get("$CJDNS_PATH/last_anodevpn.log"))
-        val command = "logcat -f $filename -v time co.anode.anodevpn:V"
+        val command = "logcat -f $filename -v time co.anode.anodium:V"
         try {
             Runtime.getRuntime().exec(command)
         } catch (e: IOException) {

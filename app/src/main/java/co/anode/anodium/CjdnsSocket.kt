@@ -1,17 +1,14 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
-import android.os.Handler
 import android.util.Log
-import org.json.JSONObject
 import java.io.FileDescriptor
 import java.net.InetAddress
-import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 import kotlin.experimental.and
 
-val LOGTAG = "co.anode.anodevpn"
+val LOGTAG = "co.anode.anodiumvpn"
 
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
@@ -198,14 +195,14 @@ object CjdnsSocket {
 
     fun clearRoutes() {
         Log.i(LOGTAG, "clear routes")
-        this.ipv4Address = ""
-        this.ipv4Route = ""
-        this.ipv4RoutePrefix = 0
-        this.ipv4AddressPrefix = 0
-        this.ipv6Route = ""
-        this.ipv6RoutePrefix = 0
-        this.ipv6Address = ""
-        this.ipv6AddressPrefix = 0
+        ipv4Address = ""
+        ipv4Route = ""
+        ipv4RoutePrefix = 0
+        ipv4AddressPrefix = 0
+        ipv6Route = ""
+        ipv6RoutePrefix = 0
+        ipv6Address = ""
+        ipv6AddressPrefix = 0
     }
 
     fun trimBitsforRoute(addr: String, prefix: Int): String {

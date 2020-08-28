@@ -1,29 +1,12 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
-import android.text.Spanned
-import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Switch
-import android.widget.TextView
-import android.widget.Toast
-import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import kotlinx.android.synthetic.main.fragment_first.*
-import java.lang.Exception
-import java.net.URL
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 
 class FirstFragment : Fragment() {
@@ -127,7 +110,7 @@ class FirstFragment : Fragment() {
     }
 
     companion object {
-        private const val LOGTAG = "co.anode.anodevpn"
+        private const val LOGTAG = "co.anode.anodium"
     }
 
  */

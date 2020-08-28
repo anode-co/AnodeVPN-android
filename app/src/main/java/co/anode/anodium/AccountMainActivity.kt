@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -19,7 +19,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import org.json.JSONObject
-import java.util.*
 
 
 class AccountMainActivity : AppCompatActivity() {

@@ -1,4 +1,4 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -90,7 +90,7 @@ object statuschecker: Runnable {
     @SuppressLint("SetTextI18n")
     override fun run() {
         try {
-           checkstatusURL(context,h).execute(url)
+           checkstatusURL(context, h).execute(url)
         } catch (e: Exception) {
             Log.i(LOGTAG,"error in getting confirmation result")
             h!!.postDelayed(this, PollingInterval)

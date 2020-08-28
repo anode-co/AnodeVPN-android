@@ -1,17 +1,14 @@
-package co.anode.anodevpn
+package co.anode.anodium
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.util.Log
-import android.view.View
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.text.HtmlCompat
@@ -28,7 +25,7 @@ class DebugActivity : AppCompatActivity() {
         buttonSubmitLogs.setOnClickListener {
             Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
             AnodeClient.mycontext = baseContext
-            AnodeClient.storeError(baseContext,"other", Throwable("User submitted logs"))
+            AnodeClient.storeError(baseContext, "other", Throwable("User submitted logs"))
             AnodeClient.PostLogs()
         }
 
@@ -38,14 +35,14 @@ class DebugActivity : AppCompatActivity() {
             while (true) {
                 this.runOnUiThread(Runnable {
                     val appversion = findViewById<TextView>(R.id.text_AppVersion)
-                    appversion.text = "App Version: "+BuildConfig.VERSION_NAME
+                    appversion.text = "App Version: "+ BuildConfig.VERSION_NAME
                     val ipv4 = findViewById<TextView>(R.id.text_ipv4)
-                    ipv4.text = "IPv4: "+CjdnsSocket.ipv4Address
+                    ipv4.text = "IPv4: "+ CjdnsSocket.ipv4Address
                     val cjdnsipv6 = findViewById<TextView>(R.id.text_cjdnsipv6)
                     val nodeinfo = CjdnsSocket.Core_nodeInfo()
                     cjdnsipv6.text = "cjdns IPv6: "+nodeinfo["myIp6"].str()
                     val internetipv6 = findViewById<TextView>(R.id.text_internetipv6)
-                    internetipv6.text = "internet IPv6: "+CjdnsSocket.ipv6Address
+                    internetipv6.text = "internet IPv6: "+ CjdnsSocket.ipv6Address
                     val pubkey = findViewById<TextView>(R.id.text_pubkey)
                     pubkey.text = "Public Key: "+anodeUtil.getPubKey()
                     val nodeLink = findViewById<TextView>(R.id.text_nodes)
