@@ -30,7 +30,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/editTextNickname"
         app:layout_constraintStart_toEndOf="@+id/editTextNickname"/>
 
-    <CheckBox
+    <!--<CheckBox
         android:id="@+id/checkBoxDataPolicy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toBottomOf="@+id/editTextNickname"
         app:layout_constraintStart_toStartOf="@id/editTextNickname"
         tools:layout_editor_absoluteX="103dp"
-        tools:layout_editor_absoluteY="311dp" />
+        tools:layout_editor_absoluteY="311dp" />-->
 
     <Button
         android:id="@+id/button_continue"
