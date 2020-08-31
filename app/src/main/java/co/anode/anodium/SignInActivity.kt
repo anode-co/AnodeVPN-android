@@ -87,6 +87,11 @@ class SignInActivity : AppCompatActivity() {
             val jsonObject = JSONObject()
             jsonObject.accumulate("emailOrUsername", params[0])
             jsonObject.accumulate("password", params[1])
+            val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            with (prefs.edit()) {
+                putString("username", params[0])
+                commit()
+            }
             val resp = AnodeClient.APIHttpReq(API_SIGNIN_URL, jsonObject.toString(), "POST", true, false)
             Log.i(LOGTAG, resp)
             return resp

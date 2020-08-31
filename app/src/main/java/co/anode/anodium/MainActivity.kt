@@ -7,7 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.VpnService
-import android.os.*
+import android.os.AsyncTask
+import android.os.Bundle
+import android.os.Environment
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -26,6 +29,8 @@ import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
     private var anodeUtil: AnodeUtil? = null
+    private var mainMenu: Menu? = null
+
     companion object {
         private const val LOGTAG = "co.anode.anodium"
     }
@@ -42,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         object : Thread() {
             override fun run() {
                 Looper.prepare();
-                Toast.makeText(baseContext, "ERROR: "+paramThrowable.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(baseContext, "ERROR: " + paramThrowable.message, Toast.LENGTH_LONG).show()
                 AnodeClient.mycontext = baseContext
                 Looper.loop();
             }
@@ -54,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         exitProcess(1)
     }
 
-    private fun checked(l: ()->Unit) {
+    private fun checked(l: () -> Unit) {
         try {
             l()
         } catch (t: Throwable) {
@@ -85,15 +90,9 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.mycontext = baseContext
         AnodeClient.statustv = findViewById(R.id.textview_status)
         AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
-
-        with (prefs.edit()) {
-            putBoolean("SignedIn", false)
-            commit()
-        }
+        AnodeClient.mainActivity = this
         //Get Public Key ID for API Authorization
         //AnodeClient.httpPostPubKeyRegistration("test","test")
-
-
         /*
         button.setOnClickListener {
             Toast.makeText(baseContext, R.string.check_update, Toast.LENGTH_LONG).show()
@@ -181,7 +180,7 @@ class MainActivity : AppCompatActivity() {
         checkStoragePermission()
         //Check for updates every 5min
         Thread(Runnable {
-            Log.i(LOGTAG,"MainActivity.CheckUpdates")
+            Log.i(LOGTAG, "MainActivity.CheckUpdates")
             while (true) {
                 AnodeClient.checkNewVersion(false)
                 if (AnodeClient.downloadFails > 1) {
@@ -197,21 +196,40 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onResume() {
-        super.onResume()
+    fun setUsernameTopBar() {
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val topUsername: TextView = findViewById(R.id.top_username)
         if (signedin) {
-            val username = prefs.getString("username","")
+            val username = prefs.getString("username", "")
             topUsername.text = username
+            //Remove sign in and sign up from menu
+            if (mainMenu != null) {
+                mainMenu!!.findItem(R.id.action_signin).setVisible(false)
+                mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
+                mainMenu!!.findItem(R.id.action_logout).setVisible(true)
+            }
         } else {
             topUsername.text = ""
+            //Add sign in and sing up to menu
+            if (mainMenu != null) {
+                mainMenu!!.findItem(R.id.action_signin).setVisible(true)
+                mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
+                mainMenu!!.findItem(R.id.action_logout).setVisible(false)
+            }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        setUsernameTopBar()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
+        mainMenu = menu
+        setUsernameTopBar()
         return true
     }
 
@@ -220,12 +238,12 @@ class MainActivity : AppCompatActivity() {
 // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
         if (id == R.id.action_account_settings) {
-            Log.i(LOGTAG,"Start nickname activity")
+            Log.i(LOGTAG, "Start nickname activity")
             val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
             startActivity(accountNicknameActivity)
             return true
         } else if (id == R.id.action_signin) {
-            Log.i(LOGTAG,"Start sign in activity")
+            Log.i(LOGTAG, "Start sign in activity")
             val signinActivity = Intent(applicationContext, SignInActivity::class.java)
             startActivity(signinActivity)
             return true
@@ -243,9 +261,13 @@ class MainActivity : AppCompatActivity() {
             AnodeClient.checkNewVersion(true)
             return true
         } else if (id == R.id.action_debug) {
-            Log.i(LOGTAG,"Start debug activity")
+            Log.i(LOGTAG, "Start debug activity")
             val debugActivity = Intent(applicationContext, DebugActivity::class.java)
             startActivity(debugActivity)
+            return true
+        } else if (id == R.id.action_logout) {
+            Log.i(LOGTAG, "Log out")
+            AnodeClient.LogoutUser().execute()
             return true
         } else {
             super.onOptionsItemSelected(item)
@@ -261,9 +283,9 @@ class MainActivity : AppCompatActivity() {
         }
         //On first run show nickname activity
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
-        if (prefs.getBoolean("FirstRun",true)) {
-            Log.i(LOGTAG,"First run: Start nickname activity")
-            with (prefs.edit()) {
+        if (prefs.getBoolean("FirstRun", true)) {
+            Log.i(LOGTAG, "First run: Start nickname activity")
+            with(prefs.edit()) {
                 putBoolean("FirstRun", false)
                 commit()
             }
@@ -316,14 +338,14 @@ class MainActivity : AppCompatActivity() {
             super.onPostExecute(result)
             if (result!!)
                 textConnectivity?.post(Runnable {
-                    textConnectivity?.text  = "Connected"
+                    textConnectivity?.text = "Connected"
                     textConnectivity?.setBackgroundColor(0xFF00FF00.toInt())
-                } )
+                })
             else
                 textConnectivity?.post(Runnable {
-                    textConnectivity?.text  = "Disconnected"
+                    textConnectivity?.text = "Disconnected"
                     textConnectivity?.setBackgroundColor(0xFFFF0000.toInt())
-                } )
+                })
         }
 
     }

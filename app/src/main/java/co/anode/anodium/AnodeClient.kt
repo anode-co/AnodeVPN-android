@@ -1,6 +1,7 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -17,6 +18,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import org.json.JSONException
 import org.json.JSONObject
@@ -42,11 +44,13 @@ object AnodeClient {
     lateinit var mycontext: Context
     lateinit var statustv: TextView
     lateinit var connectButton: Button
+    lateinit var mainActivity: AppCompatActivity
     private const val API_VERSION = "0.3"
     private const val FILE_BASE_PATH = "file://"
     private const val PROVIDER_PATH = ".provider"
     private const val API_ERROR_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/events/"
-    private const val API_REGISTRATION_URL = "https://api.anode.co/api/$API_VERSION/vpn/client/accounts/"
+    private const val API_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/client/accounts/"
+    private const val API_LOGOUT_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize/"
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
@@ -55,10 +59,11 @@ object AnodeClient {
     var downloadFails = 0
     val h = Handler()
 
-    fun init(context: Context, textview: TextView, button: Button)  {
+    fun init(context: Context, textview: TextView, button: Button, activity: AppCompatActivity)  {
         mycontext = context
         statustv = textview
         connectButton = button
+        mainActivity = activity
     }
 
     fun stackString(e: Throwable): String {
@@ -377,6 +382,12 @@ object AnodeClient {
                     statustv.text  = "VPN Authorization failed with unknown reason"
                     statustv.setBackgroundColor(0x00000000)
                 } )
+                //Sign user out
+                val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                with (prefs.edit()) {
+                    putBoolean("SignedIn", false)
+                    commit()
+                }
             } else {
                 val jsonObj = JSONObject(result)
                 if (jsonObj.has("status")) {
@@ -605,5 +616,36 @@ object AnodeClient {
         }
 
         return networkList.contains("tun0")
+    }
+
+    class LogoutUser() : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String? {
+            val resp = APIHttpReq( API_LOGOUT_URL, "","DELETE", true , false)
+            Log.i(LOGTAG, resp)
+            return resp
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
+            if (!result.isNullOrBlank()) {
+                val jsonObj = JSONObject(result)
+                if (jsonObj.has("status")) {
+                    if (jsonObj.getString("status") == "success") {
+                        Toast.makeText(mycontext, "User logged out", Toast.LENGTH_SHORT).show()
+                        //Sign user out
+                        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                        with(prefs.edit()) {
+                            putBoolean("SignedIn", false)
+                            putString("username", "")
+                            commit()
+                        }
+                        (mainActivity as MainActivity).setUsernameTopBar()
+                    }
+                }
+            } else {
+                Toast.makeText(mycontext, "$result", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

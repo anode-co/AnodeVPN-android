@@ -4,11 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import org.json.JSONObject
 
 
@@ -22,7 +26,24 @@ class AccountNicknameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_accountnickname)
+
         val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+
+        //Set sign in link
+        val signedin = prefs.getBoolean("SignedIn", false)
+        if (signedin) {
+            val signin: TextView = findViewById(R.id.textSignIn)
+            val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+            signin.movementMethod = LinkMovementMethod.getInstance()
+            signin.text = link
+            signin.setMovementMethod(object : AccountMainActivity.TextViewLinkHandler() {
+                override fun onLinkClick(url: String?) {
+                    val signInActivity = Intent(applicationContext, SignInActivity::class.java)
+                    startActivityForResult(signInActivity, 0)
+                }
+            })
+        }
+
         val prefsusername = prefs!!.getString("username","")
         usernameText = findViewById(R.id.editTextNickname)
         if (prefsusername.isEmpty()) {
@@ -45,6 +66,8 @@ class AccountNicknameActivity : AppCompatActivity() {
                 usernameRegistration().execute(username)
             }
         }
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
