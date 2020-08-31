@@ -31,7 +31,7 @@ class AccountMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_main)
-        prefs = baseContext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signin: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signin.movementMethod = LinkMovementMethod.getInstance()

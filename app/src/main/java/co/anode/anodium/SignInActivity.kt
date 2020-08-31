@@ -87,7 +87,7 @@ class SignInActivity : AppCompatActivity() {
             val jsonObject = JSONObject()
             jsonObject.accumulate("emailOrUsername", params[0])
             jsonObject.accumulate("password", params[1])
-            val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             with (prefs.edit()) {
                 putString("username", params[0])
                 commit()
@@ -102,7 +102,7 @@ class SignInActivity : AppCompatActivity() {
             Log.i(LOGTAG,"Received: $result")
             if (result.isNullOrBlank()) {
                 Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
-                val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 with (prefs.edit()) {
                     putBoolean("SignedIn", true)
                     commit()

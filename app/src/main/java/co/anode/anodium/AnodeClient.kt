@@ -147,12 +147,12 @@ object AnodeClient {
         ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
         ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString()) }
         ignoreErr{ jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
-        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
         jsonObject.accumulate("message", err.message)
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
-        val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodevpn.log")
+        val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodium.log")
         val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodium.log")
         var debugmsg = "";
         ignoreErr {
@@ -383,7 +383,7 @@ object AnodeClient {
                     statustv.setBackgroundColor(0x00000000)
                 } )
                 //Sign user out
-                val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 with (prefs.edit()) {
                     putBoolean("SignedIn", false)
                     commit()
@@ -401,7 +401,7 @@ object AnodeClient {
                         if (!isVpnActive()) {
                             cjdnsConnectVPN(node)
                         }
-                        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                         with (prefs.edit()) {
                             putLong("LastAuthorized", System.currentTimeMillis())
                             putString("ServerPublicKey",node)
@@ -412,7 +412,7 @@ object AnodeClient {
                             statustv.text  = "VPN Authorization failed: ${jsonObj.getString("message")}"
                             statustv.setBackgroundColor(0x00000000)
                         } )
-                        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                         with (prefs.edit()) {
                             putLong("LastAuthorized", 0)
                             commit()
@@ -634,7 +634,7 @@ object AnodeClient {
                     if (jsonObj.getString("status") == "success") {
                         Toast.makeText(mycontext, "User logged out", Toast.LENGTH_SHORT).show()
                         //Sign user out
-                        val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                         with(prefs.edit()) {
                             putBoolean("SignedIn", false)
                             putString("username", "")

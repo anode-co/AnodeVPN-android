@@ -62,7 +62,7 @@ class checkstatusURL(context: Context?, handler: Handler?) : AsyncTask<String, V
             } else if (status == "complete") {
                 h?.removeCallbacks(statuschecker)
                 val backupWalletPassword = jsonObj.getString("backupWalletPassword")
-                val prefs = c?.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                val prefs = c?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 with(prefs!!.edit()) {
                     putString("backupWalletPassword", backupWalletPassword)
                     commit()

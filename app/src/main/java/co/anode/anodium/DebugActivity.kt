@@ -50,7 +50,7 @@ class DebugActivity : AppCompatActivity() {
                     nodeLink.movementMethod = LinkMovementMethod.getInstance()
                     nodeLink.text = link
                     val username = findViewById<TextView>(R.id.text_username)
-                    val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                     username.text = "Username: "+prefs.getString("username","")
                     val node = findViewById<TextView>(R.id.text_node)
                     node.text = "VPN exit key: "+prefs.getString("ServerPublicKey","")

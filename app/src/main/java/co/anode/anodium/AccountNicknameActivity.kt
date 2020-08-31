@@ -27,7 +27,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_accountnickname)
 
-        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
 
         //Set sign in link
         val signedin = prefs.getBoolean("SignedIn", false)
@@ -129,7 +129,7 @@ class AccountNicknameActivity : AppCompatActivity() {
                 val jsonObj = JSONObject(result)
                 val passwordRecoveryToken = jsonObj.getString("passwordRecoveryToken")
                 //Save username
-                val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 with (prefs.edit()) {
                     putString("username",username)
                     putString("passwordRecoveryToken",passwordRecoveryToken)

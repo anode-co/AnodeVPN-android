@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         anodeUtil = AnodeUtil(application)
-        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
@@ -197,7 +197,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setUsernameTopBar() {
-        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val topUsername: TextView = findViewById(R.id.top_username)
         if (signedin) {
@@ -257,7 +257,7 @@ class MainActivity : AppCompatActivity() {
             AnodeClient.PostLogs().execute()
             return true*/
         } else if (id == R.id.action_checkupdates) {
-            Toast.makeText(baseContext, "Checking for newer AnodeVPN version...", Toast.LENGTH_LONG).show()
+            Toast.makeText(baseContext, "Checking for newer Anodium version...", Toast.LENGTH_LONG).show()
             AnodeClient.checkNewVersion(true)
             return true
         } else if (id == R.id.action_debug) {
@@ -282,7 +282,7 @@ class MainActivity : AppCompatActivity() {
         CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
         }
         //On first run show nickname activity
-        val prefs = getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         if (prefs.getBoolean("FirstRun", true)) {
             Log.i(LOGTAG, "First run: Start nickname activity")
             with(prefs.edit()) {
