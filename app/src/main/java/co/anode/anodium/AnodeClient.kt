@@ -373,6 +373,14 @@ object AnodeClient {
             return resp
         }
 
+        override fun onCancelled() {
+            super.onCancelled()
+            statustv.post(Runnable {
+                statustv.text  = "VPN connection cancelled"
+                statustv.setBackgroundColor(0x00000000)
+            } )
+        }
+
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_AUTH_VPN: $result")
@@ -560,7 +568,7 @@ object AnodeClient {
                 } )
             }
             //Check for needed authorization call
-            val prefs = mycontext.getSharedPreferences("co.anode.AnodeVPN", Context.MODE_PRIVATE)
+            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             val Authtimestamp = prefs.getLong("LastAuthorized",0)
             if ((System.currentTimeMillis() - Authtimestamp) > Auth_TIMEOUT) {
                 AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
@@ -628,7 +636,7 @@ object AnodeClient {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
-            if (!result.isNullOrBlank()) {
+            if ((!result.isNullOrBlank()) && (!result.contains("500"))) {
                 val jsonObj = JSONObject(result)
                 if (jsonObj.has("status")) {
                     if (jsonObj.getString("status") == "success") {
