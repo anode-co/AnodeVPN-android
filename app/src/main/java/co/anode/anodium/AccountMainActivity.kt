@@ -142,6 +142,12 @@ class AccountMainActivity : AppCompatActivity() {
                     val msg = jsonObj.getString("message")
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                 } else if (jsonObj.has("accountConfirmationStatusUrl")){ //initial email response
+                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                    with (prefs.edit()) {
+                        putBoolean("SignedIn",true)
+                        putBoolean("Registered",true)
+                        commit()
+                    }
                     val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
                     val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
                     verificationActivity.putExtra("accountConfirmationStatusUrl", accountConfirmation)

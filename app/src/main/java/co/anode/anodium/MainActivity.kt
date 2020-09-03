@@ -146,7 +146,6 @@ class MainActivity : AppCompatActivity() {
         }
         mHandlerTask.run()
         */
-
         Thread(Runnable {
             Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
             while (true) {
@@ -206,16 +205,17 @@ class MainActivity : AppCompatActivity() {
             //Remove sign in and sign up from menu
             if (mainMenu != null) {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(false)
-                mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
+                //mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(true)
             }
+            //Set username on title
             //this.title = "Anodium - $username"
         } else {
             topUsername.text = ""
             //Add sign in and sing up to menu
             if (mainMenu != null) {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(true)
-                mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
+                //mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(false)
             }
         }
@@ -223,8 +223,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val signedin = prefs.getBoolean("SignedIn", false)
+        val nickname_backpressed = prefs.getBoolean("NicknameActivity_BackPressed", false)
+        val signin_backpressed = prefs.getBoolean("SignInActivity_BackPressed", false)
+        //Exit app if user is not signed in
+        if (!signedin and (nickname_backpressed or signin_backpressed)) {
+            with (prefs.edit()) {
+                putBoolean("NicknameActivity_BackPressed",false)
+                putBoolean("SignInActivity_BackPressed",false)
+                commit()
+            }
+            //Close app
+            finishAffinity()
+            System.exit(0)
+        }
         setUsernameTopBar()
+        //Show/Hide Registration on menu
+        if (mainMenu != null) {
+            mainMenu!!.findItem(R.id.action_account_settings).setVisible(!prefs.getBoolean("Registered",false))
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -239,9 +257,15 @@ class MainActivity : AppCompatActivity() {
 // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
         if (id == R.id.action_account_settings) {
-            Log.i(LOGTAG, "Start nickname activity")
-            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-            startActivity(accountNicknameActivity)
+            Log.i(LOGTAG, "Start registration")
+            val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            if (prefs.getString("username","").isNullOrEmpty()) {
+                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+                startActivity(accountNicknameActivity)
+            } else {
+                val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
+                startActivityForResult(accountMainActivity, 0)
+            }
             return true
         } else if (id == R.id.action_signin) {
             Log.i(LOGTAG, "Start sign in activity")
@@ -269,6 +293,9 @@ class MainActivity : AppCompatActivity() {
         } else if (id == R.id.action_logout) {
             Log.i(LOGTAG, "Log out")
             AnodeClient.LogoutUser().execute()
+            //On Log out start sign in activity
+            val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
+            startActivity(signinActivity)
             return true
         } else {
             super.onOptionsItemSelected(item)
@@ -280,10 +307,11 @@ class MainActivity : AppCompatActivity() {
     super.onActivityResult(requestCode, resultCode, data)
     if (resultCode == Activity.RESULT_OK) {
             //Initialize CJDNS socket
-        CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
+            CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
         }
         //On first run show nickname activity
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        /*
         if (prefs.getBoolean("FirstRun", true)) {
             Log.i(LOGTAG, "First run: Start nickname activity")
             with(prefs.edit()) {
@@ -292,6 +320,14 @@ class MainActivity : AppCompatActivity() {
             }
             val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
             startActivity(accountNicknameActivity)
+        }*/
+        //If there is no username stored
+        if (prefs.getString("username","").isNullOrEmpty()) {
+            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+            startActivity(accountNicknameActivity)
+        } else if (!prefs.getBoolean("SignedIn", false)) {
+            val signinActivity = Intent(applicationContext, SignInActivity::class.java)
+            startActivity(signinActivity)
         }
     }
 

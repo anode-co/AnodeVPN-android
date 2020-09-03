@@ -67,6 +67,15 @@ class AccountNicknameActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        with (prefs.edit()) {
+            putBoolean("NicknameActivity_BackPressed",true)
+            commit()
+        }
+        finish()
+    }
+
     abstract class TextViewLinkHandler : LinkMovementMethod() {
         override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
             if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
@@ -151,6 +160,8 @@ class AccountNicknameActivity : AppCompatActivity() {
                 val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 with (prefs.edit()) {
                     putString("username",username)
+                    putBoolean("SignedIn",true)
+                    putBoolean("Registered",false)
                     putString("passwordRecoveryToken",passwordRecoveryToken)
                     commit()
                 }

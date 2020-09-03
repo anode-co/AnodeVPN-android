@@ -636,7 +636,7 @@ object AnodeClient {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
-            if ((!result.isNullOrBlank()) && (!result.contains("500"))) {
+            if ((!result.isNullOrBlank()) && ((!result.contains("500")) && (!result.contains("404")))) {
                 val jsonObj = JSONObject(result)
                 if (jsonObj.has("status")) {
                     if (jsonObj.getString("status") == "success") {
@@ -645,10 +645,9 @@ object AnodeClient {
                         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                         with(prefs.edit()) {
                             putBoolean("SignedIn", false)
-                            putString("username", "")
+                            putBoolean("Registered", false)
                             commit()
                         }
-                        (mainActivity as MainActivity).setUsernameTopBar()
                     }
                 }
             } else {
