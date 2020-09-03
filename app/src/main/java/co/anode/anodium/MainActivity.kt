@@ -209,6 +209,7 @@ class MainActivity : AppCompatActivity() {
                 mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(true)
             }
+            //this.title = "Anodium - $username"
         } else {
             topUsername.text = ""
             //Add sign in and sing up to menu
@@ -351,6 +352,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun disconnectVPN() {
+        AnodeClient.AuthorizeVPN().cancel(true)
         AnodeClient.stopThreads()
         val status = findViewById<TextView>(R.id.textview_status)
         status.setBackgroundColor(0xFFFF0000.toInt())
