@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.text.Spannable
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -29,20 +32,16 @@ class AccountNicknameActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
 
-        //Set sign in link
-        val signedin = prefs.getBoolean("SignedIn", false)
-        if (signedin) {
-            val signin: TextView = findViewById(R.id.textSignIn)
-            val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            signin.movementMethod = LinkMovementMethod.getInstance()
-            signin.text = link
-            signin.setMovementMethod(object : AccountMainActivity.TextViewLinkHandler() {
-                override fun onLinkClick(url: String?) {
-                    val signInActivity = Intent(applicationContext, SignInActivity::class.java)
-                    startActivityForResult(signInActivity, 0)
-                }
-            })
-        }
+        val signin: TextView = findViewById(R.id.textSignIn)
+        val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        signin.movementMethod = LinkMovementMethod.getInstance()
+        signin.text = link
+        signin.setMovementMethod(object : TextViewLinkHandler() {
+            override fun onLinkClick(url: String?) {
+                val signInActivity = Intent(applicationContext, SignInActivity::class.java)
+                startActivityForResult(signInActivity, 0)
+            }
+        })
 
         val prefsusername = prefs!!.getString("username","")
         usernameText = findViewById(R.id.editTextNickname)
@@ -66,8 +65,28 @@ class AccountNicknameActivity : AppCompatActivity() {
                 usernameRegistration().execute(username)
             }
         }
+    }
 
+    abstract class TextViewLinkHandler : LinkMovementMethod() {
+        override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
+            if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
+            var x = event.x.toInt()
+            var y = event.y.toInt()
+            x -= widget.totalPaddingLeft
+            y -= widget.totalPaddingTop
+            x += widget.scrollX
+            y += widget.scrollY
+            val layout = widget.layout
+            val line = layout.getLineForVertical(y)
+            val off = layout.getOffsetForHorizontal(line, x.toFloat())
+            val link = buffer.getSpans(off, off, URLSpan::class.java)
+            if (link.size != 0) {
+                onLinkClick(link[0].url)
+            }
+            return true
+        }
 
+        abstract fun onLinkClick(url: String?)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
