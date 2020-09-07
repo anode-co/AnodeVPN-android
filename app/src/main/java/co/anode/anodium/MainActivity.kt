@@ -243,6 +243,9 @@ class MainActivity : AppCompatActivity() {
             mainMenu!!.findItem(R.id.action_account_settings).setVisible(!prefs.getBoolean("Registered",false))
         }
         //Set button to correct status
+        val status = findViewById<TextView>(R.id.textview_status)
+        status.setBackgroundColor(0x00000000)
+        status.text = ""
         if (AnodeClient.isVpnActive()) {
             buttonconnectvpns.text = "DISCONNECT"
         } else {
