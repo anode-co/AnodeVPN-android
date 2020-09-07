@@ -110,18 +110,25 @@ class SignInActivity : AppCompatActivity() {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received: $result")
             if (result.isNullOrBlank()) {
-                Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
-                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                with (prefs.edit()) {
-                    putBoolean("SignedIn", true)
-                    commit()
-                }
-                thread.start();
+                //unknown
+                finish()
             }
             else if (result.contains("Internal Server Error")) {
                 finish()
             } else if (result.contains("400") || result.contains("401")) {
                 Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
+            } else {
+                val jsonObj = JSONObject(result)
+                if (jsonObj.has("username")) {
+                    Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
+                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                    with(prefs.edit()) {
+                        putBoolean("SignedIn", true)
+                        putString("username", jsonObj.getString("username"))
+                        commit()
+                    }
+                    thread.start();
+                }
             }
         }
     }
@@ -129,7 +136,7 @@ class SignInActivity : AppCompatActivity() {
     var thread: Thread = object : Thread() {
         override fun run() {
             try {
-                sleep(Toast.LENGTH_LONG.toLong()) // As I am using LENGTH_LONG in Toast
+                sleep(Toast.LENGTH_LONG.toLong())
                 finish()
             } catch (e: Exception) {
                 e.printStackTrace()
