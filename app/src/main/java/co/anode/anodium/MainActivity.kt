@@ -17,8 +17,8 @@ import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
@@ -71,8 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(toolbar);
         anodeUtil = AnodeUtil(application)
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         //Error Handling
@@ -243,6 +242,12 @@ class MainActivity : AppCompatActivity() {
         if (mainMenu != null) {
             mainMenu!!.findItem(R.id.action_account_settings).setVisible(!prefs.getBoolean("Registered",false))
         }
+        //Set button to correct status
+        if (AnodeClient.isVpnActive()) {
+            buttonconnectvpns.text = "DISCONNECT"
+        } else {
+            buttonconnectvpns.text = "CONNECT"
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -294,8 +299,8 @@ class MainActivity : AppCompatActivity() {
             Log.i(LOGTAG, "Log out")
             AnodeClient.LogoutUser().execute()
             //On Log out start sign in activity
-            val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
-            startActivity(signinActivity)
+            //val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
+            //startActivity(signinActivity)
             return true
         } else {
             super.onOptionsItemSelected(item)

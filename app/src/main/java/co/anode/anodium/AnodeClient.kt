@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
 
 object AnodeClient {
@@ -59,9 +60,9 @@ object AnodeClient {
     var downloadFails = 0
     val h = Handler()
 
-    fun init(context: Context, textview: TextView, button: Button, activity: AppCompatActivity)  {
+    fun init(context: Context, mainActivity_textview: TextView, button: Button, activity: AppCompatActivity)  {
         mycontext = context
-        statustv = textview
+        statustv = mainActivity_textview
         connectButton = button
         mainActivity = activity
     }
@@ -475,6 +476,11 @@ object AnodeClient {
         var result = ""
         var url: URL
 
+        statustv.post(Runnable {
+            statustv.text  = "Waiting for network..."
+            statustv.setBackgroundColor(0x00000000)
+        } )
+
         url = URL(address)
         //if connection failed and we are connected to cjdns try with ipv6 address
         if(isRetry and isVpnActive()) {
@@ -521,6 +527,10 @@ object AnodeClient {
                 result = conn.responseCode.toString() + ": " + conn.responseMessage
             }
         }
+        statustv.post(Runnable {
+            statustv.text  = ""
+            statustv.setBackgroundColor(0x00000000)
+        } )
         return result
     }
 
@@ -648,6 +658,9 @@ object AnodeClient {
                             putBoolean("Registered", false)
                             commit()
                         }
+                        //On Log out start sign in activity
+                        val signinActivity = Intent(mycontext, SignInActivity::class.java)
+                        mainActivity.startActivity(signinActivity)
                     }
                 }
             } else {

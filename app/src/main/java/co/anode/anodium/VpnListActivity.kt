@@ -18,7 +18,7 @@ class VpnListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vpn_servers_list)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(vpnlist_toolbar)
         //Retrieve Servers list
         fetchVpnServers().execute()
         val searchView = findViewById<SearchView>(R.id.searchText)
