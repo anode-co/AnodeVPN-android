@@ -33,10 +33,18 @@
     <string name="prompt_email">enter email</string>
     <string name="prompt_emailusername">enter email or username</string>
     <string name="prompt_password">Password</string>
+    <string name="prompt_oldpassword">old password</string>
+    <string name="prompt_newpassword">new password</string>
+    <string name="prompt_confirmpassword">confirm password</string>
+    <string name="link_forgotpassword">forgot password?</string>
     <string name="action_sign_in">Sign in</string>
+    <string name="action_changepassword">Change password</string>
     <string name="welcome">"Welcome !"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-
+    <string name="label_forgotpassword">"For us to recover your password\nplease enter your email"</string>
+    <string name="label_newpassword">"Please write your new password"</string>
+    <string name="title_activity_test2">TestActivity2</string>
+    <string name="label_passwordRecoveryMsg">"We've sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
 </resources>

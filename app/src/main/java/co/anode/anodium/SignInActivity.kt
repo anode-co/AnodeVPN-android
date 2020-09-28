@@ -16,26 +16,42 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import org.json.JSONException
 import org.json.JSONObject
 
 class SignInActivity : AppCompatActivity() {
     private val API_VERSION = "0.3"
     private var API_SIGNIN_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize/"
+    private var API_USERNAME_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
 
         val signup: TextView = findViewById(R.id.textSignUp)
-        val link: Spanned = HtmlCompat.fromHtml("don't have an account yet? <a href='#'>Sign Up</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val singupspanlink: Spanned = HtmlCompat.fromHtml("don't have an account yet? <a href='#'>Sign Up</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signup.movementMethod = LinkMovementMethod.getInstance()
-        signup.text = link
+        signup.text = singupspanlink
 
         val signUpLink = findViewById<TextView>(R.id.textSignUp)
         signUpLink.setMovementMethod(object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
                 val nicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
                 startActivityForResult(nicknameActivity, 0)
+            }
+        })
+
+        val forgotpassword: TextView = findViewById(R.id.textForgotPassword)
+        val forgotpasswordpanlink: Spanned = HtmlCompat.fromHtml("<a href='#'>forgot password?</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        forgotpassword.movementMethod = LinkMovementMethod.getInstance()
+        forgotpassword.text = forgotpasswordpanlink
+
+        val forgotpasswordLink = findViewById<TextView>(R.id.textForgotPassword)
+        forgotpasswordLink.setMovementMethod(object : TextViewLinkHandler() {
+            override fun onLinkClick(url: String?) {
+                val forgotpasswordActivity = Intent(applicationContext, ForgotPasswordActivity::class.java)
+                //val forgotpasswordActivity = Intent(applicationContext, TestActivity2::class.java)
+                startActivityForResult(forgotpasswordActivity, 0)
             }
         })
 
@@ -85,10 +101,55 @@ class SignInActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 0) {
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        if ((requestCode == 0) && (!prefs.getBoolean("ForgotPasswordActivity_BackPressed",true) || !prefs.getBoolean("SingUp_BackPressed",true))){
+            with(prefs.edit()) {
+                putBoolean("ForgotPasswordActivity_BackPressed",false)
+                putBoolean("SingUp_BackPressed",false)
+                commit()
+            }
             this.finish()
         }
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    inner class isUserRegistered() : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String? {
+            val jsonObject = JSONObject()
+            jsonObject.accumulate("username", params[0])
+            val resp = AnodeClient.APIHttpReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST", true, false)
+            Log.i(LOGTAG, resp)
+            return resp
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            Log.i(LOGTAG,"Received from $API_USERNAME_REGISTRATION_URL: $result")
+            if ((result.isNullOrBlank())) {
+                //Do nothing
+            } else if (result.contains("ERROR: ")) {
+                //Do nothing
+            } else {
+                try {
+                    val jsonObj = JSONObject(result)
+                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                    if (jsonObj.has("username")) {
+                        with(prefs.edit()) {
+                            putBoolean("SignedIn", true)
+                            putBoolean("Registered", true)
+                            commit()
+                        }
+                    } else {
+                        with(prefs.edit()) {
+                            putBoolean("Registered", false)
+                            commit()
+                        }
+                    }
+                } catch (e: JSONException) {
+
+                }
+            }
+        }
     }
 
     inner class signIn() : AsyncTask<String, Void, String>() {
@@ -118,16 +179,21 @@ class SignInActivity : AppCompatActivity() {
             } else if (result.contains("400") || result.contains("401")) {
                 Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
             } else {
-                val jsonObj = JSONObject(result)
-                if (jsonObj.has("username")) {
-                    Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
-                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                    with(prefs.edit()) {
-                        putBoolean("SignedIn", true)
-                        putString("username", jsonObj.getString("username"))
-                        commit()
+                try {
+                    val jsonObj = JSONObject(result)
+                    if (jsonObj.has("username")) {
+                        Toast.makeText(baseContext, "User signed in successfully", Toast.LENGTH_SHORT).show()
+                        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                        with(prefs.edit()) {
+                            putBoolean("SignedIn", true)
+                            putString("username", jsonObj.getString("username"))
+                            commit()
+                        }
+                        isUserRegistered().execute(jsonObj.getString("username"))
+                        thread.start();
                     }
-                    thread.start();
+                } catch (e: JSONException) {
+
                 }
             }
         }
@@ -136,7 +202,7 @@ class SignInActivity : AppCompatActivity() {
     var thread: Thread = object : Thread() {
         override fun run() {
             try {
-                sleep(Toast.LENGTH_LONG.toLong())
+                sleep(Toast.LENGTH_LONG.toLong()+3000)
                 finish()
             } catch (e: Exception) {
                 e.printStackTrace()

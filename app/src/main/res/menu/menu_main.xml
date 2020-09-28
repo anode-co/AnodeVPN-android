@@ -14,6 +14,11 @@
         android:title="@string/action_sign_in"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_changepassword"
+        android:orderInCategory="100"
+        android:title="@string/action_changepassword"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_checkupdates"
         android:orderInCategory="100"
         android:title="Check for update"
@@ -28,6 +33,11 @@
         android:id="@+id/action_logout"
         android:orderInCategory="100"
         android:title="Log out"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_deleteaccount"
+        android:orderInCategory="100"
+        android:title="Delete account"
         app:showAsAction="never"/>
     <!--
      <item

@@ -78,7 +78,14 @@ class MainActivity : AppCompatActivity() {
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
         }
-
+        /*
+        with (prefs.edit()) {
+            putString("username","")
+            putBoolean("Registered",false)
+            putBoolean("SignedIn",false)
+            commit()
+        }
+        */
         //Start the log file
         anodeUtil!!.logFile()
         //Initialize App
@@ -90,19 +97,6 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.statustv = findViewById(R.id.textview_status)
         AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
         AnodeClient.mainActivity = this
-        //Get Public Key ID for API Authorization
-        //AnodeClient.httpPostPubKeyRegistration("test","test")
-        /*
-        button.setOnClickListener {
-            Toast.makeText(baseContext, R.string.check_update, Toast.LENGTH_LONG).show()
-            AnodeClient.checkNewVersion()
-        }
-        */
-        /*
-        buttonlistvpns.setOnClickListener {
-            val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
-            startActivity(vpnListActivity)
-        }*/
 
         buttonconnectvpns.setOnClickListener() {
             checked {
@@ -206,6 +200,7 @@ class MainActivity : AppCompatActivity() {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(false)
                 //mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(true)
+                mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(true)
             }
             //Set username on title
             //this.title = "Anodium - $username"
@@ -216,6 +211,7 @@ class MainActivity : AppCompatActivity() {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(true)
                 //mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(false)
+                mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(false)
             }
         }
     }
@@ -228,6 +224,7 @@ class MainActivity : AppCompatActivity() {
         val signin_backpressed = prefs.getBoolean("SignInActivity_BackPressed", false)
         //Exit app if user is not signed in
         if (!signedin and (nickname_backpressed or signin_backpressed)) {
+            //TODO: handle back when comes through other use cases
             with (prefs.edit()) {
                 putBoolean("NicknameActivity_BackPressed",false)
                 putBoolean("SignInActivity_BackPressed",false)
@@ -304,6 +301,16 @@ class MainActivity : AppCompatActivity() {
             //On Log out start sign in activity
             //val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
             //startActivity(signinActivity)
+            return true
+        } else if (id == R.id.action_deleteaccount) {
+            Log.i(LOGTAG, "Delete account")
+            AnodeClient.DeleteAccount().execute()
+            return true
+        } else if (id == R.id.action_changepassword) {
+            Log.i(LOGTAG, "Change password")
+            val changepassactivity = Intent(applicationContext, ChangePasswordActivity::class.java)
+            changepassactivity.putExtra("ForgotPassword",false)
+            startActivity(changepassactivity)
             return true
         } else {
             super.onOptionsItemSelected(item)

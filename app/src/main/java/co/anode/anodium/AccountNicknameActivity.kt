@@ -16,7 +16,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import org.json.JSONException
 import org.json.JSONObject
+import java.io.IOException
 
 
 class AccountNicknameActivity : AppCompatActivity() {
@@ -115,17 +117,21 @@ class AccountNicknameActivity : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_USERNAME_GENERATE: $result")
-            if ((result.isNullOrBlank()) || ((result == "Internal Server Error"))) {
+            if ((result.isNullOrBlank())) {
                 finish()
             } else if (result.contains("400") || result.contains("401")) {
-                val json = result.split("|")[1]
-                val jsonObj = JSONObject(json)
-                val msg = jsonObj.getString("username")
-                Toast.makeText(baseContext, "Error: $msg", Toast.LENGTH_SHORT).show()
-            } else if (result.contains("403")) {
+                val json = result.split("-")[1]
+                var msg = result
+                try {
+                    val jsonObj = JSONObject(json)
+                    msg = jsonObj.getString("username")
+                } catch (e: JSONException) {
+                    msg += " Invalid JSON"
+                }
+                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+            } else if (result.contains("ERROR: ")) {
                 Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
             } else {
-                //{"username":"flattop-fence"}
                 val jsonObj = JSONObject(result)
                 if (jsonObj.has("username")) {
                     usernameText?.post(Runnable { usernameText?.setText(jsonObj.getString("username")) })
@@ -146,13 +152,18 @@ class AccountNicknameActivity : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_USERNAME_REGISTRATION_URL: $result")
-            if ((result.isNullOrBlank()) || ((result == "Internal Server Error"))) {
+            if ((result.isNullOrBlank())) {
                 finish()
-            } else if (result.contains("400") || result.contains("401")) {
-                val json = result.split("|")[1]
-                val jsonObj = JSONObject(json)
-                val msg = jsonObj.getString("username")
-                Toast.makeText(baseContext, "Error: $msg", Toast.LENGTH_SHORT).show()
+            } else if (result.contains("ERROR: ") ) {
+                val json = result.split("-")[1]
+                var msg = result
+                try {
+                    val jsonObj = JSONObject(json)
+                    msg = jsonObj.getString("username")
+                }catch (e: JSONException) {
+                    msg += " Invalid JSON"
+                }
+                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
             } else {
                 val jsonObj = JSONObject(result)
                 val passwordRecoveryToken = jsonObj.getString("passwordRecoveryToken")

@@ -54,6 +54,7 @@ object AnodeClient {
     private const val API_LOGOUT_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize/"
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
+    private const val API_DELETE_ACCOUNT = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<email_or_username>/delete/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
@@ -382,11 +383,12 @@ object AnodeClient {
             } )
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_AUTH_VPN: $result")
             //if 200 or 201 then connect to VPN
-            if (result.isNullOrBlank()) {
+            if (result.isNullOrBlank() || result.contains("ERROR: ")) {
                 statustv.post(Runnable {
                     statustv.text  = "VPN Authorization failed with unknown reason"
                     statustv.setBackgroundColor(0x00000000)
@@ -398,39 +400,46 @@ object AnodeClient {
                     commit()
                 }
             } else {
-                val jsonObj = JSONObject(result)
-                if (jsonObj.has("status")) {
-                    if (jsonObj.getString("status") == "success") {
-                        statustv.post(Runnable {
-                            statustv.text  = "VPN Authorization success"
-                            statustv.setBackgroundColor(0x00000000)
-                        } )
-                        //do not try to reconnect while re-authorization
-                        val node = "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"
-                        if (!isVpnActive()) {
-                            cjdnsConnectVPN(node)
+                try {
+                    val jsonObj = JSONObject(result)
+                    if (jsonObj.has("status")) {
+                        if (jsonObj.getString("status") == "success") {
+                            statustv.post(Runnable {
+                                statustv.text = "VPN Authorization success"
+                                statustv.setBackgroundColor(0x00000000)
+                            })
+                            //do not try to reconnect while re-authorization
+                            val node = "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"
+                            if (!isVpnActive()) {
+                                cjdnsConnectVPN(node)
+                            }
+                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            with(prefs.edit()) {
+                                putLong("LastAuthorized", System.currentTimeMillis())
+                                putString("ServerPublicKey", node)
+                                commit()
+                            }
+                        } else {
+                            statustv.post(Runnable {
+                                statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
+                                statustv.setBackgroundColor(0x00000000)
+                            })
+                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            with(prefs.edit()) {
+                                putLong("LastAuthorized", 0)
+                                commit()
+                            }
+                            connectButton.text = "CONNECT"
+                            CjdnsSocket.Core_stopTun()
+                            CjdnsSocket.clearRoutes()
+                            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                         }
-                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                        with (prefs.edit()) {
-                            putLong("LastAuthorized", System.currentTimeMillis())
-                            putString("ServerPublicKey",node)
-                            commit()
-                        }
-                    } else {
-                        statustv.post(Runnable {
-                            statustv.text  = "VPN Authorization failed: ${jsonObj.getString("message")}"
-                            statustv.setBackgroundColor(0x00000000)
-                        } )
-                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                        with (prefs.edit()) {
-                            putLong("LastAuthorized", 0)
-                            commit()
-                        }
-                        connectButton.text = "CONNECT"
-                        CjdnsSocket.Core_stopTun()
-                        CjdnsSocket.clearRoutes()
-                        mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                     }
+                } catch (e: JSONException) {
+                    statustv.post(Runnable {
+                        statustv.text = "VPN Authorization failed"
+                        statustv.setBackgroundColor(0x00000000)
+                    })
                 }
             }
         }
@@ -482,6 +491,7 @@ object AnodeClient {
         } )
 
         url = URL(address)
+        //url = URL("https://vpn.anode.co/api/0.3/tests/500error/")
         //if connection failed and we are connected to cjdns try with ipv6 address
         if(isRetry and isVpnActive()) {
             var cjdnsurl = address.replace("vpn.anode.co",cjdnsServerAddress)
@@ -522,9 +532,9 @@ object AnodeClient {
             result = conn.inputStream.bufferedReader().readText()
         } catch (e: Exception) {
             if ((conn.responseCode == 400) or (conn.responseCode == 403)){
-                result = conn.responseCode.toString()+"|"+ conn.errorStream.reader().readText()
+                result = "ERROR: "+conn.responseCode.toString()+" - "+ conn.errorStream.reader().readText()
             } else {
-                result = conn.responseCode.toString() + ": " + conn.responseMessage
+                result = "ERROR: "+conn.responseCode.toString() + " - " + conn.responseMessage
             }
         }
         statustv.post(Runnable {
@@ -646,25 +656,69 @@ object AnodeClient {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
-            if ((!result.isNullOrBlank()) && ((!result.contains("500")) && (!result.contains("404")))) {
-                val jsonObj = JSONObject(result)
-                if (jsonObj.has("status")) {
-                    if (jsonObj.getString("status") == "success") {
-                        Toast.makeText(mycontext, "User logged out", Toast.LENGTH_SHORT).show()
-                        //Sign user out
-                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                        with(prefs.edit()) {
-                            putBoolean("SignedIn", false)
-                            putBoolean("Registered", false)
-                            commit()
+            if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
+                try {
+                    val jsonObj = JSONObject(result)
+                    if (jsonObj.has("status")) {
+                        if (jsonObj.getString("status") == "success") {
+                            Toast.makeText(mycontext, "User logged out", Toast.LENGTH_SHORT).show()
+                            //Sign user out
+                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            with(prefs.edit()) {
+                                putBoolean("SignedIn", false)
+                                putBoolean("Registered", false)
+                                commit()
+                            }
+                            //On Log out start sign in activity
+                            val signinActivity = Intent(mycontext, SignInActivity::class.java)
+                            mainActivity.startActivity(signinActivity)
                         }
-                        //On Log out start sign in activity
-                        val signinActivity = Intent(mycontext, SignInActivity::class.java)
-                        mainActivity.startActivity(signinActivity)
                     }
+                } catch (e: JSONException) {
+                    Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(mycontext, "$result", Toast.LENGTH_SHORT).show()
+                Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    class DeleteAccount() : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String? {
+            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val username = prefs.getString("username", "")
+            val url = API_DELETE_ACCOUNT.replace("<email_or_username>", username)
+            val resp = APIHttpReq( url, "","DELETE", true , false)
+            Log.i(LOGTAG, resp)
+            return resp
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            Log.i(LOGTAG,"Received from $API_DELETE_ACCOUNT: $result")
+            if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
+                try {
+                    val jsonObj = JSONObject(result)
+                    if (jsonObj.has("status")) {
+                        if (jsonObj.getString("status") == "success") {
+                            Toast.makeText(mycontext, jsonObj.getString("message"), Toast.LENGTH_SHORT).show()
+                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            with(prefs.edit()) {
+                                putBoolean("SignedIn", false)
+                                putBoolean("Registered", false)
+                                putString("username", "")
+                                commit()
+                            }
+                            //On delete account start nickname activity
+                            val nicknameActivity = Intent(mycontext, AccountNicknameActivity::class.java)
+                            mainActivity.startActivity(nicknameActivity)
+                        }
+                    }
+                } catch (e: JSONException) {
+                    Toast.makeText(mycontext, "Error, invalid JSON", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
             }
         }
     }

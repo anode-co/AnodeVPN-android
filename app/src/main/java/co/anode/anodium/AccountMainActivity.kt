@@ -18,6 +18,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import org.json.JSONException
 import org.json.JSONObject
 
 
@@ -94,6 +95,15 @@ class AccountMainActivity : AppCompatActivity() {
         abstract fun onLinkClick(url: String?)
     }
 
+    override fun onBackPressed() {
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        with (prefs.edit()) {
+            putBoolean("SingUp_BackPressed",true)
+            commit()
+        }
+        finish()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 0) {
             this.finish()
@@ -132,26 +142,31 @@ class AccountMainActivity : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received: $result")
-            if ((result.isNullOrBlank()) || ((result == "Internal Server Error"))) {
+            if ((result.isNullOrBlank())) {
                 finish()
-            } else if (result.contains("400") or result.contains("401") or result.contains("403")) {
+            } else if (result.contains("ERROR: ")) {
                 Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
             } else {
-                val jsonObj = JSONObject(result)
-                if (jsonObj.has("status")) {//initial password response
-                    val msg = jsonObj.getString("message")
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                } else if (jsonObj.has("accountConfirmationStatusUrl")){ //initial email response
-                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                    with (prefs.edit()) {
-                        putBoolean("SignedIn",true)
-                        putBoolean("Registered",true)
-                        commit()
+                try {
+                    val jsonObj = JSONObject(result)
+                    if (jsonObj.has("status")) {//initial password response
+                        val msg = jsonObj.getString("message")
+                        Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                    } else if (jsonObj.has("passwordRecoveryToken")) {
+                    } else if (jsonObj.has("accountConfirmationStatusUrl")) { //initial email response
+                        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                        with(prefs.edit()) {
+                            putBoolean("SignedIn", true)
+                            putBoolean("Registered", true)
+                            commit()
+                        }
+                        val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
+                        val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
+                        verificationActivity.putExtra("accountConfirmationStatusUrl", accountConfirmation)
+                        startActivityForResult(verificationActivity, 0)
                     }
-                    val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
-                    val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
-                    verificationActivity.putExtra("accountConfirmationStatusUrl", accountConfirmation)
-                    startActivityForResult(verificationActivity, 0)
+                }catch (e: JSONException) {
+                    Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
                 }
             }
         }
