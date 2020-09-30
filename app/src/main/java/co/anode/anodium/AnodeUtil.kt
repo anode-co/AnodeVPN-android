@@ -50,7 +50,7 @@ class AnodeUtil(c: Context?) {
                 throw AnodeUtilException("Incompatible CPU architecture")
             }
         } catch (e: IOException) {
-            throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
+            throw AnodeUtilException("Failed to copy cjdroute file " + e.message)
         }
         /*Copy the file everytime */
         /*
@@ -62,13 +62,13 @@ class AnodeUtil(c: Context?) {
             //Copy cjdroute
         try {
             if (!cjdrouteFile.exists()) {
-                Log.i(LOGTAG,"cjdroute does not exists")
+                Log.i(LOGTAG, "cjdroute does not exists")
             } else {
                 // You can't overwrite a file while the program is running,
                 // but delete and replace works
                 File("$CJDNS_PATH/$CJDROUTE_BINFILE").delete()
             }
-            Log.i(LOGTAG,"Copying cjdroute")
+            Log.i(LOGTAG, "Copying cjdroute")
             out = FileOutputStream("$CJDNS_PATH/$CJDROUTE_BINFILE")
             val buffer = ByteArray(1024)
             var read: Int
@@ -82,11 +82,11 @@ class AnodeUtil(c: Context?) {
             val file = File("$CJDNS_PATH/$CJDROUTE_BINFILE")
             file.setExecutable(true)
         }catch (e: IOException) {
-            throw AnodeUtilException("Failed to copy cjdroute file "+e.message)
+            throw AnodeUtilException("Failed to copy cjdroute file " + e.message)
         }
         //}
         //Create and initialize conf file
-        if (!File(context!!.filesDir.toString()+"/"+ CJDROUTE_CONFFILE).exists()) {
+        if (!File(context!!.filesDir.toString() + "/" + CJDROUTE_CONFFILE).exists()) {
             initializeCjdrouteConfFile()
         }
     }
@@ -109,7 +109,7 @@ class AnodeUtil(c: Context?) {
     }
 
     private fun generateConfFile() {
-        Log.i(LOGTAG,"Generating new conf file with cjdroute...")
+        Log.i(LOGTAG, "Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
             processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--genconf")
@@ -118,17 +118,17 @@ class AnodeUtil(c: Context?) {
                     .waitFor(2, TimeUnit.SECONDS)
 
             //Clean conf
-            Log.i(LOGTAG,"Clean conf file with cjdroute")
+            Log.i(LOGTAG, "Clean conf file with cjdroute")
             processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--cleanconf")
                     .redirectInput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
                     .redirectOutput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor(2, TimeUnit.SECONDS)
         } catch (e: Exception) {
-            throw AnodeUtilException("Failed to generate new configuration file "+e.message)
+            throw AnodeUtilException("Failed to generate new configuration file " + e.message)
         }
         //Delete temp file
-        Log.i(LOGTAG,"Delete temp conf file")
+        Log.i(LOGTAG, "Delete temp conf file")
         Files.delete(Paths.get("$CJDNS_PATH/$CJDROUTE_TEMPCONFFILE"))
     }
 
@@ -147,7 +147,7 @@ class AnodeUtil(c: Context?) {
             p.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + p.exitValue())
         } catch (e: Exception) {
-            throw AnodeUtilException("Failed to execute cjdroute "+e.message)
+            throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
     }
 
@@ -169,37 +169,20 @@ class AnodeUtil(c: Context?) {
         try {
             val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
-            //val interfaces = json.getJSONObject("interfaces")
-            //val UDPInterface = interfaces.getJSONArray("UDPInterface")
-            //Peers now added with RPC call
-            //Add Peers
-            /*
-            val peer = JSONObject()
-            val peervalues = JSONObject()
-            peervalues.put("login", "cjd-snode")
-            peervalues.put("password", "wwbn34yhxhtubtghq6y2pksyt7c9mm8")
-            peervalues.put("publicKey", "9syly12vuwr1jh5qpktmjc817y38bc9ytsvs8d5qwcnvn6c2lwq0.k")
-            peer.put("94.23.31.145:17102", peervalues)
-            peervalues.put("login", "ipredator.se/cjdns_public_node")
-            peervalues.put("password", "use_more_bandwidth")
-            peervalues.put("publicKey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-            peer.put("198.167.222.70:54673", peervalues)
-            UDPInterface.getJSONObject(0).put("connectTo", peer)
-             */
             //Add tunfd and tunnel socket
             val router = json.getJSONObject("router")
             val interf = router.getJSONObject("interface")
             interf.put("tunfd", "android")
             val security = json.getJSONArray("security")
             if (security.getJSONObject(3).has("noforks"))
-                security.getJSONObject(3).put("noforks",0)
+                security.getJSONObject(3).put("noforks", 0)
             //Save file
             val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$CJDROUTE_CONFFILE"))
             val out = json.toString().replace("\\/", "/")
             writer.write(out)
             writer.close()
         } catch (e: Exception) {
-            throw AnodeUtilException("Failed to modify cjdroute.conf file "+e.message)
+            throw AnodeUtilException("Failed to modify cjdroute.conf file " + e.message)
         }
     }
 
@@ -214,7 +197,7 @@ class AnodeUtil(c: Context?) {
     fun logFile() {
         val filename: String = "$CJDNS_PATH/anodium.log"
         if (File("$CJDNS_PATH/last_anodium.log").exists())  Files.delete(Paths.get("$CJDNS_PATH/last_anodium.log"))
-        if (File(filename).exists()) Files.move(Paths.get(filename),Paths.get("$CJDNS_PATH/last_anodium.log"))
+        if (File(filename).exists()) Files.move(Paths.get(filename), Paths.get("$CJDNS_PATH/last_anodium.log"))
         val command = "logcat -f $filename -v time co.anode.anodium:V"
         try {
             Runtime.getRuntime().exec(command)
@@ -253,6 +236,26 @@ class AnodeUtil(c: Context?) {
         return (maxHeapSizeInMB - usedMemInMB).toString();
     }
 
+    fun eventLog(message: String) {
+        val logFile = File("$CJDNS_PATH/anodium-events.log")
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile()
+            } catch (e: IOException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            }
+        }
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            val buf = BufferedWriter(FileWriter(logFile, true))
+            buf.append(message)
+            buf.newLine()
+            buf.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
 }
 
-class AnodeUtilException(message:String): Exception(message)
+class AnodeUtilException(message: String): Exception(message)

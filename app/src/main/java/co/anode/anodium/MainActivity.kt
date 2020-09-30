@@ -192,6 +192,22 @@ class MainActivity : AppCompatActivity() {
             }
         }, "MainActivity.CheckUpdates").start()
 
+        //Check for event log files daily
+        Thread(Runnable {
+            Log.i(LOGTAG, "MainActivity.CheckEventLogFiles")
+            while (true) {
+                AnodeClient.checkNewVersion(false)
+                if (AnodeClient.downloadFails > 1) {
+
+
+                    //daily
+                    Thread.sleep(24 * 60 * 60000)
+                } else {
+                    //check for event log files daily
+                    Thread.sleep(24 * 60 * 60000)
+                }
+            }
+        }, "MainActivity.CheckUpdates").start()
     }
 
     fun setUsernameTopBar() {
