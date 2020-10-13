@@ -22,6 +22,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
         val emailPattern: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
         val buttonccontinue = findViewById<Button>(R.id.buttonForgotPasswordContinue)
         buttonccontinue.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Continue pressed")
             val email = findViewById<EditText>(R.id.editTextForgotPassEmailAddress)
             if (email.text.isNullOrEmpty()) {
                 Toast.makeText(baseContext, "Please fill in email field", Toast.LENGTH_SHORT).show()
@@ -31,6 +32,8 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 forgotPassword().execute(email.text.toString())
             }
         }
+
+        AnodeClient.eventLog(baseContext,"Activity: Forgot password created")
     }
 
     override fun onBackPressed() {

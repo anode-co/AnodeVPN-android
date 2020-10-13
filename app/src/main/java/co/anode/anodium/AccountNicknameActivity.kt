@@ -40,6 +40,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         signin.text = link
         signin.setMovementMethod(object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
+                AnodeClient.eventLog(baseContext,"Button: Sing in link pressed")
                 val signInActivity = Intent(applicationContext, SignInActivity::class.java)
                 startActivityForResult(signInActivity, 0)
             }
@@ -55,11 +56,13 @@ class AccountNicknameActivity : AppCompatActivity() {
 
         val generateusername: Button = findViewById(R.id.button_generateusername)
         generateusername.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Generate username pressed")
             usernameGenerate().execute()
         }
 
         val continueButton: Button = findViewById(R.id.button_continue)
         continueButton.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Continue pressed")
             username = usernameText?.text.toString()
             if (username.isEmpty()) {
                 Toast.makeText(baseContext, "Please enter or generate a username", Toast.LENGTH_SHORT).show()
@@ -67,9 +70,11 @@ class AccountNicknameActivity : AppCompatActivity() {
                 usernameRegistration().execute(username)
             }
         }
+        AnodeClient.eventLog(baseContext,"Activity: Nickname created")
     }
 
     override fun onBackPressed() {
+        AnodeClient.eventLog(baseContext,"Button: Back pressed")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         with (prefs.edit()) {
             putBoolean("NicknameActivity_BackPressed",true)

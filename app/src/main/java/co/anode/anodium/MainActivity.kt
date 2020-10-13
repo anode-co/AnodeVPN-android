@@ -18,8 +18,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import java.io.File
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.InetSocketAddress
@@ -78,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
         }
+
         /*
         with (prefs.edit()) {
             putString("username","")
@@ -102,14 +106,16 @@ class MainActivity : AppCompatActivity() {
             checked {
                 val status: TextView = findViewById(R.id.textview_status)
                 if (buttonconnectvpns.text == "CONNECT") {
-                    //CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
-                    status.text = "VPN Connecting..."
                     AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
-                    buttonconnectvpns.text = "DISCONNECT"
                 } else {
                     disconnectVPN()
                 }
             }
+        }
+
+        buttonVPNList.setOnClickListener() {
+            val vpnlistactivity = Intent(applicationContext, VpnListActivity::class.java)
+            startActivity(vpnlistactivity)
         }
 
         val intent = VpnService.prepare(applicationContext)
@@ -164,6 +170,35 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, "MainActivity.UploadErrorsThread").start()
+
+        //Check for event log files daily
+        Thread(Runnable {
+            Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
+            while (true) {
+                AnodeClient.ignoreErr {
+                    //Check if 24 hours have passed since last log file submitted
+                    if (System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted",0) > 86400000) {
+                        if (!File(applicationContext.filesDir.toString() + "/anodium-events.log").exists()) {
+                            Log.d(LOGTAG, "No events to report, sleeping")
+                            Thread.sleep(60 * 60000)
+                        } else if (!AnodeClient.checkNetworkConnection()) {
+                            // try again in 10 seconds, waiting for internet
+                            Log.i(LOGTAG, "Waiting for internet connection to report events")
+                            Thread.sleep(10000)
+                        } else {
+                            Log.i(LOGTAG, "Reporting an events log file")
+                            if (AnodeClient.httpPostEvent(application.filesDir).contains("Error")) {
+                                Thread.sleep(60000)
+                            } else {
+                                //Log posted, sleep for a day
+                                Thread.sleep(24 * 60 * 60000)
+                            }
+                        }
+                    }
+                    Thread.sleep(60*60000)
+                }
+            }
+        }, "MainActivity.UploadEventsThread").start()
         //Delete old APK files
         AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
         AnodeClient.downloadFails = 0
@@ -179,6 +214,8 @@ class MainActivity : AppCompatActivity() {
                     //In case of >1 failure delete old apk files and retry after 20min
                     AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
                     Thread.sleep(20 * 60000)
+                } else if (AnodeClient.downloadingUpdate) {
+                    Thread.sleep(20 * 60000)
                 } else {
                     //check for new version every 5min
                     Thread.sleep(5 * 60000)
@@ -186,22 +223,7 @@ class MainActivity : AppCompatActivity() {
             }
         }, "MainActivity.CheckUpdates").start()
 
-        //Check for event log files daily
-        Thread(Runnable {
-            Log.i(LOGTAG, "MainActivity.CheckEventLogFiles")
-            while (true) {
-                AnodeClient.checkNewVersion(false)
-                if (AnodeClient.downloadFails > 1) {
-
-
-                    //daily
-                    Thread.sleep(24 * 60 * 60000)
-                } else {
-                    //check for event log files daily
-                    Thread.sleep(24 * 60 * 60000)
-                }
-            }
-        }, "MainActivity.CheckUpdates").start()
+        AnodeClient.eventLog(baseContext, "Application launched")
     }
 
     fun setUsernameTopBar() {
@@ -234,6 +256,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        AnodeClient.eventLog(baseContext, "Resume MainActivity")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val nickname_backpressed = prefs.getBoolean("NicknameActivity_BackPressed", false)
@@ -241,9 +264,9 @@ class MainActivity : AppCompatActivity() {
         //Exit app if user is not signed in
         if (!signedin and (nickname_backpressed or signin_backpressed)) {
             //TODO: handle back when comes through other use cases
-            with (prefs.edit()) {
-                putBoolean("NicknameActivity_BackPressed",false)
-                putBoolean("SignInActivity_BackPressed",false)
+            with(prefs.edit()) {
+                putBoolean("NicknameActivity_BackPressed", false)
+                putBoolean("SignInActivity_BackPressed", false)
                 commit()
             }
             //Close app
@@ -253,7 +276,7 @@ class MainActivity : AppCompatActivity() {
         setUsernameTopBar()
         //Show/Hide Registration on menu
         if (mainMenu != null) {
-            mainMenu!!.findItem(R.id.action_account_settings).setVisible(!prefs.getBoolean("Registered",false))
+            mainMenu!!.findItem(R.id.action_account_settings).setVisible(!prefs.getBoolean("Registered", false))
         }
         //Set button to correct status
         val status = findViewById<TextView>(R.id.textview_status)
@@ -280,7 +303,7 @@ class MainActivity : AppCompatActivity() {
         if (id == R.id.action_account_settings) {
             Log.i(LOGTAG, "Start registration")
             val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            if (prefs.getString("username","").isNullOrEmpty()) {
+            if (prefs.getString("username", "").isNullOrEmpty()) {
                 val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
                 startActivity(accountNicknameActivity)
             } else {
@@ -313,6 +336,7 @@ class MainActivity : AppCompatActivity() {
             return true
         } else if (id == R.id.action_logout) {
             Log.i(LOGTAG, "Log out")
+            AnodeClient.eventLog(baseContext, "Menu: Log out selected")
             AnodeClient.LogoutUser().execute()
             //On Log out start sign in activity
             //val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
@@ -320,12 +344,13 @@ class MainActivity : AppCompatActivity() {
             return true
         } else if (id == R.id.action_deleteaccount) {
             Log.i(LOGTAG, "Delete account")
+            AnodeClient.eventLog(baseContext, "Menu: Delete account selected")
             AnodeClient.DeleteAccount().execute()
             return true
         } else if (id == R.id.action_changepassword) {
             Log.i(LOGTAG, "Change password")
             val changepassactivity = Intent(applicationContext, ChangePasswordActivity::class.java)
-            changepassactivity.putExtra("ForgotPassword",false)
+            changepassactivity.putExtra("ForgotPassword", false)
             startActivity(changepassactivity)
             return true
         } else {
@@ -353,7 +378,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(accountNicknameActivity)
         }*/
         //If there is no username stored
-        if (prefs.getString("username","").isNullOrEmpty()) {
+        if (prefs.getString("username", "").isNullOrEmpty()) {
             val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
             startActivity(accountNicknameActivity)
         } else if (!prefs.getBoolean("SignedIn", false)) {
@@ -428,6 +453,14 @@ class MainActivity : AppCompatActivity() {
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
         startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+
+        //Rating bar
+        val fragmentRating: RatingFragment = RatingFragment()
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.add(R.id.mainLayout,fragmentRating,"")
+        fragmentTransaction.addToBackStack(null)
+        fragmentTransaction.commit()
     }
 }
 

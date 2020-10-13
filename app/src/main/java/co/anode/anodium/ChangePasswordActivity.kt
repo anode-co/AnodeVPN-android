@@ -37,6 +37,7 @@ class ChangePasswordActivity : AppCompatActivity() {
         }
 
         buttonchangePassword.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Change password pressed")
             val oldpassword = findViewById<EditText>(R.id.editTextOldPassword)
             val newpassword = findViewById<EditText>(R.id.editTextnewPassword)
             val confirmpassword = findViewById<EditText>(R.id.editTextconfirmPassword)
@@ -51,6 +52,7 @@ class ChangePasswordActivity : AppCompatActivity() {
                 changePassword().execute(bForgotPassword.toString(),oldpassword.text.toString(), newpassword.text.toString())
             }
         }
+        AnodeClient.eventLog(baseContext,"Activity: Change password created")
     }
 
     inner class changePassword() : AsyncTask<String, Void, String>() {

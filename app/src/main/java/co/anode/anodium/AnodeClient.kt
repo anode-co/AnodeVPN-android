@@ -1,7 +1,6 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -22,9 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.File
-import java.io.PrintWriter
-import java.io.StringWriter
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.NetworkInterface
 import java.net.SocketTimeoutException
@@ -38,7 +35,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
-import kotlin.concurrent.thread
 
 
 object AnodeClient {
@@ -59,6 +55,7 @@ object AnodeClient {
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
     var downloadFails = 0
+    var downloadingUpdate = false
     val h = Handler()
 
     fun init(context: Context, mainActivity_textview: TextView, button: Button, activity: AppCompatActivity)  {
@@ -89,6 +86,43 @@ object AnodeClient {
                     // ok, it looks like everything worked, we can delete the file now
                     Log.e(LOGTAG, "Log submitted successfully ${file.name}")
                     file.delete()
+                    return "Log submitted successfully"
+                }
+                else if (json.has("status") and (json.getString("status") != "success")) {
+                    Log.e(LOGTAG, "Error invalid status posting ${file.name}: $resp")
+                    return "Error invalid status posting ${file.name}: $resp"
+                } else {
+                    return "Error posting ${file.name} to server: $resp"
+                }
+            } catch (e:Exception) {
+                Log.e(LOGTAG, "Error posting ${file.name}: $resp")
+                return "Error posting ${file.name}: $resp"
+            }
+        } catch (e: Exception) {
+            Log.e(LOGTAG, "Error reporting error: ${e.message}\n${stackString(e)}")
+            return "Error reporting error: ${e.message}\n${stackString(e)}"
+        }
+    }
+
+    fun httpPostEvent(dir: File): String {
+        try {
+            if (!dir.exists()) { return "No event log files to be submitted" }
+            val files = dir.listFiles { file -> file.name.startsWith("anodium-events") }
+            if (files.isEmpty()) { return "No event log files to be submitted" }
+            val file = files.random()
+            val eventLog = eventJsonObj().toString(1)
+            val resp = APIHttpReq(API_ERROR_URL,eventLog, "POST", false, false)
+            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            try {
+                val json = JSONObject(resp)
+                if (json.has("status") and (json.getString("status") == "success")) {
+                    // ok, it looks like everything worked, we can delete the file now
+                    Log.e(LOGTAG, "Log submitted successfully ${file.name}")
+                    file.delete()
+                    with (prefs.edit()) {
+                        putLong("LastEventLogFileSubmitted", System.currentTimeMillis())
+                        commit()
+                    }
                     return "Log submitted successfully"
                 }
                 else if (json.has("status") and (json.getString("status") != "success")) {
@@ -186,7 +220,32 @@ object AnodeClient {
         return jsonObject
     }
 
+    @Throws(JSONException::class)
+    private fun eventJsonObj(): JSONObject {
+        val anodeUtil: AnodeUtil = AnodeUtil(mycontext)
+        val jsonObject = JSONObject()
+        var pubkey = ""
+        ignoreErr { pubkey = anodeUtil.getPubKey() }
+        if (pubkey == "") pubkey = "unknown"
+        jsonObject.accumulate("publicKey", pubkey)
+        jsonObject.accumulate("error", "appUsage")
+        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_CODE)
+        jsonObject.accumulate("clientOs", "Android")
+        jsonObject.accumulate("clientOsVersion", android.os.Build.VERSION.RELEASE)
+        jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+        ignoreErr { jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address) }
+        ignoreErr { jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
+        ignoreErr { jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString()) }
+        ignoreErr { jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val username = prefs!!.getString("username","")
+        ignoreErr { jsonObject.accumulate("username", username) }
+        jsonObject.accumulate("message", "Events log")
 
+        val eventlogfile = File(anodeUtil.CJDNS_PATH+"/anodium-events.log")
+        jsonObject.accumulate("debuggingMessages", eventlogfile.readText(Charsets.UTF_8))
+        return jsonObject
+    }
 
 
     fun deleteFiles(folder: String, ext: String) {
@@ -220,6 +279,7 @@ object AnodeClient {
         try {
             val file = File(destination)
             if (!file.exists() or (file.length() < filesize)) {
+                Toast.makeText(mycontext, R.string.downloading_update, Toast.LENGTH_LONG).show()
                 val request = DownloadManager.Request(uri)
                 //Setting title of request
                 request.setTitle(filename)
@@ -237,17 +297,17 @@ object AnodeClient {
                 query = DownloadManager.Query()
                 var c: Cursor? = null
                 query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
-                var downloading = true
-                while (downloading) {
+                downloadingUpdate = true
+                while (downloadingUpdate) {
                     c = downloadManager.query(query)
                     if (c.moveToFirst()) {
                         var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
                         if (status == DownloadManager.STATUS_FAILED) {
                             flag = false
-                            downloading = false
+                            downloadingUpdate = false
                             break
                         } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                            downloading = false
+                            downloadingUpdate = false
                             flag = true
                             break
                         }
@@ -335,7 +395,6 @@ object AnodeClient {
             if (result != null) {
                 if (result.contains("http")) {
                     Log.i(LOGTAG, "Updating APK from $result")
-                    Toast.makeText(mycontext, R.string.downloading_update, Toast.LENGTH_LONG).show()
                     val url = result.split("|")[0]
                     val version = result.split("|")[1]
                     val filesize = result.split("|")[2].toLong()
@@ -370,6 +429,10 @@ object AnodeClient {
             val pubkey = params[0]
             val jsonObject = JSONObject()
             jsonObject.accumulate("date", System.currentTimeMillis())
+            statustv.post(Runnable {
+                statustv.text  = "VPN connecting..."
+                statustv.setBackgroundColor(0x00000000)
+            } )
             val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
             Log.i(LOGTAG, resp)
             return resp
@@ -419,6 +482,7 @@ object AnodeClient {
                                 putString("ServerPublicKey", node)
                                 commit()
                             }
+                            connectButton.text = "DISCONNECT"
                         } else {
                             statustv.post(Runnable {
                                 statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
@@ -720,6 +784,29 @@ object AnodeClient {
             } else {
                 Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    fun eventLog(ctx:Context, message: String) {
+        val anodeUtil: AnodeUtil = AnodeUtil(ctx)
+        val logFile = File(anodeUtil.CJDNS_PATH+"/anodium-events.log")
+        //Do not log if file is bigger than 1MB
+        if (logFile.length() > 1000000) return
+
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        try {
+            val buf = BufferedWriter(FileWriter(logFile, true))
+            buf.append(DateTimeFormatter.ISO_INSTANT.format(Instant.now())+": "+message)
+            buf.newLine()
+            buf.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 }

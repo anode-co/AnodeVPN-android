@@ -1,11 +1,13 @@
 package co.anode.anodium
 
 //import kotlin.collections.ArrayList
+import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_vpn_servers_list.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URL
 
@@ -13,7 +15,8 @@ import java.net.URL
 class VpnListActivity : AppCompatActivity() {
     var dataList = ArrayList<HashMap<String, String>>()
     var adapter: VPNListAdapter? = null
-    private val API_SERVERS_LIST = "https://vpn.anode.co/api/0.3/vpn/servers/"
+    private val API_VERSION = "0.3"
+    private val API_SERVERS_LIST = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +36,7 @@ class VpnListActivity : AppCompatActivity() {
                 return false
             }
         })
+        AnodeClient.eventLog(baseContext,"Activity: VPN List created")
     }
 
     inner class fetchVpnServers() : AsyncTask<String, Void, String>() {
@@ -40,7 +44,8 @@ class VpnListActivity : AppCompatActivity() {
             try {
                 var url = API_SERVERS_LIST
                 if (params.isNotEmpty()) url = params[0].toString()
-                return URL(url).readText(Charsets.UTF_8)
+                //return URL(url).readText(Charsets.UTF_8)
+                return AnodeClient.APIHttpReq(url,"", "GET", true, false)
             } catch (e: Exception) {
                 Toast.makeText(baseContext, "Error: "+e.message, Toast.LENGTH_LONG).show()
                 return null
@@ -53,34 +58,35 @@ class VpnListActivity : AppCompatActivity() {
                 if (dataList.isNotEmpty()) findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, dataList)
                 return
             }
-            //findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
 
-            val jsonObj = JSONObject(result)
-            val nextUrl = jsonObj.getString("next")
-            val serversArr = jsonObj.getJSONArray("results")
+            val serversArr = JSONArray(result)
+            val prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+
             for (i in 0 until serversArr.length()) {
                 val serverdetails = serversArr.getJSONObject(i)
                 val map = HashMap<String, String>()
                 //if (!serverdetails.getBoolean("isFake")) {
-                map["name"] = serverdetails.getString("name")
-                map["publicKey"] = serverdetails.getString("publicKey")
-                map["bandwidthBps"] = serverdetails.getString("bandwidthBps")
-                map["region"] = serverdetails.getString("region")
-                map["countryCode"] = serverdetails.getString("countryCode")
-                map["onlineSinceDatetime"] = serverdetails.getString("onlineSinceDatetime")
-                map["lastSeenDatetime"] = serverdetails.getString("lastSeenDatetime")
-                map["speed"] = "100"
-                val networkdetails = serverdetails.getJSONObject("networkSettings")
-                map["network_usesNat"] = networkdetails.getString("usesNat")
+                    map["name"] = serverdetails.getString("name")
 
-                dataList.add(map)
+                    map["publicKey"] = serverdetails.getString("publicKey")
+                    map["bandwidthBps"] = serverdetails.getString("bandwidthBps")
+                    map["region"] = serverdetails.getString("region")
+                    map["countryCode"] = serverdetails.getString("countryCode")
+                    map["onlineSinceDatetime"] = serverdetails.getString("onlineSinceDatetime")
+                    map["lastSeenDatetime"] = serverdetails.getString("lastSeenDatetime")
+                    map["averageRating"] = serverdetails.getString("averageRating")
+                    map["isFavorite"] = serverdetails.getString("isFavorite")
+                    map["speed"] = "100"
+                    val networkdetails = serverdetails.getJSONObject("networkSettings")
+                    map["network_usesNat"] = networkdetails.getString("usesNat")
+
+                    dataList.add(map)
                 //}
             }
-            if (nextUrl == "null") {
-                dataList.sortWith(compareBy {it.get("countryCode")})
-                adapter = VPNListAdapter(this@VpnListActivity, dataList)
-                findViewById<ListView>(R.id.listview_servers).adapter = adapter
-            } else fetchVpnServers().execute(nextUrl)
+            //Sort list by country
+            dataList.sortWith(compareBy {it.get("countryCode")})
+            adapter = VPNListAdapter(this@VpnListActivity, dataList)
+            findViewById<ListView>(R.id.listview_servers).adapter = adapter
         }
     }
 }

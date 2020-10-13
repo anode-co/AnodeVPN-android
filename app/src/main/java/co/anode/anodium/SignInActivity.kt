@@ -33,9 +33,9 @@ class SignInActivity : AppCompatActivity() {
         signup.movementMethod = LinkMovementMethod.getInstance()
         signup.text = singupspanlink
 
-        val signUpLink = findViewById<TextView>(R.id.textSignUp)
-        signUpLink.setMovementMethod(object : TextViewLinkHandler() {
+        signup.setMovementMethod(object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
+                AnodeClient.eventLog(baseContext,"Button: Sign up pressed")
                 val nicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
                 startActivityForResult(nicknameActivity, 0)
             }
@@ -46,9 +46,9 @@ class SignInActivity : AppCompatActivity() {
         forgotpassword.movementMethod = LinkMovementMethod.getInstance()
         forgotpassword.text = forgotpasswordpanlink
 
-        val forgotpasswordLink = findViewById<TextView>(R.id.textForgotPassword)
-        forgotpasswordLink.setMovementMethod(object : TextViewLinkHandler() {
+        forgotpassword.setMovementMethod(object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
+                AnodeClient.eventLog(baseContext,"Button: Forgot password pressed")
                 val forgotpasswordActivity = Intent(applicationContext, ForgotPasswordActivity::class.java)
                 //val forgotpasswordActivity = Intent(applicationContext, TestActivity2::class.java)
                 startActivityForResult(forgotpasswordActivity, 0)
@@ -57,6 +57,7 @@ class SignInActivity : AppCompatActivity() {
 
         val buttonSignin = findViewById<Button>(R.id.buttonSingIn)
         buttonSignin.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Sign in pressed")
             val email = findViewById<EditText>(R.id.editTextTextEmailAddress)
             val password = findViewById<EditText>(R.id.editTextTextPassword)
             if (email.text.isNullOrEmpty()) {
@@ -67,9 +68,11 @@ class SignInActivity : AppCompatActivity() {
                 signIn().execute(email.text.toString(), password.text.toString())
             }
         }
+        AnodeClient.eventLog(baseContext,"Activity: Sign in created")
     }
 
     override fun onBackPressed() {
+        AnodeClient.eventLog(baseContext,"Button: Back pressed")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         with (prefs.edit()) {
             putBoolean("SignInActivity_BackPressed",true)
@@ -190,7 +193,7 @@ class SignInActivity : AppCompatActivity() {
                             commit()
                         }
                         isUserRegistered().execute(jsonObj.getString("username"))
-                        thread.start();
+                        thread.start()
                     }
                 } catch (e: JSONException) {
 

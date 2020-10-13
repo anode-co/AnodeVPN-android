@@ -30,6 +30,7 @@ class ForgotPasswordSuccessActivity : AppCompatActivity() {
 
         val buttonGoToEmail = findViewById<Button>(R.id.buttonGoToEmail)
         buttonGoToEmail.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Go to email pressed")
             val emailClient = Intent(Intent.ACTION_MAIN)
             emailClient.addCategory(Intent.CATEGORY_APP_EMAIL)
             startActivity(emailClient)
@@ -37,8 +38,10 @@ class ForgotPasswordSuccessActivity : AppCompatActivity() {
 
         val buttonResendEmail = findViewById<Button>(R.id.buttonResendEmail)
         buttonResendEmail.setOnClickListener() {
+            AnodeClient.eventLog(baseContext,"Button: Resend email pressed")
             resendEmail().execute(url)
         }
+        AnodeClient.eventLog(baseContext,"Activity: Forgot password success created")
     }
     //TODO: close activity after password reset
 

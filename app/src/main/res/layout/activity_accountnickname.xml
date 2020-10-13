@@ -48,7 +48,9 @@
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
-        app:layout_constraintBottom_toTopOf="@id/textSignIn"/>
+        app:layout_constraintBottom_toTopOf="@id/textSignIn"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape"/>
 
     <TextView
         android:id="@+id/textSignIn"
