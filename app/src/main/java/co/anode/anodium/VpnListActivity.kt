@@ -22,6 +22,12 @@ class VpnListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vpn_servers_list)
         setSupportActionBar(vpnlist_toolbar)
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        //actionbar!!.title = "New Activity"
+        //set back button
+        actionbar?.setDisplayHomeAsUpEnabled(true)
         //Retrieve Servers list
         fetchVpnServers().execute()
         val searchView = findViewById<SearchView>(R.id.searchText)
@@ -37,6 +43,11 @@ class VpnListActivity : AppCompatActivity() {
             }
         })
         AnodeClient.eventLog(baseContext,"Activity: VPN List created")
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     inner class fetchVpnServers() : AsyncTask<String, Void, String>() {

@@ -1,6 +1,14 @@
 <?xml version = "1.0" encoding = "utf-8"?>
-<shape xmlns:android = "http://schemas.android.com/apk/res/android">
-    <size android:height="160dp" android:width="40dp"/>
-    <solid android:color="#FFFFFF" />
-    <corners android:radius="80dp"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape xmlns:android = "http://schemas.android.com/apk/res/android">
+            <size android:height="160dp" android:width="40dp"/>
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="80dp"/>
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ic_baseline_power_settings_new_24"
+        android:gravity="center"
+        android:width="50dp"
+        android:height="50dp"/>
+</layer-list>

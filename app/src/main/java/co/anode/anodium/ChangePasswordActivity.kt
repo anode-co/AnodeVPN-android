@@ -21,6 +21,12 @@ class ChangePasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_change_password)
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = getString(R.string.action_changepassword)
+        //set back button
+        actionbar?.setDisplayHomeAsUpEnabled(true)
         val param = intent.extras
         setResult(0)
         //Check if activity started from Forgot password flow, then hide "old password"
@@ -53,6 +59,11 @@ class ChangePasswordActivity : AppCompatActivity() {
             }
         }
         AnodeClient.eventLog(baseContext,"Activity: Change password created")
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     inner class changePassword() : AsyncTask<String, Void, String>() {

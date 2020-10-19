@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F1F8FE"
+    android:background="@color/colorPrimarybackground"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
     <include layout="@layout/statusbar"/>
     <Button
@@ -13,6 +13,8 @@
         android:layout_height="160dp"
         android:background="@drawable/round_button"
         android:text="@string/button_connect"
+        android:textSize="10sp"
+        android:paddingTop="65dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -12,11 +12,14 @@ import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.text.HtmlCompat
 import org.json.JSONException
 import org.json.JSONObject
@@ -32,6 +35,12 @@ class AccountMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_main)
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = getString(R.string.action_sign_up)
+        //set back button
+        actionbar?.setDisplayHomeAsUpEnabled(true)
         prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signin: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -39,7 +48,7 @@ class AccountMainActivity : AppCompatActivity() {
         signin.text = link
         val createAccountButton: Button = findViewById(R.id.buttonCreateAccount)
         createAccountButton.setOnClickListener() {
-            AnodeClient.eventLog(baseContext,"Button: CREATE ACCOUNT pressed")
+            AnodeClient.eventLog(baseContext, "Button: CREATE ACCOUNT pressed")
             val emailPattern: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
             val email = findViewById<EditText>(R.id.editTextTextEmailAddress)
             //val passwordPattern: String = "(?=.*\\d)(?=.*[A-Za-z]).{9,}"
@@ -52,15 +61,15 @@ class AccountMainActivity : AppCompatActivity() {
             }
             else {
                 AnodeClient.mycontext = baseContext
-                val username = prefs!!.getString("username","")
+                val username = prefs!!.getString("username", "")
                 if (password.text.toString().isNotEmpty())
-                    fieldRegistration().execute("password",password.text.toString(),username)
-                fieldRegistration().execute("email",email.text.toString(),username)
+                    fieldRegistration().execute("password", password.text.toString(), username)
+                fieldRegistration().execute("email", email.text.toString(), username)
             }
         }
         val skipButton: Button = findViewById(R.id.buttonSkip)
         skipButton.setOnClickListener() {
-            AnodeClient.eventLog(baseContext,"Button: SKIP pressed")
+            AnodeClient.eventLog(baseContext, "Button: SKIP pressed")
             setResult(0)
             finish()
         }
@@ -68,12 +77,18 @@ class AccountMainActivity : AppCompatActivity() {
         val signinLink = findViewById<TextView>(R.id.textSignIn)
         signinLink.setMovementMethod(object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
-                AnodeClient.eventLog(baseContext,"Button: Sing in Link pressed")
+                AnodeClient.eventLog(baseContext, "Button: Sing in Link pressed")
                 val signInActivity = Intent(applicationContext, SignInActivity::class.java)
                 startActivityForResult(signInActivity, 0)
             }
         })
-        AnodeClient.eventLog(baseContext,"Activity: AcccountMain created")
+        AnodeClient.eventLog(baseContext, "Activity: AcccountMain created")
+
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     abstract class TextViewLinkHandler : LinkMovementMethod() {
@@ -99,10 +114,10 @@ class AccountMainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        AnodeClient.eventLog(baseContext,"Button: Back pressed")
+        AnodeClient.eventLog(baseContext, "Button: Back pressed")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        with (prefs.edit()) {
-            putBoolean("SingUp_BackPressed",true)
+        with(prefs.edit()) {
+            putBoolean("SingUp_BackPressed", true)
             commit()
         }
         finish()
@@ -126,11 +141,11 @@ class AccountMainActivity : AppCompatActivity() {
             }
             when {
                 params[0] == "email" -> {
-                    url = API_EMAIL_REGISTRATION_URL.replace("<username>",username,false)
+                    url = API_EMAIL_REGISTRATION_URL.replace("<username>", username, false)
                     jsonObject.accumulate("email", params[1])
                 }
                 params[0] == "password" -> {
-                    url = API_PASSWORD_REGISTRATION_URL.replace("<username>",username,false)
+                    url = API_PASSWORD_REGISTRATION_URL.replace("<username>", username, false)
                     jsonObject.accumulate("password", params[1])
                 }
                 else -> {
@@ -145,7 +160,7 @@ class AccountMainActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG,"Received: $result")
+            Log.i(LOGTAG, "Received: $result")
             if ((result.isNullOrBlank())) {
                 finish()
             } else if (result.contains("ERROR: ")) {

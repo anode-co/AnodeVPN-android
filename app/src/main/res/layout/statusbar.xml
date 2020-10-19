@@ -12,5 +12,6 @@
         android:text=""
         app:layout_constraintTop_toTopOf="parent"
         android:gravity="center"
+        android:textColor="@color/colorPrimaryDarkText"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

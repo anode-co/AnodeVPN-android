@@ -17,6 +17,7 @@ import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -75,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar);
+        //Disable night mode (dark mode)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         anodeUtil = AnodeUtil(application)
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         //Error Handling
@@ -89,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             putBoolean("SignedIn",false)
             commit()
         }
-        */
+       */
         //Start the log file
         anodeUtil!!.logFile()
         //Initialize App

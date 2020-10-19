@@ -19,6 +19,12 @@ class ForgotPasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = getString(R.string.title_forgotpassword)
+        //set back button
+        actionbar.setDisplayHomeAsUpEnabled(true)
         val emailPattern: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
         val buttonccontinue = findViewById<Button>(R.id.buttonForgotPasswordContinue)
         buttonccontinue.setOnClickListener() {
@@ -34,6 +40,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
         }
 
         AnodeClient.eventLog(baseContext,"Activity: Forgot password created")
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     override fun onBackPressed() {

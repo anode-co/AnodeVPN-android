@@ -4,52 +4,86 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimarybackground"
+    android:orientation="vertical"
     tools:context="co.anode.anodium.AccountMainActivity">
     <include layout="@layout/statusbar"/>
-    <EditText
-        android:id="@+id/editTextTextEmailAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        android:hint="@string/prompt_email"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:isScrollContainer="true"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomContainer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/passwordLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextEmailAddress"
-        app:layout_constraintStart_toStartOf="@id/editTextTextEmailAddress"
-        app:layout_constraintVertical_bias="0.0"
-        app:passwordToggleEnabled="true">
-        <EditText
-            android:id="@+id/editTextTextPassword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:ems="10"
-            android:inputType="textPassword"
-            android:text="" />
-    </com.google.android.material.textfield.TextInputLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/signin_bottom_container">
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_above="@+id/editTextTextEmailAddress"
+                android:layout_marginBottom="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                app:srcCompat="@drawable/ic_login" />
+            <EditText
+                android:id="@+id/editTextTextEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="44dp"
+                android:layout_marginRight="44dp"
+                android:ems="10"
+                android:hint="@string/prompt_email"
+                android:inputType="textEmailAddress" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/passwordLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/editTextTextEmailAddress"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="44dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginRight="44dp"
+                app:passwordToggleEnabled="true">
+
+                <EditText
+                    android:id="@+id/editTextTextPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="24dp"
+                    android:ems="10"
+                    android:inputType="textPassword"
+                    android:text=""
+                    android:hint="@string/prompt_password"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+<LinearLayout
+    android:id="@+id/bottomContainer"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/signin_bottom_container"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    android:orientation="vertical"
+    android:gravity="end">
     <Button
         android:id="@+id/buttonCreateAccount"
         android:layout_marginLeft="44dp"
         android:layout_marginRight="44dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="CREATE ACCOUNT"
+        android:layout_marginBottom="10dp"
+        android:text="@string/action_create_account"
         app:layout_constraintBottom_toTopOf="@+id/buttonSkip"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_gravity="center_horizontal"
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape"/>
     <Button
@@ -58,23 +92,19 @@
         android:layout_marginRight="44dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SKIP"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/action_skip"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center_horizontal"
         app:layout_constraintBottom_toTopOf="@id/textSignIn"
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape"/>
-
     <TextView
         android:id="@+id/textSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="already have an account? Sign in"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center_horizontal"
         app:layout_constraintBottom_toBottomOf="parent" />
-
+</LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

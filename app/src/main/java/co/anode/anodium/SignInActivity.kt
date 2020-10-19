@@ -28,6 +28,13 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
 
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = getString(R.string.action_sign_in)
+        //set back button
+        actionbar?.setDisplayHomeAsUpEnabled(true)
+
         val signup: TextView = findViewById(R.id.textSignUp)
         val singupspanlink: Spanned = HtmlCompat.fromHtml("don't have an account yet? <a href='#'>Sign Up</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signup.movementMethod = LinkMovementMethod.getInstance()
@@ -69,6 +76,11 @@ class SignInActivity : AppCompatActivity() {
             }
         }
         AnodeClient.eventLog(baseContext,"Activity: Sign in created")
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     override fun onBackPressed() {

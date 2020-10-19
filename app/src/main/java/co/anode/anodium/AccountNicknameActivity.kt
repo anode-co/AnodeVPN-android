@@ -31,7 +31,12 @@ class AccountNicknameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_accountnickname)
-
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = "Sign up"
+        //set back button
+        actionbar.setDisplayHomeAsUpEnabled(true)
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
 
         val signin: TextView = findViewById(R.id.textSignIn)
@@ -71,6 +76,11 @@ class AccountNicknameActivity : AppCompatActivity() {
             }
         }
         AnodeClient.eventLog(baseContext,"Activity: Nickname created")
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     override fun onBackPressed() {

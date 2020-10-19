@@ -21,7 +21,12 @@ class DebugActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_debug)
-
+        //actionbar
+        val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = "Debug"
+        //set back button
+        actionbar.setDisplayHomeAsUpEnabled(true)
         val buttonSubmitLogs = findViewById<Button>(R.id.button_SubmitLogs)
         buttonSubmitLogs.setOnClickListener {
             Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
@@ -69,6 +74,11 @@ class DebugActivity : AppCompatActivity() {
                 Thread.sleep(8000)
             }
         }, "DebugActivity.RefreshValues").start()
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     class GetPublicIP(): AsyncTask<TextView, Void, String>() {
