@@ -7,4 +7,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="signin_bottom_container">150dp</dimen>
     <dimen name="singlebutton_bottom_container">100dp</dimen>
+    <dimen name="button_margin">44dp</dimen>
 </resources>

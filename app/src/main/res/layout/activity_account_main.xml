@@ -76,11 +76,12 @@
     android:gravity="end">
     <Button
         android:id="@+id/buttonCreateAccount"
-        android:layout_marginLeft="44dp"
-        android:layout_marginRight="44dp"
+        android:layout_marginLeft="@dimen/button_margin"
+        android:layout_marginRight="@dimen/button_margin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
+        android:textSize="16sp"
         android:text="@string/action_create_account"
         app:layout_constraintBottom_toTopOf="@+id/buttonSkip"
         android:layout_gravity="center_horizontal"
@@ -88,12 +89,13 @@
         android:background="@drawable/buttonshape"/>
     <Button
         android:id="@+id/buttonSkip"
-        android:layout_marginLeft="44dp"
-        android:layout_marginRight="44dp"
+        android:layout_marginLeft="@dimen/button_margin"
+        android:layout_marginRight="@dimen/button_margin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/action_skip"
         android:layout_marginBottom="10dp"
+        android:textSize="16sp"
         android:layout_gravity="center_horizontal"
         app:layout_constraintBottom_toTopOf="@id/textSignIn"
         android:textColor="#C9DDE9"
@@ -102,7 +104,7 @@
         android:id="@+id/textSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="already have an account? Sign in"
+        android:text="@string/label_already_have_account"
         android:layout_marginBottom="10dp"
         android:layout_gravity="center_horizontal"
         app:layout_constraintBottom_toBottomOf="parent" />

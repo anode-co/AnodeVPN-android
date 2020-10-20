@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         buttonconnectvpns.setOnClickListener() {
             checked {
                 //val status: TextView = findViewById(R.id.textview_status)
-                if (buttonconnectvpns.text == "CONNECT") {
+                if (buttonconnectvpns.text == resources.getString(R.string.button_connect)) {
                     AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                 } else {
                     disconnectVPN()
@@ -287,9 +287,9 @@ class MainActivity : AppCompatActivity() {
         status.setBackgroundColor(0x00000000)
         status.text = ""
         if (AnodeClient.isVpnActive()) {
-            buttonconnectvpns.text = "DISCONNECT"
+            buttonconnectvpns.text = resources.getString(R.string.button_disconnect)
         } else {
-            buttonconnectvpns.text = "CONNECT"
+            buttonconnectvpns.text = resources.getString(R.string.button_connect)
         }
     }
 
@@ -453,7 +453,7 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.textview_status)
         status.setBackgroundColor(0xFFFF0000.toInt())
         status.text = "VPN disconnected"
-        buttonconnectvpns.text = "CONNECT"
+        buttonconnectvpns.text = resources.getString(R.string.button_connect)
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
         startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))

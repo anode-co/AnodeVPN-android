@@ -7,8 +7,11 @@
     <!-- Buttons -->
     <string name="button_connect">Start</string>
     <string name="button_disconnect">Stop</string>
+    <string name="button_submit">Submit</string>
     <string name="button_vpn_list">VPN List</string>
     <string name="action_create_account">Create account</string>
+    <string name="button_resend_email">Resend Email</string>
+    <string name="button_goto_email">Go to Email</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
@@ -33,6 +36,7 @@
     <string name="active_connections"> active connection(s) established</string>
     <string name="title_activity_login">Sign in</string>
     <string name="prompt_email">enter email</string>
+    <string name="hint_enter_username">enter username</string>
     <string name="prompt_emailusername">enter email or username</string>
     <string name="prompt_password">password</string>
     <string name="prompt_oldpassword">old password</string>
@@ -41,6 +45,7 @@
     <string name="link_forgotpassword">forgot password?</string>
     <string name="title_forgotpassword">Forgot password?</string>
     <string name="action_sign_in">Sign in</string>
+    <string name="label_already_have_account">already have an account? Sign in</string>
     <string name="action_sign_up">Sign up</string>
     <string name="action_changepassword">Change password</string>
     <string name="welcome">"Welcome !"</string>
@@ -51,6 +56,8 @@
     <string name="label_newpassword">"Please write your new password"</string>
     <string name="action_continue">Continue</string>
     <string name="label_passwordRecoveryMsg">"We've sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
+    <string name="label_email_verification">"We 've sent a verification link to your email."</string>
+    <string name="label_rating">"How was your VPN service?"</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

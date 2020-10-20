@@ -2,13 +2,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape xmlns:android = "http://schemas.android.com/apk/res/android">
-            <size android:height="180dp" android:width="40dp"/>
+            <size android:height="200dp" android:width="40dp"/>
             <solid android:color="@color/colorPrimarybackground" />
-            <corners android:radius="90dp"/>
+            <corners android:radius="100dp"/>
         </shape>
     </item>
     <item android:drawable="@drawable/ic_baseline_power_settings_new_24"
         android:gravity="center"
-        android:width="50dp"
-        android:height="50dp"/>
+        android:width="70dp"
+        android:height="70dp"/>
 </layer-list>

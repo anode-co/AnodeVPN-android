@@ -34,8 +34,8 @@
                 android:id="@+id/editTextTextEmailAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="44dp"
-                android:layout_marginEnd="44dp"
+                android:layout_marginStart="@dimen/button_margin"
+                android:layout_marginEnd="@dimen/button_margin"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:ems="10"
@@ -46,8 +46,8 @@
                 android:id="@+id/passwordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="44dp"
-                android:layout_marginEnd="44dp"
+                android:layout_marginStart="@dimen/button_margin"
+                android:layout_marginEnd="@dimen/button_margin"
                 android:layout_below="@+id/editTextTextEmailAddress"
                 app:passwordToggleEnabled="true">
                 <EditText
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/passwordLayout"
                 android:text="@string/link_forgotpassword"
-                android:layout_marginStart="44dp"
+                android:layout_marginStart="@dimen/button_margin"
                 android:layout_marginEnd="20dp"
                 android:textAlignment="viewEnd"
                 android:layout_alignEnd="@+id/passwordLayout"
@@ -83,11 +83,12 @@
         android:gravity="end">
         <Button
             android:id="@+id/buttonSingIn"
-            android:layout_marginLeft="44dp"
-            android:layout_marginRight="44dp"
+            android:layout_marginLeft="@dimen/button_margin"
+            android:layout_marginRight="@dimen/button_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/action_sign_in"
+            android:textSize="16sp"
             android:layout_marginBottom="15dp"
             android:textColor="#C9DDE9"
             android:background="@drawable/buttonshape"/>

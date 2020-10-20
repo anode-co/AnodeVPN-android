@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textSize="24sp"
-        android:text="How was your VPN service?"
+        android:text="@string/label_rating"
         android:layout_marginBottom="20dp"/>
 
     <RatingBar
@@ -26,9 +26,10 @@
         android:id="@+id/buttonSubmitRating"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:text="submit"
+        android:layout_marginStart="@dimen/button_margin"
+        android:layout_marginEnd="@dimen/button_margin"
+        android:text="@string/button_submit"
+        android:textSize="16sp"
         android:layout_marginTop="120dp"
         android:layout_marginBottom="24dp"
         android:textColor="#C9DDE9"
