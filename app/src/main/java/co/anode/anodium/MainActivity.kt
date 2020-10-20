@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar);
         //Disable night mode (dark mode)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
         anodeUtil = AnodeUtil(application)
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         //Error Handling
@@ -107,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
         buttonconnectvpns.setOnClickListener() {
             checked {
-                val status: TextView = findViewById(R.id.textview_status)
+                //val status: TextView = findViewById(R.id.textview_status)
                 if (buttonconnectvpns.text == "CONNECT") {
                     AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                 } else {
@@ -180,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 AnodeClient.ignoreErr {
                     //Check if 24 hours have passed since last log file submitted
-                    if (System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted",0) > 86400000) {
+                    if (System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted", 0) > 86400000) {
                         if (!File(applicationContext.filesDir.toString() + "/anodium-events.log").exists()) {
                             Log.d(LOGTAG, "No events to report, sleeping")
                             Thread.sleep(60 * 60000)
@@ -198,7 +199,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     }
-                    Thread.sleep(60*60000)
+                    Thread.sleep(60 * 60000)
                 }
             }
         }, "MainActivity.UploadEventsThread").start()
@@ -461,7 +462,7 @@ class MainActivity : AppCompatActivity() {
         val fragmentRating: RatingFragment = RatingFragment()
         val fragmentManager: FragmentManager = supportFragmentManager
         val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.add(R.id.mainLayout,fragmentRating,"")
+        fragmentTransaction.add(R.id.mainLayout, fragmentRating, "")
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
     }

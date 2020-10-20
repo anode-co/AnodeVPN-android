@@ -33,7 +33,7 @@ class AnodeUtil(c: Context?) {
 
         //Read architecture
         val arch = System.getProperty("os.arch")
-        var `in`: InputStream? = null
+        val `in`: InputStream
         val out: OutputStream?
         try {
             val am = context!!.assets
@@ -187,7 +187,7 @@ class AnodeUtil(c: Context?) {
     }
 
     fun getPubKey(): String {
-        var pubkey = ""
+        var pubkey: String
         val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         val json = JSONObject(filecontent)
         pubkey = json.getString("publicKey")

@@ -2,9 +2,9 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape xmlns:android = "http://schemas.android.com/apk/res/android">
-            <size android:height="160dp" android:width="40dp"/>
-            <solid android:color="#FFFFFF" />
-            <corners android:radius="80dp"/>
+            <size android:height="180dp" android:width="40dp"/>
+            <solid android:color="@color/colorPrimarybackground" />
+            <corners android:radius="90dp"/>
         </shape>
     </item>
     <item android:drawable="@drawable/ic_baseline_power_settings_new_24"

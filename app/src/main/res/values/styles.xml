@@ -6,6 +6,8 @@
         <item name="actionBarStyle">@style/MyActionBarStyle</item>
         <item name="actionBarTheme">@style/MyActionBarStyle</item>
         <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
+        <item name="android:fontFamily">@font/lato</item>
+        <item name="android:textAllCaps">false</item>
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>

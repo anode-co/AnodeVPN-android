@@ -33,7 +33,7 @@ class SignInActivity : AppCompatActivity() {
         //set actionbar title
         actionbar!!.title = getString(R.string.action_sign_in)
         //set back button
-        actionbar?.setDisplayHomeAsUpEnabled(true)
+        actionbar.setDisplayHomeAsUpEnabled(true)
 
         val signup: TextView = findViewById(R.id.textSignUp)
         val singupspanlink: Spanned = HtmlCompat.fromHtml("don't have an account yet? <a href='#'>Sign Up</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)

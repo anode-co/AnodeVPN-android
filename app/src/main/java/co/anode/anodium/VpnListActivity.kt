@@ -71,7 +71,7 @@ class VpnListActivity : AppCompatActivity() {
             }
 
             val serversArr = JSONArray(result)
-            val prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            //val prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
 
             for (i in 0 until serversArr.length()) {
                 val serverdetails = serversArr.getJSONObject(i)

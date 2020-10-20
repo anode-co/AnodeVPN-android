@@ -65,7 +65,6 @@ class VPNListAdapter(private val context: Context,
         }
 
         holder.favoriteButton.setOnClickListener {
-            val prefs = context.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             if (!prefs.getBoolean("favorite_" + dataitem["name"], false)) {
                 AnodeClient.eventLog(context, "Button FAVORITE for " + dataitem["name"])
                 toggleFavorite().execute("ADD")

@@ -293,13 +293,13 @@ object AnodeClient {
                 request.setDestinationUri(destinationuri)
                 //Enqueue download and save the referenceId
                 downloadReference = downloadManager.enqueue(request)
-                var query: DownloadManager.Query? = null
-                query = DownloadManager.Query()
-                var c: Cursor? = null
+
+                var query = DownloadManager.Query()
+
                 query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
                 downloadingUpdate = true
                 while (downloadingUpdate) {
-                    c = downloadManager.query(query)
+                    val c = downloadManager.query(query)
                     if (c.moveToFirst()) {
                         var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
                         if (status == DownloadManager.STATUS_FAILED) {
@@ -357,8 +357,8 @@ object AnodeClient {
     class getLatestAPK(): AsyncTask<Any?, Any?, String>() {
         override fun doInBackground(objects: Array<Any?>): String? {
             Log.i(LOGTAG,"Checking for latest APK")
-            var result = ""
-            val versionCode = BuildConfig.VERSION_CODE
+            var result: String
+            //val versionCode = BuildConfig.VERSION_CODE
             val versionName = BuildConfig.VERSION_NAME
             val major_number = versionName.split(".")[0].toInt()
             val minor_number = versionName.split(".")[1].toInt()
@@ -546,7 +546,7 @@ object AnodeClient {
         var useHttps = true
         Log.i(LOGTAG,"HttpReq at $address with $body and Auth:$needsAuth")
         val cjdnsServerAddress = "h.vpn.anode.co" //"[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]"
-        var result = ""
+        var result:String
         var url: URL
 
         statustv.post(Runnable {

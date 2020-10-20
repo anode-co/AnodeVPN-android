@@ -26,12 +26,11 @@ class ChangePasswordActivity : AppCompatActivity() {
         //set actionbar title
         actionbar!!.title = getString(R.string.action_changepassword)
         //set back button
-        actionbar?.setDisplayHomeAsUpEnabled(true)
+        actionbar.setDisplayHomeAsUpEnabled(true)
         val param = intent.extras
         setResult(0)
         //Check if activity started from Forgot password flow, then hide "old password"
-        var bForgotPassword = false
-        bForgotPassword = param?.getBoolean("ForgotPassword")!!
+        val bForgotPassword = param?.getBoolean("ForgotPassword")!!
         val buttonchangePassword = findViewById<Button>(R.id.buttonChangePassword)
         val labelnewPassword = findViewById<TextView>(R.id.label_newpassword)
         labelnewPassword.visibility = View.GONE

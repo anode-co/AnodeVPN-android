@@ -40,7 +40,7 @@ class AccountMainActivity : AppCompatActivity() {
         //set actionbar title
         actionbar!!.title = getString(R.string.action_sign_up)
         //set back button
-        actionbar?.setDisplayHomeAsUpEnabled(true)
+        actionbar.setDisplayHomeAsUpEnabled(true)
         prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signin: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
