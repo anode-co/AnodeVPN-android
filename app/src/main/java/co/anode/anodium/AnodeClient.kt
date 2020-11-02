@@ -272,7 +272,7 @@ object AnodeClient {
         val filename = "anodium-$version.apk"
         var downloadReference: Long = 0
         val downloadManager = mycontext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        var destination = mycontext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"
+        var destination = mycontext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!.toString() + "/"
         destination += filename
         val destinationuri = Uri.parse("$FILE_BASE_PATH$destination")
         var flag = true
@@ -316,7 +316,7 @@ object AnodeClient {
             }
             if (flag) {
                 downloadFails = 0
-                showInstallOption(destination, uri)
+                showInstallOption(destination)
             } else {
                 downloadFails++
                 Toast.makeText(mycontext,"ERROR downloading", Toast.LENGTH_LONG).show()
@@ -328,10 +328,7 @@ object AnodeClient {
         return downloadReference
     }
 
-    fun showInstallOption(
-            destination: String,
-            uri: Uri
-    ) {
+    fun showInstallOption(destination: String) {
         val onComplete = object : BroadcastReceiver() {
             override fun onReceive(
                     context: Context,
@@ -400,7 +397,6 @@ object AnodeClient {
                     val filesize = result.split("|")[2].toLong()
                     downloadFile(Uri.parse(url), version, filesize)
                 } else if (result.contains("error")) {
-                    //TODO: submit it? show to user?
                     Log.i(LOGTAG, "ERROR updating APK from $result")
                 } else if (result == "none"){
                     if (notifyUser) Toast.makeText(mycontext,"Application already at latest version", Toast.LENGTH_LONG).show()
@@ -427,14 +423,18 @@ object AnodeClient {
     class AuthorizeVPN() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val pubkey = params[0]
+            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            with (prefs.edit()) {
+                putString("LastServerPubkey", pubkey)
+                commit()
+            }
             val jsonObject = JSONObject()
             jsonObject.accumulate("date", System.currentTimeMillis())
+            val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
             statustv.post(Runnable {
                 statustv.text  = "VPN connecting..."
                 statustv.setBackgroundColor(0x00000000)
             } )
-            val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
-            Log.i(LOGTAG, resp)
             return resp
         }
 
@@ -472,17 +472,18 @@ object AnodeClient {
                                 statustv.setBackgroundColor(0x00000000)
                             })
                             //do not try to reconnect while re-authorization
-                            val node = "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"
-                            if (!isVpnActive()) {
+                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            val node = prefs.getString("LastServerPubkey","cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                            val connectedNode = prefs.getString("ServerPublicKey","")
+                            if ((!isVpnActive()) || (node != connectedNode)) {
                                 cjdnsConnectVPN(node)
                             }
-                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putLong("LastAuthorized", System.currentTimeMillis())
                                 putString("ServerPublicKey", node)
                                 commit()
                             }
-                            connectButton.text = "DISCONNECT"
+                            connectButton.text =  mycontext.resources.getString(R.string.button_disconnect)
                         } else {
                             statustv.post(Runnable {
                                 statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
@@ -493,7 +494,7 @@ object AnodeClient {
                                 putLong("LastAuthorized", 0)
                                 commit()
                             }
-                            connectButton.text = "CONNECT"
+                            connectButton.text =  mycontext.resources.getString(R.string.button_connect)
                             CjdnsSocket.Core_stopTun()
                             CjdnsSocket.clearRoutes()
                             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
@@ -537,6 +538,9 @@ object AnodeClient {
                 statustv.text  = "VPN Authorization required"
                 statustv.setBackgroundColor(0xFFFF0000.toInt())
             } )
+            connectButton.post(Runnable {
+                connectButton.text  = mycontext.resources.getString(R.string.button_connect)
+            })
             //Stop UI thread
             h.removeCallbacks(runnableConnection)
         }
@@ -655,7 +659,7 @@ object AnodeClient {
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             val Authtimestamp = prefs.getLong("LastAuthorized",0)
             if ((System.currentTimeMillis() - Authtimestamp) > Auth_TIMEOUT) {
-                AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
             }
             //GetPublicIP().execute(status)
             h!!.postDelayed(this, 10000) //ms
@@ -751,7 +755,7 @@ object AnodeClient {
         override fun doInBackground(vararg params: String?): String? {
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             val username = prefs.getString("username", "")
-            val url = API_DELETE_ACCOUNT.replace("<email_or_username>", username)
+            val url = API_DELETE_ACCOUNT.replace("<email_or_username>", username!!)
             val resp = APIHttpReq( url, "","DELETE", true , false)
             Log.i(LOGTAG, resp)
             return resp

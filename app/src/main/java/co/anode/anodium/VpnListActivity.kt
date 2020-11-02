@@ -53,6 +53,7 @@ class VpnListActivity : AppCompatActivity() {
     inner class fetchVpnServers() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             try {
+                AnodeClient.statustv = findViewById(R.id.textview_status)
                 var url = API_SERVERS_LIST
                 if (params.isNotEmpty()) url = params[0].toString()
                 //return URL(url).readText(Charsets.UTF_8)

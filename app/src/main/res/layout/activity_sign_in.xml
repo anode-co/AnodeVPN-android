@@ -34,8 +34,8 @@
                 android:id="@+id/editTextTextEmailAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/button_margin"
-                android:layout_marginEnd="@dimen/button_margin"
+                android:layout_marginStart="@dimen/editfield_margin"
+                android:layout_marginEnd="@dimen/editfield_margin"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:ems="10"
@@ -46,8 +46,8 @@
                 android:id="@+id/passwordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/button_margin"
-                android:layout_marginEnd="@dimen/button_margin"
+                android:layout_marginStart="@dimen/editfield_margin"
+                android:layout_marginEnd="@dimen/editfield_margin"
                 android:layout_below="@+id/editTextTextEmailAddress"
                 app:passwordToggleEnabled="true">
                 <EditText

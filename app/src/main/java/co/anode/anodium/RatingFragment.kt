@@ -47,9 +47,9 @@ class RatingFragment : Fragment() {
          * @param param2 Parameter 2.
          * @return A new instance of fragment RatingFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        //fun newInstance(param1: String, param2: String) =
+        fun newInstance() =
                 RatingFragment().apply {
                     arguments = Bundle().apply {
                         //putString(ARG_PARAM1, param1)
@@ -60,11 +60,13 @@ class RatingFragment : Fragment() {
 
     inner class submitRating() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            val url = API_RATING_URL.replace("<public_key>", prefs!!.getString("ServerPublicKey", ""),true)
+            val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val serverkey = prefs.getString("ServerPublicKey", "")
+            val url = API_RATING_URL.replace("<public_key>", serverkey,true)
             val jsonObject = JSONObject()
             jsonObject.accumulate("rating", params[0])
             return AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true, false)
+            //TODO: start a timer and close fragment after it expires
         }
 
         override fun onPostExecute(result: String?) {

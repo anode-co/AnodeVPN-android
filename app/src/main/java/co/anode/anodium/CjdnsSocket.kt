@@ -232,6 +232,10 @@ object CjdnsSocket {
         call("UDPInterface_beginConnection", Benc.dict("publicKey","9syly12vuwr1jh5qpktmjc817y38bc9ytsvs8d5qwcnvn6c2lwq0.k","address", "94.23.31.145:17102","peerName", peerName, "password","wwbn34yhxhtubtghq6y2pksyt7c9mm8","login", "cjd-snode", "interfaceNumber",0))
         call("UDPInterface_beginConnection", Benc.dict("publicKey","cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k","address", "198.167.222.70:54673","peerName", peerName, "password","use_more_bandwidth","login", "ipredator.se/cjdns_public_node", "interfaceNumber",0))
     }
+
+    fun addPeer(publickey:String, address:String, login:String, password:String) {
+        call("UDPInterface_beginConnection", Benc.dict("publicKey",publickey,"address", address,"peerName", "", "password","use_more_bandwidth","login", "ipredator.se/cjdns_public_node", "interfaceNumber",0))
+    }
 }
 
 class CjdnsException(message:String): Exception(message)

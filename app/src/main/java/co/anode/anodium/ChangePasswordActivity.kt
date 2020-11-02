@@ -69,13 +69,13 @@ class ChangePasswordActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String?): String? {
             val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             val jsonObject = JSONObject()
-            var url = API_CHANGEPASSWORD_URL.replace("<username>", prefs.getString("username",""), true)
+            var url = API_CHANGEPASSWORD_URL.replace("<username>", prefs.getString("username","")!!, true)
             if (params[0] == "false") {
                 jsonObject.accumulate("currentPassword", params[1])
             } else {
                 //jsonObject.accumulate("passwordRecoveryToken", prefs.getString("passwordResetToken",""))
                 jsonObject.accumulate("passwordResetToken", prefs.getString("passwordResetToken",""))
-                url = API_CHANGEPASSWORD_RESET_URL.replace("<username>", prefs.getString("username",""), true)
+                url = API_CHANGEPASSWORD_RESET_URL.replace("<username>", prefs.getString("username","")!!, true)
             }
             jsonObject.accumulate("newPassword", params[2])
             val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true, false)

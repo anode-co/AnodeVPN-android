@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true"
     android:background="@color/colorPrimarybackground"
     tools:context="co.anode.anodium.VpnListActivity">
-
+    
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"

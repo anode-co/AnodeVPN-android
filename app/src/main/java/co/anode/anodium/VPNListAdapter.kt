@@ -43,7 +43,7 @@ class VPNListAdapter(private val context: Context,
         holder.countryImageView.setImageResource(id)
         holder.speedTextView = view.findViewById(R.id.row_speed)
         holder.speedTextView.text = dataitem["speed"]
-        holder.connectButton = view.findViewById(R.id.row_button)
+        holder.connectButton = view.findViewById(R.id.button_smallconnectvpn)
         holder.favoriteButton = view.findViewById(R.id.button_favorite)
         holder.ratingbar = view.findViewById(R.id.list_ratingbar)
         if (dataitem["averageRating"].isNullOrEmpty() || dataitem["averageRating"] == "null") {
@@ -53,13 +53,15 @@ class VPNListAdapter(private val context: Context,
         }
 
         if ((dataitem["isFavorite"] == "true") || (prefs.getBoolean("favorite_" + dataitem["name"], false))){
-            holder.favoriteButton.setBackgroundResource(R.drawable.ic_baseline_favorite_24)
+            holder.favoriteButton.setBackgroundResource(R.drawable.button_round_fav_small)
         } else {
-            holder.favoriteButton.setBackgroundResource(R.drawable.ic_baseline_favorite_border_24)
+            holder.favoriteButton.setBackgroundResource(R.drawable.button_round_unfav_small)
         }
 
         holder.connectButton.setOnClickListener {
             AnodeClient.eventLog(context, "Button CONNECT to " + dataitem["name"])
+            //TODO: add new peer ???
+            //CjdnsSocket.addPeer("","","","")
             AnodeClient.AuthorizeVPN().execute(dataitem["publicKey"])
             (context as Activity).finish()
         }
@@ -68,7 +70,7 @@ class VPNListAdapter(private val context: Context,
             if (!prefs.getBoolean("favorite_" + dataitem["name"], false)) {
                 AnodeClient.eventLog(context, "Button FAVORITE for " + dataitem["name"])
                 toggleFavorite().execute("ADD")
-                holder.favoriteButton.setBackgroundResource(R.drawable.ic_baseline_favorite_24)
+                holder.favoriteButton.setBackgroundResource(R.drawable.button_round_fav_small)
                 with(prefs.edit()) {
                     putBoolean("favorite_" + dataitem["name"], true)
                     commit()
@@ -76,7 +78,7 @@ class VPNListAdapter(private val context: Context,
             } else {
                 AnodeClient.eventLog(context, "Button UNFAVORITE for " + dataitem["name"])
                 toggleFavorite().execute("DELETE")
-                holder.favoriteButton.setBackgroundResource(R.drawable.ic_baseline_favorite_border_24)
+                holder.favoriteButton.setBackgroundResource(R.drawable.button_round_unfav_small)
                 with(prefs.edit()) {
                     putBoolean("favorite_" + dataitem["name"], false)
                     commit()
@@ -89,7 +91,6 @@ class VPNListAdapter(private val context: Context,
     }
 
     private class ViewHolder {
-        //lateinit var countryTextView: TextView
         lateinit var countryImageView: ImageView
         lateinit var nameTextView: TextView
         lateinit var speedTextView: TextView
@@ -98,8 +99,8 @@ class VPNListAdapter(private val context: Context,
         lateinit var ratingbar: RatingBar
     }
 
-    fun setFilter(text: String?) {
-        val text = text!!.toLowerCase(Locale.getDefault())
+    fun setFilter(str: String?) {
+        val text = str!!.toLowerCase(Locale.getDefault())
         list.clear()
         if (text.isEmpty()) {
             dataList.addAll(tempdataList)
@@ -116,7 +117,7 @@ class VPNListAdapter(private val context: Context,
     inner class toggleFavorite() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val prefs = context.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            val url = API_FAVORITE_URL.replace("<server_public_key>", prefs!!.getString("ServerPublicKey", ""), true)
+            val url = API_FAVORITE_URL.replace("<server_public_key>", prefs.getString("ServerPublicKey", "")!!, true)
             return if (params[0]=="ADD") {
                 AnodeClient.APIHttpReq(url, "", "POST", true, false)
             } else {

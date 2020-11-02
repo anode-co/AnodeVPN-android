@@ -53,7 +53,7 @@ class AccountNicknameActivity : AppCompatActivity() {
 
         val prefsusername = prefs.getString("username","")
         usernameText = findViewById(R.id.editTextNickname)
-        if (prefsusername.isEmpty()) {
+        if (prefsusername!!.isEmpty()) {
             usernameGenerate().execute()
         } else {
             usernameText?.setText(prefsusername)

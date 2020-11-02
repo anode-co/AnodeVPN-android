@@ -3,63 +3,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="10dp"
+    android:layout_height="80dp"
     android:weightSum="1"
     android:gravity="center_vertical"
     android:baselineAligned="false">
 
-    <LinearLayout android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingLeft="15dp"
-        tools:ignore="UselessParent">
+    <RelativeLayout
+        android:id="@+id/row_relative"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="10dp">
         <ImageView
             android:id="@+id/row_country"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:scaleType="centerCrop" />
-        <!--<TextView
-            android:id="@+id/row_country"
+            android:scaleType="centerCrop"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/gr"/>
+        <LinearLayout
+            android:id="@+id/info_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Country"
-            android:textStyle="bold"/>-->
+            android:orientation="vertical"
+            android:layout_marginStart="100dp">
+            <TextView
+                android:id="@+id/row_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name"
+                android:layout_gravity="left"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/row_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="Speed"/>
+            <RatingBar
+                android:id="@+id/list_ratingbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                    style="@style/Widget.AppCompat.RatingBar.Small" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/button_favorite"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:background="@drawable/ic_baseline_favorite_border_24"
-            android:layout_gravity="right"  />
-        <TextView
-            android:id="@+id/row_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-34dp"
-            android:text="Name"
-            android:textStyle="bold"/>
-        <TextView
-            android:id="@+id/row_speed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Speed"/>
-        <RatingBar
-            android:id="@+id/list_ratingbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:isIndicator="true"
-            android:scaleX=".5"
-            android:scaleY=".5"
-            android:layout_gravity="center_horizontal" />
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"
+            android:layout_toStartOf="@+id/button_smallconnectvpn"
+            android:background="@drawable/button_round_fav_small" />
+
         <Button
-            android:id="@+id/row_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="CONNECT"
-            android:textColor="#C9DDE9"
-            android:background="@drawable/buttonshape"/>
-    </LinearLayout>
+            android:id="@+id/button_smallconnectvpn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/round_button_small" />
+    </RelativeLayout>
 
 </LinearLayout>

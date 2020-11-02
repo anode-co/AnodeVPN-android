@@ -36,8 +36,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="44dp"
-                android:layout_marginRight="44dp"
+                android:layout_marginLeft="@dimen/editfield_margin"
+                android:layout_marginRight="@dimen/editfield_margin"
                 android:ems="10"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress" />
@@ -48,9 +48,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/editTextTextEmailAddress"
                 android:layout_centerHorizontal="true"
-                android:layout_marginLeft="44dp"
+                android:layout_marginLeft="@dimen/editfield_margin"
                 android:layout_marginTop="50dp"
-                android:layout_marginRight="44dp"
+                android:layout_marginRight="@dimen/editfield_margin"
                 app:passwordToggleEnabled="true">
 
                 <EditText

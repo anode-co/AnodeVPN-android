@@ -110,7 +110,8 @@ class MainActivity : AppCompatActivity() {
             checked {
                 //val status: TextView = findViewById(R.id.textview_status)
                 if (buttonconnectvpns.text == resources.getString(R.string.button_connect)) {
-                    AnodeClient.AuthorizeVPN().execute("cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                    buttonconnectvpns.text = resources.getString(R.string.button_disconnect)
+                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
                 } else {
                     disconnectVPN()
                 }
@@ -261,6 +262,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         AnodeClient.eventLog(baseContext, "Resume MainActivity")
+        AnodeClient.statustv = findViewById(R.id.textview_status)
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val nickname_backpressed = prefs.getBoolean("NicknameActivity_BackPressed", false)
