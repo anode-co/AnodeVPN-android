@@ -5,9 +5,4 @@
         android:fontWeight="200"
         android:font="@font/lato_regular"
         />
-    <font
-        android:fontStyle="normal"
-        android:fontWeight="200"
-        android:font="@font/lato_bold"
-        />
 </font-family>
