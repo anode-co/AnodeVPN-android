@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:text="@string/action_sign_in"
             android:textSize="16sp"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="@dimen/bottom_button_margin"
             android:textColor="#C9DDE9"
             android:background="@drawable/buttonshape"/>
 
@@ -99,6 +99,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="don't have an account yet? Sign Up"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginTop="-30dp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

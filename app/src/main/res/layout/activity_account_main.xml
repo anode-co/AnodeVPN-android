@@ -94,10 +94,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/action_skip"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
         android:textSize="16sp"
         android:layout_gravity="center_horizontal"
-        app:layout_constraintBottom_toTopOf="@id/textSignIn"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape"/>
     <TextView
@@ -105,7 +105,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/label_already_have_account"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="-30dp"
         android:layout_gravity="center_horizontal"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

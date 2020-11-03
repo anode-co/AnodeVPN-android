@@ -9,4 +9,5 @@
     <dimen name="singlebutton_bottom_container">100dp</dimen>
     <dimen name="button_margin">100dp</dimen>
     <dimen name="editfield_margin">44dp</dimen>
+    <dimen name="bottom_button_margin">40dp</dimen>
 </resources>

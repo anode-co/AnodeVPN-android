@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:text="@string/button_vpn_list"
         android:fontFamily="@font/lato"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
         android:layout_marginStart="@dimen/button_margin"
         android:layout_marginEnd="@dimen/button_margin"
         android:textSize="16sp"
