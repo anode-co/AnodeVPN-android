@@ -517,33 +517,35 @@ object AnodeClient {
         CjdnsSocket.IpTunnel_connectTo(node)
         var tries = 0
         //Check for ip address given by cjdns try for 20 times, 10secs
-        while (!iconnected && (tries < 10)) {
-            iconnected = CjdnsSocket.getCjdnsRoutes()
-            tries++
-            Thread.sleep(2000)
-        }
-        if (iconnected) {
-            //Restart Service
-            CjdnsSocket.Core_stopTun()
-            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-            statustv.post(Runnable {
-                statustv.text  = "VPN Connected"
-                statustv.setBackgroundColor(0xFF00FF00.toInt())
-            } )
-            //Start Thread for checking connection
-            h.postDelayed(runnableConnection, 10000)
-        } else {
-            statustv.post(Runnable {
-                statustv.text  = "VPN Authorization required"
-                statustv.setBackgroundColor(0xFFFF0000.toInt())
-            } )
-            connectButton.post(Runnable {
-                connectButton.text  = mycontext.resources.getString(R.string.button_connect)
-            })
-            //Stop UI thread
-            h.removeCallbacks(runnableConnection)
-        }
+        Thread(Runnable {
+            while (!iconnected && (tries < 10)) {
+                iconnected = CjdnsSocket.getCjdnsRoutes()
+                tries++
+                Thread.sleep(2000)
+            }
+            if (iconnected) {
+                //Restart Service
+                CjdnsSocket.Core_stopTun()
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                statustv.post(Runnable {
+                    statustv.text  = "VPN Connected"
+                    statustv.setBackgroundColor(0xFF00FF00.toInt())
+                } )
+                //Start Thread for checking connection
+                h.postDelayed(runnableConnection, 10000)
+            } else {
+                statustv.post(Runnable {
+                    statustv.text  = "VPN Authorization required"
+                    statustv.setBackgroundColor(0xFFFF0000.toInt())
+                } )
+                connectButton.post(Runnable {
+                    connectButton.text  = mycontext.resources.getString(R.string.button_connect)
+                })
+                //Stop UI thread
+                h.removeCallbacks(runnableConnection)
+            }
+        }, "AnodeClient.cjdnsConnectVPN").start()
     }
 
     fun APIHttpReq(address: String, body: String, method: String, needsAuth: Boolean,isRetry: Boolean): String {
