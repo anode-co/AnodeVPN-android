@@ -67,6 +67,14 @@ class DebugActivity : AppCompatActivity() {
                         info += peers[i]["lladdr"].toString() + " " + peers[i]["addr"].toString() + " " + peers[i]["state"].toString() + " in " + peers[i]["recvKbps"].toString() + " out " + peers[i]["sendKbps"].toString() + " " + peers[i]["user"].toString() + "\n"
                     }
                     peerstats.text = "Peer stats: $info"
+
+                    val listconnnections = findViewById<TextView>(R.id.text_listconnections)
+                    val connections:ArrayList<Benc.Bdict> = CjdnsSocket.IpTunnel_listConnections()
+                    info = ""
+                    for (i in 0 until connections.count()) {
+                         info += connections[i].toString()
+                    }
+                    listconnnections.text = "Connections: $info"
                     val publicip = findViewById<TextView>(R.id.text_publicIP)
                     publicip.text = "Public IP: updating ip..."
                     GetPublicIP().execute(publicip)

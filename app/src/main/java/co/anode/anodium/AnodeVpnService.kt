@@ -61,10 +61,12 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
                 .allowFamily(AF_INET)
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
+            CjdnsSocket.VPNipv4Address = CjdnsSocket.ipv4Address
             b.addRoute(CjdnsSocket.ipv4Route, CjdnsSocket.ipv4RoutePrefix) //0
             b.addAddress(CjdnsSocket.ipv4Address, CjdnsSocket.ipv4AddressPrefix) //32
         }
         if (CjdnsSocket.ipv6Address.isNotEmpty() && CjdnsSocket.ipv6Address != "") {
+            CjdnsSocket.VPNipv6Address = CjdnsSocket.ipv6Address
             b.addRoute(CjdnsSocket.ipv6Route, CjdnsSocket.ipv6RoutePrefix) //0
             b.addAddress(CjdnsSocket.ipv6Address, CjdnsSocket.ipv6AddressPrefix) //64
         }

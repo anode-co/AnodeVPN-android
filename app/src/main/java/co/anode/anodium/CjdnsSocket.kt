@@ -13,12 +13,14 @@ val LOGTAG = "co.anode.anodiumvpn"
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
     var ipv4Address: String = ""
+    var VPNipv4Address: String = ""
     var ipv4AddressPrefix: Int = 0
     var ipv4Route: String = ""
     var ipv4RoutePrefix: Int = 0
     var ipv6Route: String = ""
     var ipv6RoutePrefix: Int = 0
     var ipv6Address: String = ""
+    var VPNipv6Address: String = ""
     var ipv6AddressPrefix: Int = 0
     var logpeerStats: String = ""
     var logshowConnections: String = ""
@@ -79,6 +81,9 @@ object CjdnsSocket {
         if (err.toString() != "null") {
             if (err.str().contains("no tun currently")) {
                 //Ignore it
+            } else if (err.str().contains("connection not found")) {
+                //Ignore it
+                return dec
             } else if (err is Benc.Bstr && err.str() != "none") {
                 throw CjdnsException("cjdns replied: " + err.str())
             }
@@ -147,6 +152,24 @@ object CjdnsSocket {
         return out
     }
 
+    fun IpTunnel_listConnections(): ArrayList<Benc.Bdict> {
+        var connection: Benc.Obj
+        val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
+        var i = 0
+        val list= call("IpTunnel_listConnections", null)
+        for (i in 0 until list["connections"].size()) {
+            try {
+                connection = IpTunnel_showConnection(list["connections"][0].num().toInt())
+                if (connection.toString().contains("connection not found"))
+                    break
+                out.add(connection as Benc.Bdict)
+            }catch (e: java.lang.Exception) {
+                break
+            }
+        }
+        return out
+    }
+
     fun getNumberofEstablishedPeers(): Int {
         val peers:ArrayList<Benc.Bdict> = InterfaceController_peerStats()
         var totalestablishedpeers: Int = 0
@@ -161,6 +184,18 @@ object CjdnsSocket {
     fun IpTunnel_connectTo(node: String) {
         Log.i(LOGTAG,"IpTunnel_connectTo: $node")
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
+    }
+
+    fun IpTunnel_removeAllConnections() {
+        val connections:ArrayList<Benc.Bdict> = IpTunnel_listConnections()
+        for (i in 0 until connections.count()) {
+            IpTunnel_removeConnection(i)
+        }
+    }
+
+    fun IpTunnel_removeConnection(num: Int) {
+        Log.i(LOGTAG,"IpTunnel_removeConnection: $num")
+        call("IpTunnel_removeConnection", Benc.dict("connection", num))
     }
 
     fun IpTunnel_showConnection(num: Int): Benc.Obj =

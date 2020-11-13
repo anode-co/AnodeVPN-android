@@ -113,7 +113,8 @@ class MainActivity : AppCompatActivity() {
                     buttonconnectvpns.text = resources.getString(R.string.button_disconnect)
                     AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
                 } else {
-                    disconnectVPN()
+                    disconnectVPN(true)
+                    //disconnectVPN(false)
                 }
             }
         }
@@ -359,6 +360,9 @@ class MainActivity : AppCompatActivity() {
             changepassactivity.putExtra("ForgotPassword", false)
             startActivity(changepassactivity)
             return true
+        } else if (id == R.id.action_closeapp) {
+            closeApp()
+            return true
         } else {
             super.onOptionsItemSelected(item)
             return false
@@ -446,27 +450,36 @@ class MainActivity : AppCompatActivity() {
                     textConnectivity?.setBackgroundColor(0xFFFF0000.toInt())
                 })
         }
-
     }
 
-    fun disconnectVPN() {
+    fun disconnectVPN(showRatingBar: Boolean) {
         AnodeClient.AuthorizeVPN().cancel(true)
         AnodeClient.stopThreads()
         val status = findViewById<TextView>(R.id.textview_status)
         status.setBackgroundColor(0xFFFF0000.toInt())
         status.text = "VPN disconnected"
         buttonconnectvpns.text = resources.getString(R.string.button_connect)
+        CjdnsSocket.IpTunnel_removeAllConnections()
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
         startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
 
         //Rating bar
-        val fragmentRating: RatingFragment = RatingFragment()
-        val fragmentManager: FragmentManager = supportFragmentManager
-        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.add(R.id.mainLayout, fragmentRating, "")
-        fragmentTransaction.addToBackStack(null)
-        fragmentTransaction.commit()
+        if (showRatingBar) {
+            val fragmentRating: RatingFragment = RatingFragment()
+            val fragmentManager: FragmentManager = supportFragmentManager
+            val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.add(R.id.mainLayout, fragmentRating, "")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }
+    }
+
+    fun closeApp() {
+        Log.d(LOGTAG, "Closing anodium application")
+        disconnectVPN(false)
+        finish()
+        System.exit(0)
     }
 }
 

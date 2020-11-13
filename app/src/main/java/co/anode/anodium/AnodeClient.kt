@@ -495,6 +495,7 @@ object AnodeClient {
                                 commit()
                             }
                             connectButton.text =  mycontext.resources.getString(R.string.button_connect)
+                            CjdnsSocket.IpTunnel_removeAllConnections()
                             CjdnsSocket.Core_stopTun()
                             CjdnsSocket.clearRoutes()
                             mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
@@ -525,6 +526,7 @@ object AnodeClient {
             }
             if (iconnected) {
                 //Restart Service
+                //CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
@@ -536,7 +538,7 @@ object AnodeClient {
                 h.postDelayed(runnableConnection, 10000)
             } else {
                 statustv.post(Runnable {
-                    statustv.text  = "VPN Authorization required"
+                    statustv.text  = "VPN connection failed"
                     statustv.setBackgroundColor(0xFFFF0000.toInt())
                 } )
                 connectButton.post(Runnable {
@@ -617,8 +619,6 @@ object AnodeClient {
 
     object runnableConnection: Runnable {
         private var h: Handler? = null
-        private var ipv4address: String? = null
-        private var ipv6address: String? = null
 
         fun init(handler: Handler)  {
             h = handler
@@ -632,26 +632,25 @@ object AnodeClient {
                     statustv.text  = "VPN disconnected"
                     statustv.setBackgroundColor(0xFFFF0000.toInt())
                 } )
+                CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 CjdnsSocket.clearRoutes()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                connectButton.text = "CONNECT"
+                connectButton.text = mycontext.resources.getString(R.string.button_connect)
             }
             val newip4address = CjdnsSocket.ipv4Address
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
-            if ((ipv4address != newip4address) || (ipv4address != newip4address)){
+            if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
                 statustv.post(Runnable {
                     statustv.text  = "VPN Reconnecting..."
                     statustv.setBackgroundColor(0xFF00FF00.toInt())
                 } )
-                ipv4address = newip4address
-                ipv6address = newip6address
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-            } else if (ipv6address != "") {
+            } else if (CjdnsSocket.VPNipv6Address != "") {
                 statustv.post(Runnable {
                     statustv.text  = "VPN Connected"
                     statustv.setBackgroundColor(0xFF00FF00.toInt())

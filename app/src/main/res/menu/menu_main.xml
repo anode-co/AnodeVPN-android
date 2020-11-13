@@ -21,34 +21,27 @@
     <item
         android:id="@+id/action_checkupdates"
         android:orderInCategory="100"
-        android:title="Check for update"
+        android:title="@string/action_check_update"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_debug"
         android:orderInCategory="100"
-        android:title="Debug screen"
+        android:title="@string/action_debug"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
-        android:title="Log out"
+        android:title="@string/action_logout"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_deleteaccount"
         android:orderInCategory="100"
-        android:title="Delete account"
-        app:showAsAction="never"/>
-    <!--
-     <item
-        android:id="@+id/action_vpnlist"
-        android:orderInCategory="100"
-        android:title="VPN List"
+        android:title="@string/action_delete_account"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_submitlogs"
+        android:id="@+id/action_closeapp"
         android:orderInCategory="100"
-        android:title="Submit Logs"
+        android:title="@string/action_closeapp"
         app:showAsAction="never"/>
-    -->
 </menu>
