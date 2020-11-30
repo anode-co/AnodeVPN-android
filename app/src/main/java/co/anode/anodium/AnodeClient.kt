@@ -514,6 +514,7 @@ object AnodeClient {
     fun cjdnsConnectVPN(node: String) {
         var iconnected: Boolean = false
         runnableConnection.init(h)
+        CjdnsSocket.IpTunnel_removeAllConnections()
         //Connect to Internet
         CjdnsSocket.IpTunnel_connectTo(node)
         var tries = 0
@@ -523,10 +524,10 @@ object AnodeClient {
                 iconnected = CjdnsSocket.getCjdnsRoutes()
                 tries++
                 Thread.sleep(2000)
+                //CjdnsSocket.SessionManager_sessionStatsByIP("fc18:0f9f:6054:ea50:43b6:7a4d:4e0d:db1c")
             }
             if (iconnected) {
                 //Restart Service
-                //CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
@@ -544,6 +545,7 @@ object AnodeClient {
                 connectButton.post(Runnable {
                     connectButton.text  = mycontext.resources.getString(R.string.button_connect)
                 })
+                CjdnsSocket.IpTunnel_removeAllConnections()
                 //Stop UI thread
                 h.removeCallbacks(runnableConnection)
             }

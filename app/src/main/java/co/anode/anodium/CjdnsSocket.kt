@@ -69,6 +69,7 @@ object CjdnsSocket {
                 } else {
                     Benc.dict("q", name)
                 }
+        Log.i(LOGTAG,benc.toString())
         ls.outputStream.write(benc.bytes())
         val x = read()
         //Log.i(LOGTAG, "$benc-->$x")
@@ -152,6 +153,24 @@ object CjdnsSocket {
         return out
     }
 
+    fun getIpTunnelConnectionIDs(): MutableList<Int> {
+        var connection: Benc.Obj
+        val out:MutableList<Int> = mutableListOf()
+        var i = 0
+        val list= call("IpTunnel_listConnections", null)
+        for (i in 0 until list["connections"].size()) {
+            try {
+                connection = IpTunnel_showConnection(list["connections"][0].num().toInt())
+                if (connection.toString().contains("connection not found"))
+                    break
+                out.add(list["connections"][0].num().toInt())
+            }catch (e: java.lang.Exception) {
+                break
+            }
+        }
+        return out
+    }
+
     fun IpTunnel_listConnections(): ArrayList<Benc.Bdict> {
         var connection: Benc.Obj
         val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
@@ -187,9 +206,9 @@ object CjdnsSocket {
     }
 
     fun IpTunnel_removeAllConnections() {
-        val connections:ArrayList<Benc.Bdict> = IpTunnel_listConnections()
+        val connections:MutableList<Int> = getIpTunnelConnectionIDs()
         for (i in 0 until connections.count()) {
-            IpTunnel_removeConnection(i)
+            IpTunnel_removeConnection(connections[i])
         }
     }
 
@@ -205,7 +224,8 @@ object CjdnsSocket {
             call("Sign_sign", Benc.dict("msgHash", b64Digest))
 
     fun getCjdnsRoutes(): Boolean {
-        val connection = IpTunnel_showConnection(0)
+        val connectionIDs:MutableList<Int> = getIpTunnelConnectionIDs()
+        val connection = IpTunnel_showConnection(connectionIDs[0])
         logshowConnections = connection.toString()
         val ip4Address = connection["ip4Address"]
         val ip4Prefix = connection["ip4Prefix"]
@@ -270,6 +290,19 @@ object CjdnsSocket {
 
     fun addPeer(publickey:String, address:String, login:String, password:String) {
         call("UDPInterface_beginConnection", Benc.dict("publicKey",publickey,"address", address,"peerName", "", "password","use_more_bandwidth","login", "ipredator.se/cjdns_public_node", "interfaceNumber",0))
+    }
+
+    fun SessionManager_sessionStatsByIP(address:String) {
+        val result = call("SessionManager_sessionStatsByIP", Benc.dict("ip6",address))
+        //get path
+        val addr = result["addr"].toString().split(".")
+        val path = addr[1]+"."+addr[2]+"."+addr[3]+"."+addr[4]
+        SwitchPinger_ping(path)
+    }
+
+    fun SwitchPinger_ping(path:String) {
+        Log.i(LOGTAG, "SwitchPinger_ping for path: "+path)
+        val result = call("SwitchPinger_ping", Benc.dict("path",path))
     }
 }
 
