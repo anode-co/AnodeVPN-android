@@ -42,7 +42,7 @@
     <string name="connecting">Connecting…</string>
     <string name="authorization_needed">Can not connect to VPN. Authorization needed</string>
     <string name="active_connections"> active connection(s) established</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login">Login</string>
     <string name="prompt_email">enter email</string>
     <string name="hint_enter_username">enter username</string>
     <string name="prompt_emailusername">enter email or username</string>
@@ -52,7 +52,7 @@
     <string name="prompt_confirmpassword">confirm password</string>
     <string name="link_forgotpassword">forgot password?</string>
     <string name="title_forgotpassword">Forgot password?</string>
-    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in">Login</string>
     <string name="label_already_have_account">already have an account? Sign in</string>
     <string name="action_sign_up">Sign up</string>
     <string name="action_changepassword">Change password</string>
@@ -60,11 +60,14 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="label_forgotpassword">"For us to recover your password\nplease enter your email"</string>
-    <string name="label_newpassword">"Please write your new password"</string>
+    <string name="label_forgotpassword">"To recover your password\nenter your email"</string>
+    <string name="label_newpassword">"Enter a new password"</string>
     <string name="action_continue">Continue</string>
     <string name="label_passwordRecoveryMsg">"We've sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
     <string name="label_email_verification">"We 've sent a verification link to your email."</string>
     <string name="label_rating">"How was your VPN service?"</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- CONTENT DESCIPTIONS -->
+    <string name="contentdescription_password_image">Password image</string>
+    <string name="contentdescription_login_image">Login image</string>
 </resources>
