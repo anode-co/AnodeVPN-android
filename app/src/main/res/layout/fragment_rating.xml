@@ -3,24 +3,80 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="bottom"
     android:id="@+id/fragmentRating"
     tools:context=".RatingFragment">
-
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimarybackground">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/ratingBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:textSize="24sp"
         android:text="@string/label_rating"
         android:layout_marginBottom="20dp"/>
-
     <RatingBar
         android:id="@+id/ratingBar"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="50dp" />
+        app:layout_constraintBottom_toTopOf="@+id/buttonSubmitRating"
+        android:progressBackgroundTint="#AAAAAA"
+        android:progressTint="#FFB85A"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="150dp"/>
+    <ToggleButton
+        android:id="@+id/toggleButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_comment"
+        android:layout_margin="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/toggleButton2"
+        app:layout_constraintBottom_toTopOf="@+id/toggleButton3"/>
+    <ToggleButton
+        android:id="@+id/toggleButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_comment"
+        android:layout_margin="10dp"
+        app:layout_constraintStart_toEndOf="@id/toggleButton1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/toggleButton3" />
+    <ToggleButton
+        android:id="@+id/toggleButton3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_comment"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/toggleButton4"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSubmitRating"/>
+    <ToggleButton
+        android:id="@+id/toggleButton4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_comment"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintStart_toEndOf="@id/toggleButton3"
+        app:layout_constraintEnd_toStartOf="@id/toggleButton5"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSubmitRating"/>
+    <ToggleButton
+        android:id="@+id/toggleButton5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_comment"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintStart_toEndOf="@id/toggleButton4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSubmitRating"/>
 
     <Button
         android:id="@+id/buttonSubmitRating"
@@ -28,10 +84,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/button_margin"
         android:layout_marginEnd="@dimen/button_margin"
-        android:text="@string/button_submit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/button_send"
         android:textSize="16sp"
-        android:layout_marginTop="120dp"
         android:layout_marginBottom="@dimen/bottom_button_margin"
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
