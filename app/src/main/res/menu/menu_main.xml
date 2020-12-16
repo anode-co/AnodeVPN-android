@@ -34,11 +34,11 @@
         android:orderInCategory="100"
         android:title="@string/action_logout"
         app:showAsAction="never"/>
-    <item
+    <!--<item
         android:id="@+id/action_deleteaccount"
         android:orderInCategory="100"
         android:title="@string/action_delete_account"
-        app:showAsAction="never"/>
+        app:showAsAction="never"/>-->
     <item
         android:id="@+id/action_closeapp"
         android:orderInCategory="100"
