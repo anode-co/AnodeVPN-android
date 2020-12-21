@@ -1,0 +1,14 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape xmlns:android = "http://schemas.android.com/apk/res/android">
+            <size android:height="200dp" android:width="40dp"/>
+            <solid android:color="@color/colorlightGrey" />
+            <corners android:radius="100dp"/>
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ic_baseline_power_settings_new_24"
+        android:gravity="center"
+        android:width="70dp"
+        android:height="70dp"/>
+</layer-list>

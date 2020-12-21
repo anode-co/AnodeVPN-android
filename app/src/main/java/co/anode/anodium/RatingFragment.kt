@@ -1,26 +1,17 @@
 package co.anode.anodium
 
 import android.content.Context
-import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RatingBar
-import android.widget.Toast
+import android.widget.ToggleButton
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_rating.*
 import kotlinx.android.synthetic.main.fragment_rating.view.*
-import org.json.JSONException
-import org.json.JSONObject
-import java.io.File
 
 class RatingFragment : Fragment() {
-    private val API_VERSION = "0.3"
-    private var API_RATING_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/<public_key>/rating/"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -28,14 +19,142 @@ class RatingFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_rating, container, false)
+        val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val ratingBar: RatingBar = v.findViewById(R.id.ratingBar)
+        val tb1: ToggleButton = v.findViewById(R.id.toggleButton1)
+        val tb2: ToggleButton = v.findViewById(R.id.toggleButton2)
+        val tb3: ToggleButton = v.findViewById(R.id.toggleButton3)
+        val tb4: ToggleButton = v.findViewById(R.id.toggleButton4)
+        val tb5: ToggleButton = v.findViewById(R.id.toggleButton5)
+        hideComments(v)
+        v.buttonSubmitRating.visibility = View.GONE
+
+        ratingBar.setOnRatingBarChangeListener { ratingBar, rating, fromUser ->
+            showComments(v)
+            v.buttonSubmitRating.visibility = View.VISIBLE
+            if (rating in 0f..1f) {
+                tb1.textOn = getString(R.string.rating1_1)
+                tb1.textOff = getString(R.string.rating1_1)
+                tb2.textOn = getString(R.string.rating1_2)
+                tb2.textOff = getString(R.string.rating1_2)
+                tb3.textOn = getString(R.string.rating1_3)
+                tb3.textOff = getString(R.string.rating1_3)
+                tb4.textOn = getString(R.string.rating1_4)
+                tb4.textOff = getString(R.string.rating1_4)
+                tb5.textOn = getString(R.string.rating1_5)
+                tb5.textOff = getString(R.string.rating1_5)
+                tb1.isChecked = false
+                tb2.isChecked = false
+                tb3.isChecked = false
+                tb4.isChecked = false
+                tb5.isChecked = false
+            } else if (rating in 1f..2f) {
+                tb1.textOn = getString(R.string.rating2_1)
+                tb1.textOff = getString(R.string.rating2_1)
+                tb2.textOn = getString(R.string.rating2_2)
+                tb2.textOff = getString(R.string.rating2_2)
+                tb3.textOn = getString(R.string.rating2_3)
+                tb3.textOff = getString(R.string.rating2_3)
+                tb4.textOn = getString(R.string.rating2_4)
+                tb4.textOff = getString(R.string.rating2_4)
+                tb5.textOn = getString(R.string.rating2_5)
+                tb5.textOff = getString(R.string.rating2_5)
+                tb1.isChecked = false
+                tb2.isChecked = false
+                tb3.isChecked = false
+                tb4.isChecked = false
+                tb5.isChecked = false
+            } else if (rating in 2f..3f) {
+                tb1.textOn = getString(R.string.rating3_1)
+                tb1.textOff = getString(R.string.rating3_1)
+                tb2.textOn = getString(R.string.rating3_2)
+                tb2.textOff = getString(R.string.rating3_2)
+                tb3.textOn = getString(R.string.rating3_3)
+                tb3.textOff = getString(R.string.rating3_3)
+                tb4.textOn = getString(R.string.rating3_4)
+                tb4.textOff = getString(R.string.rating3_4)
+                tb5.textOn = getString(R.string.rating3_5)
+                tb5.textOff = getString(R.string.rating3_5)
+                tb1.isChecked = false
+                tb2.isChecked = false
+                tb3.isChecked = false
+                tb4.isChecked = false
+                tb5.isChecked = false
+            } else if (rating in 4f..5f) {
+                tb1.textOn = getString(R.string.rating4_1)
+                tb1.textOff = getString(R.string.rating4_1)
+                tb2.textOn = getString(R.string.rating4_2)
+                tb2.textOff = getString(R.string.rating4_2)
+                tb3.textOn = getString(R.string.rating4_3)
+                tb3.textOff = getString(R.string.rating4_3)
+                tb4.textOn = getString(R.string.rating4_4)
+                tb4.textOff = getString(R.string.rating4_4)
+                tb5.textOn = getString(R.string.rating4_5)
+                tb5.textOff = getString(R.string.rating4_5)
+                tb1.isChecked = false
+                tb2.isChecked = false
+                tb3.isChecked = false
+                tb4.isChecked = false
+                tb5.isChecked = false
+            }
+        }
+
         v.buttonSubmitRating.setOnClickListener{
             this.context?.let { it1 -> AnodeClient.eventLog(it1, "Button RATING clicked") }
-            val ratingBar: RatingBar = v.findViewById(R.id.ratingBar)
-            submitRating().execute(ratingBar.rating.toString())
-            //activity?.supportFragmentManager?.popBackStack()
+            var comment = ""
+            if (tb1.isChecked) {
+                comment += tb1.textOn.toString() + ","
+            }
+            if (tb2.isChecked) {
+                comment += tb2.textOn.toString() + ","
+            }
+            if (tb3.isChecked) {
+                comment += tb3.textOn.toString() + ","
+            }
+            if (tb4.isChecked) {
+                comment += tb4.textOn.toString() + ","
+            }
+            if (tb5.isChecked) {
+                comment += tb5.textOn.toString() + ","
+            }
+            comment = comment.dropLast(1)
+            val rating = ratingBar.rating
+            context?.let { it1 -> AnodeClient.storeRating(it1, prefs.getString("ServerPublicKey", ""), rating, comment) }
+            activity?.supportFragmentManager?.popBackStack()
         }
 
         return v
+    }
+
+    fun hideComments(v: View) {
+        val tb1: ToggleButton = v.findViewById(R.id.toggleButton1)
+        val tb2: ToggleButton = v.findViewById(R.id.toggleButton2)
+        val tb3: ToggleButton = v.findViewById(R.id.toggleButton3)
+        val tb4: ToggleButton = v.findViewById(R.id.toggleButton4)
+        val tb5: ToggleButton = v.findViewById(R.id.toggleButton5)
+        tb1.visibility = View.GONE
+        tb2.visibility = View.GONE
+        tb3.visibility = View.GONE
+        tb4.visibility = View.GONE
+        tb5.visibility = View.GONE
+    }
+
+    fun showComments(v: View) {
+        val tb1: ToggleButton = v.findViewById(R.id.toggleButton1)
+        val tb2: ToggleButton = v.findViewById(R.id.toggleButton2)
+        val tb3: ToggleButton = v.findViewById(R.id.toggleButton3)
+        val tb4: ToggleButton = v.findViewById(R.id.toggleButton4)
+        val tb5: ToggleButton = v.findViewById(R.id.toggleButton5)
+        tb1.visibility = View.VISIBLE
+        tb2.visibility = View.VISIBLE
+        tb3.visibility = View.VISIBLE
+        tb4.visibility = View.VISIBLE
+        tb5.visibility = View.VISIBLE
+        tb1.isChecked = false
+        tb2.isChecked = false
+        tb3.isChecked = false
+        tb4.isChecked = false
+        tb5.isChecked = false
     }
 
     companion object {
@@ -56,38 +175,5 @@ class RatingFragment : Fragment() {
                         //putString(ARG_PARAM2, param2)
                     }
                 }
-    }
-
-    inner class submitRating() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
-            val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            val serverkey = prefs.getString("ServerPublicKey", "")
-            val url = API_RATING_URL.replace("<public_key>", serverkey,true)
-            val jsonObject = JSONObject()
-            jsonObject.accumulate("rating", params[0])
-            return AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true, false)
-            //TODO: start a timer and close fragment after it expires
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_RATING_URL: $result")
-            if ((result.isNullOrBlank())) {
-                //
-            } else {
-                try {
-                    val json = JSONObject(result)
-                    if (json.has("averageRating")) {
-                        Toast.makeText(context, "Rating submitted successfully", Toast.LENGTH_SHORT).show()
-                    }
-                    else {
-                        Toast.makeText(context, "Rating could not be submitted", Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e:Exception) {
-                    Log.i(LOGTAG,e.toString())
-                }
-            }
-            activity?.supportFragmentManager?.popBackStack()
-        }
     }
 }

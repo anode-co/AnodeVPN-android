@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.database.Cursor
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -17,8 +16,10 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
@@ -40,7 +41,7 @@ import kotlin.collections.ArrayList
 object AnodeClient {
     lateinit var mycontext: Context
     lateinit var statustv: TextView
-    lateinit var connectButton: Button
+    lateinit var connectButton: ToggleButton
     lateinit var mainActivity: AppCompatActivity
     private const val API_VERSION = "0.3"
     private const val FILE_BASE_PATH = "file://"
@@ -52,13 +53,14 @@ object AnodeClient {
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
     private const val API_DELETE_ACCOUNT = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<email_or_username>/delete/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
+    private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
     var downloadFails = 0
     var downloadingUpdate = false
     val h = Handler()
 
-    fun init(context: Context, mainActivity_textview: TextView, button: Button, activity: AppCompatActivity)  {
+    fun init(context: Context, mainActivity_textview: TextView, button: ToggleButton, activity: AppCompatActivity)  {
         mycontext = context
         statustv = mainActivity_textview
         connectButton = button
@@ -141,6 +143,27 @@ object AnodeClient {
         }
     }
 
+    fun httpPostRating(): String {
+        val anodeUtil: AnodeUtil = AnodeUtil(mycontext)
+        val ratings = File(anodeUtil.CJDNS_PATH+"/anodium-rating.json").readText()
+        val resp = APIHttpReq(API_RATINGS_URL, ratings, "POST", true, false)
+        try {
+            val json = JSONObject(resp)
+            if (json.has("status") and (json.getString("status") == "success")) {
+                Log.e(LOGTAG, "Rating submitted successfully")
+                //Delete file
+                File(anodeUtil.CJDNS_PATH+"/anodium-rating.json").delete()
+            } else {
+                Log.e(LOGTAG, "Error posting rating to server: $resp")
+                return "Error posting rating"
+            }
+        } catch (e:Exception) {
+            Log.e(LOGTAG, "Error posting rating: $resp")
+            return "Error posting rating"
+        }
+        return ""
+    }
+
     fun checkNetworkConnection() =
         with(mycontext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) {
             getNetworkCapabilities(activeNetwork)?.run {
@@ -156,6 +179,24 @@ object AnodeClient {
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
         File(ctx.filesDir,fname).appendText(err)
         Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
+    }
+
+    fun storeRating(ctx: Context, pubkey: String, rating: Float, comment: String) {
+        val anodeUtil: AnodeUtil = AnodeUtil(mycontext)
+        var jsonRatings: JSONArray = JSONArray()
+        if (pubkey.isEmpty()) { return }
+        if (File(anodeUtil.CJDNS_PATH+"/anodium-rating.json").exists())
+        {
+            jsonRatings = JSONArray(File(anodeUtil.CJDNS_PATH+"/anodium-rating.json").readText())
+        }
+        val jsonObject = JSONObject()
+        jsonObject.accumulate("publicKey", pubkey)
+        jsonObject.accumulate("rating", rating)
+        jsonObject.accumulate("comment", comment)
+        jsonObject.accumulate("created_at", System.currentTimeMillis())
+        jsonRatings.put(jsonObject)
+        val ratingfile = File(anodeUtil.CJDNS_PATH+"/anodium-rating.json")
+        ratingfile.writeText(jsonRatings.toString())
     }
 
     fun errorCount(ctx: Context): Int {
@@ -483,7 +524,8 @@ object AnodeClient {
                                 putString("ServerPublicKey", node)
                                 commit()
                             }
-                            connectButton.text =  mycontext.resources.getString(R.string.button_disconnect)
+                            //connectButton.text =  mycontext.resources.getString(R.string.button_disconnect)
+                            connectButton.isChecked = true
                         } else {
                             statustv.post(Runnable {
                                 statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
@@ -494,7 +536,8 @@ object AnodeClient {
                                 putLong("LastAuthorized", 0)
                                 commit()
                             }
-                            connectButton.text =  mycontext.resources.getString(R.string.button_connect)
+                            //connectButton.text =  mycontext.resources.getString(R.string.button_connect)
+                            connectButton.isChecked = false
                             CjdnsSocket.IpTunnel_removeAllConnections()
                             CjdnsSocket.Core_stopTun()
                             CjdnsSocket.clearRoutes()
@@ -531,19 +574,22 @@ object AnodeClient {
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                //Indicate connected
+                connectButton.post(Runnable {
+                    connectButton.isChecked = true
+                })
+                /*
                 statustv.post(Runnable {
                     statustv.text  = "VPN Connected"
                     statustv.setBackgroundColor(0xFF00FF00.toInt())
                 } )
+                */
                 //Start Thread for checking connection
                 h.postDelayed(runnableConnection, 10000)
             } else {
-                statustv.post(Runnable {
-                    statustv.text  = "VPN connection failed"
-                    statustv.setBackgroundColor(0xFFFF0000.toInt())
-                } )
+                Log.i(LOGTAG,"VPN connection failed")
                 connectButton.post(Runnable {
-                    connectButton.text  = mycontext.resources.getString(R.string.button_connect)
+                    connectButton.isChecked = false
                 })
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 //Stop UI thread
@@ -630,15 +676,18 @@ object AnodeClient {
             if (!CjdnsSocket.getCjdnsRoutes()) {
                 //Disconnect
                 stopThreads()
-                statustv.post(Runnable {
+                /*statustv.post(Runnable {
                     statustv.text  = "VPN disconnected"
                     statustv.setBackgroundColor(0xFFFF0000.toInt())
-                } )
+                } )*/
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 CjdnsSocket.clearRoutes()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                connectButton.text = mycontext.resources.getString(R.string.button_connect)
+                //connectButton.text = mycontext.resources.getString(R.string.button_connect)
+                connectButton.post(Runnable {
+                    connectButton.isChecked = false
+                })
             }
             val newip4address = CjdnsSocket.ipv4Address
             val newip6address = CjdnsSocket.ipv6Address
@@ -646,17 +695,15 @@ object AnodeClient {
             if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
                 statustv.post(Runnable {
                     statustv.text  = "VPN Reconnecting..."
-                    statustv.setBackgroundColor(0xFF00FF00.toInt())
                 } )
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
             } else if (CjdnsSocket.VPNipv6Address != "") {
-                statustv.post(Runnable {
-                    statustv.text  = "VPN Connected"
-                    statustv.setBackgroundColor(0xFF00FF00.toInt())
-                } )
+                connectButton.post(Runnable {
+                    connectButton.isChecked = true
+                })
             }
             //Check for needed authorization call
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)

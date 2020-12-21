@@ -12,12 +12,13 @@
         android:layout_height="match_parent"
         android:scaleType="center"
         app:srcCompat="@drawable/ic_world_map"/>
-    <Button
+    <ToggleButton
         android:id="@+id/buttonconnectvpns"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:background="@drawable/round_button"
-        android:text="@string/button_connect"
+        android:textOff="@string/button_connect"
+        android:textOn="@string/button_disconnect"
         android:textSize="12sp"
         android:paddingTop="110dp"
         app:layout_constraintBottom_toBottomOf="parent"

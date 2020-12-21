@@ -6,12 +6,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.VpnService
-import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Environment
-import android.os.Looper
+import android.os.*
 import android.util.Log
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
@@ -24,10 +24,7 @@ import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.File
-import java.io.IOException
 import java.lang.reflect.InvocationTargetException
-import java.net.InetSocketAddress
-import java.net.Socket
 import kotlin.system.exitProcess
 
 
@@ -105,19 +102,21 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.statustv = findViewById(R.id.textview_status)
         AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
         AnodeClient.mainActivity = this
+        val MIN_CLICK_INTERVAL: Long = 1000
+        var mLastClickTime: Long = 0
 
         buttonconnectvpns.setOnClickListener() {
-            checked {
-                //val status: TextView = findViewById(R.id.textview_status)
-                if (buttonconnectvpns.text == resources.getString(R.string.button_connect)) {
-                    buttonconnectvpns.text = resources.getString(R.string.button_disconnect)
-                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
-                } else {
+            //avoid accidental double clicks
+            if (SystemClock.uptimeMillis() - mLastClickTime > MIN_CLICK_INTERVAL) {
+                mLastClickTime = SystemClock.uptimeMillis()
+                if (!buttonconnectvpns.isChecked) {
                     disconnectVPN(true)
-                    //disconnectVPN(false)
+                } else {
+                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
                 }
             }
         }
+
 
         buttonVPNList.setOnClickListener() {
             val vpnlistactivity = Intent(applicationContext, VpnListActivity::class.java)
@@ -177,28 +176,61 @@ class MainActivity : AppCompatActivity() {
             }
         }, "MainActivity.UploadErrorsThread").start()
 
+        //Check internet connectivity
+        Thread(Runnable {
+            while (true) {
+                if (internetConnection() == false) {
+                    runOnUiThread {
+                        val toast = Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG)
+                        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
+                        toast.show()
+                    }
+                }
+                Thread.sleep(3000)
+            }
+        }, "MainActivity.CheckInternetConnectivity").start()
+
         //Check for event log files daily
         Thread(Runnable {
             Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
             while (true) {
                 AnodeClient.ignoreErr {
                     //Check if 24 hours have passed since last log file submitted
-                    if (System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted", 0) > 86400000) {
-                        if (!File(applicationContext.filesDir.toString() + "/anodium-events.log").exists()) {
-                            Log.d(LOGTAG, "No events to report, sleeping")
+                    if ((System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted", 0) > 86400000) or
+                            (System.currentTimeMillis() - prefs.getLong("LastRatingSubmitted", 0) > 86400000)) {
+                        val bEvents = File(applicationContext.filesDir.toString() + "/anodium-events.log").exists()
+                        val bRatings = File(applicationContext.filesDir.toString() + "/anodium-rating.json").exists()
+                        var timetosleep: Long = 60000
+                        if ((!bEvents) or (!bRatings)) {
+                            Log.d(LOGTAG, "No events or ratings to report, sleeping")
                             Thread.sleep(60 * 60000)
                         } else if (!AnodeClient.checkNetworkConnection()) {
                             // try again in 10 seconds, waiting for internet
                             Log.i(LOGTAG, "Waiting for internet connection to report events")
                             Thread.sleep(10000)
                         } else {
-                            Log.i(LOGTAG, "Reporting an events log file")
-                            if (AnodeClient.httpPostEvent(application.filesDir).contains("Error")) {
-                                Thread.sleep(60000)
-                            } else {
-                                //Log posted, sleep for a day
-                                Thread.sleep(24 * 60 * 60000)
+                            if (bEvents) {
+                                Log.i(LOGTAG, "Reporting an events log file")
+                                if (AnodeClient.httpPostEvent(application.filesDir).contains("Error")) {
+                                    timetosleep = 60000
+                                } else {
+                                    //Log posted, sleep for a day
+                                    timetosleep = 60000 * 60 * 24
+                                }
                             }
+                            if (bRatings) {
+                                Log.i(LOGTAG, "Reporting ratings")
+                                if (AnodeClient.httpPostRating().contains("Error")) {
+                                    timetosleep = 60000
+                                } else {
+                                    with(prefs.edit()) {
+                                        putLong("LastRatingSubmitted", System.currentTimeMillis())
+                                        commit()
+                                    }
+                                    timetosleep = 60000 * 60 * 24
+                                }
+                            }
+                            Thread.sleep(timetosleep)
                         }
                     }
                     Thread.sleep(60 * 60000)
@@ -244,7 +276,7 @@ class MainActivity : AppCompatActivity() {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(false)
                 //mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(true)
-                mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(true)
+                //mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(true)
             }
             //Set username on title
             //this.title = "Anodium - $username"
@@ -255,7 +287,7 @@ class MainActivity : AppCompatActivity() {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(true)
                 //mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(false)
-                mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(false)
+                //mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(false)
             }
         }
     }
@@ -289,11 +321,7 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.textview_status)
         status.setBackgroundColor(0x00000000)
         status.text = ""
-        if (AnodeClient.isVpnActive()) {
-            buttonconnectvpns.text = resources.getString(R.string.button_disconnect)
-        } else {
-            buttonconnectvpns.text = resources.getString(R.string.button_connect)
-        }
+        buttonconnectvpns.isChecked = AnodeClient.isVpnActive()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -349,12 +377,12 @@ class MainActivity : AppCompatActivity() {
             //val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
             //startActivity(signinActivity)
             return true
-        } else if (id == R.id.action_deleteaccount) {
+        } /*else if (id == R.id.action_deleteaccount) {
             Log.i(LOGTAG, "Delete account")
             AnodeClient.eventLog(baseContext, "Menu: Delete account selected")
             AnodeClient.DeleteAccount().execute()
             return true
-        } else if (id == R.id.action_changepassword) {
+        }*/ else if (id == R.id.action_changepassword) {
             Log.i(LOGTAG, "Change password")
             val changepassactivity = Intent(applicationContext, ChangePasswordActivity::class.java)
             changepassactivity.putExtra("ForgotPassword", false)
@@ -418,38 +446,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    class checkInternetConnection(): AsyncTask<TextView, Any?, Boolean?>() {
-        var textConnectivity: TextView? = null
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-
-        }
-        override fun doInBackground(vararg params: TextView?): Boolean? {
-            textConnectivity = params[0]
-            try {
-                val sock = Socket()
-                sock.connect(InetSocketAddress("8.8.8.8", 53), 1500)
-                sock.close()
-                return true
-            } catch (e: IOException) {
-                return false
-            }
-        }
-
-        override fun onPostExecute(result: Boolean?) {
-            super.onPostExecute(result)
-            if (result!!)
-                textConnectivity?.post(Runnable {
-                    textConnectivity?.text = "Connected"
-                    textConnectivity?.setBackgroundColor(0xFF00FF00.toInt())
-                })
-            else
-                textConnectivity?.post(Runnable {
-                    textConnectivity?.text = "Disconnected"
-                    textConnectivity?.setBackgroundColor(0xFFFF0000.toInt())
-                })
-        }
+    fun internetConnection(): Boolean? {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return if (activeNetwork?.isConnected == null)
+            false
+        else
+            activeNetwork.isConnected
     }
 
     fun disconnectVPN(showRatingBar: Boolean) {
@@ -458,7 +461,6 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.textview_status)
         status.setBackgroundColor(0xFFFF0000.toInt())
         status.text = "VPN disconnected"
-        buttonconnectvpns.text = resources.getString(R.string.button_connect)
         CjdnsSocket.IpTunnel_removeAllConnections()
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()

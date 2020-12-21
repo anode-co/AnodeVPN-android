@@ -11,7 +11,8 @@
     <string name="action_login">Login</string>
     <string name="action_skip">Skip</string>
 
-
+    <!-- Toasts -->
+    <string name="toast_no_internet">You lost your internet connection</string>
     <!-- Buttons -->
     <string name="button_connect">Start</string>
     <string name="button_disconnect">Stop</string>
@@ -82,4 +83,19 @@
     <string name="rating2_3">2.3 comment</string>
     <string name="rating2_4">2.4 comment</string>
     <string name="rating2_5">2.5 comment</string>
+    <string name="rating3_1">3.1 comment</string>
+    <string name="rating3_2">3.2 comment</string>
+    <string name="rating3_3">3.3 comment</string>
+    <string name="rating3_4">3.4 comment</string>
+    <string name="rating3_5">3.5 comment</string>
+    <string name="rating4_1">4.1 comment</string>
+    <string name="rating4_2">4.2 comment</string>
+    <string name="rating4_3">4.3 comment</string>
+    <string name="rating4_4">4.4 comment</string>
+    <string name="rating4_5">4.5 comment</string>
+    <string name="rating5_1">5.1 comment</string>
+    <string name="rating5_2">5.2 comment</string>
+    <string name="rating5_3">5.3 comment</string>
+    <string name="rating5_4">5.4 comment</string>
+    <string name="rating5_5">5.5 comment</string>
 </resources>

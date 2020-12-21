@@ -225,27 +225,37 @@ object CjdnsSocket {
 
     fun getCjdnsRoutes(): Boolean {
         val connectionIDs:MutableList<Int> = getIpTunnelConnectionIDs()
-        val connection = IpTunnel_showConnection(connectionIDs[0])
-        logshowConnections = connection.toString()
-        val ip4Address = connection["ip4Address"]
-        val ip4Prefix = connection["ip4Prefix"]
-        val ip4Alloc = connection["ip4Alloc"]
-        val ip6Address = connection["ip6Address"]
-        val ip6Prefix = connection["ip6Prefix"]
-        val ip6Alloc = connection["ip6Alloc"]
-        //Authorization missing...
-        if ((ip4Address.toString() == "null") && (ip6Address.toString() == "null")){
-            return false
-        }
-        ipv4RoutePrefix =  ip4Prefix.num().toInt()
-        ipv4AddressPrefix = ip4Alloc.num().toInt()
-        ipv6RoutePrefix = ip6Prefix.num().toInt()
-        ipv6AddressPrefix = ip6Alloc.num().toInt()
-        ipv4Address = trimBitsforRoute(ip4Address.str(), ipv4AddressPrefix)
-        ipv4Route = trimBitsforRoute(ip4Address.str(), ipv4RoutePrefix)
-        ipv6Address = trimBitsforRoute(ip6Address.str(), ipv6AddressPrefix)
-        ipv6Route = trimBitsforRoute(ip6Address.str(), ipv6RoutePrefix)
-        return true
+        if (connectionIDs.size > 0) {
+            val connection = IpTunnel_showConnection(connectionIDs[0])
+            logshowConnections = connection.toString()
+            val ip4Address = connection["ip4Address"]
+            val ip6Address = connection["ip6Address"]
+            //Authorization missing...
+            if ((ip4Address.toString() == "null") && (ip6Address.toString() == "null")) {
+                return false
+            }
+            if (connection["ip4Prefix"].toString() != "null") {
+                val ip4Prefix = connection["ip4Prefix"]
+                ipv4RoutePrefix = ip4Prefix.num().toInt()
+                ipv4Route = trimBitsforRoute(ip4Address.str(), ipv4RoutePrefix)
+            }
+            if (connection["ip6Prefix"].toString() != "null") {
+                val ip6Prefix = connection["ip6Prefix"]
+                ipv6RoutePrefix = ip6Prefix.num().toInt()
+                ipv6Route = trimBitsforRoute(ip6Address.str(), ipv6RoutePrefix)
+            }
+            if (connection["ip4Alloc"].toString() != "null") {
+                val ip4Alloc = connection["ip4Alloc"]
+                ipv4AddressPrefix = ip4Alloc.num().toInt()
+                ipv4Address = trimBitsforRoute(ip4Address.str(), ipv4AddressPrefix)
+            }
+            if (connection["ip6Alloc"].toString() != "null") {
+                val ip6Alloc = connection["ip6Alloc"]
+                ipv6AddressPrefix = ip6Alloc.num().toInt()
+                ipv6Address = trimBitsforRoute(ip6Address.str(), ipv6AddressPrefix)
+            }
+            return true
+        } else { return false }
     }
 
     fun clearRoutes() {
@@ -284,7 +294,8 @@ object CjdnsSocket {
 
     fun UDPInterface_beginConnection() {
         var peerName = ""
-        call("UDPInterface_beginConnection", Benc.dict("publicKey","9syly12vuwr1jh5qpktmjc817y38bc9ytsvs8d5qwcnvn6c2lwq0.k","address", "94.23.31.145:17102","peerName", peerName, "password","wwbn34yhxhtubtghq6y2pksyt7c9mm8","login", "cjd-snode", "interfaceNumber",0))
+        //call("UDPInterface_beginConnection", Benc.dict("publicKey","9syly12vuwr1jh5qpktmjc817y38bc9ytsvs8d5qwcnvn6c2lwq0.k","address", "94.23.31.145:17102","peerName", peerName, "password","wwbn34yhxhtubtghq6y2pksyt7c9mm8","login", "cjd-snode", "interfaceNumber",0))
+        call("UDPInterface_beginConnection", Benc.dict("publicKey","znrj10d4s005qyg2wg2sx54k4yrqjxyvkc1pz4vqfzxdv5sxvds0.k","address", "188.165.200.79:17102","peerName", peerName, "password","gxv7zc4nyrcqc10wn5yn8pzsl7cs413","login", "ratty.cjdns.fr", "interfaceNumber",0))
         call("UDPInterface_beginConnection", Benc.dict("publicKey","cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k","address", "198.167.222.70:54673","peerName", peerName, "password","use_more_bandwidth","login", "ipredator.se/cjdns_public_node", "interfaceNumber",0))
     }
 
