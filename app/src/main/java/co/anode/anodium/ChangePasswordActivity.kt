@@ -37,7 +37,7 @@ class ChangePasswordActivity : AppCompatActivity() {
         if (bForgotPassword) {
             val oldpassword = findViewById<EditText>(R.id.editTextOldPassword)
             oldpassword.visibility = View.GONE
-            buttonchangePassword.text = "CONTINUE"
+            buttonchangePassword.text = getString(R.string.action_continue)
             labelnewPassword.visibility = View.VISIBLE
             image.visibility = View.VISIBLE
         }
