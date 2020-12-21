@@ -24,8 +24,6 @@ class VpnListActivity : AppCompatActivity() {
         setSupportActionBar(vpnlist_toolbar)
         //actionbar
         val actionbar = supportActionBar
-        //set actionbar title
-        //actionbar!!.title = "New Activity"
         //set back button
         actionbar?.setDisplayHomeAsUpEnabled(true)
         //Retrieve Servers list
