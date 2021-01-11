@@ -3,17 +3,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="bottom"
     tools:context=".VPNDetailsFragment">
-
-    <TextView
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="VPN Details"/>
+        android:layout_marginBottom="@dimen/bottom_button_margin">
+    <TextView
+        android:id="@+id/VpnDetailstitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VPN Details"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     <RelativeLayout
         android:id="@+id/row_relative"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@+id/VpnDetailstitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
         android:padding="10dp">
         <ImageView
             android:id="@+id/row_country"
@@ -36,18 +50,25 @@
                 android:layout_gravity="left"
                 android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/row_speed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:text="Speed"/>
             <RatingBar
                 android:id="@+id/list_ratingbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.RatingBar.Small" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Load: 52%"/>
         </LinearLayout>
+
+        <Button
+            android:id="@+id/button_share"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"
+            android:layout_toStartOf="@+id/button_favorite"
+            android:background="@drawable/button_round_share" />
 
         <Button
             android:id="@+id/button_favorite"
@@ -66,9 +87,16 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/round_button_small" />
     </RelativeLayout>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Buy bandwidth"/>
+        android:text="Buy bandwith"
+        app:layout_constraintTop_toBottomOf="@+id/row_relative"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="16sp"
+        android:textColor="#C9DDE9"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/buttonshape"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

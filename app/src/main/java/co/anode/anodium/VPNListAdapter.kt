@@ -1,15 +1,15 @@
 package co.anode.anodium
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.AsyncTask
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -43,7 +43,7 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
         //holder.countryTextView = view.findViewById(R.id.row_country)
         //holder.countryTextView.text = dataitem["countryCode"]
         holder.countryImageView = view.findViewById(R.id.row_country)
-        val id = context.resources.getIdentifier(dataitem["countryCode"]?.toLowerCase(Locale.ROOT), "drawable",context.packageName)
+        val id = context.resources.getIdentifier(dataitem["countryCode"]?.toLowerCase(Locale.ROOT), "drawable", context.packageName)
         holder.countryImageView.setImageResource(id)
         //holder.speedTextView = view.findViewById(R.id.row_speed)
         //holder.speedTextView.text = dataitem["speed"]
@@ -65,11 +65,15 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
         holder.infobox.setOnClickListener {
             AnodeClient.eventLog(context, "Show VPN Server details " + dataitem["name"])
             //VPN Details
-            val fragmentVPNDetails: VPNDetailsFragment = VPNDetailsFragment()
-            val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.add(R.id.ServerListLayout, fragmentVPNDetails, "")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+            val vpndetailsFragment: BottomSheetDialogFragment = VPNDetailsFragment()
+            val args = Bundle()
+            args.putString("name", dataitem["name"])
+            args.putString("countryCode", dataitem["countryCode"]?.toLowerCase(Locale.ROOT))
+            args.putString("publicKey", dataitem["publicKey"])
+            args.putString("load", dataitem["load"])
+            args.putFloat("averageRating", dataitem["averageRating"]!!.toFloat())
+            vpndetailsFragment.arguments = args
+            vpndetailsFragment.show(fragmentManager, "")
         }
 
         holder.connectButton.setOnClickListener {
