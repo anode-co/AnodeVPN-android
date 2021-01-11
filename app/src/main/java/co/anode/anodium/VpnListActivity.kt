@@ -65,7 +65,7 @@ class VpnListActivity : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             if (result.isNullOrBlank()) {
-                if (dataList.isNotEmpty()) findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, dataList)
+                if (dataList.isNotEmpty()) findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, supportFragmentManager, dataList)
                 return
             }
 
@@ -76,26 +76,23 @@ class VpnListActivity : AppCompatActivity() {
                 val serverdetails = serversArr.getJSONObject(i)
                 val map = HashMap<String, String>()
                 //if (!serverdetails.getBoolean("isFake")) {
-                    map["name"] = serverdetails.getString("name")
-
-                    map["publicKey"] = serverdetails.getString("publicKey")
-                    map["bandwidthBps"] = serverdetails.getString("bandwidthBps")
-                    map["region"] = serverdetails.getString("region")
-                    map["countryCode"] = serverdetails.getString("countryCode")
-                    map["onlineSinceDatetime"] = serverdetails.getString("onlineSinceDatetime")
-                    map["lastSeenDatetime"] = serverdetails.getString("lastSeenDatetime")
-                    map["averageRating"] = serverdetails.getString("averageRating")
-                    map["isFavorite"] = serverdetails.getString("isFavorite")
-                    map["speed"] = "100"
-                    val networkdetails = serverdetails.getJSONObject("networkSettings")
-                    map["network_usesNat"] = networkdetails.getString("usesNat")
-
-                    dataList.add(map)
+                map["publicKey"] = serverdetails.getString("publicKey")
+                map["name"] = serverdetails.getString("name")
+                map["countryCode"] = serverdetails.getString("countryCode")
+                map["averageRating"] = serverdetails.getString("averageRating")
+                map["cost"] = serverdetails.getString("cost")
+                map["load"] = serverdetails.getInt("load").toString()
+                map["quality"] = serverdetails.getInt("quality").toString()
+                map["isFavorite"] = serverdetails.getString("isFavorite")
+                map["onlineSinceDatetime"] = serverdetails.getString("onlineSinceDatetime")
+                map["lastSeenDatetime"] = serverdetails.getString("lastSeenDatetime")
+                map["numRatings"] = serverdetails.getInt("numRatings").toString()
+                dataList.add(map)
                 //}
             }
             //Sort list by country
             dataList.sortWith(compareBy {it.get("countryCode")})
-            adapter = VPNListAdapter(this@VpnListActivity, dataList)
+            adapter = VPNListAdapter(this@VpnListActivity,supportFragmentManager, dataList)
             findViewById<ListView>(R.id.listview_servers).adapter = adapter
         }
     }

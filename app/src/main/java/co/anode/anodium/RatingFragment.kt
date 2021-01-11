@@ -8,10 +8,11 @@ import android.view.ViewGroup
 import android.widget.RatingBar
 import android.widget.ToggleButton
 import androidx.fragment.app.Fragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.fragment_rating.*
 import kotlinx.android.synthetic.main.fragment_rating.view.*
 
-class RatingFragment : Fragment() {
+class RatingFragment : BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

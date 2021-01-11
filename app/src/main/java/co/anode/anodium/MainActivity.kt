@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import java.io.File
@@ -468,12 +470,17 @@ class MainActivity : AppCompatActivity() {
 
         //Rating bar
         if (showRatingBar) {
+            /*
             val fragmentRating: RatingFragment = RatingFragment()
             val fragmentManager: FragmentManager = supportFragmentManager
             val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
             fragmentTransaction.add(R.id.mainLayout, fragmentRating, "")
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
+
+             */
+            val ratingFragment: BottomSheetDialogFragment = RatingFragment()
+            ratingFragment.show(supportFragmentManager,"")
         }
     }
 

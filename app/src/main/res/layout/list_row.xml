@@ -26,35 +26,24 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginStart="100dp">
+            <ImageView
+                android:id="@+id/serversignal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_2_signals" />
             <TextView
                 android:id="@+id/row_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Name"
-                android:layout_gravity="left"
                 android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/row_speed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:text="Speed"/>
             <RatingBar
                 android:id="@+id/list_ratingbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                    style="@style/Widget.AppCompat.RatingBar.Small" />
+                style="@style/Widget.AppCompat.RatingBar.Small" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/button_favorite"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="10dp"
-            android:layout_toStartOf="@+id/button_smallconnectvpn"
-            android:background="@drawable/button_round_fav_small" />
 
         <Button
             android:id="@+id/button_smallconnectvpn"

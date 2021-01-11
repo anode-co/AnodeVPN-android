@@ -8,11 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-class VPNListAdapter(private val context: Context,
+class VPNListAdapter(private val context: Context, private val fragmentManager: FragmentManager,
                      private var dataList: ArrayList<HashMap<String, String>>) : BaseAdapter() {
     private val API_VERSION = "0.3"
     private var API_FAVORITE_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/<server_public_key>/favorite/"
@@ -25,7 +27,7 @@ class VPNListAdapter(private val context: Context,
     override fun getItem(position: Int): Int { return position }
     override fun getItemId(position: Int): Long { return 0 }
 
-    @SuppressLint("ViewHolder")
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view: View
         var dataitem = dataList[position]
@@ -33,7 +35,9 @@ class VPNListAdapter(private val context: Context,
 
         view = inflater.inflate(R.layout.list_row, parent, false)
         val prefs = context.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+
         holder = ViewHolder()
+        holder.infobox = view.findViewById<LinearLayout>(R.id.info_box)
         holder.nameTextView = view.findViewById(R.id.row_name)
         holder.nameTextView.text = dataitem["name"]
         //holder.countryTextView = view.findViewById(R.id.row_country)
@@ -41,21 +45,31 @@ class VPNListAdapter(private val context: Context,
         holder.countryImageView = view.findViewById(R.id.row_country)
         val id = context.resources.getIdentifier(dataitem["countryCode"]?.toLowerCase(Locale.ROOT), "drawable",context.packageName)
         holder.countryImageView.setImageResource(id)
-        holder.speedTextView = view.findViewById(R.id.row_speed)
-        holder.speedTextView.text = dataitem["speed"]
+        //holder.speedTextView = view.findViewById(R.id.row_speed)
+        //holder.speedTextView.text = dataitem["speed"]
         holder.connectButton = view.findViewById(R.id.button_smallconnectvpn)
-        holder.favoriteButton = view.findViewById(R.id.button_favorite)
+        //holder.favoriteButton = view.findViewById(R.id.button_favorite)
         holder.ratingbar = view.findViewById(R.id.list_ratingbar)
         if (dataitem["averageRating"].isNullOrEmpty() || dataitem["averageRating"] == "null") {
             holder.ratingbar.rating = 0.0f
         } else {
             holder.ratingbar.rating = dataitem["averageRating"]!!.toFloat()
         }
-
+/*
         if ((dataitem["isFavorite"] == "true") || (prefs.getBoolean("favorite_" + dataitem["name"], false))){
             holder.favoriteButton.setBackgroundResource(R.drawable.button_round_fav_small)
         } else {
             holder.favoriteButton.setBackgroundResource(R.drawable.button_round_unfav_small)
+        }
+*/
+        holder.infobox.setOnClickListener {
+            AnodeClient.eventLog(context, "Show VPN Server details " + dataitem["name"])
+            //VPN Details
+            val fragmentVPNDetails: VPNDetailsFragment = VPNDetailsFragment()
+            val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.add(R.id.ServerListLayout, fragmentVPNDetails, "")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
         }
 
         holder.connectButton.setOnClickListener {
@@ -65,7 +79,7 @@ class VPNListAdapter(private val context: Context,
             AnodeClient.AuthorizeVPN().execute(dataitem["publicKey"])
             (context as Activity).finish()
         }
-
+/*
         holder.favoriteButton.setOnClickListener {
             if (!prefs.getBoolean("favorite_" + dataitem["name"], false)) {
                 AnodeClient.eventLog(context, "Button FAVORITE for " + dataitem["name"])
@@ -85,6 +99,8 @@ class VPNListAdapter(private val context: Context,
                 }
             }
         }
+
+ */
         view.tag = holder
 
         return view
@@ -97,6 +113,7 @@ class VPNListAdapter(private val context: Context,
         lateinit var connectButton: Button
         lateinit var favoriteButton: Button
         lateinit var ratingbar: RatingBar
+        lateinit var infobox: LinearLayout
     }
 
     fun setFilter(str: String?) {
