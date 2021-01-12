@@ -43,7 +43,7 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         val ratingbar = currentView.findViewById<RatingBar>(R.id.list_ratingbar)
         ratingbar.rating = arguments?.getFloat("averageRating")!!
         val loadtext = currentView.findViewById<TextView>(R.id.text_load)
-        loadtext.text = "Load: " + arguments?.getString("load") + "%"
+        loadtext.text = context?.resources?.getString(R.string.text_load) + arguments?.getString("load") + "%"
 
         val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val favoriteButton = currentView.findViewById<Button>(R.id.button_favorite)

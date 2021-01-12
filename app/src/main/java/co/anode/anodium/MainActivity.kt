@@ -19,14 +19,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.json.JSONObject
 import java.io.File
 import java.lang.reflect.InvocationTargetException
+import java.net.SocketTimeoutException
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLHandshakeException
 import kotlin.system.exitProcess
 
 
@@ -178,7 +180,7 @@ class MainActivity : AppCompatActivity() {
             }
         }, "MainActivity.UploadErrorsThread").start()
 
-        //Check internet connectivity
+        //Check internet connectivity & public IP
         Thread(Runnable {
             while (true) {
                 if (internetConnection() == false) {
@@ -191,6 +193,20 @@ class MainActivity : AppCompatActivity() {
                 Thread.sleep(3000)
             }
         }, "MainActivity.CheckInternetConnectivity").start()
+
+        //Get public IP
+        Thread(Runnable {
+            while (true) {
+                if (internetConnection() == true) {
+                    val textPublicIP = findViewById<TextView>(R.id.publicip)
+                    val publicip = GetPublicIP()
+                    runOnUiThread {
+                        textPublicIP.text = publicip
+                    }
+                }
+                Thread.sleep(10000)
+            }
+        }, "MainActivity.GetPublicIP").start()
 
         //Check for event log files daily
         Thread(Runnable {
@@ -470,18 +486,61 @@ class MainActivity : AppCompatActivity() {
 
         //Rating bar
         if (showRatingBar) {
-            /*
-            val fragmentRating: RatingFragment = RatingFragment()
-            val fragmentManager: FragmentManager = supportFragmentManager
-            val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.add(R.id.mainLayout, fragmentRating, "")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
-
-             */
             val ratingFragment: BottomSheetDialogFragment = RatingFragment()
             ratingFragment.show(supportFragmentManager,"")
         }
+    }
+
+    fun GetPublicIP(): String {
+        var result = ""
+        var v4ip = ""
+        var v6ip = ""
+        val getv4URL = "https://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+        val getv6URL = "https://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+        val getAddressURL = "https://h.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+
+        val urlv4 = URL(getv4URL)
+        val urlv6 = URL(getv6URL)
+        val connv4 = urlv4.openConnection() as HttpsURLConnection
+
+        connv4.connectTimeout = 2000
+        connv4.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        connv4.requestMethod = "GET"
+        try {
+            connv4.connect()
+        } catch (e: SocketTimeoutException) {
+            v4ip = "Error getting public IP"
+        } catch (e: SSLHandshakeException) {
+            v4ip = "Error getting public IP"
+        }
+        try {
+            val json = JSONObject(connv4.inputStream.bufferedReader().readText())
+            //json.getInt("version")
+            v4ip = json.getString("ipAddress")
+        } catch (e: Exception) {
+            v4ip = "Error getting public IP"
+        }
+
+        val connv6 = urlv6.openConnection() as HttpsURLConnection
+        connv6.connectTimeout = 2000
+        connv6.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        connv6.requestMethod = "GET"
+        try {
+            connv6.connect()
+        } catch (e: SocketTimeoutException) {
+            v6ip = "Error getting public IP"
+        } catch (e: SSLHandshakeException) {
+            v6ip = "Error getting public IP"
+        }
+        try {
+            val json = JSONObject(connv6.inputStream.bufferedReader().readText())
+            //json.getInt("version")
+            v6ip = json.getString("ipAddress")
+        } catch (e: Exception) {
+            v6ip = "Error getting public IP"
+        }
+        result = baseContext.resources.getString(R.string.text_publicip)+ " v4: "+v4ip+"\n"+baseContext.resources.getString(R.string.text_publicip)+" v6: "+v6ip
+        return result
     }
 
     fun closeApp() {

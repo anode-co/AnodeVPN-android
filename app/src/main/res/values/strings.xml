@@ -11,6 +11,10 @@
 
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
+    <!--Main Activity-->
+    <string name="text_publicip">Public IP</string>
+    <!--VPN Details Fragment-->
+    <string name="text_load">Load: </string>
     <!-- Buttons -->
     <string name="button_connect">Start</string>
     <string name="button_disconnect">Stop</string>
