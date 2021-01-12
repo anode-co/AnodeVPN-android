@@ -16,9 +16,6 @@ import kotlin.collections.ArrayList
 
 class VPNListAdapter(private val context: Context, private val fragmentManager: FragmentManager,
                      private var dataList: ArrayList<HashMap<String, String>>) : BaseAdapter() {
-    private val API_VERSION = "0.3"
-    private var API_FAVORITE_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/<server_public_key>/favorite/"
-
     var list = dataList
     private var tempdataList: ArrayList<HashMap<String, String>> = ArrayList(list)
 
@@ -40,28 +37,26 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
         holder.infobox = view.findViewById<LinearLayout>(R.id.info_box)
         holder.nameTextView = view.findViewById(R.id.row_name)
         holder.nameTextView.text = dataitem["name"]
-        //holder.countryTextView = view.findViewById(R.id.row_country)
-        //holder.countryTextView.text = dataitem["countryCode"]
         holder.countryImageView = view.findViewById(R.id.row_country)
-        val id = context.resources.getIdentifier(dataitem["countryCode"]?.toLowerCase(Locale.ROOT), "drawable", context.packageName)
+        val id = context.resources.getIdentifier("ic_"+dataitem["countryCode"]?.toLowerCase(Locale.ROOT), "drawable", context.packageName)
         holder.countryImageView.setImageResource(id)
-        //holder.speedTextView = view.findViewById(R.id.row_speed)
-        //holder.speedTextView.text = dataitem["speed"]
         holder.connectButton = view.findViewById(R.id.button_smallconnectvpn)
-        //holder.favoriteButton = view.findViewById(R.id.button_favorite)
         holder.ratingbar = view.findViewById(R.id.list_ratingbar)
         if (dataitem["averageRating"].isNullOrEmpty() || dataitem["averageRating"] == "null") {
             holder.ratingbar.rating = 0.0f
         } else {
             holder.ratingbar.rating = dataitem["averageRating"]!!.toFloat()
         }
-/*
-        if ((dataitem["isFavorite"] == "true") || (prefs.getBoolean("favorite_" + dataitem["name"], false))){
-            holder.favoriteButton.setBackgroundResource(R.drawable.button_round_fav_small)
-        } else {
-            holder.favoriteButton.setBackgroundResource(R.drawable.button_round_unfav_small)
+        val signal = dataitem["quality"]?.toInt()
+        val imageSignal = view.findViewById<ImageView>(R.id.serversignal)
+        when (signal) {
+            0 -> imageSignal.setBackgroundResource(R.drawable.ic_0_signal)
+            1 -> imageSignal.setBackgroundResource(R.drawable.ic_1_signal)
+            2 -> imageSignal.setBackgroundResource(R.drawable.ic_2_signals)
+            3 -> imageSignal.setBackgroundResource(R.drawable.ic_3_signals)
         }
-*/
+
+
         holder.infobox.setOnClickListener {
             AnodeClient.eventLog(context, "Show VPN Server details " + dataitem["name"])
             //VPN Details
@@ -83,28 +78,7 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
             AnodeClient.AuthorizeVPN().execute(dataitem["publicKey"])
             (context as Activity).finish()
         }
-/*
-        holder.favoriteButton.setOnClickListener {
-            if (!prefs.getBoolean("favorite_" + dataitem["name"], false)) {
-                AnodeClient.eventLog(context, "Button FAVORITE for " + dataitem["name"])
-                toggleFavorite().execute("ADD")
-                holder.favoriteButton.setBackgroundResource(R.drawable.button_round_fav_small)
-                with(prefs.edit()) {
-                    putBoolean("favorite_" + dataitem["name"], true)
-                    commit()
-                }
-            } else {
-                AnodeClient.eventLog(context, "Button UNFAVORITE for " + dataitem["name"])
-                toggleFavorite().execute("DELETE")
-                holder.favoriteButton.setBackgroundResource(R.drawable.button_round_unfav_small)
-                with(prefs.edit()) {
-                    putBoolean("favorite_" + dataitem["name"], false)
-                    commit()
-                }
-            }
-        }
 
- */
         view.tag = holder
 
         return view
@@ -135,29 +109,5 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
         notifyDataSetChanged()
     }
 
-    inner class toggleFavorite() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
-            val prefs = context.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            val url = API_FAVORITE_URL.replace("<server_public_key>", prefs.getString("ServerPublicKey", "")!!, true)
-            return if (params[0]=="ADD") {
-                AnodeClient.APIHttpReq(url, "", "POST", true, false)
-            } else {
-                AnodeClient.APIHttpReq(url, "", "DELETE", true, false)
-            }
-        }
 
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.i(LOGTAG, "Received from $API_FAVORITE_URL: $result")
-            if ((result.isNullOrBlank())) {
-                //
-            } else {
-                try {
-                    //
-                } catch (e: Exception) {
-                    Log.i(LOGTAG, e.toString())
-                }
-            }
-        }
-    }
 }

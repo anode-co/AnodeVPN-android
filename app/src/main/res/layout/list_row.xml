@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
             android:layout_alignParentStart="true"
-            android:src="@drawable/gr"/>
+            android:src="@drawable/ic_ad"/>
         <LinearLayout
             android:id="@+id/info_box"
             android:layout_width="wrap_content"

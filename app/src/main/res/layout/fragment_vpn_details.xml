@@ -32,10 +32,10 @@
         <ImageView
             android:id="@+id/row_country"
             android:layout_width="60dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:scaleType="centerCrop"
             android:layout_alignParentStart="true"
-            android:src="@drawable/gr"/>
+            android:src="@drawable/ic_ad"/>
         <LinearLayout
             android:id="@+id/info_box"
             android:layout_width="wrap_content"
@@ -49,13 +49,13 @@
                 android:text="Name"
                 android:layout_gravity="left"
                 android:textStyle="bold"/>
-
             <RatingBar
                 android:id="@+id/list_ratingbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.RatingBar.Small" />
             <TextView
+                android:id="@+id/text_load"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Load: 52%"/>
