@@ -1,5 +1,6 @@
 package co.anode.anodium
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -121,7 +122,7 @@ class RatingFragment : BottomSheetDialogFragment() {
             comment = comment.dropLast(1)
             val rating = ratingBar.rating
             context?.let { it1 -> AnodeClient.storeRating(it1, prefs.getString("ServerPublicKey", ""), rating, comment) }
-            activity?.supportFragmentManager?.popBackStack()
+            dismiss()
         }
 
         return v

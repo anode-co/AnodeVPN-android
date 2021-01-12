@@ -20,6 +20,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+    <ImageButton
+        android:id="@+id/button_vpndetailsClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_close"
+        android:background="@color/colorPrimarybackground"
+        android:layout_marginRight="20dp"/>
     <RelativeLayout
         android:id="@+id/row_relative"
         android:layout_width="wrap_content"
@@ -87,7 +96,8 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/round_button_small" />
     </RelativeLayout>
-    <Button
+    <!--
+        <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Buy bandwith"
@@ -98,5 +108,6 @@
         android:textColor="#C9DDE9"
         android:layout_marginTop="20dp"
         android:background="@drawable/buttonshape"/>
+        -->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
