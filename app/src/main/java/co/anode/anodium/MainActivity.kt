@@ -35,7 +35,7 @@ import kotlin.system.exitProcess
 class MainActivity : AppCompatActivity() {
     private var anodeUtil: AnodeUtil? = null
     private var mainMenu: Menu? = null
-
+    private var publicIpThreadSleep: Long = 10
     companion object {
         private const val LOGTAG = "co.anode.anodium"
     }
@@ -194,19 +194,41 @@ class MainActivity : AppCompatActivity() {
             }
         }, "MainActivity.CheckInternetConnectivity").start()
 
-        //Get public IP
+        //Get v4 public IP
         Thread(Runnable {
             while (true) {
                 if (internetConnection() == true) {
-                    val textPublicIP = findViewById<TextView>(R.id.publicip)
-                    val publicip = GetPublicIP()
+                    val textPublicIP = findViewById<TextView>(R.id.v4publicip)
+                    val publicip = GetPublicIPv4()
+                    if (!publicip.contains("Error"))
+                    {
+                        publicIpThreadSleep = 10000
+                    }
                     runOnUiThread {
-                        textPublicIP.text = publicip
+                        textPublicIP.text = baseContext.resources.getString(R.string.text_publicipv4) + publicip
                     }
                 }
-                Thread.sleep(10000)
+                Thread.sleep(publicIpThreadSleep)
             }
-        }, "MainActivity.GetPublicIP").start()
+        }, "MainActivity.GetPublicIPv4").start()
+
+        //Get v6 public IP
+        Thread(Runnable {
+            while (true) {
+                if (internetConnection() == true) {
+                    val textPublicIP = findViewById<TextView>(R.id.v6publicip)
+                    val publicip = GetPublicIPv6()
+                    if (!publicip.contains("Error"))
+                    {
+                        publicIpThreadSleep = 10000
+                    }
+                    runOnUiThread {
+                        textPublicIP.text = baseContext.resources.getString(R.string.text_publicipv6) + publicip
+                    }
+                }
+                Thread.sleep(publicIpThreadSleep)
+            }
+        }, "MainActivity.GetPublicIPv4").start()
 
         //Check for event log files daily
         Thread(Runnable {
@@ -491,56 +513,70 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun GetPublicIP(): String {
+    fun GetPublicIPv4(): String {
+        return URL("http://ipv4bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
+    /*
         var result = ""
-        var v4ip = ""
-        var v6ip = ""
-        val getv4URL = "https://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
-        val getv6URL = "https://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
-        val getAddressURL = "https://h.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+        var ip = ""
+        val getURL = "https://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
 
-        val urlv4 = URL(getv4URL)
-        val urlv6 = URL(getv6URL)
-        val connv4 = urlv4.openConnection() as HttpsURLConnection
+        val url = URL(getURL)
+        val conn = url.openConnection() as HttpsURLConnection
 
-        connv4.connectTimeout = 2000
-        connv4.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        connv4.requestMethod = "GET"
+        conn.connectTimeout = 3000
+        conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        conn.requestMethod = "GET"
         try {
-            connv4.connect()
+            conn.connect()
         } catch (e: SocketTimeoutException) {
-            v4ip = "Error getting public IP"
+            ip = "Error getting public IP"
         } catch (e: SSLHandshakeException) {
-            v4ip = "Error getting public IP"
+            ip = "Error getting public IP"
         }
         try {
             val json = JSONObject(connv4.inputStream.bufferedReader().readText())
             //json.getInt("version")
-            v4ip = json.getString("ipAddress")
+            ip = json.getString("ipAddress")
         } catch (e: Exception) {
-            v4ip = "Error getting public IP"
+            ip = "Error getting public IP"
         }
 
-        val connv6 = urlv6.openConnection() as HttpsURLConnection
-        connv6.connectTimeout = 2000
-        connv6.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        connv6.requestMethod = "GET"
-        try {
-            connv6.connect()
-        } catch (e: SocketTimeoutException) {
-            v6ip = "Error getting public IP"
-        } catch (e: SSLHandshakeException) {
-            v6ip = "Error getting public IP"
-        }
-        try {
-            val json = JSONObject(connv6.inputStream.bufferedReader().readText())
-            //json.getInt("version")
-            v6ip = json.getString("ipAddress")
-        } catch (e: Exception) {
-            v6ip = "Error getting public IP"
-        }
         result = baseContext.resources.getString(R.string.text_publicip)+ " v4: "+v4ip+"\n"+baseContext.resources.getString(R.string.text_publicip)+" v6: "+v6ip
         return result
+
+         */
+    }
+
+    fun GetPublicIPv6(): String {
+        return URL("http://ipv6bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
+        /*
+        var result = ""
+        val getURL = "https://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+
+        val url = URL(getURL)
+        val conn = url.openConnection() as HttpsURLConnection
+
+        conn.connectTimeout = 3000
+        conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        conn.requestMethod = "GET"
+        try {
+            conn.connect()
+        } catch (e: SocketTimeoutException) {
+            result = "Error getting public IP"
+        } catch (e: SSLHandshakeException) {
+            result = "Error getting public IP"
+        }
+        try {
+
+            val json = JSONObject(conn.inputStream.bufferedReader().readText())
+            //json.getInt("version")
+            result = json.getString("ipAddress")
+        } catch (e: Exception) {
+            result = "Error getting public IP"
+        }
+
+        return result
+         */
     }
 
     fun closeApp() {
