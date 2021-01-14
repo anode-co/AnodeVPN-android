@@ -70,4 +70,13 @@
     <string name="rating4_3">4.3 comment</string>
     <string name="rating4_4">4.4 comment</string>
     <string name="rating4_5">4.5 comment</string>
+    <!-- Status bar states-->
+    <string name="status_connected">VPN connected</string>
+    <string name="status_disconnected">VPN disconnected</string>
+    <string name="status_connecting">VPN connecting</string>
+    <string name="status_canceled">VPN connection canceled</string>
+    <string name="status_error">VPN connection error</string>
+    <string name="status_request_authorization">VPN request authorization</string>
+    <string name="status_authorized">VPN authorized</string>
+    <string name="status_authorization_failed">VPN authorization failed</string>
 </resources>

@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
@@ -28,12 +29,14 @@ import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLHandshakeException
 import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
+    private val BUTTON_STATE_DISCONNECTED = 0
+    private val BUTTON_STATE_CONNECTING = 1
+    private val BUTTON_STATE_CONNECTED = 2
     private var anodeUtil: AnodeUtil? = null
     private var mainMenu: Menu? = null
     private var publicIpThreadSleep: Long = 10
@@ -117,11 +120,11 @@ class MainActivity : AppCompatActivity() {
                 if (!buttonconnectvpns.isChecked) {
                     disconnectVPN(true)
                 } else {
-                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
+                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "hsrk7rrwssgpzv7jqxv95wmnx9c435s8jtf0k0w7v4rupymdj9k0.k"))
+                    bigbuttonState(BUTTON_STATE_CONNECTING)
                 }
             }
         }
-
 
         buttonVPNList.setOnClickListener() {
             val vpnlistactivity = Intent(applicationContext, VpnListActivity::class.java)
@@ -189,6 +192,7 @@ class MainActivity : AppCompatActivity() {
                         val toast = Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG)
                         toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
                         toast.show()
+                        //bigbuttonState(BUTTON_STATE_DISCONNECTED)
                     }
                 }
                 Thread.sleep(3000)
@@ -305,6 +309,35 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.eventLog(baseContext, "Application launched")
     }
 
+    fun bigbuttonState(state: Int) {
+        val status = findViewById<TextView>(R.id.textview_status)
+        when(state) {
+            BUTTON_STATE_DISCONNECTED -> {
+                //Status bar
+                status.text = ""
+                //Show disconnected on toast so it times out
+                val toast = Toast.makeText(applicationContext, getString(R.string.status_disconnected), Toast.LENGTH_LONG)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
+                toast.show()
+                //Button
+                buttonconnectvpns.alpha = 1.0f
+            }
+            BUTTON_STATE_CONNECTING -> {
+                status.text = resources.getString(R.string.status_connecting)
+                buttonconnectvpns.text = "Cancel"
+                buttonconnectvpns.alpha = 0.5f
+            }
+            BUTTON_STATE_CONNECTED -> {
+                status.text = ""
+                buttonconnectvpns.alpha = 1.0f
+                val toast = Toast.makeText(applicationContext, getString(R.string.status_connected), Toast.LENGTH_LONG)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
+                toast.show()
+                //buttonconnectvpns.textOn = "Stop"
+            }
+        }
+    }
+
     fun setUsernameTopBar() {
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
@@ -360,9 +393,10 @@ class MainActivity : AppCompatActivity() {
         }
         //Set button to correct status
         val status = findViewById<TextView>(R.id.textview_status)
-        status.setBackgroundColor(0x00000000)
         status.text = ""
-        buttonconnectvpns.isChecked = AnodeClient.isVpnActive()
+        if (AnodeClient.isVpnActive()) {
+            bigbuttonState(BUTTON_STATE_CONNECTED)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -499,14 +533,11 @@ class MainActivity : AppCompatActivity() {
     fun disconnectVPN(showRatingBar: Boolean) {
         AnodeClient.AuthorizeVPN().cancel(true)
         AnodeClient.stopThreads()
-        val status = findViewById<TextView>(R.id.textview_status)
-        status.setBackgroundColor(0xFFFF0000.toInt())
-        status.text = "VPN disconnected"
         CjdnsSocket.IpTunnel_removeAllConnections()
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
         startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-
+        bigbuttonState(BUTTON_STATE_DISCONNECTED)
         //Rating bar
         if (showRatingBar) {
             val ratingFragment: BottomSheetDialogFragment = RatingFragment()

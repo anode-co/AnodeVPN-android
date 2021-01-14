@@ -13,12 +13,14 @@ import android.os.AsyncTask
 import android.os.Environment
 import android.os.Handler
 import android.util.Log
+import android.view.Gravity
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import kotlinx.android.synthetic.main.content_main.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -54,6 +56,9 @@ object AnodeClient {
     private const val API_DELETE_ACCOUNT = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<email_or_username>/delete/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
     private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
+    private val BUTTON_STATE_DISCONNECTED = 0
+    private val BUTTON_STATE_CONNECTING = 1
+    private val BUTTON_STATE_CONNECTED = 2
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
     var downloadFails = 0
@@ -474,17 +479,13 @@ object AnodeClient {
             val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
             statustv.post(Runnable {
                 statustv.text  = "VPN connecting..."
-                statustv.setBackgroundColor(0x00000000)
             } )
             return resp
         }
 
         override fun onCancelled() {
             super.onCancelled()
-            statustv.post(Runnable {
-                statustv.text  = "VPN connection cancelled"
-                statustv.setBackgroundColor(0x00000000)
-            } )
+            mainButtonState(BUTTON_STATE_DISCONNECTED)
         }
 
         @SuppressLint("SetTextI18n")
@@ -494,8 +495,7 @@ object AnodeClient {
             //if 200 or 201 then connect to VPN
             if (result.isNullOrBlank() || result.contains("ERROR: ")) {
                 statustv.post(Runnable {
-                    statustv.text  = "VPN Authorization failed with unknown reason"
-                    statustv.setBackgroundColor(0x00000000)
+                    statustv.text  = mycontext.resources.getString(R.string.status_authorization_failed)
                 } )
                 //Sign user out
                 val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
@@ -509,8 +509,7 @@ object AnodeClient {
                     if (jsonObj.has("status")) {
                         if (jsonObj.getString("status") == "success") {
                             statustv.post(Runnable {
-                                statustv.text = "VPN Authorization success"
-                                statustv.setBackgroundColor(0x00000000)
+                                statustv.text = mycontext.resources.getString(R.string.status_authorized)
                             })
                             //do not try to reconnect while re-authorization
                             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
@@ -524,20 +523,16 @@ object AnodeClient {
                                 putString("ServerPublicKey", node)
                                 commit()
                             }
-                            //connectButton.text =  mycontext.resources.getString(R.string.button_disconnect)
-                            connectButton.isChecked = true
                         } else {
                             statustv.post(Runnable {
                                 statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
-                                statustv.setBackgroundColor(0x00000000)
                             })
                             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putLong("LastAuthorized", 0)
                                 commit()
                             }
-                            //connectButton.text =  mycontext.resources.getString(R.string.button_connect)
-                            connectButton.isChecked = false
+                            mainButtonState(BUTTON_STATE_DISCONNECTED)
                             CjdnsSocket.IpTunnel_removeAllConnections()
                             CjdnsSocket.Core_stopTun()
                             CjdnsSocket.clearRoutes()
@@ -546,8 +541,7 @@ object AnodeClient {
                     }
                 } catch (e: JSONException) {
                     statustv.post(Runnable {
-                        statustv.text = "VPN Authorization failed"
-                        statustv.setBackgroundColor(0x00000000)
+                        statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
                     })
                 }
             }
@@ -574,23 +568,14 @@ object AnodeClient {
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-                //Indicate connected
-                connectButton.post(Runnable {
-                    connectButton.isChecked = true
-                })
-                /*
-                statustv.post(Runnable {
-                    statustv.text  = "VPN Connected"
-                    statustv.setBackgroundColor(0xFF00FF00.toInt())
-                } )
-                */
+                //TODO: should we wait until we get new public ip to show connected?
+                mainButtonState(BUTTON_STATE_CONNECTED)
+
                 //Start Thread for checking connection
                 h.postDelayed(runnableConnection, 10000)
             } else {
                 Log.i(LOGTAG,"VPN connection failed")
-                connectButton.post(Runnable {
-                    connectButton.isChecked = false
-                })
+                mainButtonState(BUTTON_STATE_DISCONNECTED)
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 //Stop UI thread
                 h.removeCallbacks(runnableConnection)
@@ -607,7 +592,6 @@ object AnodeClient {
 
         statustv.post(Runnable {
             statustv.text  = "Waiting for network..."
-            statustv.setBackgroundColor(0x00000000)
         } )
 
         url = URL(address)
@@ -659,7 +643,6 @@ object AnodeClient {
         }
         statustv.post(Runnable {
             statustv.text  = ""
-            statustv.setBackgroundColor(0x00000000)
         } )
         return result
     }
@@ -676,34 +659,26 @@ object AnodeClient {
             if (!CjdnsSocket.getCjdnsRoutes()) {
                 //Disconnect
                 stopThreads()
-                /*statustv.post(Runnable {
-                    statustv.text  = "VPN disconnected"
-                    statustv.setBackgroundColor(0xFFFF0000.toInt())
-                } )*/
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 CjdnsSocket.clearRoutes()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                //connectButton.text = mycontext.resources.getString(R.string.button_connect)
-                connectButton.post(Runnable {
-                    connectButton.isChecked = false
-                })
+                mainButtonState(BUTTON_STATE_DISCONNECTED)
             }
             val newip4address = CjdnsSocket.ipv4Address
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
             if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
                 statustv.post(Runnable {
-                    statustv.text  = "VPN Reconnecting..."
+                    statustv.text  = mycontext.resources.getString(R.string.status_connecting)
                 } )
+                mainButtonState(BUTTON_STATE_CONNECTING)
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
             } else if (CjdnsSocket.VPNipv6Address != "") {
-                connectButton.post(Runnable {
-                    connectButton.isChecked = true
-                })
+                mainButtonState(BUTTON_STATE_CONNECTED)
             }
             //Check for needed authorization call
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
@@ -861,6 +836,34 @@ object AnodeClient {
             buf.close()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    fun mainButtonState(state: Int) {
+        when(state) {
+            BUTTON_STATE_DISCONNECTED -> {
+                //Status bar
+                statustv.text = ""
+                val toast = Toast.makeText(mycontext, R.string.status_disconnected, Toast.LENGTH_LONG)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
+                toast.show()
+                //Button
+                connectButton.alpha = 1.0f
+                connectButton.isChecked = false
+            }
+            BUTTON_STATE_CONNECTING -> {
+                statustv.text = mycontext.resources.getString(R.string.status_connecting)
+                connectButton.textOn = "Cancel"
+                connectButton.alpha = 0.5f
+            }
+            BUTTON_STATE_CONNECTED -> {
+                statustv.text = ""
+                connectButton.alpha = 1.0f
+                connectButton.isChecked = true
+                val toast = Toast.makeText(mycontext, R.string.status_connected, Toast.LENGTH_LONG)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
+                toast.show()
+            }
         }
     }
 }
