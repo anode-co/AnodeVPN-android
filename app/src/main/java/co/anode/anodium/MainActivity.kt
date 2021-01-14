@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.json.JSONObject
 import java.io.File
 import java.lang.reflect.InvocationTargetException
+import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
@@ -514,14 +515,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun GetPublicIPv4(): String {
-        return URL("http://ipv4bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
-    /*
-        var result = ""
-        var ip = ""
-        val getURL = "https://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+        //return URL("http://ipv4bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
+        val getURL = "http://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
 
         val url = URL(getURL)
-        val conn = url.openConnection() as HttpsURLConnection
+        val conn = url.openConnection() as HttpURLConnection
 
         conn.connectTimeout = 3000
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -529,32 +527,24 @@ class MainActivity : AppCompatActivity() {
         try {
             conn.connect()
         } catch (e: SocketTimeoutException) {
-            ip = "Error getting public IP"
+            return "Error getting public IP"
         } catch (e: SSLHandshakeException) {
-            ip = "Error getting public IP"
+            return "Error getting public IP"
         }
         try {
-            val json = JSONObject(connv4.inputStream.bufferedReader().readText())
-            //json.getInt("version")
-            ip = json.getString("ipAddress")
+            val json = JSONObject(conn.inputStream.bufferedReader().readText())
+            return json.getString("ipAddress")
         } catch (e: Exception) {
-            ip = "Error getting public IP"
+            return "Error getting public IP"
         }
-
-        result = baseContext.resources.getString(R.string.text_publicip)+ " v4: "+v4ip+"\n"+baseContext.resources.getString(R.string.text_publicip)+" v6: "+v6ip
-        return result
-
-         */
     }
 
     fun GetPublicIPv6(): String {
-        return URL("http://ipv6bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
-        /*
-        var result = ""
-        val getURL = "https://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
+        //return URL("http://ipv6bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
+        val getURL = "http://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
 
         val url = URL(getURL)
-        val conn = url.openConnection() as HttpsURLConnection
+        val conn = url.openConnection() as HttpURLConnection
 
         conn.connectTimeout = 3000
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -562,21 +552,16 @@ class MainActivity : AppCompatActivity() {
         try {
             conn.connect()
         } catch (e: SocketTimeoutException) {
-            result = "Error getting public IP"
+            return "Error getting public IP"
         } catch (e: SSLHandshakeException) {
-            result = "Error getting public IP"
+            return "Error getting public IP"
         }
         try {
-
             val json = JSONObject(conn.inputStream.bufferedReader().readText())
-            //json.getInt("version")
-            result = json.getString("ipAddress")
+            return json.getString("ipAddress")
         } catch (e: Exception) {
-            result = "Error getting public IP"
+            return "Error getting public IP"
         }
-
-        return result
-         */
     }
 
     fun closeApp() {
