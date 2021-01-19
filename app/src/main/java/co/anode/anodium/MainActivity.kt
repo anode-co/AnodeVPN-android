@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar)
         //Disable night mode (dark mode)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
@@ -636,8 +636,7 @@ class MainActivity : AppCompatActivity() {
         }
         override fun run() {
             h?.removeCallbacks(connectingDialog)
-            //if (!AnodeClient.vpnConnected) {
-            if(true){
+            if (!AnodeClient.vpnConnected) {
                 if (c!=null) {
                     val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
                     builder.setTitle("VPN Connecting")
