@@ -56,9 +56,9 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
 
     private fun configVpn() {
         val b = avpn.builder().setSession("AnodeVpnService")
-                .addAddress(myIp6, 128)
-                .addRoute("fc00::",8)
-                .allowFamily(AF_INET)
+                //.addAddress(myIp6, 128)
+                //.addRoute("fc00::",8)
+                //.allowFamily(AF_INET)
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
             CjdnsSocket.VPNipv4Address = CjdnsSocket.ipv4Address
