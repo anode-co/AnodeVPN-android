@@ -1,6 +1,9 @@
 package co.anode.anodium
 import android.app.Activity
+import android.app.Activity.RESULT_OK
+import android.app.ListActivity
 import android.content.Context
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -75,7 +78,10 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
             AnodeClient.eventLog(context, "Button CONNECT to " + dataitem["name"])
             //TODO: add new peer ???
             //CjdnsSocket.addPeer("","","","")
-            AnodeClient.AuthorizeVPN().execute(dataitem["publicKey"])
+            val intent: Intent = Intent()
+            intent.putExtra("action", "connect")
+            intent.putExtra("publickey", dataitem["publicKey"])
+            (context as Activity).setResult(RESULT_OK,intent)
             (context as Activity).finish()
         }
 

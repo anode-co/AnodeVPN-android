@@ -1,7 +1,9 @@
 package co.anode.anodium
 
 //import kotlin.collections.ArrayList
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.widget.*
@@ -46,6 +48,13 @@ class VpnListActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            //TODO:???
+        }
     }
 
     inner class fetchVpnServers() : AsyncTask<String, Void, String>() {

@@ -45,6 +45,7 @@ object AnodeClient {
     lateinit var statustv: TextView
     lateinit var connectButton: ToggleButton
     lateinit var mainActivity: AppCompatActivity
+    var vpnConnected: Boolean = false
     private const val API_VERSION = "0.3"
     private const val FILE_BASE_PATH = "file://"
     private const val PROVIDER_PATH = ".provider"
@@ -58,7 +59,6 @@ object AnodeClient {
     private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
     private val BUTTON_STATE_DISCONNECTED = 0
     private val BUTTON_STATE_CONNECTING = 1
-    private val BUTTON_STATE_CONNECTED = 2
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
     var downloadFails = 0
@@ -485,6 +485,7 @@ object AnodeClient {
 
         override fun onCancelled() {
             super.onCancelled()
+            vpnConnected = false
             mainButtonState(BUTTON_STATE_DISCONNECTED)
         }
 
@@ -558,6 +559,7 @@ object AnodeClient {
         //Check for ip address given by cjdns try for 20 times, 10secs
         Thread(Runnable {
             while (!iconnected && (tries < 10)) {
+                vpnConnected = false
                 iconnected = CjdnsSocket.getCjdnsRoutes()
                 tries++
                 Thread.sleep(2000)
@@ -569,12 +571,13 @@ object AnodeClient {
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
                 //TODO: should we wait until we get new public ip to show connected?
-                mainButtonState(BUTTON_STATE_CONNECTED)
-
+                //mainButtonState(BUTTON_STATE_CONNECTED)
+                vpnConnected = true
                 //Start Thread for checking connection
                 h.postDelayed(runnableConnection, 10000)
             } else {
                 Log.i(LOGTAG,"VPN connection failed")
+                vpnConnected = false
                 mainButtonState(BUTTON_STATE_DISCONNECTED)
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 //Stop UI thread
@@ -678,7 +681,7 @@ object AnodeClient {
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
             } else if (CjdnsSocket.VPNipv6Address != "") {
-                mainButtonState(BUTTON_STATE_CONNECTED)
+                //mainButtonState(BUTTON_STATE_CONNECTED)
             }
             //Check for needed authorization call
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
@@ -844,9 +847,6 @@ object AnodeClient {
             BUTTON_STATE_DISCONNECTED -> {
                 //Status bar
                 statustv.text = ""
-                val toast = Toast.makeText(mycontext, R.string.status_disconnected, Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
-                toast.show()
                 //Button
                 connectButton.alpha = 1.0f
                 connectButton.isChecked = false
@@ -855,14 +855,6 @@ object AnodeClient {
                 statustv.text = mycontext.resources.getString(R.string.status_connecting)
                 connectButton.textOn = "Cancel"
                 connectButton.alpha = 0.5f
-            }
-            BUTTON_STATE_CONNECTED -> {
-                statustv.text = ""
-                connectButton.alpha = 1.0f
-                connectButton.isChecked = true
-                val toast = Toast.makeText(mycontext, R.string.status_connected, Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
-                toast.show()
             }
         }
     }

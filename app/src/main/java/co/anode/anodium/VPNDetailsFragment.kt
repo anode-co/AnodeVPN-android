@@ -2,6 +2,7 @@ package co.anode.anodium
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -78,14 +79,16 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         val connectButton = currentView.findViewById<Button>(R.id.button_smallconnectvpn)
         connectButton.setOnClickListener {
             AnodeClient.eventLog(requireContext(), "Button CONNECT to " + arguments?.getString("name"))
-            //TODO: add new peer ???
-            //CjdnsSocket.addPeer("","","","")
-            AnodeClient.AuthorizeVPN().execute(arguments?.getString("publicKey"))
+            val intent: Intent = Intent()
+            intent.putExtra("action", "connect")
+            intent.putExtra("publickey", arguments?.getString("publicKey"))
+            (context as Activity).setResult(Activity.RESULT_OK,intent)
+            dismiss()
             (context as Activity).finish()
         }
         val closeButton = currentView.findViewById<ImageButton>(R.id.button_vpndetailsClose)
         closeButton.setOnClickListener {
-            (context as Activity).finish()
+            dismiss()
         }
         return currentView
     }
