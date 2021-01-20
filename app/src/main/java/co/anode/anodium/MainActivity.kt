@@ -193,8 +193,8 @@ class MainActivity : AppCompatActivity() {
 
         //Check internet connectivity & public IP
         Thread(Runnable {
-            while (uiInForeground) {
-                if (internetConnection() == false) {
+            while (true) {
+                if ((internetConnection() == false) && (uiInForeground)){
                     runOnUiThread {
                         val toast = Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG)
                         toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
@@ -208,8 +208,8 @@ class MainActivity : AppCompatActivity() {
 
         //Get v4 public IP
         Thread(Runnable {
-            while (uiInForeground) {
-                if (internetConnection() == true) {
+            while (true) {
+                if ((internetConnection() == true) && (uiInForeground)){
                     val textPublicIP = findViewById<TextView>(R.id.v4publicip)
                     val publicip = GetPublicIPv4()
                     if (!publicip.contains("Error")) {
@@ -228,8 +228,8 @@ class MainActivity : AppCompatActivity() {
 
         //Get v6 public IP
         Thread(Runnable {
-            while (uiInForeground) {
-                if (internetConnection() == true) {
+            while (true) {
+                if ((internetConnection() == true) && (uiInForeground)) {
                     val textPublicIP = findViewById<TextView>(R.id.v6publicip)
                     val publicip = GetPublicIPv6()
                     if (!publicip.contains("Error")) {
