@@ -12,8 +12,8 @@
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
-    <string name="text_publicipv4">Public IP v4: </string>
-    <string name="text_publicipv6">Public IP v6: </string>
+    <string name="text_publicipv4">Public IPv4: </string>
+    <string name="text_publicipv6">Public IPv6: </string>
     <!--VPN Details Fragment-->
     <string name="text_load">Load: </string>
     <!-- Buttons -->

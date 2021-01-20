@@ -12,6 +12,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
 import android.os.*
+import android.text.Html
 import android.util.Log
 import android.view.Gravity
 import android.view.Menu
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private var anodeUtil: AnodeUtil? = null
     private var mainMenu: Menu? = null
     private var publicIpThreadSleep: Long = 10
+    private var uiInForeground = true
     val h = Handler()
 
     companion object {
@@ -60,10 +62,10 @@ class MainActivity : AppCompatActivity() {
 
         object : Thread() {
             override fun run() {
-                Looper.prepare();
+                Looper.prepare()
                 Toast.makeText(baseContext, "ERROR: " + paramThrowable.message, Toast.LENGTH_LONG).show()
                 AnodeClient.mycontext = baseContext
-                Looper.loop();
+                Looper.loop()
             }
         }.start()
         try {
@@ -191,7 +193,7 @@ class MainActivity : AppCompatActivity() {
 
         //Check internet connectivity & public IP
         Thread(Runnable {
-            while (true) {
+            while (uiInForeground) {
                 if (internetConnection() == false) {
                     runOnUiThread {
                         val toast = Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG)
@@ -206,7 +208,7 @@ class MainActivity : AppCompatActivity() {
 
         //Get v4 public IP
         Thread(Runnable {
-            while (true) {
+            while (uiInForeground) {
                 if (internetConnection() == true) {
                     val textPublicIP = findViewById<TextView>(R.id.v4publicip)
                     val publicip = GetPublicIPv4()
@@ -214,7 +216,7 @@ class MainActivity : AppCompatActivity() {
                         publicIpThreadSleep = 10000
                     }
                     runOnUiThread {
-                        textPublicIP.text = baseContext.resources.getString(R.string.text_publicipv4) + publicip
+                        textPublicIP.text = Html.fromHtml("<b>"+baseContext.resources.getString(R.string.text_publicipv4)+"</b>&nbsp;"+ publicip)
                         if (AnodeClient.vpnConnected) {
                             bigbuttonState(BUTTON_STATE_CONNECTED)
                         }
@@ -226,7 +228,7 @@ class MainActivity : AppCompatActivity() {
 
         //Get v6 public IP
         Thread(Runnable {
-            while (true) {
+            while (uiInForeground) {
                 if (internetConnection() == true) {
                     val textPublicIP = findViewById<TextView>(R.id.v6publicip)
                     val publicip = GetPublicIPv6()
@@ -234,7 +236,7 @@ class MainActivity : AppCompatActivity() {
                         publicIpThreadSleep = 10000
                     }
                     runOnUiThread {
-                        textPublicIP.text = baseContext.resources.getString(R.string.text_publicipv6) + publicip
+                        textPublicIP.text = Html.fromHtml("<b>"+baseContext.resources.getString(R.string.text_publicipv6)+"</b>&nbsp;" + publicip)
                         if (AnodeClient.vpnConnected) {
                             bigbuttonState(BUTTON_STATE_CONNECTED)
                         }
@@ -388,6 +390,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         AnodeClient.eventLog(baseContext, "Resume MainActivity")
         AnodeClient.statustv = findViewById(R.id.textview_status)
+        uiInForeground = true
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val nickname_backpressed = prefs.getBoolean("NicknameActivity_BackPressed", false)
@@ -415,6 +418,16 @@ class MainActivity : AppCompatActivity() {
         if (AnodeClient.isVpnActive()) {
             bigbuttonState(BUTTON_STATE_CONNECTED)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        uiInForeground = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        uiInForeground = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -586,13 +599,13 @@ class MainActivity : AppCompatActivity() {
         try {
             conn.connect()
         } catch (e: java.lang.Exception) {
-            return "Error getting public IP"
+            return "None"
         }
         try {
             val json = JSONObject(conn.inputStream.bufferedReader().readText())
             return json.getString("ipAddress")
         } catch (e: Exception) {
-            return "Error getting public IP"
+            return "None"
         }
     }
 
@@ -609,13 +622,13 @@ class MainActivity : AppCompatActivity() {
         try {
             conn.connect()
         } catch (e: java.lang.Exception) {
-            return "Error getting public IP"
+            return "None"
         }
         try {
             val json = JSONObject(conn.inputStream.bufferedReader().readText())
             return json.getString("ipAddress")
         } catch (e: Exception) {
-            return "Error getting public IP"
+            return "None"
         }
     }
 
