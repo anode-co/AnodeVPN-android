@@ -86,6 +86,7 @@ class checkstatusURL(context: Context?, handler: Handler?, activity: AppCompatAc
     }
 }
 
+@SuppressLint("StaticFieldLeak")
 object statuschecker: Runnable {
     private const val PollingInterval: Long = 10000
     private var h: Handler? = null

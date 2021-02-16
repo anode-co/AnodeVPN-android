@@ -13,14 +13,12 @@ import android.os.AsyncTask
 import android.os.Environment
 import android.os.Handler
 import android.util.Log
-import android.view.Gravity
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import kotlinx.android.synthetic.main.content_main.*
+import co.anode.anodium.CjdnsSocket.UDPInterface_beginConnection
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -56,6 +54,7 @@ object AnodeClient {
     private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
     private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
     private const val API_DELETE_ACCOUNT = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<email_or_username>/delete/"
+    private const val API_PEERING_LINES = "https://vpn.anode.co/api/$API_VERSION/vpn/cjdns/peeringlines/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
     private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
     private val BUTTON_STATE_DISCONNECTED = 0
@@ -774,6 +773,32 @@ object AnodeClient {
                     }
                 } catch (e: JSONException) {
                     Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    class GetPeeringLines : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String? {
+            val url = API_PEERING_LINES
+            val resp = APIHttpReq( url, "","GET", false , false)
+            Log.i(LOGTAG, resp)
+            return resp
+        }
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            Log.i(LOGTAG,"Received from $API_PEERING_LINES: $result")
+            if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
+                try {
+                    val peers = JSONArray(result)
+                    for (i in 0 until peers.length()) {
+                        val peer = peers.getJSONObject(i)
+                        UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
+                    }
+                } catch (e: JSONException) {
+                    Toast.makeText(mycontext, "Error, invalid JSON", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
