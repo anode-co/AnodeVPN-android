@@ -1,9 +1,10 @@
 package co.anode.anodium
 
 import android.Manifest
-import android.accessibilityservice.GestureDescription
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -30,10 +31,8 @@ import org.json.JSONObject
 import java.io.File
 import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
-import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.*
-import javax.net.ssl.SSLHandshakeException
 import kotlin.system.exitProcess
 
 
@@ -45,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private var mainMenu: Menu? = null
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
+    private var previousPublicIPv4 = ""
     val h = Handler()
 
     companion object {
@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
 
         buttonVPNList.setOnClickListener() {
             val vpnlistactivity = Intent(applicationContext, VpnListActivity::class.java)
-            startActivityForResult(vpnlistactivity,0)
+            startActivityForResult(vpnlistactivity, 0)
         }
 
         val intent = VpnService.prepare(applicationContext)
@@ -149,6 +149,22 @@ class MainActivity : AppCompatActivity() {
             //Add peers
             CjdnsSocket.UDPInterface_beginConnection()
         }
+
+        //Create notification channel
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val CHANNEL_ID = "anodium_channel_01"
+            val name = "anodium_channel"
+            val descriptionText = "Anodium channel"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
 
         // Removed public key from main
         // val pubkey: TextView = findViewById(R.id.textViewPubkey)
@@ -194,7 +210,7 @@ class MainActivity : AppCompatActivity() {
         //Check internet connectivity & public IP
         Thread(Runnable {
             while (true) {
-                if ((internetConnection() == false) && (uiInForeground)){
+                if ((internetConnection() == false) && (uiInForeground)) {
                     runOnUiThread {
                         val toast = Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG)
                         toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
@@ -209,18 +225,21 @@ class MainActivity : AppCompatActivity() {
         //Get v4 public IP
         Thread(Runnable {
             while (true) {
-                if ((internetConnection() == true) && (uiInForeground)){
+                if ((internetConnection() == true) && (uiInForeground)) {
                     val textPublicIP = findViewById<TextView>(R.id.v4publicip)
                     val publicip = GetPublicIPv4()
                     if (!publicip.contains("Error")) {
                         publicIpThreadSleep = 10000
                     }
                     runOnUiThread {
-                        textPublicIP.text = Html.fromHtml("<b>"+baseContext.resources.getString(R.string.text_publicipv4)+"</b>&nbsp;"+ publicip)
-                        if (AnodeClient.vpnConnected) {
+                        textPublicIP.text = Html.fromHtml("<b>" + baseContext.resources.getString(R.string.text_publicipv4) + "</b>&nbsp;" + publicip)
+                        if ((AnodeClient.vpnConnected) &&
+                                (previousPublicIPv4 != publicip) &&
+                                ((publicip != "None") || (!publicip.contains("Error")))) {
                             bigbuttonState(BUTTON_STATE_CONNECTED)
                         }
                     }
+                    previousPublicIPv4 = publicip
                 }
                 Thread.sleep(publicIpThreadSleep)
             }
@@ -236,10 +255,10 @@ class MainActivity : AppCompatActivity() {
                         publicIpThreadSleep = 10000
                     }
                     runOnUiThread {
-                        textPublicIP.text = Html.fromHtml("<b>"+baseContext.resources.getString(R.string.text_publicipv6)+"</b>&nbsp;" + publicip)
-                        if (AnodeClient.vpnConnected) {
+                        textPublicIP.text = Html.fromHtml("<b>" + baseContext.resources.getString(R.string.text_publicipv6) + "</b>&nbsp;" + publicip)
+                        /*if (AnodeClient.vpnConnected) {
                             bigbuttonState(BUTTON_STATE_CONNECTED)
-                        }
+                        }*/
                     }
                 }
                 Thread.sleep(publicIpThreadSleep)
@@ -338,15 +357,15 @@ class MainActivity : AppCompatActivity() {
             BUTTON_STATE_CONNECTING -> {
                 AnodeClient.eventLog(baseContext, "Main button status for CONNECTING")
                 //Start 30sec timer
-                connectingDialog.init(h,this@MainActivity)
-                h.postDelayed(connectingDialog,30000)
+                connectingDialog.init(h, this@MainActivity)
+                h.postDelayed(connectingDialog, 30000)
                 status.text = resources.getString(R.string.status_connecting)
                 buttonconnectvpns.text = "Cancel"
                 buttonconnectvpns.alpha = 0.5f
             }
             BUTTON_STATE_CONNECTED -> {
                 AnodeClient.eventLog(baseContext, "Main button status for CONNECTED")
-                //h.removeCallbacks(connectingDialog)
+                h.removeCallbacks(connectingDialog)
                 status.text = ""
                 buttonconnectvpns.alpha = 1.0f
                 /*val toast = Toast.makeText(applicationContext, getString(R.string.status_connected), Toast.LENGTH_LONG)
@@ -510,7 +529,7 @@ class MainActivity : AppCompatActivity() {
             if(data != null ) {
                 //Conecting to VPN Server
                 if (data.getStringExtra("action") == "connect") {
-                    Log.i(LOGTAG, "Connecting to "+data.getStringExtra("publickey"))
+                    Log.i(LOGTAG, "Connecting to " + data.getStringExtra("publickey"))
                     AnodeClient.AuthorizeVPN().execute(data.getStringExtra("publickey"))
                     bigbuttonState(BUTTON_STATE_CONNECTING)
                 }
@@ -601,11 +620,11 @@ class MainActivity : AppCompatActivity() {
         } catch (e: java.lang.Exception) {
             return "None"
         }
-        try {
+        return try {
             val json = JSONObject(conn.inputStream.bufferedReader().readText())
-            return json.getString("ipAddress")
+            json.getString("ipAddress")
         } catch (e: Exception) {
-            return "None"
+            "None"
         }
     }
 
@@ -639,6 +658,7 @@ class MainActivity : AppCompatActivity() {
         System.exit(0)
     }
 
+    @SuppressLint("StaticFieldLeak")
     object connectingDialog: Runnable {
         private var h: Handler? = null
         private var c: Context? = null
@@ -649,30 +669,30 @@ class MainActivity : AppCompatActivity() {
         }
         override fun run() {
             h?.removeCallbacks(connectingDialog)
-            if (!AnodeClient.vpnConnected) {
-                if (c!=null) {
-                    val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
-                    builder.setTitle("VPN Connecting")
-                    builder.setMessage("Taking a long time to connect, VPN server may not be working.")
+            //if (!AnodeClient.vpnConnected) {
+            if (c!=null) {
+                val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
+                builder.setTitle("VPN Connecting")
+                builder.setMessage("Taking a long time to connect, VPN server may not be working.")
 
-                    builder.setPositiveButton("Keep waiting", DialogInterface.OnClickListener { dialog, which ->
-                        dialog.dismiss()
-                    })
+                builder.setPositiveButton("Keep waiting", DialogInterface.OnClickListener { dialog, which ->
+                    dialog.dismiss()
+                })
 
-                    builder.setNegativeButton("Disconnect", DialogInterface.OnClickListener { dialog, which ->
-                        //MainActivity().disconnectVPN(false)
-                        AnodeClient.AuthorizeVPN().cancel(true)
-                        AnodeClient.stopThreads()
-                        CjdnsSocket.IpTunnel_removeAllConnections()
-                        CjdnsSocket.Core_stopTun()
-                        CjdnsSocket.clearRoutes()
-                        c!!.startService(Intent(c!!, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                        dialog.dismiss()
-                    })
-                    val alert: AlertDialog = builder.create()
-                    alert.show()
-                }
+                builder.setNegativeButton("Disconnect", DialogInterface.OnClickListener { dialog, which ->
+                    //MainActivity().disconnectVPN(false)
+                    AnodeClient.AuthorizeVPN().cancel(true)
+                    AnodeClient.stopThreads()
+                    CjdnsSocket.IpTunnel_removeAllConnections()
+                    CjdnsSocket.Core_stopTun()
+                    CjdnsSocket.clearRoutes()
+                    c!!.startService(Intent(c!!, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                    dialog.dismiss()
+                })
+                val alert: AlertDialog = builder.create()
+                alert.show()
             }
+            //}
         }
     }
 

@@ -3,8 +3,9 @@ package co.anode.anodium
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
-import android.system.OsConstants.AF_INET
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import java.io.FileDescriptor
 import java.lang.Exception
 
@@ -101,7 +102,23 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     override fun run() {
         try {
             main()
+            var time = System.currentTimeMillis()
+            val interval = 10 * 60 * 1000 //10min
             while (true) {
+                if(System.currentTimeMillis() > (time + interval)) {
+                    time = System.currentTimeMillis()
+                    val CHANNEL_ID = "anodium_channel_01"
+                    var builder = NotificationCompat.Builder(avpn.applicationContext, CHANNEL_ID)
+                            .setSmallIcon(R.mipmap.ic_logo_foreground)
+                            .setContentTitle("Test notification")
+                            .setContentText("with some short description...")
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    with(NotificationManagerCompat.from(avpn.applicationContext)) {
+                        // notificationId is a unique int for each notification that you must define
+                        val notificationId = 1
+                        notify(notificationId, builder.build())
+                    }
+                }
                 Thread.sleep(1000)
             }
         } catch (e: InterruptedException) {
