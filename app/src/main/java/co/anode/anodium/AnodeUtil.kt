@@ -17,6 +17,7 @@ class AnodeUtil(c: Context?) {
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
     val CJDROUTE_LOG = "cjdroute.log"
+    val PLTD_BINFILE = "pltd"
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
 
     init {
@@ -33,8 +34,8 @@ class AnodeUtil(c: Context?) {
 
         //Read architecture
         val arch = System.getProperty("os.arch")
-        val `in`: InputStream
-        val out: OutputStream?
+        var `in`: InputStream
+        var out: OutputStream?
         try {
             val am = context!!.assets
             Log.i(LOGTAG, "OS Architecture: $arch")
@@ -89,6 +90,26 @@ class AnodeUtil(c: Context?) {
         if (!File(context!!.filesDir.toString() + "/" + CJDROUTE_CONFFILE).exists()) {
             initializeCjdrouteConfFile()
         }
+
+        //Copy pltd
+        val am = context!!.assets
+        if (arch == "x86" || arch!!.contains("i686")) {
+            `in` = am.open("pltd_emulator")
+        } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
+            `in` = am.open("pltd_aarch64")
+        }
+        out = FileOutputStream("$CJDNS_PATH/$PLTD_BINFILE")
+        val buffer = ByteArray(1024)
+        var read: Int
+        while (`in`.read(buffer).also { read = it } != -1) {
+            out.write(buffer, 0, read)
+        }
+        `in`.close()
+        out.close()
+        //Set permissions
+        Log.i(LOGTAG, "set new cjdroute permissions")
+        val file = File("$CJDNS_PATH/$PLTD_BINFILE")
+        file.setExecutable(true)
     }
 
 
@@ -148,6 +169,22 @@ class AnodeUtil(c: Context?) {
             Log.e(LOGTAG, "cjdns exited with " + p.exitValue())
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
+        }
+    }
+
+    private fun launchpltd() {
+        try {
+            Log.e(LOGTAG, "Launching pltd (file size: " +
+                    File("$CJDNS_PATH/$PLTD_BINFILE").length() + ")")
+            val processBuilder = ProcessBuilder()
+
+            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE")
+            pb.environment()["TMPDIR"] = CJDNS_PATH
+            val p = processBuilder.start()
+            p.waitFor()
+            Log.e(LOGTAG, "pltd exited with " + p.exitValue())
+        } catch (e: Exception) {
+            throw AnodeUtilException("Failed to execute pltd " + e.message)
         }
     }
 

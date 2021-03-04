@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         anodeUtil = AnodeUtil(application)
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
        */
+
         //Start the log file
         anodeUtil!!.logFile()
         //Initialize App
@@ -145,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         if (intent != null) {
             startActivityForResult(intent, 0)
         } else {
-            onActivityResult(0, Activity.RESULT_OK, null)
+            onActivityResult(0, RESULT_OK, null)
             //Get list of peering lines and add them as peers
             AnodeClient.GetPeeringLines().execute()
         }
@@ -161,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             }
             // Register the channel with the system
             val notificationManager: NotificationManager =
-                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -225,6 +226,9 @@ class MainActivity : AppCompatActivity() {
         //Get v4 public IP
         Thread(Runnable {
             while (true) {
+                val inforeq = Rpc.GetInfoRequest.newBuilder()
+                        .build()
+
                 if ((internetConnection() == true) && (uiInForeground)) {
                     val textPublicIP = findViewById<TextView>(R.id.v4publicip)
                     val publicip = GetPublicIPv4()
@@ -378,7 +382,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setUsernameTopBar() {
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val topUsername: TextView = findViewById(R.id.top_username)
         if (signedin) {
@@ -410,7 +414,7 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.eventLog(baseContext, "Resume MainActivity")
         AnodeClient.statustv = findViewById(R.id.textview_status)
         uiInForeground = true
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val nickname_backpressed = prefs.getBoolean("NicknameActivity_BackPressed", false)
         val signin_backpressed = prefs.getBoolean("SignInActivity_BackPressed", false)
@@ -462,7 +466,7 @@ class MainActivity : AppCompatActivity() {
         val id = item.itemId
         if (id == R.id.action_account_settings) {
             Log.i(LOGTAG, "Start registration")
-            val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
             if (prefs.getString("username", "").isNullOrEmpty()) {
                 val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
                 startActivity(accountNicknameActivity)
@@ -524,7 +528,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
-    if (resultCode == Activity.RESULT_OK) {
+    if (resultCode == RESULT_OK) {
             Log.i(LOGTAG, "onActivityResult")
             if(data != null ) {
                 //Conecting to VPN Server
@@ -539,7 +543,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //On first run show nickname activity
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         /*
         if (prefs.getBoolean("FirstRun", true)) {
             Log.i(LOGTAG, "First run: Start nickname activity")
@@ -582,7 +586,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun internetConnection(): Boolean? {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
         return if (activeNetwork?.isConnected == null)
             false
