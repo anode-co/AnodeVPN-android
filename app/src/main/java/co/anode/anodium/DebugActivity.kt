@@ -1,7 +1,6 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
-import android.app.ActionBar
 import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
@@ -10,12 +9,48 @@ import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import co.anode.anodium.connection.lndConnection.LndSSLSocketFactory
+import co.anode.anodium.connection.lndConnection.MacaroonCallCredential
+import co.anode.anodium.connection.manageWalletConfigs.WalletConfig
+import co.anode.anodium.connection.manageWalletConfigs.WalletConfigsManager
+import co.anode.anodium.lnd.LndLightningService
+import co.anode.anodium.lnd.RemoteLndLightningService
+import io.grpc.ManagedChannel
+import io.grpc.okhttp.OkHttpChannelBuilder
 import java.net.URL
+import javax.net.ssl.HostnameVerifier
+
 
 class DebugActivity : AppCompatActivity() {
+    private lateinit var mSecureChannel: ManagedChannel
+    private lateinit var mLndLightningService: LndLightningService
+    private lateinit var mMacaroon: MacaroonCallCredential
+    private lateinit var mConnectionConfig: WalletConfig
+
+    private fun readSavedConnectionInfo() {
+        // Load current wallet connection config
+        mConnectionConfig = WalletConfigsManager.getInstance().getCurrentWalletConfig()
+        // Generate Macaroon
+        mMacaroon = MacaroonCallCredential(mConnectionConfig.getMacaroon())
+    }
+
+    fun createWallet() {
+        readSavedConnectionInfo()
+        val hostnameVerifier: HostnameVerifier? = null
+        val host: String = mConnectionConfig.getHost()
+        val port: Int = mConnectionConfig.getPort()
+
+        // Channels are expensive to create. We want to create it once and then reuse it on all our requests.
+        mSecureChannel = OkHttpChannelBuilder
+                .forAddress(host, port)
+                .hostnameVerifier(hostnameVerifier) // null = default hostnameVerifier
+                .sslSocketFactory(LndSSLSocketFactory.create(mConnectionConfig)) // null = default SSLSocketFactory
+                .build()
+        mLndLightningService = RemoteLndLightningService(mSecureChannel, mMacaroon)
+
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,10 +64,14 @@ class DebugActivity : AppCompatActivity() {
         actionbar.setDisplayHomeAsUpEnabled(true)
         val buttonSubmitLogs = findViewById<Button>(R.id.button_SubmitLogs)
         buttonSubmitLogs.setOnClickListener {
-            Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
+
+            /*Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
             AnodeClient.mycontext = baseContext
             AnodeClient.storeError(baseContext, "other", Throwable("User submitted logs"))
             AnodeClient.PostLogs()
+
+             */
+            createWallet()
         }
         val buttonDeleteAccount = findViewById<Button>(R.id.button_Deleteaccount)
         buttonDeleteAccount.setOnClickListener {
@@ -75,15 +114,21 @@ class DebugActivity : AppCompatActivity() {
                     peerstats.text = info
 
                     val listconnnections = findViewById<TextView>(R.id.text_listconnections)
-                    val connections:ArrayList<Benc.Bdict> = CjdnsSocket.IpTunnel_listConnections()
+                    val connections: ArrayList<Benc.Bdict> = CjdnsSocket.IpTunnel_listConnections()
                     info = ""
                     for (i in 0 until connections.count()) {
-                         info += connections[i].toString()
+                        info += connections[i].toString()
                     }
                     listconnnections.text = info
                     val publicip = findViewById<TextView>(R.id.text_publicIP)
                     publicip.text = "updating ip..."
                     GetPublicIP().execute(publicip)
+                    //val inforespons = Rpc.GetInfoResponse.newBuilder()
+                    /*val walletResp = Rpc.WalletBalanceResponse.newBuilder()
+                    val walletReq = Rpc.WalletBalanceRequest.newBuilder()
+                    walletReq.walletResp.totalBalance
+                    val rpc = findViewById<TextView>(R.id.text_rpc)
+                    rpc.text = "RPC msg: " + inforespons.version*/
                 })
                 Thread.sleep(8000)
             }

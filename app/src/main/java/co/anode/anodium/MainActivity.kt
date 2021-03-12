@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         anodeUtil!!.logFile()
         //Initialize App
         anodeUtil!!.initializeApp()
-        //Launch cjdroute
+        //Launch cjdroute & pltd
         anodeUtil!!.launch()
         //Initialize AnodeClient
         AnodeClient.mycontext = baseContext
@@ -226,9 +226,6 @@ class MainActivity : AppCompatActivity() {
         //Get v4 public IP
         Thread(Runnable {
             while (true) {
-                val inforeq = Rpc.GetInfoRequest.newBuilder()
-                        .build()
-
                 if ((internetConnection() == true) && (uiInForeground)) {
                     val textPublicIP = findViewById<TextView>(R.id.v4publicip)
                     val publicip = GetPublicIPv4()

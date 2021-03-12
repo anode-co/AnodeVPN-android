@@ -93,7 +93,7 @@ class AnodeUtil(c: Context?) {
 
         //Copy pltd
         val am = context!!.assets
-        if (arch == "x86" || arch!!.contains("i686")) {
+        if (arch == "x86" || arch.contains("i686")) {
             `in` = am.open("pltd_emulator")
         } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
             `in` = am.open("pltd_aarch64")
@@ -107,7 +107,7 @@ class AnodeUtil(c: Context?) {
         `in`.close()
         out.close()
         //Set permissions
-        Log.i(LOGTAG, "set new cjdroute permissions")
+        Log.i(LOGTAG, "set new pltd permissions")
         val file = File("$CJDNS_PATH/$PLTD_BINFILE")
         file.setExecutable(true)
     }
@@ -122,6 +122,7 @@ class AnodeUtil(c: Context?) {
             generateConfFile()
             modifyJSONConfFile()
         }
+        launchpltd()
     }
 
     fun initializeCjdrouteConfFile() {
@@ -181,8 +182,8 @@ class AnodeUtil(c: Context?) {
             val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE")
             pb.environment()["TMPDIR"] = CJDNS_PATH
             val p = processBuilder.start()
-            p.waitFor()
-            Log.e(LOGTAG, "pltd exited with " + p.exitValue())
+            //p.waitFor()
+            //Log.e(LOGTAG, "pltd exited with " + p.exitValue())
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute pltd " + e.message)
         }
