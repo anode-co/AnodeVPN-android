@@ -179,7 +179,7 @@ class AnodeUtil(c: Context?) {
                     File("$CJDNS_PATH/$PLTD_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
 
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE")
+            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE","--lnddir=/data/data/co.anode.anodium/files --configfile=/data/data/co.anode.anodium/files/config.go --datadir=/data/data/co.anode.anodium/files")
             pb.environment()["TMPDIR"] = CJDNS_PATH
             val p = processBuilder.start()
             //p.waitFor()

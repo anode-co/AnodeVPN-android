@@ -40,46 +40,47 @@ public class LndSSLSocketFactory {
             e.printStackTrace();
             return null;
         }
-
-        if (walletConfig.isTor()) {
-            // Always trust the certificate on Tor connection
-            try {
-                sslCtx.init(null, new TrustManager[]{new BlindTrustManager()}, null);
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-                return null;
-            }
-            return sslCtx.getSocketFactory();
-
-        } else {
-            // On clearnet we want to validate the certificate.
-            if (walletConfig.getCert() != null && !walletConfig.getCert().isEmpty()) {
-                //try to create a trustmanager that trust the certificate that was transmitted with the lndconnect string.
+        if (walletConfig != null) {
+            if (walletConfig.isTor()) {
+                // Always trust the certificate on Tor connection
                 try {
-                    InputStream caInput = null;
-                    String certificateBase64UrlString = walletConfig.getCert();
-                    byte[] certificateBytes = BaseEncoding.base64Url().decode(certificateBase64UrlString);
-
-                    // Generate the CA Certificate from the supplied byte array
-                    caInput = new ByteArrayInputStream(certificateBytes);
-                    Certificate ca = CertificateFactory.getInstance("X.509").generateCertificate(caInput);
-
-                    // Load the key store using the CA
-                    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    keyStore.load(null, null);
-                    keyStore.setCertificateEntry("ca", ca);
-
-                    // Initialize the TrustManager with this CA
-                    TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    tmf.init(keyStore);
-
-                    // Create an SSL context that uses the created trust manager
-                    sslCtx.init(null, tmf.getTrustManagers(), new SecureRandom());
-                    return sslCtx.getSocketFactory();
-
-                } catch (Exception e) {
-                    //ZapLog.e(LOG_TAG, "Error while initializing self signed certificate.");
+                    sslCtx.init(null, new TrustManager[]{new BlindTrustManager()}, null);
+                } catch (KeyManagementException e) {
                     e.printStackTrace();
+                    return null;
+                }
+                return sslCtx.getSocketFactory();
+
+            } else {
+                // On clearnet we want to validate the certificate.
+                if (walletConfig.getCert() != null && !walletConfig.getCert().isEmpty()) {
+                    //try to create a trustmanager that trust the certificate that was transmitted with the lndconnect string.
+                    try {
+                        InputStream caInput = null;
+                        String certificateBase64UrlString = walletConfig.getCert();
+                        byte[] certificateBytes = BaseEncoding.base64Url().decode(certificateBase64UrlString);
+
+                        // Generate the CA Certificate from the supplied byte array
+                        caInput = new ByteArrayInputStream(certificateBytes);
+                        Certificate ca = CertificateFactory.getInstance("X.509").generateCertificate(caInput);
+
+                        // Load the key store using the CA
+                        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                        keyStore.load(null, null);
+                        keyStore.setCertificateEntry("ca", ca);
+
+                        // Initialize the TrustManager with this CA
+                        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                        tmf.init(keyStore);
+
+                        // Create an SSL context that uses the created trust manager
+                        sslCtx.init(null, tmf.getTrustManagers(), new SecureRandom());
+                        return sslCtx.getSocketFactory();
+
+                    } catch (Exception e) {
+                        //ZapLog.e(LOG_TAG, "Error while initializing self signed certificate.");
+                        e.printStackTrace();
+                    }
                 }
             }
         }

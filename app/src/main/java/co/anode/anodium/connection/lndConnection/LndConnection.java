@@ -5,11 +5,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 
+import co.anode.anodium.connection.manageWalletConfigs.WalletConfig;
+import co.anode.anodium.connection.manageWalletConfigs.WalletConfigsManager;
 import io.grpc.ManagedChannel;
 import io.grpc.okhttp.OkHttpChannelBuilder;
 import co.anode.anodium.BuildConfig;
-//import co.anode.anodium.connection.manageWalletConfigs.WalletConfig;
-//import co.anode.anodium.connection.manageWalletConfigs.WalletConfigsManager;
 import co.anode.anodium.lnd.LndAutopilotService;
 import co.anode.anodium.lnd.LndChainNotifierService;
 import co.anode.anodium.lnd.LndInvoicesService;
@@ -55,7 +55,7 @@ public class LndConnection {
     private LndWalletUnlockerService mLndWalletUnlockerService;
     private LndWatchtowerService mLndWatchtowerService;
     private LndWatchtowerClientService mLndWatchtowerClientService;
-    //private WalletConfig mConnectionConfig;
+    private WalletConfig mConnectionConfig;
     private boolean isConnected = false;
 
     private LndConnection() {
@@ -113,16 +113,16 @@ public class LndConnection {
         return mLndWatchtowerClientService;
     }
 
-/*    private void readSavedConnectionInfo() {
+    private void readSavedConnectionInfo() {
 
         // Load current wallet connection config
         mConnectionConfig = WalletConfigsManager.getInstance().getCurrentWalletConfig();
 
         // Generate Macaroon
         mMacaroon = new MacaroonCallCredential(mConnectionConfig.getMacaroon());
-    }*/
+    }
 
-/*    private void generateChannelAndStubs() {
+    private void generateChannelAndStubs() {
         String host = mConnectionConfig.getHost();
         int port = mConnectionConfig.getPort();
 
@@ -152,26 +152,26 @@ public class LndConnection {
         mLndWatchtowerService = new RemoteLndWatchtowerService(mSecureChannel, mMacaroon);
         mLndWatchtowerClientService = new RemoteLndWatchtowerClientService(mSecureChannel, mMacaroon);
         mLndWalletUnlockerService = new RemoteLndWalletUnlockerService(mSecureChannel, mMacaroon);
-    }*/
+    }
 
-/*    public void openConnection() {
+    public void openConnection() {
         if (!isConnected) {
             isConnected = true;
-            ZapLog.d(LOG_TAG, "Starting LND connection...(Open Http Channel)");
+            //ZapLog.d(LOG_TAG, "Starting LND connection...(Open Http Channel)");
             readSavedConnectionInfo();
             generateChannelAndStubs();
         }
 
-    }*/
+    }
 
-/*    public void closeConnection() {
+    public void closeConnection() {
         if (mSecureChannel != null) {
             //ZapLog.d(LOG_TAG, "Shutting down LND connection...(Closing Http Channel)");
             shutdownChannel();
         }
 
         isConnected = false;
-    }*/
+    }
 
     public boolean isConnected() {
         return isConnected;
@@ -181,20 +181,20 @@ public class LndConnection {
      * Will shutdown the channel and cancel all active calls.
      * Waits for shutdown (blocking) and logs result.
      */
-    /*private void shutdownChannel() {
+    private void shutdownChannel() {
         try {
             if (mSecureChannel.shutdownNow().awaitTermination(1, TimeUnit.SECONDS)) {
-                ZapLog.d(LOG_TAG, "LND channel shutdown successfully...");
+                //ZapLog.d(LOG_TAG, "LND channel shutdown successfully...");
             } else {
-                ZapLog.e(LOG_TAG, "LND channel shutdown failed...");
+                //ZapLog.e(LOG_TAG, "LND channel shutdown failed...");
             }
         } catch (InterruptedException e) {
-            ZapLog.e(LOG_TAG, "LND channel shutdown exception: " + e.getMessage());
+           // ZapLog.e(LOG_TAG, "LND channel shutdown exception: " + e.getMessage());
         }
-    }*/
+    }
 
-/*    public WalletConfig getConnectionConfig() {
+    public WalletConfig getConnectionConfig() {
         return mConnectionConfig;
-    }*/
+    }
 
 }
