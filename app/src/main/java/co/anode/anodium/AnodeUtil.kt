@@ -92,6 +92,7 @@ class AnodeUtil(c: Context?) {
         }
 
         //Copy pltd
+        /*
         val am = context!!.assets
         if (arch == "x86" || arch.contains("i686")) {
             `in` = am.open("pltd_emulator")
@@ -109,7 +110,7 @@ class AnodeUtil(c: Context?) {
         //Set permissions
         Log.i(LOGTAG, "set new pltd permissions")
         val file = File("$CJDNS_PATH/$PLTD_BINFILE")
-        file.setExecutable(true)
+        file.setExecutable(true)*/
     }
 
 
@@ -122,7 +123,7 @@ class AnodeUtil(c: Context?) {
             generateConfFile()
             modifyJSONConfFile()
         }
-        launchpltd()
+        //launchpltd()
     }
 
     fun initializeCjdrouteConfFile() {
@@ -179,7 +180,7 @@ class AnodeUtil(c: Context?) {
                     File("$CJDNS_PATH/$PLTD_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
 
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE","--lnddir=/data/data/co.anode.anodium/files --configfile=/data/data/co.anode.anodium/files/config.go --datadir=/data/data/co.anode.anodium/files")
+            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE","--notls --lnddir=/data/data/co.anode.anodium/files --configfile=/data/data/co.anode.anodium/files/config.go --datadir=/data/data/co.anode.anodium/files")
             pb.environment()["TMPDIR"] = CJDNS_PATH
             val p = processBuilder.start()
             //p.waitFor()
