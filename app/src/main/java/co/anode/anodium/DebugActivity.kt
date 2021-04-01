@@ -11,92 +11,17 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
-import co.anode.anodium.connection.lndConnection.LndConnection
-import co.anode.anodium.connection.lndConnection.LndSSLSocketFactory
-import co.anode.anodium.connection.lndConnection.MacaroonCallCredential
-import co.anode.anodium.connection.manageWalletConfigs.WalletConfig
-import co.anode.anodium.connection.manageWalletConfigs.WalletConfigsManager
-import co.anode.anodium.lnd.LndLightningService
-import co.anode.anodium.lnd.RemoteLndLightningService
-import co.anode.anodium.util.Wallet
 import com.github.lightningnetwork.lnd.lnrpc.*
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
-import org.apache.commons.codec.binary.Hex
 import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Paths
 import javax.net.ssl.HostnameVerifier
+
 
 class DebugActivity : AppCompatActivity() {
     private lateinit var mSecureChannel: ManagedChannel
-    private lateinit var mLndLightningService: LndLightningService
-    private lateinit var mMacaroon: MacaroonCallCredential
-    private lateinit var mConnectionConfig: WalletConfig
-    private val CERT_PATH = "/Users/user/Library/Application Support/Lnd/tls.cert"
-    private val MACAROON_PATH = "/data/data/co.anode.anodium/files/admin.macaroon"
-    private val HOST = "localhost"
-    private val PORT = 10009
     private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
-
-    private fun createWalletConfig(){
-        val cert = null
-
-        val macaroon: String = Hex.encodeHexString(
-                Files.readAllBytes(Paths.get(MACAROON_PATH))
-        )
-        WalletConfigsManager.getInstance().addWalletConfig("mywallet", "local", "localhost", 10009, cert, macaroon)
-    }
-    private fun readSavedConnectionInfo() {
-        // Load current wallet connection config
-        mConnectionConfig = WalletConfigsManager.getInstance().currentWalletConfig
-        // Generate Macaroon
-        mMacaroon = MacaroonCallCredential(mConnectionConfig.macaroon)
-    }
-    private fun createConnection() {
-        val hostnameVerifier: HostnameVerifier? = null
-        mSecureChannel = OkHttpChannelBuilder
-                .forAddress("localhost", 10009)
-                .hostnameVerifier(hostnameVerifier) // null = default hostnameVerifier
-                //.sslSocketFactory(LndSSLSocketFactory.create(mConnectionConfig)) // null = default SSLSocketFactory
-                .sslSocketFactory(LndSSLSocketFactory.create(null))
-                .build()
-    }
-
-    fun createWallet() {
-        //TODO: find a way to generate macaroon for lnd connection
-        //createWalletConfig()
-        //readSavedConnectionInfo()
-        // Channels are expensive to create. We want to create it once and then reuse it on all our requests.
-        createConnection()
-        val stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub? = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
-
-        // First start:
-        val gsrq: GenSeedRequest = GenSeedRequest.newBuilder().build()
-        //val gsr: GenSeedResponse? = stub?.genSeed(gsrq)
-        val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
-        val bldr = InitWalletRequest.newBuilder().setWalletPassword(password).build()
-
-        /*if (gsr != null) {
-            for (i in 0 until gsr.getCipherSeedMnemonicCount()) {
-                //print(gsr.getCipherSeedMnemonic(i))
-                bldr.setCipherSeedMnemonic(i, gsr.getCipherSeedMnemonic(i))
-            }
-        }*/
-        //val response: InitWalletResponse = stub!!.initWallet(bldr)
-        //mLndLightningService = RemoteLndLightningService(mSecureChannel, mMacaroon)
-    }
-
-    fun openwallet() {
-        // Start lnd connection
-        if (WalletConfigsManager.getInstance().hasAnyConfigs()) {
-            //TimeOutUtil.getInstance().setCanBeRestarted(true)
-            LndConnection.getInstance().openConnection()
-            Wallet.getInstance().testLndConnectionAndLoadWallet()
-        }
-    }
-
 
     fun createSecurechannel() {
         val hostnameVerifier: HostnameVerifier? = null
@@ -104,8 +29,6 @@ class DebugActivity : AppCompatActivity() {
                 .forAddress("localhost", 10009)
                 .hostnameVerifier(hostnameVerifier) // null = default hostnameVerifier
                 .usePlaintext()
-                //.sslSocketFactory(LndSSLSocketFactory.create(mConnectionConfig)) // null = default SSLSocketFactory
-                //.sslSocketFactory(LndSSLSocketFactory.create(null))
                 .build()
     }
 
@@ -126,26 +49,24 @@ class DebugActivity : AppCompatActivity() {
         }
     }
 
-    fun unlockLocalWallet() {
+    fun openWallet() {
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+        //if we do not have a stored macaroon, create new local wallet
         if (prefs.getString("admin_macaroon", "") == "") {
             createLocalWallet()
         }
         val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
-        val unlockwalletreq = UnlockWalletRequest.newBuilder().setWalletPassword(password).build()
-        //val unlockwalletresponse = stub.unlockWallet(unlockwalletreq)
-        //TODO: get macaroon from unlock wallet response?!
-        mMacaroon = MacaroonCallCredential(prefs.getString("admin_macaroon", ""))
+        val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(password).build())
+        val initialized = response.isInitialized
     }
 
     fun getPubKey() {
-        //val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(mMacaroon)
-        mLndLightningService = RemoteLndLightningService(mSecureChannel, mMacaroon)
-
-        val response = mLndLightningService.getInfo(GetInfoRequest.newBuilder().build())
-        response.blockingGet().identityPubkey
+        val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
+        val response = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
+        val pubkey = response.identityPubkey
     }
+
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -174,8 +95,16 @@ class DebugActivity : AppCompatActivity() {
             val lndVersionString = "lnd version: " + Wallet.getInstance().lndVersionString.split(" commit")[0]
 
              */
+            //clear wallet
+            /*
+            val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            with(prefs!!.edit()) {
+                putString("admin_macaroon", "")
+                commit()
+            }*/
+
             createSecurechannel()
-            unlockLocalWallet()
+            openWallet()
             getPubKey()
 
         }
