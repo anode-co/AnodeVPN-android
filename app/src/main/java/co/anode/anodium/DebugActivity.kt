@@ -9,6 +9,7 @@ import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import com.github.lightningnetwork.lnd.lnrpc.*
@@ -20,53 +21,6 @@ import javax.net.ssl.HostnameVerifier
 
 
 class DebugActivity : AppCompatActivity() {
-    private lateinit var mSecureChannel: ManagedChannel
-    private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
-
-    fun createSecurechannel() {
-        val hostnameVerifier: HostnameVerifier? = null
-        mSecureChannel = OkHttpChannelBuilder
-                .forAddress("localhost", 10009)
-                .hostnameVerifier(hostnameVerifier) // null = default hostnameVerifier
-                .usePlaintext()
-                .build()
-    }
-
-    fun createLocalWallet() {
-        val gsr = stub.genSeed(GenSeedRequest.newBuilder().build())
-        val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
-        val bldr = InitWalletRequest.newBuilder().setWalletPassword(password)
-        for (i in 0 until gsr.cipherSeedMnemonicCount) {
-            Log.i(LOGTAG, gsr.getCipherSeedMnemonic(i))
-            bldr.addCipherSeedMnemonic(gsr.getCipherSeedMnemonic(i))
-        }
-        val walletresponse = stub.initWallet(bldr.build())
-        Log.i(LOGTAG, walletresponse.adminMacaroon.toStringUtf8())
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        with(prefs!!.edit()) {
-            putString("admin_macaroon", walletresponse.adminMacaroon.toStringUtf8())
-            commit()
-        }
-    }
-
-    fun openWallet() {
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
-        //if we do not have a stored macaroon, create new local wallet
-        if (prefs.getString("admin_macaroon", "") == "") {
-            createLocalWallet()
-        }
-        val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
-        val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(password).build())
-        val initialized = response.isInitialized
-    }
-
-    fun getPubKey() {
-        val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
-        val response = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
-        val pubkey = response.identityPubkey
-    }
-
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,35 +32,22 @@ class DebugActivity : AppCompatActivity() {
         actionbar!!.title = "View Logs"
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+
         val buttonSubmitLogs = findViewById<Button>(R.id.button_SubmitLogs)
         buttonSubmitLogs.setOnClickListener {
 
-            /*Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
+            Toast.makeText(baseContext, "Sending log files to Anode server...", Toast.LENGTH_LONG).show()
             AnodeClient.mycontext = baseContext
             AnodeClient.storeError(baseContext, "other", Throwable("User submitted logs"))
             AnodeClient.PostLogs()
 
+            /* For testing the RPC
+            LndRPCController.createSecurechannel()
+            LndRPCController.openWallet(prefs)
+            LndRPCController.getBalance()
+            LndRPCController.sendCoins("pkt1qyyss226w6tcqgy3jlggz8vrmt3q6qzlawhpchd",5)
              */
-            /*
-            createWallet()
-            //openwallet()
-            LndConnection.getInstance().openConnection()
-            Wallet.getInstance().unlockWallet("password")
-            val lndVersionString = "lnd version: " + Wallet.getInstance().lndVersionString.split(" commit")[0]
-
-             */
-            //clear wallet
-            /*
-            val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            with(prefs!!.edit()) {
-                putString("admin_macaroon", "")
-                commit()
-            }*/
-
-            createSecurechannel()
-            openWallet()
-            getPubKey()
-
         }
         val buttonDeleteAccount = findViewById<Button>(R.id.button_Deleteaccount)
         buttonDeleteAccount.setOnClickListener {
@@ -136,7 +77,6 @@ class DebugActivity : AppCompatActivity() {
                     nodeLink.movementMethod = LinkMovementMethod.getInstance()
                     nodeLink.text = link
                     val username = findViewById<TextView>(R.id.text_username)
-                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                     username.text = prefs.getString("username", "")
                     val node = findViewById<TextView>(R.id.text_node)
                     node.text = prefs.getString("ServerPublicKey", "")
@@ -158,12 +98,6 @@ class DebugActivity : AppCompatActivity() {
                     val publicip = findViewById<TextView>(R.id.text_publicIP)
                     publicip.text = "updating ip..."
                     GetPublicIP().execute(publicip)
-                    //val inforespons = Rpc.GetInfoResponse.newBuilder()
-                    /*val walletResp = Rpc.WalletBalanceResponse.newBuilder()
-                    val walletReq = Rpc.WalletBalanceRequest.newBuilder()
-                    walletReq.walletResp.totalBalance
-                    val rpc = findViewById<TextView>(R.id.text_rpc)
-                    rpc.text = "RPC msg: " + inforespons.version*/
                 })
                 Thread.sleep(8000)
             }
