@@ -13,6 +13,7 @@ import javax.net.ssl.HostnameVerifier
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
     private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
+    var isOpen = false
 
     fun createSecurechannel() {
         val hostnameVerifier: HostnameVerifier? = null
@@ -47,6 +48,9 @@ object LndRPCController {
     }
 
     fun openWallet(preferences: SharedPreferences) {
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
         //if we do not have a stored macaroon, create new local wallet
         if (preferences.getString("admin_macaroon", "") == "") {
@@ -54,7 +58,7 @@ object LndRPCController {
         }
         val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
         val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(password).build())
-        val initialized = response.isInitialized
+        isOpen = true
     }
 
     fun getPubKey() {
@@ -69,18 +73,22 @@ object LndRPCController {
         addressResponse.address
     }
 
-    fun getPaymentRequest() {
-        var payrequest = PayReq.newBuilder()
-        payrequest.paymentAddr
-
-    }
-
-    fun getBalance() {
+    fun getConfirmedBalance():Long {
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-        val confirmedBalance = walletBalanceResponse.confirmedBalance/1073741824
-        val unconfirmedBalance = walletBalanceResponse.unconfirmedBalance/1073741824
-        val totalBalance = walletBalanceResponse.totalBalance/1073741824
+        return walletBalanceResponse.confirmedBalance/1073741824
+    }
+
+    fun getUncofirmedBalance():Long {
+        val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
+        val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
+        return walletBalanceResponse.unconfirmedBalance / 1073741824
+    }
+
+    fun getTotalBalance(): Long {
+        val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
+        val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
+        return walletBalanceResponse.totalBalance / 1073741824
     }
 
     fun sendCoins(address: String, amount: Long) {
@@ -97,6 +105,12 @@ object LndRPCController {
         val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
         val hash = sendcoinsresponse.hashCode()
 
+    }
+
+    fun getTransactions(): MutableList<Transaction> {
+        val transactionsrequest = GetTransactionsRequest.newBuilder().build()
+        val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsrequest)
+        return transactions.transactionsList
     }
 
     // ByteString values when using for example "paymentRequest.getDescriptionBytes()" can for some reason not directly be used as they are double in length

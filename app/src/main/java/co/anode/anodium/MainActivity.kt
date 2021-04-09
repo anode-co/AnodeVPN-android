@@ -514,6 +514,11 @@ class MainActivity : AppCompatActivity() {
             changepassactivity.putExtra("ForgotPassword", false)
             startActivity(changepassactivity)
             return true
+        } else if (id == R.id.action_wallet) {
+            Log.i(LOGTAG, "Open wallet activity")
+            val walletactivity = Intent(applicationContext, WalletActivity::class.java)
+            startActivity(walletactivity)
+            return true
         } else if (id == R.id.action_closeapp) {
             closeApp()
             return true

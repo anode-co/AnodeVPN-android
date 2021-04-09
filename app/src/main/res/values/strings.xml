@@ -8,7 +8,7 @@
     <string name="action_closeapp">Close app</string>
     <string name="action_login">Login</string>
     <string name="action_skip">Skip</string>
-
+    <string name="action_wallet">Wallet</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
@@ -70,6 +70,13 @@
     <string name="rating4_3">4.3 comment</string>
     <string name="rating4_4">4.4 comment</string>
     <string name="rating4_5">4.5 comment</string>
+    <!-- Wallet Activity-->
+    <string name="wallet_activity_title">PKT Wallet</string>
+    <string name="wallet_balance">Wallet Balance</string>
+    <string name="wallet_address">My PKT wallet address</string>
+    <string name="wallet_payments">Payments</string>
+    <string name="wallet_see_history">See payment history</string>
+    <string name="wallet_coin">PKT</string>
     <!-- Status bar states-->
     <string name="status_connected">VPN connected</string>
     <string name="status_disconnected">VPN disconnected</string>
@@ -79,4 +86,13 @@
     <string name="status_request_authorization">VPN request authorization</string>
     <string name="status_authorized">VPN authorized</string>
     <string name="status_authorization_failed">VPN authorization failed</string>
+    <string name="title_activity_wallet">MainActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>
