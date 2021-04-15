@@ -8,14 +8,19 @@ import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
+import kotlinx.coroutines.GlobalScope
+import java.util.concurrent.CompletableFuture
 import javax.net.ssl.HostnameVerifier
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
     private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
+    private const val LOGTAG = "co.anode.anodium"
     var isOpen = false
+    val walletpassword: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
 
     fun createSecurechannel() {
+        Log.i(LOGTAG, "LndRPCController.createSecurechannel")
         val hostnameVerifier: HostnameVerifier? = null
         mSecureChannel = OkHttpChannelBuilder
                 .forAddress("localhost", 10009)
@@ -32,9 +37,9 @@ object LndRPCController {
     }
 
     fun createLocalWallet(preferences: SharedPreferences) {
+        Log.i(LOGTAG, "LndRPCController.createLocalWallet")
         val gsr = stub.genSeed(GenSeedRequest.newBuilder().build())
-        val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
-        val bldr = InitWalletRequest.newBuilder().setWalletPassword(password)
+        val bldr = InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
         for (i in 0 until gsr.cipherSeedMnemonicCount) {
             Log.i(LOGTAG, gsr.getCipherSeedMnemonic(i))
             bldr.addCipherSeedMnemonic(gsr.getCipherSeedMnemonic(i))
@@ -47,7 +52,8 @@ object LndRPCController {
         }
     }
 
-    fun openWallet(preferences: SharedPreferences) {
+    fun openWallet(preferences: SharedPreferences):Boolean {
+        Log.i(LOGTAG, "LndRPCController.openWallet")
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
@@ -56,42 +62,47 @@ object LndRPCController {
         if (preferences.getString("admin_macaroon", "") == "") {
             createLocalWallet(preferences)
         }
-        val password: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
-        val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(password).build())
-        isOpen = true
+        val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
+        return true
     }
 
     fun getPubKey() {
+        Log.i(LOGTAG, "LndRPCController.getPubKey")
         val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
         val response = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
         val pubkey = response.identityPubkey
     }
 
-    fun generateRequest() {
+    fun generateAddress() : String {
+        Log.i(LOGTAG, "LndRPCController.generateAddress")
         val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
         val addressResponse = LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
-        addressResponse.address
+        return addressResponse.address
     }
 
     fun getConfirmedBalance():Long {
+        Log.i(LOGTAG, "LndRPCController.getConfirmedBalance")
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.confirmedBalance/1073741824
     }
 
     fun getUncofirmedBalance():Long {
+        Log.i(LOGTAG, "LndRPCController.getUncofirmedBalance")
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.unconfirmedBalance / 1073741824
     }
 
     fun getTotalBalance(): Long {
+        Log.i(LOGTAG, "LndRPCController.getTotalBalance")
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.totalBalance / 1073741824
     }
 
     fun sendCoins(address: String, amount: Long) {
+        Log.i(LOGTAG, "LndRPCController.sendCoins")
         val sendcoinsrequest = SendCoinsRequest.newBuilder()
         sendcoinsrequest.addr = address
         sendcoinsrequest.amount = amount * 1073741824

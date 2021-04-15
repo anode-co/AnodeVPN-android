@@ -338,6 +338,8 @@ class MainActivity : AppCompatActivity() {
         }, "MainActivity.CheckUpdates").start()
 
         AnodeClient.eventLog(baseContext, "Application launched")
+
+        LndRPCController.openWallet(prefs)
     }
 
     fun bigbuttonState(state: Int) {

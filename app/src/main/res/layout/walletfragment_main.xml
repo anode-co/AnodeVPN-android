@@ -54,8 +54,20 @@
         android:padding="20dp"
         android:background="@color/colorPrimary"
         android:textColor="#FFF"
+        android:textIsSelectable="true"
         android:text="pkt1qyyss226w6tcqgy3jlggz8vrmt3q6qzlawhpchd"/>
-
+    <ImageView
+        android:id="@+id/walletAddressSharebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_round_share"
+        android:src="@drawable/ic_share"
+        android:backgroundTint="@color/colorPrimary"
+        app:layout_constraintTop_toTopOf="@+id/walletAddress"
+        app:layout_constraintEnd_toEndOf="@+id/walletAddress"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="40dp"
+        app:tint="#FFFFFF" />
     <TextView
         android:id="@+id/walletPaymentsLabel"
         android:layout_width="wrap_content"
@@ -74,6 +86,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
+        android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/walletPaymentsLabel"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
@@ -111,6 +124,7 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/PaymentRowFirstLayout"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
@@ -149,6 +163,7 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/PaymentRowSecondLayout"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
@@ -187,6 +202,7 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/PaymentRowThirdLayout"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
@@ -227,4 +243,17 @@
         android:text="@string/wallet_see_history"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/button_sendPayment"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/button_round_send"
+        android:rotation="-45"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

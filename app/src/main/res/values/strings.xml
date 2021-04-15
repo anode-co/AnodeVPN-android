@@ -77,6 +77,12 @@
     <string name="wallet_payments">Payments</string>
     <string name="wallet_see_history">See payment history</string>
     <string name="wallet_coin">PKT</string>
+    <!-- Wallet Send transaction fragment -->
+    <string name="send_pkt_title">Send Transaction</string>
+    <string name="send_pkt_receivers_address">Receiver\'s PKT address</string>
+    <string name="send_pkt_amount">PKT ammount</string>
+    <string name="send_pkt_password">Account password</string>
+    <string name="send_pkt_send_payment">Send payment</string>
     <!-- Status bar states-->
     <string name="status_connected">VPN connected</string>
     <string name="status_disconnected">VPN disconnected</string>
