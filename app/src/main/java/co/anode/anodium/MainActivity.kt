@@ -339,7 +339,9 @@ class MainActivity : AppCompatActivity() {
 
         AnodeClient.eventLog(baseContext, "Application launched")
 
-        LndRPCController.openWallet(prefs)
+        if (prefs.getString("lndwallet","") != "") {
+            LndRPCController.openWallet(prefs)
+        }
     }
 
     fun bigbuttonState(state: Int) {

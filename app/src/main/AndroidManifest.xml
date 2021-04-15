@@ -21,8 +21,7 @@
         tools:targetApi="q">
         <activity
             android:name=".WalletActivity"
-            android:label="@string/title_activity_wallet"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ForgotPasswordSuccessActivity" />
         <activity
             android:name=".ForgotPasswordActivity"

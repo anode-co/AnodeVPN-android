@@ -77,6 +77,9 @@
     <string name="wallet_payments">Payments</string>
     <string name="wallet_see_history">See payment history</string>
     <string name="wallet_coin">PKT</string>
+    <!-- Wallet Setup fragment -->
+    <string name="wallet_create">Create PKT wallet</string>
+    <string name="wallet_import">Import PKT wallet</string>
     <!-- Wallet Send transaction fragment -->
     <string name="send_pkt_title">Send Transaction</string>
     <string name="send_pkt_receivers_address">Receiver\'s PKT address</string>

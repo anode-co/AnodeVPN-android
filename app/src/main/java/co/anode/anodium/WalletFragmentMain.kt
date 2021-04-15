@@ -34,7 +34,11 @@ class WalletFragmentMain : Fragment() {
 
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
+
         val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        if(!prefs.getBoolean("lndwallet", false)) {
+            return
+        }
         //Set balance
         walletBalance = v.findViewById(R.id.walletBalanceNumber)
         walletBalance.text = LndRPCController.getTotalBalance().toString()

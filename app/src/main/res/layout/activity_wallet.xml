@@ -4,22 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WalletActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="@string/wallet_activity_title"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+    tools:context=".WalletActivity"
+    android:id="@+id/activity_wallet">
 
     <fragment
         android:id="@+id/wallet_fragmentMain"
@@ -27,5 +13,10 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:layout_marginTop="?attr/actionBarSize"/>
-
+    <fragment
+        android:id="@+id/wallet_fragmentCreate"
+        class="co.anode.anodium.WalletFragmentSetup"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
