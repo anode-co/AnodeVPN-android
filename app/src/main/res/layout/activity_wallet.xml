@@ -11,12 +11,10 @@
         android:id="@+id/wallet_fragmentMain"
         class="co.anode.anodium.WalletFragmentMain"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"/>
+        android:layout_width="match_parent" />
     <fragment
         android:id="@+id/wallet_fragmentCreate"
         class="co.anode.anodium.WalletFragmentSetup"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"/>
+        android:layout_width="match_parent" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

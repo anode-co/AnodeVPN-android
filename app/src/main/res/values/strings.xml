@@ -80,6 +80,9 @@
     <!-- Wallet Setup fragment -->
     <string name="wallet_create">Create PKT wallet</string>
     <string name="wallet_import">Import PKT wallet</string>
+    <string name="wallet_create_label">Setup your PKT wallet</string>
+    <string name="wallet_create_seed_label">This is your backup seed phrase</string>
+    <string name="wallet_create_seed_instructions">You must write down these words and keep them in a safe place. You will need these words if you ever need to recover your wallet.\nYou will only see these words once.</string>
     <!-- Wallet Send transaction fragment -->
     <string name="send_pkt_title">Send Transaction</string>
     <string name="send_pkt_receivers_address">Receiver\'s PKT address</string>

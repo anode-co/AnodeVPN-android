@@ -7,6 +7,7 @@ import android.content.res.ColorStateList
 import android.os.AsyncTask
 import android.os.Bundle
 import android.text.Layout
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,11 +35,12 @@ class WalletFragmentMain : Fragment() {
 
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
-
+        AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
         val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         if(!prefs.getBoolean("lndwallet", false)) {
             return
         }
+        Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
         //Set balance
         walletBalance = v.findViewById(R.id.walletBalanceNumber)
         walletBalance.text = LndRPCController.getTotalBalance().toString()
@@ -62,11 +64,12 @@ class WalletFragmentMain : Fragment() {
         walletAddress.text = address
 
         walletAddress.setOnClickListener {
+            AnodeClient.eventLog(requireContext(),"Button: Copy wallet address clicked")
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
         }
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
 
-        if (transactions.count() > -1) {
+        if (transactions.count() > 0) {
             val layout = v.findViewById<LinearLayout>(R.id.PaymentRowFirstLayout)
             layout.visibility = View.VISIBLE
             val firstaddress = v.findViewById<TextView>(R.id.firstaddress)
@@ -127,8 +130,9 @@ class WalletFragmentMain : Fragment() {
             }
         }
 
-        val sharebutton = v.findViewById<ImageView>(R.id.walletAddressSharebutton)
+        val sharebutton = v.findViewById<Button>(R.id.walletAddressSharebutton)
         sharebutton.setOnClickListener {
+            AnodeClient.eventLog(requireContext(),"Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $address")
@@ -140,6 +144,7 @@ class WalletFragmentMain : Fragment() {
 
         val sendpaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
         sendpaymentButton.setOnClickListener {
+            AnodeClient.eventLog(requireContext(),"Button: Send PKT clicked")
             val sendpaymentFragment: BottomSheetDialogFragment = SendPaymentFragment()
             sendpaymentFragment.show(childFragmentManager,"")
         }

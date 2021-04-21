@@ -338,8 +338,14 @@ class MainActivity : AppCompatActivity() {
         }, "MainActivity.CheckUpdates").start()
 
         AnodeClient.eventLog(baseContext, "Application launched")
-
-        if (prefs.getString("lndwallet","") != "") {
+        /*Settings for testing wallet
+        prefs.edit().putBoolean("lndwallet", true).apply()
+        prefs.edit().putString("walletpassword","password").apply()*/
+        /*Settings for testing wallet creation*/
+        //prefs.edit().putBoolean("lndwallet", false).apply()
+        //prefs.edit().putString("walletpassword","").apply()
+        if (prefs.getBoolean("lndwallet",false) ) {
+            Log.i(LOGTAG, "MainActivity trying to open wallet")
             LndRPCController.openWallet(prefs)
         }
     }

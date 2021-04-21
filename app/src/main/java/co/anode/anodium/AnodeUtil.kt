@@ -92,25 +92,64 @@ class AnodeUtil(c: Context?) {
             initializeCjdrouteConfFile()
         }
 
-        //Copy pltd
-        val am = context!!.assets
-        if (arch == "x86" || arch.contains("i686")) {
-            `in` = am.open("pltd_emulator")
-        } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-            `in` = am.open("pltd_aarch64")
+        try {
+            val pltdFile = File("$CJDNS_PATH/$PLTD_BINFILE")
+            if (!pltdFile.exists()) {
+                Log.i(LOGTAG, "pltd does not exists")
+            } else {
+                // You can't overwrite a file while the program is running,
+                // but delete and replace works
+                File("$CJDNS_PATH/$PLTD_BINFILE").delete()
+            }
+            Log.i(LOGTAG, "Copying pltd")
+            //Copy pltd
+            val am = context!!.assets
+            if (arch == "x86" || arch.contains("i686")) {
+                `in` = am.open("pltd_emulator")
+            } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
+                `in` = am.open("pltd_aarch64")
+            }
+            out = FileOutputStream("$CJDNS_PATH/$PLTD_BINFILE")
+            val buffer = ByteArray(1024)
+            var read: Int
+            while (`in`.read(buffer).also { read = it } != -1) {
+                out.write(buffer, 0, read)
+            }
+            `in`.close()
+            out.close()
+            //Set permissions
+            Log.i(LOGTAG, "set new pltd permissions")
+            val file = File("$CJDNS_PATH/$PLTD_BINFILE")
+            file.setExecutable(true)
+            //Create lnd directory
+            val lnddir = File("$CJDNS_PATH/lnd")
+            if (!lnddir.exists()) {
+                lnddir.mkdir()
+            }
+            //Copy tls files
+            val tlscert = File("$CJDNS_PATH/lnd/tls.cert")
+            if (!tlscert.exists()) {
+                `in` = am.open("tls.cert")
+                out = FileOutputStream("$CJDNS_PATH/lnd/tls.cert")
+                while (`in`.read(buffer).also { read = it } != -1) {
+                    out.write(buffer, 0, read)
+                }
+                `in`.close()
+                out.close()
+            }
+            val tlskey = File("$CJDNS_PATH/lnd/tls.key")
+            if (!tlskey.exists()) {
+                `in` = am.open("tls.key")
+                out = FileOutputStream("$CJDNS_PATH/lnd/tls.key")
+                while (`in`.read(buffer).also { read = it } != -1) {
+                    out.write(buffer, 0, read)
+                }
+                `in`.close()
+                out.close()
+            }
+        }catch (e: IOException) {
+            throw AnodeUtilException("Failed to copy pltd or tls files " + e.message)
         }
-        out = FileOutputStream("$CJDNS_PATH/$PLTD_BINFILE")
-        val buffer = ByteArray(1024)
-        var read: Int
-        while (`in`.read(buffer).also { read = it } != -1) {
-            out.write(buffer, 0, read)
-        }
-        `in`.close()
-        out.close()
-        //Set permissions
-        Log.i(LOGTAG, "set new pltd permissions")
-        val file = File("$CJDNS_PATH/$PLTD_BINFILE")
-        file.setExecutable(true)
     }
 
 

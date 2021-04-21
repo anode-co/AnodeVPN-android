@@ -2,6 +2,7 @@ package co.anode.anodium
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
@@ -20,27 +21,28 @@ class WalletActivity : AppCompatActivity() {
         actionbar!!.title = getString(R.string.wallet_activity_title)
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-
+        AnodeClient.eventLog(baseContext,"Activity: WalletActivity created")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        val createfragment = WalletFragmentSetup()
-        val mainfragment = WalletFragmentMain()
+        val createfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
+        val mainfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain)
 
         //Show setup or main fragment according to wallet existing or not
+        val ft = supportFragmentManager.beginTransaction()
+        ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
         if (prefs.getBoolean("lndwallet", false)) {
-          supportFragmentManager.beginTransaction()
-                  .show(mainfragment)
-                  .commit()
-            supportFragmentManager.beginTransaction()
-                    .hide(createfragment)
-                    .commit()
+            if (createfragment != null) {
+                Log.i(LOGTAG, "WalletActivity hide create fragment")
+                ft.hide(createfragment)
+            }
+            //ft.show(mainfragment)
         } else {
-            supportFragmentManager.beginTransaction()
-                    .show(createfragment)
-                    .commit()
-            supportFragmentManager.beginTransaction()
-                    .hide(mainfragment)
-                    .commit()
+            if (mainfragment != null) {
+                Log.i(LOGTAG, "WalletActivity hide main fragment")
+                ft.hide(mainfragment)
+            }
+            //ft.show(createfragment)
         }
+        ft.commit()
     }
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()

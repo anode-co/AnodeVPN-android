@@ -57,19 +57,18 @@
         android:background="@color/colorPrimary"
         android:textColor="#FFF"
         android:textIsSelectable="true"
-        android:text="pkt1qyyss226w6tcqgy3jlggz8vrmt3q6qzlawhpchd"/>
-    <ImageView
+        android:text=""/>
+    <Button
         android:id="@+id/walletAddressSharebutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:drawableTintMode="multiply"
+        android:drawableTint="#FFFFFF"
         android:background="@drawable/button_round_share"
-        android:src="@drawable/ic_share"
-        android:backgroundTint="@color/colorPrimary"
         app:layout_constraintTop_toTopOf="@+id/walletAddress"
         app:layout_constraintEnd_toEndOf="@+id/walletAddress"
         android:layout_marginTop="40dp"
-        android:layout_marginEnd="40dp"
-        app:tint="#FFFFFF" />
+        android:layout_marginEnd="40dp" />
     <TextView
         android:id="@+id/walletPaymentsLabel"
         android:layout_width="wrap_content"

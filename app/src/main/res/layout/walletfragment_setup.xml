@@ -9,14 +9,56 @@
     android:background="@android:color/white">
 
     <TextView
-        android:id="@+id/textview_first"
+        android:id="@+id/text_walletcreate_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_first_fragment"
-        app:layout_constraintBottom_toTopOf="@id/button_wallet_create"
+        android:text="@string/wallet_create_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:textSize="12pt"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="20dp"/>
+    <TextView
+        android:id="@+id/text_walletcreate_seed_instructions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/wallet_create_seed_instructions"
+        app:layout_constraintTop_toBottomOf="@id/text_walletcreate_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="20dp"
+        android:textAlignment="center"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:textSize="8pt" />
+    <LinearLayout
+        android:id="@+id/seed_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/text_walletcreate_seed_instructions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginTop="20dp">
+        <TextView
+            android:id="@+id/seed_column1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:textSize="8pt"
+            android:text="1. dfkjdfsl\n2.fdsklfdksfj\n3. fdks;lfd"/>
+        <TextView
+            android:layout_marginStart="20dp"
+            android:id="@+id/seed_column2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="8pt"
+            android:text="1. dfkjdfsl\n2.fdsklfdksfj\n3. fdks;lfd"/>
+    </LinearLayout>
 
     <Button
         android:id="@+id/button_wallet_create"
@@ -26,7 +68,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textview_first"
+        android:textSize="16sp"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape"/>
+    <Button
+        android:id="@+id/button_wallet_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Close"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         android:textSize="16sp"
         android:layout_marginBottom="@dimen/bottom_button_margin"
         android:textColor="#C9DDE9"

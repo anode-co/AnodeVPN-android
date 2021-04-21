@@ -9,6 +9,7 @@ import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
 import kotlinx.coroutines.GlobalScope
+import java.lang.Exception
 import java.util.concurrent.CompletableFuture
 import javax.net.ssl.HostnameVerifier
 
@@ -16,8 +17,6 @@ object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
     private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
     private const val LOGTAG = "co.anode.anodium"
-    var isOpen = false
-    val walletpassword: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
 
     fun createSecurechannel() {
         Log.i(LOGTAG, "LndRPCController.createSecurechannel")
@@ -36,20 +35,45 @@ object LndRPCController {
         }
     }
 
-    fun createLocalWallet(preferences: SharedPreferences) {
+    fun createLocalWallet(preferences: SharedPreferences, password:String):String {
         Log.i(LOGTAG, "LndRPCController.createLocalWallet")
-        val gsr = stub.genSeed(GenSeedRequest.newBuilder().build())
-        val bldr = InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
-        for (i in 0 until gsr.cipherSeedMnemonicCount) {
-            Log.i(LOGTAG, gsr.getCipherSeedMnemonic(i))
-            bldr.addCipherSeedMnemonic(gsr.getCipherSeedMnemonic(i))
+        var result = ""
+        val walletpassword: ByteString = ByteString.copyFrom(password, Charsets.UTF_8)
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
         }
-        val walletresponse = stub.initWallet(bldr.build())
-        Log.i(LOGTAG, walletresponse.adminMacaroon.toStringUtf8())
-        with(preferences.edit()) {
-            putString("admin_macaroon", walletresponse.adminMacaroon.toStringUtf8())
-            commit()
+        try {
+            stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+            val gsr = stub.genSeed(GenSeedRequest.newBuilder().build())
+            val bldr = InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
+            val seed: MutableList<String> = mutableListOf()
+            for (i in 0 until gsr.cipherSeedMnemonicCount) {
+                seed.add(gsr.getCipherSeedMnemonic(i))
+                bldr.addCipherSeedMnemonic(gsr.getCipherSeedMnemonic(i))
+            }
+            val walletresponse = stub.initWallet(bldr.build())
+
+            if (walletresponse.isInitialized) {
+                Log.i(LOGTAG, "LndRPCController wallet created")
+                with(preferences.edit()) {
+                    //adminMacaroon is empty!
+                    putString("admin_macaroon", walletresponse.adminMacaroon.toStringUtf8())
+                    putString("walletpassword", password)
+                    putBoolean("lndwallet", true)
+                    commit()
+                }
+                result = "Success"
+                for (i in 0 until seed.size ) {
+                    result += seed[i]+" "
+                }
+            } else {
+                result = "Error"
+            }
+        }catch (e:Exception) {
+            result = e.printStackTrace().toString()
         }
+
+        return result
     }
 
     fun openWallet(preferences: SharedPreferences):Boolean {
@@ -59,9 +83,10 @@ object LndRPCController {
         }
         stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
         //if we do not have a stored macaroon, create new local wallet
-        if (preferences.getString("admin_macaroon", "") == "") {
+        /*if (preferences.getString("admin_macaroon", "") == "") {
             createLocalWallet(preferences)
-        }
+        }*/
+        val walletpassword: ByteString = ByteString.copyFrom(preferences.getString("walletpassword",""), Charsets.UTF_8)
         val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
         return true
     }
