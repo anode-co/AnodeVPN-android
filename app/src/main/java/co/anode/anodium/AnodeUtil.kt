@@ -105,9 +105,9 @@ class AnodeUtil(c: Context?) {
             //Copy pltd
             val am = context!!.assets
             if (arch == "x86" || arch.contains("i686")) {
-                `in` = am.open("pltd_emulator")
+                `in` = am.open("x86_64/$PLTD_BINFILE")
             } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-                `in` = am.open("pltd_aarch64")
+                `in` = am.open("aarch64/$PLTD_BINFILE")
             }
             out = FileOutputStream("$CJDNS_PATH/$PLTD_BINFILE")
             val buffer = ByteArray(1024)
