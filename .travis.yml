@@ -6,9 +6,8 @@ env:
   - ANDROID_API=28
 android:
   components:
-  # - tools
-  # - tools
-  # - platform-tools
+  - tools
+  - platform-tools
   - build-tools-29.0.3
   - android-${ANDROID_API}
   - extra-android-m2repository
