@@ -16,6 +16,7 @@ android:
   - android-sdk-license-.+
 before_install:
 - yes | sdkmanager "platforms;android-${ANDROID_API}"
+- chmod +x gradlew
 before_cache: "-rm -f $HOME/.gradle/caches/modules-2/modules-2.lock -rm -fr $HOME/.gradle/caches/*/plugin-resolution/"
 cache:
   directories:
