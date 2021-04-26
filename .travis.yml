@@ -12,6 +12,7 @@ android:
   - build-tools-29.0.3
   - android-${ANDROID_API}
   - extra-android-m2repository
+  - extra-google-m2repository
   licenses:
   - android-sdk-license-.+
 before_install:
