@@ -41,13 +41,6 @@ class DebugActivity : AppCompatActivity() {
             AnodeClient.mycontext = baseContext
             AnodeClient.storeError(baseContext, "other", Throwable("User submitted logs"))
             AnodeClient.PostLogs()
-
-            /* For testing the RPC
-            LndRPCController.createSecurechannel()
-            LndRPCController.openWallet(prefs)
-            LndRPCController.getBalance()
-            LndRPCController.sendCoins("pkt1qyyss226w6tcqgy3jlggz8vrmt3q6qzlawhpchd",5)
-             */
         }
         val buttonDeleteAccount = findViewById<Button>(R.id.button_Deleteaccount)
         buttonDeleteAccount.setOnClickListener {
