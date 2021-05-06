@@ -516,7 +516,7 @@ object AnodeClient {
                             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                             val node = prefs.getString("LastServerPubkey","cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
                             val connectedNode = prefs.getString("ServerPublicKey","")
-                            if ((!isVpnActive()) || (node != connectedNode)) {
+                            if ((!node.isNullOrEmpty()) && ((!isVpnActive()) || (node != connectedNode))) {
                                 cjdnsConnectVPN(node)
                             }
                             with(prefs.edit()) {

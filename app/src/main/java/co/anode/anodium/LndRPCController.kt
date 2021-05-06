@@ -81,13 +81,17 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
-        //if we do not have a stored macaroon, create new local wallet
-        /*if (preferences.getString("admin_macaroon", "") == "") {
-            createLocalWallet(preferences)
-        }*/
-        val walletpassword: ByteString = ByteString.copyFrom(preferences.getString("walletpassword",""), Charsets.UTF_8)
-        val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
+        try {
+            stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+            val walletpassword: ByteString =
+                ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
+            val response = stub.unlockWallet(
+                UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build()
+            )
+        }catch(e:Exception) {
+            Log.e(LOGTAG, e.toString())
+            return false
+        }
         return true
     }
 

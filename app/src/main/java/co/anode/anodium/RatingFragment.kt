@@ -1,17 +1,14 @@
 package co.anode.anodium
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.RatingBar
 import android.widget.ToggleButton
-import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.fragment_rating.*
-import kotlinx.android.synthetic.main.fragment_rating.view.*
 
 class RatingFragment : BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,11 +26,12 @@ class RatingFragment : BottomSheetDialogFragment() {
         val tb4: ToggleButton = v.findViewById(R.id.toggleButton4)
         val tb5: ToggleButton = v.findViewById(R.id.toggleButton5)
         hideComments(v)
-        v.buttonSubmitRating.visibility = View.GONE
+        val buttonSubmitRating = v.findViewById<Button>(R.id.buttonSubmitRating)
+        buttonSubmitRating.visibility = View.GONE
 
         ratingBar.setOnRatingBarChangeListener { ratingBar, rating, fromUser ->
             showComments(v)
-            v.buttonSubmitRating.visibility = View.VISIBLE
+            buttonSubmitRating.visibility = View.VISIBLE
             if (rating in 0f..1f) {
                 tb1.textOn = getString(R.string.rating1_1)
                 tb1.textOff = getString(R.string.rating1_1)
@@ -101,7 +99,7 @@ class RatingFragment : BottomSheetDialogFragment() {
             }
         }
 
-        v.buttonSubmitRating.setOnClickListener{
+        buttonSubmitRating.setOnClickListener{
             this.context?.let { it1 -> AnodeClient.eventLog(it1, "Button RATING clicked") }
             var comment = ""
             if (tb1.isChecked) {
@@ -121,7 +119,9 @@ class RatingFragment : BottomSheetDialogFragment() {
             }
             comment = comment.dropLast(1)
             val rating = ratingBar.rating
-            context?.let { it1 -> AnodeClient.storeRating(it1, prefs.getString("ServerPublicKey", ""), rating, comment) }
+            var ServerPublicKey = ""
+            ServerPublicKey = prefs.getString("ServerPublicKey", "").toString()
+            context?.let { it1 -> AnodeClient.storeRating(it1, ServerPublicKey, rating, comment) }
             dismiss()
         }
 

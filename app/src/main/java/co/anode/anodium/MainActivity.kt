@@ -2,7 +2,6 @@ package co.anode.anodium
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -18,15 +17,12 @@ import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import org.json.JSONObject
 import java.io.File
 import java.lang.reflect.InvocationTargetException
@@ -45,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
     private var previousPublicIPv4 = ""
+    private var walletIsOpen = false
     val h = Handler()
 
     companion object {
@@ -87,6 +84,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         //Disable night mode (dark mode)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -120,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         AnodeClient.mainActivity = this
         val MIN_CLICK_INTERVAL: Long = 1000
         var mLastClickTime: Long = 0
-
+        val buttonconnectvpns = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         buttonconnectvpns.setOnClickListener() {
             //avoid accidental double clicks
             if (SystemClock.uptimeMillis() - mLastClickTime > MIN_CLICK_INTERVAL) {
@@ -133,7 +131,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
+        val buttonVPNList = findViewById<Button>(R.id.buttonVPNList)
         buttonVPNList.setOnClickListener() {
             val vpnlistactivity = Intent(applicationContext, VpnListActivity::class.java)
             startActivityForResult(vpnlistactivity, 0)
@@ -346,12 +344,19 @@ class MainActivity : AppCompatActivity() {
         //prefs.edit().putString("walletpassword","").apply()
         if (prefs.getBoolean("lndwallet",false) ) {
             Log.i(LOGTAG, "MainActivity trying to open wallet")
-            LndRPCController.openWallet(prefs)
+            if (!LndRPCController.openWallet(prefs)) {
+                //can not open wallet
+                Log.w(LOGTAG,"Can not open PKT wallet")
+                walletIsOpen = false
+            } else {
+                walletIsOpen = true
+            }
         }
     }
 
     fun bigbuttonState(state: Int) {
         val status = findViewById<TextView>(R.id.textview_status)
+        val buttonconnectvpns = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         when(state) {
             BUTTON_STATE_DISCONNECTED -> {
                 AnodeClient.eventLog(baseContext, "Main button status DISCONNECTING")
@@ -525,9 +530,22 @@ class MainActivity : AppCompatActivity() {
             startActivity(changepassactivity)
             return true
         } else if (id == R.id.action_wallet) {
-            Log.i(LOGTAG, "Open wallet activity")
-            val walletactivity = Intent(applicationContext, WalletActivity::class.java)
-            startActivity(walletactivity)
+            if (walletIsOpen) {
+                Log.i(LOGTAG, "Open wallet activity")
+                val walletactivity = Intent(applicationContext, WalletActivity::class.java)
+                startActivity(walletactivity)
+            } else {
+                Toast.makeText(
+                    baseContext,
+                    "Could not open PKT wallet.\nPlease try again after restarting the application.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            return true
+        } else if (id == R.id.action_wallet_debug) {
+            Log.i(LOGTAG, "Open wallet debug activity")
+            val walletdebugactivity = Intent(applicationContext, DebugWalletActivity::class.java)
+            startActivity(walletdebugactivity)
             return true
         } else if (id == R.id.action_closeapp) {
             closeApp()

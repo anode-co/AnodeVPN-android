@@ -8,7 +8,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_vpn_servers_list.*
+//import kotlinx.android.synthetic.main.activity_vpn_servers_list.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URL
@@ -23,6 +23,7 @@ class VpnListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vpn_servers_list)
+        val vpnlist_toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.vpnlist_toolbar)
         setSupportActionBar(vpnlist_toolbar)
         //actionbar
         val actionbar = supportActionBar

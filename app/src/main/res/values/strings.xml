@@ -9,6 +9,7 @@
     <string name="action_login">Login</string>
     <string name="action_skip">Skip</string>
     <string name="action_wallet">Wallet</string>
+    <string name="action_wallet_debug">Wallet debug</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
