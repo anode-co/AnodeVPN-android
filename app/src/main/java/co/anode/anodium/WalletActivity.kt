@@ -3,12 +3,7 @@ package co.anode.anodium
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 
 class WalletActivity : AppCompatActivity() {
 
@@ -34,13 +29,11 @@ class WalletActivity : AppCompatActivity() {
                 Log.i(LOGTAG, "WalletActivity hide create fragment")
                 ft.hide(createfragment)
             }
-            //ft.show(mainfragment)
         } else {
             if (mainfragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide main fragment")
                 ft.hide(mainfragment)
             }
-            //ft.show(createfragment)
         }
         ft.commit()
     }
