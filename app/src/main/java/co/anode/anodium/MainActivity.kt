@@ -25,7 +25,6 @@ import androidx.core.app.ActivityCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
 import java.io.File
-import java.lang.reflect.InvocationTargetException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
@@ -41,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
     private var previousPublicIPv4 = ""
-    private var walletIsOpen = false
     val h = Handler()
 
     companion object {
@@ -51,9 +49,9 @@ class MainActivity : AppCompatActivity() {
     fun exception(paramThrowable: Throwable) {
         //Toast message before exiting app
         var type = "other"
-        if ((paramThrowable.cause as InvocationTargetException).targetException is CjdnsException) type = "cjdnsSocket"
-        else if ((paramThrowable.cause as InvocationTargetException).targetException is AnodeUtilException) type = "cjdroute"
-        else if ((paramThrowable.cause as InvocationTargetException).targetException is AnodeVPNException) type = "vpnService"
+        if (paramThrowable.cause.toString().contains("CjdnsException") ) type = "cjdnsSocket"
+        else if (paramThrowable.cause.toString().contains("AnodeUtilException") ) type = "cjdroute"
+        else if (paramThrowable.cause.toString().contains("AnodeVPNException") ) type = "vpnService"
         // we'll post the error on next startup
         AnodeClient.storeError(application, type, paramThrowable)
 
@@ -336,20 +334,90 @@ class MainActivity : AppCompatActivity() {
         }, "MainActivity.CheckUpdates").start()
 
         AnodeClient.eventLog(baseContext, "Application launched")
-        /*Settings for testing wallet
-        prefs.edit().putBoolean("lndwallet", true).apply()
-        prefs.edit().putString("walletpassword","password").apply()*/
-        /*Settings for testing wallet creation*/
-        //prefs.edit().putBoolean("lndwallet", false).apply()
-        //prefs.edit().putString("walletpassword","").apply()
-        if (prefs.getBoolean("lndwallet",false) ) {
+
+        val walletfile = File(baseContext.filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
+        if (walletfile.exists()) {
             Log.i(LOGTAG, "MainActivity trying to open wallet")
-            if (!LndRPCController.openWallet(prefs)) {
+            var result = LndRPCController.openWallet(prefs)
+            if (result.contains("ErrWrongPassphrase")) {
+                var password = ""
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+                builder.setTitle("PKT Wallet")
+                builder.setMessage("Please type your PKT Wallet password")
+                val input = EditText(this)
+                val lp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT)
+                input.layoutParams = lp
+                builder.setView(input)
+                builder.setPositiveButton("Submit", DialogInterface.OnClickListener { dialog, which ->
+                    password = input.text.toString()
+                    dialog.dismiss()
+
+                    if ((prefs != null) && (!password.isNullOrEmpty())) {
+                        with(prefs.edit()) {
+                            putString("walletpassword", password)
+                            commit()
+                        }
+                        val result = LndRPCController.openWallet(prefs)
+                        if (result == "OK") {
+                            with(prefs.edit()) {
+                                putBoolean("lndwalletopened", true)
+                                commit()
+                            }
+                            Toast.makeText(this, "PKT wallet is open", Toast.LENGTH_LONG).show()
+                        } else {
+                            with(prefs.edit()) {
+                                putBoolean("lndwalletopened", false)
+                                commit()
+                            }
+                            Toast.makeText(this, "Wrong password.", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                })
+
+                builder.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
+                    dialog.dismiss()
+                })
+                val alert: androidx.appcompat.app.AlertDialog = builder.create()
+                alert.show()
+            } else if (result != "OK") {
                 //can not open wallet
                 Log.w(LOGTAG,"Can not open PKT wallet")
-                walletIsOpen = false
-            } else {
-                walletIsOpen = true
+                //wrong password prompt user to type password again
+
+                val datadir =
+                    File(baseContext.filesDir.toString() + "/lnd/data/chain/pkt/mainnet")
+                var checkwallet = result
+                if (!datadir.exists()) {
+                    Log.e(LOGTAG, "expected folder structure not available")
+                    checkwallet += " datadir does not exist "
+                } else if (!walletfile.exists()) {
+                    Log.e(LOGTAG, "wallet.db does not exist")
+                    checkwallet += " wallet.db does not exist "
+                } else {
+                    checkwallet += " wallet.db exists "
+                }
+                if (prefs.getString("walletpassword", "").isNullOrEmpty()) {
+                    Log.e(LOGTAG, "walletpassword in shared preferences is empty")
+                    checkwallet += " walletpassword is empty"
+                } else {
+                    checkwallet += " walletpassword is not empty"
+                }
+                AnodeClient.storeError(baseContext, "other", Throwable(checkwallet))
+                Toast.makeText(baseContext, "Error in opening PKT wallet", Toast.LENGTH_LONG)
+                    .show()
+            } else if (result == "OK"){
+                with(prefs.edit()) {
+                    putBoolean("lndwalletopened", true)
+                    commit()
+                }
+            }
+        } else {
+            Log.i(LOGTAG, "Wallet does not exist")
+            with(prefs.edit()) {
+                putBoolean("lndwalletopened", false)
+                commit()
             }
         }
     }
@@ -530,17 +598,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(changepassactivity)
             return true
         } else if (id == R.id.action_wallet) {
-            if (walletIsOpen) {
-                Log.i(LOGTAG, "Open wallet activity")
-                val walletactivity = Intent(applicationContext, WalletActivity::class.java)
-                startActivity(walletactivity)
-            } else {
-                Toast.makeText(
-                    baseContext,
-                    "Could not open PKT wallet.\nPlease try again after restarting the application.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            Log.i(LOGTAG, "Open wallet activity")
+            val walletactivity = Intent(applicationContext, WalletActivity::class.java)
+            startActivity(walletactivity)
             return true
         } else if (id == R.id.action_wallet_debug) {
             Log.i(LOGTAG, "Open wallet debug activity")
@@ -729,5 +789,4 @@ class MainActivity : AppCompatActivity() {
             //}
         }
     }
-
 }

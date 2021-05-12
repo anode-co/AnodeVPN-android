@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import java.io.File
 
 class WalletActivity : AppCompatActivity() {
 
@@ -24,7 +25,9 @@ class WalletActivity : AppCompatActivity() {
         //Show setup or main fragment according to wallet existing or not
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
-        if (prefs.getBoolean("lndwallet", false)) {
+        //Check if wallet exists
+        val walletfile = File(baseContext.filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
+        if (walletfile.exists()) {
             if (createfragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide create fragment")
                 ft.hide(createfragment)

@@ -3,14 +3,11 @@ package co.anode.anodium
 import android.content.SharedPreferences
 import android.util.Log
 import com.github.lightningnetwork.lnd.lnrpc.*
-import com.github.lightningnetwork.lnd.routerrpc.SendPaymentRequest
 import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
-import kotlinx.coroutines.GlobalScope
 import java.lang.Exception
-import java.util.concurrent.CompletableFuture
 import javax.net.ssl.HostnameVerifier
 
 object LndRPCController {
@@ -59,7 +56,6 @@ object LndRPCController {
                     //adminMacaroon is empty!
                     putString("admin_macaroon", walletresponse.adminMacaroon.toStringUtf8())
                     putString("walletpassword", password)
-                    putBoolean("lndwallet", true)
                     commit()
                 }
                 result = "Success"
@@ -70,13 +66,12 @@ object LndRPCController {
                 result = "Error"
             }
         }catch (e:Exception) {
-            result = e.printStackTrace().toString()
+            result = e.toString()
         }
-
         return result
     }
 
-    fun openWallet(preferences: SharedPreferences):Boolean {
+    fun openWallet(preferences: SharedPreferences):String {
         Log.i(LOGTAG, "LndRPCController.openWallet")
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
@@ -90,9 +85,9 @@ object LndRPCController {
             )
         }catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
-            return false
+            return e.toString()
         }
-        return true
+        return "fdsgfd"//"OK"
     }
 
     fun getPubKey() {
@@ -159,3 +154,5 @@ object LndRPCController {
         return ByteString.copyFrom(hexBytes)
     }
 }
+
+class LndRPCException(message: String): Exception(message)

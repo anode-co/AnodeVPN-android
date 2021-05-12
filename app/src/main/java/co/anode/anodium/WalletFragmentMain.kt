@@ -37,117 +37,134 @@ class WalletFragmentMain : Fragment() {
         super.onViewCreated(v, savedInstanceState)
         AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
         val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        if(!prefs.getBoolean("lndwallet", false)) {
-            return
-        }
-        Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
-        //Set balance
-        walletBalance = v.findViewById(R.id.walletBalanceNumber)
-        walletBalance.text = LndRPCController.getTotalBalance().toString()
+        if(!prefs.getBoolean("lndwalletopened", false)) {
+            Toast.makeText(context, "wallet file exists but could not be opened.\n Please try launching the application again.", Toast.LENGTH_LONG)
+        } else {
+            Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
+            //Set balance
+            walletBalance = v.findViewById(R.id.walletBalanceNumber)
+            walletBalance.text = LndRPCController.getTotalBalance().toString()
 
-        val transactions = LndRPCController.getTransactions()
-        for (i in 0 until transactions.count()) {
-            transactions[i].amount
-            transactions[i].destAddressesList[0]
-            transactions[i].timeStamp
-        }
+            val transactions = LndRPCController.getTransactions()
+            for (i in 0 until transactions.count()) {
+                transactions[i].amount
+                transactions[i].destAddressesList[0]
+                transactions[i].timeStamp
+            }
 
-        var address = prefs.getString("lndwalletaddress", "")
-        if (address == "") {
-            address = LndRPCController.generateAddress()
-            with(prefs.edit()) {
-                putString("lndwalletaddress", address)
-                commit()
+            var address = prefs.getString("lndwalletaddress", "")
+            if (address == "") {
+                address = LndRPCController.generateAddress()
+                with(prefs.edit()) {
+                    putString("lndwalletaddress", address)
+                    commit()
+                }
             }
-        }
-        val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
-        walletAddress.text = address
+            val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
+            walletAddress.text = address
 
-        walletAddress.setOnClickListener {
-            AnodeClient.eventLog(requireContext(),"Button: Copy wallet address clicked")
-            Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
-        }
-        val simpleDate = SimpleDateFormat("dd/MM/yyyy")
+            walletAddress.setOnClickListener {
+                AnodeClient.eventLog(requireContext(), "Button: Copy wallet address clicked")
+                Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
+            }
+            val simpleDate = SimpleDateFormat("dd/MM/yyyy")
 
-        if (transactions.count() > 0) {
-            val layout = v.findViewById<LinearLayout>(R.id.PaymentRowFirstLayout)
-            layout.visibility = View.VISIBLE
-            val firstaddress = v.findViewById<TextView>(R.id.firstaddress)
-            firstaddress.text = transactions[0].destAddressesList[0]
-            val firstamount = v.findViewById<TextView>(R.id.firstpaymentamount)
-            if (transactions[0].amount < 0) {
-                val icon = v.findViewById<ImageView>(R.id.firstpaymenticon)
-                icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
-                DrawableCompat.setTint(icon.drawable, ContextCompat.getColor(requireContext(), android.R.color.holo_red_light))
+            if (transactions.count() > 0) {
+                val layout = v.findViewById<LinearLayout>(R.id.PaymentRowFirstLayout)
+                layout.visibility = View.VISIBLE
+                val firstaddress = v.findViewById<TextView>(R.id.firstaddress)
+                firstaddress.text = transactions[0].destAddressesList[0]
+                val firstamount = v.findViewById<TextView>(R.id.firstpaymentamount)
+                if (transactions[0].amount < 0) {
+                    val icon = v.findViewById<ImageView>(R.id.firstpaymenticon)
+                    icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
+                    DrawableCompat.setTint(
+                        icon.drawable,
+                        ContextCompat.getColor(requireContext(), android.R.color.holo_red_light)
+                    )
+                }
+                firstamount.text =
+                    getString(R.string.wallet_coin) + (transactions[0].amount / 1073741824).toString()
+                val firstdate = v.findViewById<TextView>(R.id.firstpaymentdate)
+                firstdate.text = simpleDate.format(Date(transactions[0].timeStamp))
             }
-            firstamount.text = getString(R.string.wallet_coin) + (transactions[0].amount / 1073741824).toString()
-            val firstdate = v.findViewById<TextView>(R.id.firstpaymentdate)
-            firstdate.text = simpleDate.format(Date(transactions[0].timeStamp))
-        }
-        if (transactions.count() > 1) {
-            val layout = v.findViewById<LinearLayout>(R.id.PaymentRowSecondLayout)
-            layout.visibility = View.VISIBLE
-            val secondaddress = v.findViewById<TextView>(R.id.Secondaddress)
-            secondaddress.text = transactions[1].destAddressesList[0]
-            val secondamount = v.findViewById<TextView>(R.id.Secondpaymentamount)
-            secondamount.text = getString(R.string.wallet_coin) + (transactions[1].amount / 1073741824).toString()
-            val seconddate = v.findViewById<TextView>(R.id.Secondpaymentdate)
-            seconddate.text = simpleDate.format(Date(transactions[1].timeStamp))
-            if (transactions[1].amount < 0) {
-                val icon = v.findViewById<ImageView>(R.id.Secondpaymenticon)
-                icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
-                DrawableCompat.setTint(icon.drawable, ContextCompat.getColor(requireContext(), android.R.color.holo_red_light))
+            if (transactions.count() > 1) {
+                val layout = v.findViewById<LinearLayout>(R.id.PaymentRowSecondLayout)
+                layout.visibility = View.VISIBLE
+                val secondaddress = v.findViewById<TextView>(R.id.Secondaddress)
+                secondaddress.text = transactions[1].destAddressesList[0]
+                val secondamount = v.findViewById<TextView>(R.id.Secondpaymentamount)
+                secondamount.text =
+                    getString(R.string.wallet_coin) + (transactions[1].amount / 1073741824).toString()
+                val seconddate = v.findViewById<TextView>(R.id.Secondpaymentdate)
+                seconddate.text = simpleDate.format(Date(transactions[1].timeStamp))
+                if (transactions[1].amount < 0) {
+                    val icon = v.findViewById<ImageView>(R.id.Secondpaymenticon)
+                    icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
+                    DrawableCompat.setTint(
+                        icon.drawable,
+                        ContextCompat.getColor(requireContext(), android.R.color.holo_red_light)
+                    )
+                }
             }
-        }
-        if (transactions.count() > 2) {
-            val layout = v.findViewById<LinearLayout>(R.id.PaymentRowThirdLayout)
-            layout.visibility = View.VISIBLE
-            val thirdaddress = v.findViewById<TextView>(R.id.Thirdaddress)
-            thirdaddress.text = transactions[2].destAddressesList[0]
-            val thirdamount = v.findViewById<TextView>(R.id.Thirdpaymentamount)
-            thirdamount.text = getString(R.string.wallet_coin) + (transactions[2].amount / 1073741824).toString()
-            val thirdddate = v.findViewById<TextView>(R.id.Thirdpaymentdate)
-            thirdddate.text = simpleDate.format(Date(transactions[2].timeStamp))
-            if (transactions[2].amount < 0) {
-                val icon = v.findViewById<ImageView>(R.id.Thirdpaymenticon)
-                icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
-                DrawableCompat.setTint(icon.drawable, ContextCompat.getColor(requireContext(), android.R.color.holo_red_light))
+            if (transactions.count() > 2) {
+                val layout = v.findViewById<LinearLayout>(R.id.PaymentRowThirdLayout)
+                layout.visibility = View.VISIBLE
+                val thirdaddress = v.findViewById<TextView>(R.id.Thirdaddress)
+                thirdaddress.text = transactions[2].destAddressesList[0]
+                val thirdamount = v.findViewById<TextView>(R.id.Thirdpaymentamount)
+                thirdamount.text =
+                    getString(R.string.wallet_coin) + (transactions[2].amount / 1073741824).toString()
+                val thirdddate = v.findViewById<TextView>(R.id.Thirdpaymentdate)
+                thirdddate.text = simpleDate.format(Date(transactions[2].timeStamp))
+                if (transactions[2].amount < 0) {
+                    val icon = v.findViewById<ImageView>(R.id.Thirdpaymenticon)
+                    icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
+                    DrawableCompat.setTint(
+                        icon.drawable,
+                        ContextCompat.getColor(requireContext(), android.R.color.holo_red_light)
+                    )
+                }
             }
-        }
-        if (transactions.count() > 3) {
-            val layout = v.findViewById<LinearLayout>(R.id.PaymentRowFourthLayout)
-            layout.visibility = View.VISIBLE
-            val fourthaddress = v.findViewById<TextView>(R.id.Fourthaddress)
-            fourthaddress.text = transactions[3].destAddressesList[0]
-            val fourthamount = v.findViewById<TextView>(R.id.Fourthpaymentamount)
-            fourthamount.text = getString(R.string.wallet_coin) + (transactions[3].amount / 1073741824).toString()
-            val fourthdate = v.findViewById<TextView>(R.id.Fourthpaymentdate)
-            fourthdate.text = simpleDate.format(Date(transactions[3].timeStamp))
-            if (transactions[3].amount < 0) {
-                val icon = v.findViewById<ImageView>(R.id.Fourthpaymenticon)
-                icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
-                DrawableCompat.setTint(icon.drawable, ContextCompat.getColor(requireContext(), android.R.color.holo_red_light))
+            if (transactions.count() > 3) {
+                val layout = v.findViewById<LinearLayout>(R.id.PaymentRowFourthLayout)
+                layout.visibility = View.VISIBLE
+                val fourthaddress = v.findViewById<TextView>(R.id.Fourthaddress)
+                fourthaddress.text = transactions[3].destAddressesList[0]
+                val fourthamount = v.findViewById<TextView>(R.id.Fourthpaymentamount)
+                fourthamount.text =
+                    getString(R.string.wallet_coin) + (transactions[3].amount / 1073741824).toString()
+                val fourthdate = v.findViewById<TextView>(R.id.Fourthpaymentdate)
+                fourthdate.text = simpleDate.format(Date(transactions[3].timeStamp))
+                if (transactions[3].amount < 0) {
+                    val icon = v.findViewById<ImageView>(R.id.Fourthpaymenticon)
+                    icon.setImageResource(R.drawable.ic_baseline_arrow_upward_24)
+                    DrawableCompat.setTint(
+                        icon.drawable,
+                        ContextCompat.getColor(requireContext(), android.R.color.holo_red_light)
+                    )
+                }
             }
-        }
 
-        val sharebutton = v.findViewById<Button>(R.id.walletAddressSharebutton)
-        sharebutton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(),"Button: Share wallet address clicked")
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $address")
-                type = "text/plain"
+            val sharebutton = v.findViewById<Button>(R.id.walletAddressSharebutton)
+            sharebutton.setOnClickListener {
+                AnodeClient.eventLog(requireContext(), "Button: Share wallet address clicked")
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $address")
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
             }
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
-        }
 
-        val sendpaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
-        sendpaymentButton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(),"Button: Send PKT clicked")
-            val sendpaymentFragment: BottomSheetDialogFragment = SendPaymentFragment()
-            sendpaymentFragment.show(childFragmentManager,"")
-        }
+            val sendpaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
+            sendpaymentButton.setOnClickListener {
+                AnodeClient.eventLog(requireContext(), "Button: Send PKT clicked")
+                val sendpaymentFragment: BottomSheetDialogFragment = SendPaymentFragment()
+                sendpaymentFragment.show(childFragmentManager, "")
+            }
+        }//wallet is not opened check
     }
 
     class openWallet(): AsyncTask<Any?, Any?, String>() {

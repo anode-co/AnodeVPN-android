@@ -287,7 +287,7 @@ class AnodeUtil(c: Context?) {
     }
 
     fun readCPUUsage(): Float {
-        try {
+        /*try {
             val reader = RandomAccessFile("/proc/stat", "r")
             var load = reader.readLine()
             var toks = load.split(" +").toTypedArray() // Split on one or more spaces
@@ -305,7 +305,7 @@ class AnodeUtil(c: Context?) {
             return (cpu2 - cpu1).toFloat() / (cpu2 + idle2 - (cpu1 + idle1))
         } catch (ex: IOException) {
             ex.printStackTrace()
-        }
+        }*/
         return 0f
     }
 
