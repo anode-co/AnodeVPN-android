@@ -22,13 +22,25 @@ class DebugWalletActivity : AppCompatActivity() {
 
         Thread(Runnable {
             Log.i(LOGTAG, "DebugActivity.RefreshValues startup")
+            var sleep: Long = 500
             val anodeUtil = AnodeUtil(application)
+            var logfile = File(anodeUtil.CJDNS_PATH+"/"+anodeUtil.PLTD_LOG).readText()
+            this.runOnUiThread(Runnable {
+                logtext.text = logfile
+            })
+            var oldlog = logfile
             while (true) {
                 this.runOnUiThread(Runnable {
-                    val logfile = File(anodeUtil.CJDNS_PATH+"/"+anodeUtil.PLTD_LOG).readText()
-                    logtext.text = logfile
+                    var newlog = File(anodeUtil.CJDNS_PATH+"/"+anodeUtil.PLTD_LOG).readText()
+                    if (newlog.length > oldlog.length) {
+                        oldlog = newlog
+                        logtext.text = newlog
+                        sleep = 2000
+                    } else {
+                        sleep = 500
+                    }
                 })
-                Thread.sleep(500)
+                Thread.sleep(sleep)
             }
         }, "DebugWalletActivity.RefreshValues").start()
     }

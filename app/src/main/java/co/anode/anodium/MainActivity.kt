@@ -405,6 +405,8 @@ class MainActivity : AppCompatActivity() {
                     checkwallet += " walletpassword is not empty"
                 }
                 AnodeClient.storeError(baseContext, "other", Throwable(checkwallet))
+                val pltdlog = File(anodeUtil!!.CJDNS_PATH+"/"+ anodeUtil!!.PLTD_LOG).readText()
+                AnodeClient.storeError(baseContext, "other", Throwable(pltdlog))
                 Toast.makeText(baseContext, "Error in opening PKT wallet", Toast.LENGTH_LONG)
                     .show()
             } else if (result == "OK"){
