@@ -1,6 +1,7 @@
 package co.anode.anodium
 
 import android.content.Context
+import android.system.Os
 import android.util.Log
 import org.json.JSONObject
 import java.io.*
@@ -31,102 +32,28 @@ class AnodeUtil(c: Context?) {
         //Create files folder
         Log.i(LOGTAG, "Creating files directory")
         context!!.filesDir.mkdir()
-        val cjdrouteFile = File("$CJDNS_PATH/$CJDROUTE_BINFILE")
+        //Create symbolic link for cjdroute
+        val filesdir = "data/data/co.anode.anodium/files"
+        val nativelibdir = context!!.applicationInfo.nativeLibraryDir.toString()
+        val cjdrouteFile = File("$filesdir/cjdroute")
+        cjdrouteFile.delete()
+        var oldPath = "$nativelibdir/libcjdroute.so"
+        var newPath = "$filesdir/cjdroute"
+        Os.symlink(oldPath, newPath)
+        //Create symbolic link for pltd
+        val pltdfile = File("$filesdir/pltd")
+        pltdfile.delete()
+        oldPath = "$nativelibdir/libpltd.so"
+        newPath = "$filesdir/pltd"
+        Os.symlink(oldPath,newPath)
 
-        //Read architecture
-        val arch = System.getProperty("os.arch")
+        //Copy tls files
         var `in`: InputStream
         var out: OutputStream?
+        val am = context!!.assets
         try {
-            val am = context!!.assets
-            Log.i(LOGTAG, "OS Architecture: $arch")
-            if (arch == "x86" || arch!!.contains("i686")) {
-                `in` = am.open("i686/16/cjdroute")
-            } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-                `in` = am.open("aarch64/21/cjdroute")
-            } else if (arch.contains("armeabi") || arch.contains("armv7a")) {
-                `in` = am.open("armv7a/16/cjdroute")
-            } else if (arch.contains("x86_64")) {
-                `in` = am.open("X86_64/21/cjdroute")
-            } else { //Unknown architecture
-                throw AnodeUtilException("Incompatible CPU architecture")
-            }
-        } catch (e: IOException) {
-            throw AnodeUtilException("Failed to copy cjdroute file " + e.message)
-        }
-        /*Copy the file everytime */
-        /*
-        if (!cjdrouteFile.exists() ||
-                arch!!.contains("i686") ||
-                arch.contains("x86") ||
-                arch.contains("X86_64")){
-         */
-            //Copy cjdroute
-        try {
-            if (!cjdrouteFile.exists()) {
-                Log.i(LOGTAG, "cjdroute does not exists")
-            } else {
-                // You can't overwrite a file while the program is running,
-                // but delete and replace works
-                File("$CJDNS_PATH/$CJDROUTE_BINFILE").delete()
-            }
-            Log.i(LOGTAG, "Copying cjdroute")
-            out = FileOutputStream("$CJDNS_PATH/$CJDROUTE_BINFILE")
             val buffer = ByteArray(1024)
             var read: Int
-            while (`in`.read(buffer).also { read = it } != -1) {
-                out.write(buffer, 0, read)
-            }
-            `in`.close()
-            out.close()
-            //Set permissions
-            Log.i(LOGTAG, "set new cjdroute permissions")
-            val file = File("$CJDNS_PATH/$CJDROUTE_BINFILE")
-            file.setExecutable(true)
-        }catch (e: IOException) {
-            throw AnodeUtilException("Failed to copy cjdroute file " + e.message)
-        }
-        //}
-        //Create and initialize conf file
-        if (!File(context!!.filesDir.toString() + "/" + CJDROUTE_CONFFILE).exists()) {
-            initializeCjdrouteConfFile()
-        }
-
-        try {
-            val pltdFile = File("$CJDNS_PATH/$PLTD_BINFILE")
-            if (!pltdFile.exists()) {
-                Log.i(LOGTAG, "pltd does not exists")
-            } else {
-                // You can't overwrite a file while the program is running,
-                // but delete and replace works
-                File("$CJDNS_PATH/$PLTD_BINFILE").delete()
-            }
-            Log.i(LOGTAG, "Copying pltd")
-            //Copy pltd
-            val am = context!!.assets
-            if (arch == "x86" || arch.contains("i686")) {
-                `in` = am.open("x86_64/$PLTD_BINFILE")
-            } else if (arch.contains("arm64-v8a") || arch.contains("aarch64")) {
-                `in` = am.open("aarch64/$PLTD_BINFILE")
-            }
-            out = FileOutputStream("$CJDNS_PATH/$PLTD_BINFILE")
-            val buffer = ByteArray(1024)
-            var read: Int
-            while (`in`.read(buffer).also { read = it } != -1) {
-                out.write(buffer, 0, read)
-            }
-            `in`.close()
-            out.close()
-            //Set permissions
-            Log.i(LOGTAG, "set new pltd permissions")
-            val file = File("$CJDNS_PATH/$PLTD_BINFILE")
-            file.setExecutable(true)
-            //Create lnd directory
-            val lnddir = File("$CJDNS_PATH/lnd")
-            if (!lnddir.exists()) {
-                lnddir.mkdir()
-            }
-            //Copy tls files
             val tlscert = File("$CJDNS_PATH/lnd/tls.cert")
             if (!tlscert.exists()) {
                 `in` = am.open("tls.cert")
@@ -155,15 +82,13 @@ class AnodeUtil(c: Context?) {
 
     fun launch() {
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
-        if (confFile.exists()) {
+        if (!confFile.exists()) {
+            initializeCjdrouteConfFile()
             launchCJDNS()
-        } else {
-            Log.i(LOGTAG, "Trying to create new cjdroute.conf file...")
-            generateConfFile()
-            modifyJSONConfFile()
         }
         launchpltd()
     }
+
 
     fun initializeCjdrouteConfFile() {
         generateConfFile()

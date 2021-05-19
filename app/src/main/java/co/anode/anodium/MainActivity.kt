@@ -12,6 +12,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
 import android.os.*
+import android.system.Os
 import android.text.Html
 import android.util.Log
 import android.view.Gravity
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
     private var previousPublicIPv4 = ""
+    val MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL = 1
     val h = Handler()
 
     companion object {
@@ -107,7 +109,6 @@ class MainActivity : AppCompatActivity() {
         anodeUtil!!.logFile()
         //Initialize App
         anodeUtil!!.initializeApp()
-        //Launch cjdroute & pltd
         anodeUtil!!.launch()
         //Initialize AnodeClient
         AnodeClient.mycontext = baseContext
@@ -671,9 +672,25 @@ class MainActivity : AppCompatActivity() {
 
     fun requestStoragePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL)
         } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL) {
+            if ((grantResults.size > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                //Launch cjdroute & pltd
+                //anodeUtil!!.launch()
+            } else {
+                Toast.makeText(baseContext, "Normal operation of Anodium can not proceed without needed permissions", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
