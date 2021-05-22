@@ -227,7 +227,7 @@ object AnodeClient {
         ignoreErr{ jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now())) }
         ignoreErr{ jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address) }
         ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
-        ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString()) }
+        ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", "0") }
         ignoreErr{ jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
@@ -281,7 +281,7 @@ object AnodeClient {
         jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
         ignoreErr { jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address) }
         ignoreErr { jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
-        ignoreErr { jsonObject.accumulate("cpuUtilizationPercent", anodeUtil.readCPUUsage().toString()) }
+        ignoreErr { jsonObject.accumulate("cpuUtilizationPercent", "0") }
         ignoreErr { jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")

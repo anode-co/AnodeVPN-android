@@ -87,7 +87,7 @@ object LndRPCController {
             Log.e(LOGTAG, e.toString())
             return e.toString()
         }
-        return "fdsgfd"//"OK"
+        return "OK"
     }
 
     fun getPubKey() {

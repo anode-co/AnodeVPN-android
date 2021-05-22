@@ -20,6 +20,8 @@ class AnodeUtil(c: Context?) {
     val CJDROUTE_LOG = "cjdroute.log"
     val PLTD_LOG = "pltd.log"
     val PLTD_BINFILE = "pltd"
+    lateinit var pltd_pb: Process
+    lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
 
     init {
@@ -47,6 +49,12 @@ class AnodeUtil(c: Context?) {
         newPath = "$filesdir/pltd"
         Os.symlink(oldPath,newPath)
 
+
+        //Create lnd directory
+        val lnddir = File("$CJDNS_PATH/lnd")
+        if (!lnddir.exists()) {
+            lnddir.mkdir()
+        }
         //Copy tls files
         var `in`: InputStream
         var out: OutputStream?
@@ -84,8 +92,8 @@ class AnodeUtil(c: Context?) {
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
             initializeCjdrouteConfFile()
-            launchCJDNS()
         }
+        launchCJDNS()
         launchpltd()
     }
 
@@ -130,9 +138,9 @@ class AnodeUtil(c: Context?) {
                     .redirectOutput(File(CJDNS_PATH, CJDROUTE_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = CJDNS_PATH
-            val p = processBuilder.start()
-            p.waitFor()
-            Log.e(LOGTAG, "cjdns exited with " + p.exitValue())
+            cjdns_pb = processBuilder.start()
+            cjdns_pb.waitFor()
+            Log.e(LOGTAG, "cjdns exited with " + cjdns_pb.exitValue())
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
@@ -148,9 +156,7 @@ class AnodeUtil(c: Context?) {
                     .redirectOutput(File(CJDNS_PATH, PLTD_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = CJDNS_PATH
-            val p = processBuilder.start()
-            //p.waitFor()
-            //Log.e(LOGTAG, "pltd exited with " + p.exitValue())
+            pltd_pb = processBuilder.start()
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute pltd " + e.message)
         }
@@ -209,29 +215,6 @@ class AnodeUtil(c: Context?) {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-    }
-
-    fun readCPUUsage(): Float {
-        /*try {
-            val reader = RandomAccessFile("/proc/stat", "r")
-            var load = reader.readLine()
-            var toks = load.split(" +").toTypedArray() // Split on one or more spaces
-            val idle1 = toks[4].toLong()
-            val cpu1 = toks[2].toLong() + toks[3].toLong() + toks[5].toLong() + toks[6].toLong() + toks[7].toLong() + toks[8].toLong()
-            try {
-                Thread.sleep(360)
-            } catch (e: java.lang.Exception) {}
-            reader.seek(0)
-            load = reader.readLine()
-            reader.close()
-            toks = load.split(" +").toTypedArray()
-            val idle2 = toks[4].toLong()
-            val cpu2 = toks[2].toLong() + toks[3].toLong() + toks[5].toLong() + toks[6].toLong() + toks[7].toLong() + toks[8].toLong()
-            return (cpu2 - cpu1).toFloat() / (cpu2 + idle2 - (cpu1 + idle1))
-        } catch (ex: IOException) {
-            ex.printStackTrace()
-        }*/
-        return 0f
     }
 
     fun readMemUsage(): String {
