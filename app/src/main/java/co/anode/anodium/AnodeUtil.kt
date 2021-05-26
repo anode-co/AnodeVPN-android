@@ -89,12 +89,12 @@ class AnodeUtil(c: Context?) {
 
 
     fun launch() {
+        launchpltd()
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
             initializeCjdrouteConfFile()
         }
         launchCJDNS()
-        launchpltd()
     }
 
 

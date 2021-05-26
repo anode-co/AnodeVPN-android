@@ -2,11 +2,7 @@ package co.anode.anodium
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.content.res.ColorStateList
-import android.os.AsyncTask
 import android.os.Bundle
-import android.text.Layout
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,9 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,13 +30,7 @@ class WalletFragmentMain : Fragment() {
         super.onViewCreated(v, savedInstanceState)
         AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
         val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        //Try opening the wallet again...
         if(!prefs.getBoolean("lndwalletopened", false)) {
-            Toast.makeText(
-                context,
-                "wallet file exists but could not be opened.\n Please try launching the application again.",
-                Toast.LENGTH_LONG
-            )
             return
         }
         Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
@@ -169,21 +156,6 @@ class WalletFragmentMain : Fragment() {
             AnodeClient.eventLog(requireContext(), "Button: Send PKT clicked")
             val sendpaymentFragment: BottomSheetDialogFragment = SendPaymentFragment()
             sendpaymentFragment.show(childFragmentManager, "")
-        }
-    }
-
-    class openWallet(): AsyncTask<Any?, Any?, String>() {
-        override fun doInBackground(vararg params: Any?): String? {
-            val prefs = params[0] as SharedPreferences
-            val v = params[1] as View
-
-            val balance = v.findViewById<TextView>(R.id.walletBalanceNumber)
-            balance.text = LndRPCController.getTotalBalance().toString()
-            return ""
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
         }
     }
 }

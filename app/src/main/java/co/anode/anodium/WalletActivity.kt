@@ -19,20 +19,19 @@ class WalletActivity : AppCompatActivity() {
         actionbar.setDisplayHomeAsUpEnabled(true)
         AnodeClient.eventLog(baseContext,"Activity: WalletActivity created")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        val createfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
-        val mainfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain)
-
         //Show setup or main fragment according to wallet existing or not
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
         //Check if wallet exists
         val walletfile = File(baseContext.filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
         if (walletfile.exists()) {
+            val createfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
             if (createfragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide create fragment")
                 ft.hide(createfragment)
             }
         } else {
+            val mainfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain)
             if (mainfragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide main fragment")
                 ft.hide(mainfragment)
