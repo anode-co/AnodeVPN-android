@@ -12,7 +12,7 @@ import javax.net.ssl.HostnameVerifier
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
-    private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
+    //private lateinit var stub: WalletUnlockerGrpc.WalletUnlockerBlockingStub
     private const val LOGTAG = "co.anode.anodium"
 
     fun createSecurechannel() {
@@ -40,7 +40,7 @@ object LndRPCController {
             createSecurechannel()
         }
         try {
-            stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+            var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
             val gsr = stub.genSeed(GenSeedRequest.newBuilder().build())
             val bldr = InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
             val seed: MutableList<String> = mutableListOf()
@@ -56,6 +56,7 @@ object LndRPCController {
                     //adminMacaroon is empty!
                     putString("admin_macaroon", walletresponse.adminMacaroon.toStringUtf8())
                     putString("walletpassword", password)
+                    putBoolean("lndwalletopened", true)
                     commit()
                 }
                 result = "Success"
@@ -77,13 +78,13 @@ object LndRPCController {
             createSecurechannel()
         }
         try {
-            stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+            var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
             val walletpassword: ByteString =
                 ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
             val response = stub.unlockWallet(
                 UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build()
             )
-        }catch(e:Exception) {
+        } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
             return e.toString()
         }
@@ -152,10 +153,8 @@ object LndRPCController {
         sendcoinsrequest.label = ""
         sendcoinsrequest.minConfs = 1
         sendcoinsrequest.spendUnconfirmed = false
-
         val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
         val hash = sendcoinsresponse.hashCode()
-
     }
 
     fun getTransactions(): MutableList<Transaction> {
