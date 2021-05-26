@@ -94,6 +94,15 @@ class WalletFragmentSetup : Fragment() {
         }
 
         closebutton.setOnClickListener {
+            //Open wallet before closing
+            val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            var result = LndRPCController.openWallet(prefs)
+            if (result == "OK"){
+                with(prefs.edit()) {
+                    putBoolean("lndwalletopened", true)
+                    commit()
+                }
+            }
             activity?.finish()
         }
 

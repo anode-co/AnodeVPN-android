@@ -92,6 +92,7 @@ object LndRPCController {
 
     fun getPubKey() {
         Log.i(LOGTAG, "LndRPCController.getPubKey")
+        if (!this::mSecureChannel.isInitialized) { return }
         val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
         val response = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
         val pubkey = response.identityPubkey
@@ -99,6 +100,9 @@ object LndRPCController {
 
     fun generateAddress() : String {
         Log.i(LOGTAG, "LndRPCController.generateAddress")
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
         val addressResponse = LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
         return addressResponse.address
@@ -106,6 +110,9 @@ object LndRPCController {
 
     fun getConfirmedBalance():Long {
         Log.i(LOGTAG, "LndRPCController.getConfirmedBalance")
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.confirmedBalance/1073741824
@@ -113,6 +120,9 @@ object LndRPCController {
 
     fun getUncofirmedBalance():Long {
         Log.i(LOGTAG, "LndRPCController.getUncofirmedBalance")
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.unconfirmedBalance / 1073741824
@@ -120,6 +130,9 @@ object LndRPCController {
 
     fun getTotalBalance(): Long {
         Log.i(LOGTAG, "LndRPCController.getTotalBalance")
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.totalBalance / 1073741824
@@ -127,6 +140,9 @@ object LndRPCController {
 
     fun sendCoins(address: String, amount: Long) {
         Log.i(LOGTAG, "LndRPCController.sendCoins")
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         val sendcoinsrequest = SendCoinsRequest.newBuilder()
         sendcoinsrequest.addr = address
         sendcoinsrequest.amount = amount * 1073741824
@@ -143,6 +159,9 @@ object LndRPCController {
     }
 
     fun getTransactions(): MutableList<Transaction> {
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
         val transactionsrequest = GetTransactionsRequest.newBuilder().build()
         val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsrequest)
         return transactions.transactionsList
