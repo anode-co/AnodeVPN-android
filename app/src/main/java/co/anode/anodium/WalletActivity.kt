@@ -18,7 +18,6 @@ class WalletActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
         AnodeClient.eventLog(baseContext,"Activity: WalletActivity created")
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         //Show setup or main fragment according to wallet existing or not
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)

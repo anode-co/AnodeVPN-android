@@ -12,17 +12,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 class WalletFragmentMain : Fragment() {
-    lateinit var walletBalance:TextView
-
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.walletfragment_main, container, false)
     }
 
@@ -30,12 +28,13 @@ class WalletFragmentMain : Fragment() {
         super.onViewCreated(v, savedInstanceState)
         AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
         val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        if(!prefs.getBoolean("lndwalletopened", false)) {
+        val walletfile = File(requireContext().filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
+        if (!walletfile.exists()) {
             return
         }
         Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
         //Set balance
-        walletBalance = v.findViewById(R.id.walletBalanceNumber)
+        val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
         walletBalance.text = LndRPCController.getTotalBalance().toString()
 
         val transactions = LndRPCController.getTransactions()
