@@ -21,10 +21,10 @@
         android:usesCleartextTraffic="true"
         android:extractNativeLibs="true"
         tools:targetApi="q">
-        <activity android:name=".DebugWalletActivity"></activity>
+        <activity android:name=".DebugWalletActivity" />
         <activity
             android:name=".WalletActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity android:name=".ForgotPasswordSuccessActivity" />
         <activity
             android:name=".ForgotPasswordActivity"

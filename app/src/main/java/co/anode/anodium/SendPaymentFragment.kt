@@ -1,6 +1,5 @@
 package co.anode.anodium
 
-import android.app.Dialog
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -22,28 +21,18 @@ class SendPaymentFragment: BottomSheetDialogFragment() {
         super.onCreate(savedInstanceState)
     }
 
-
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
-
-        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        dialog.setOnShowListener {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val v = inflater.inflate(R.layout.fragment_sendpayment, container, false)
+        dialog!!.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        dialog!!.setOnShowListener {
             Handler().post {
-                val bottomSheet =
-                    (dialog as? BottomSheetDialog)?.findViewById<View>(R.id.design_bottom_sheet) as? FrameLayout
+                val bottomSheet = (dialog as? BottomSheetDialog)?.findViewById<View>(R.id.design_bottom_sheet) as? FrameLayout
                 bottomSheet?.let {
                     BottomSheetBehavior.from(it).state = BottomSheetBehavior.STATE_EXPANDED
                 }
             }
         }
-        return dialog
-    }
-
-        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_sendpayment, container, false)
-
         val sendbutton = v.findViewById<Button>(R.id.button_sendPKTPayment)
         sendbutton.setOnClickListener {
             var sendcoins = true
