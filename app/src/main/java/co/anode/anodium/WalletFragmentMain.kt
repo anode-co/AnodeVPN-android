@@ -2,20 +2,28 @@ package co.anode.anodium
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.marginBottom
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.github.lightningnetwork.lnd.lnrpc.Transaction
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class WalletFragmentMain : Fragment() {
     override fun onCreateView(
@@ -50,18 +58,71 @@ class WalletFragmentMain : Fragment() {
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
         }
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
-        val firstaddress = v.findViewById<TextView>(R.id.firstaddress)
-        val firstamount = v.findViewById<TextView>(R.id.firstpaymentamount)
-        val firstdate = v.findViewById<TextView>(R.id.firstpaymentdate)
-        val secondaddress = v.findViewById<TextView>(R.id.Secondaddress)
-        val secondamount = v.findViewById<TextView>(R.id.Secondpaymentamount)
-        val seconddate = v.findViewById<TextView>(R.id.Secondpaymentdate)
-        val thirdaddress = v.findViewById<TextView>(R.id.Thirdaddress)
-        val thirdamount = v.findViewById<TextView>(R.id.Thirdpaymentamount)
-        val thirdddate = v.findViewById<TextView>(R.id.Thirdpaymentdate)
-        val fourthaddress = v.findViewById<TextView>(R.id.Fourthaddress)
-        val fourthamount = v.findViewById<TextView>(R.id.Fourthpaymentamount)
-        val fourthdate = v.findViewById<TextView>(R.id.Fourthpaymentdate)
+        val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
+        val context = requireContext()
+        var prevtransactions : MutableList<Transaction> = ArrayList()
+        val simpleDate = SimpleDateFormat("dd/MM/yyyy")
+        var transactions = LndRPCController.getTransactions()
+
+        if (transactions.count() > prevtransactions.count()) {
+            prevtransactions = transactions
+            for (i in 0 until transactions.count()) {
+
+                //Add new line
+                var line = LinearLayout(context)
+                line.id = i
+                line.orientation = LinearLayout.HORIZONTAL
+                val llparams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                line.layoutParams = llparams
+                line.setPadding(10, 10, 10, 10)
+
+                //Add textview and image in the line
+                val textaddress = TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setPadding(10, 10, 0, 10)
+                        setMargins(20,0,0,0)
+                        gravity = Gravity.RIGHT
+                    }
+                    text = transactions[i].destAddressesList[0].substring(4,20) +"..."
+                }
+                textaddress.id = View.generateViewId()
+                line.addView(textaddress)
+                val icon = ImageView(context)
+                val amount:Float = transactions[i].amount.toFloat()/ 1073741824
+                if (amount < 0) {
+                    icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
+                } else {
+                    icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
+                }
+                line.addView(icon)
+                val textamount = TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    text = "PKT%.2f".format(amount)
+                }
+                line.addView(textamount)
+                val textDate = TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        gravity = Gravity.LEFT
+                    }
+                    text = simpleDate.format(Date(transactions[i].timeStamp * 1000))
+                }
+                line.addView(textDate)
+                listsLayout.addView(line)
+            }
+        }//transactions
 
         Thread(Runnable {
             var prevtransactions : MutableList<Transaction> = ArrayList()
@@ -70,15 +131,12 @@ class WalletFragmentMain : Fragment() {
                 if (transactions.count() > prevtransactions.count()) {
                     prevtransactions = transactions
 
-                    for (i in 0 until transactions.count()) {
-                        transactions[i].amount
-                        transactions[i].destAddressesList[0]
-                        transactions[i].timeStamp
-                    }
+                    //for (i in 0 until transactions.count()) {
+
                     activity?.runOnUiThread {
                         //Set balance
-                        walletBalance.text = LndRPCController.getTotalBalance().toString()
-
+                        walletBalance.text = "%.2f".format(LndRPCController.getTotalBalance())
+                        /*
                         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
 
                         if (transactions.count() > 0) {
@@ -157,7 +215,7 @@ class WalletFragmentMain : Fragment() {
                                     )
                                 )
                             }
-                        }
+                        }*/
                     }
                 }
                 Thread.sleep(10000)

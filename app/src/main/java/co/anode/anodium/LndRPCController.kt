@@ -129,14 +129,14 @@ object LndRPCController {
         return walletBalanceResponse.unconfirmedBalance / 1073741824
     }
 
-    fun getTotalBalance(): Long {
+    fun getTotalBalance(): Float {
         Log.i(LOGTAG, "LndRPCController.getTotalBalance")
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-        return walletBalanceResponse.totalBalance / 1073741824
+        return (walletBalanceResponse.totalBalance / 1073741824).toFloat()
     }
 
     fun sendCoins(address: String, amount: Long) {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -80,9 +81,16 @@
         android:layout_marginTop="50dp"
         android:layout_marginStart="20dp"
         android:text="@string/wallet_payments"/>
-
-    <!-- 1st Payment Row -->
     <LinearLayout
+        android:id="@+id/paymentsList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/walletPaymentsLabel">
+
+    </LinearLayout>
+    <!-- 1st Payment Row -->
+    <!--<LinearLayout
         android:id="@+id/PaymentRowFirstLayout"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
@@ -119,47 +127,47 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="23/05/2021"/>
-    </LinearLayout>
+    </LinearLayout>-->
     <!-- 2nd Payment Row -->
-    <LinearLayout
-        android:id="@+id/PaymentRowSecondLayout"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@+id/PaymentRowFirstLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="10dp"
-        android:padding="10dp">
-        <TextView
-            android:id="@+id/Secondaddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cqgy3jlggz8vrmt3q6q"
-            android:maxLength="19"
-            android:layout_marginEnd="20dp"/>
-        <ImageView
-            android:id="@+id/Secondpaymenticon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:tint="@android:color/holo_green_light"
-            android:src="@drawable/ic_baseline_arrow_downward_24"/>
-        <TextView
-            android:id="@+id/Secondpaymentamount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:text="PKT132"/>
-        <TextView
-            android:id="@+id/Secondpaymentdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="23/05/2021"/>
-    </LinearLayout>
-    <!-- 3rd Payment Row -->
+    <!--<LinearLayout
+       android:id="@+id/PaymentRowSecondLayout"
+       android:orientation="horizontal"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:visibility="invisible"
+       app:layout_constraintTop_toBottomOf="@+id/PaymentRowFirstLayout"
+       app:layout_constraintStart_toStartOf="parent"
+       android:layout_marginStart="20dp"
+       android:layout_marginEnd="20dp"
+       android:layout_marginTop="10dp"
+       android:padding="10dp">
+       <TextView
+           android:id="@+id/Secondaddress"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="cqgy3jlggz8vrmt3q6q"
+           android:maxLength="19"
+           android:layout_marginEnd="20dp"/>
+       <ImageView
+           android:id="@+id/Secondpaymenticon"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_marginEnd="20dp"
+           app:tint="@android:color/holo_green_light"
+           android:src="@drawable/ic_baseline_arrow_downward_24"/>
+       <TextView
+           android:id="@+id/Secondpaymentamount"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_marginEnd="20dp"
+           android:text="PKT132"/>
+       <TextView
+           android:id="@+id/Secondpaymentdate"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="23/05/2021"/>
+   </LinearLayout>
+
     <LinearLayout
         android:id="@+id/PaymentRowThirdLayout"
         android:orientation="horizontal"
@@ -198,7 +206,6 @@
             android:layout_height="wrap_content"
             android:text="23/05/2021"/>
     </LinearLayout>
-    <!-- 4th Payment Row -->
     <LinearLayout
         android:id="@+id/PaymentRowFourthLayout"
         android:orientation="horizontal"
@@ -236,26 +243,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="23/05/2021"/>
-    </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/PaymentRowFourthLayout"
-        android:text="@string/wallet_see_history"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"/>
-
-    <Button
-        android:id="@+id/button_sendPayment"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/button_round_send"
-        android:rotation="-45"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+    </LinearLayout>-->
+<!--
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/PaymentRowFourthLayout"
+       android:text="@string/wallet_see_history"
+       android:layout_marginEnd="20dp"
+       android:layout_marginTop="20dp"/>
+-->
+   <Button
+       android:id="@+id/button_sendPayment"
+       android:layout_width="60dp"
+       android:layout_height="60dp"
+       android:layout_alignParentEnd="true"
+       android:layout_marginBottom="20dp"
+       android:background="@drawable/button_round_send"
+       android:rotation="-45"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
