@@ -57,6 +57,9 @@ class WalletFragmentMain : Fragment() {
             AnodeClient.eventLog(requireContext(), "Button: Copy wallet address clicked")
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
         }
+
+        val parentlayout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
+
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val context = requireContext()
@@ -66,35 +69,31 @@ class WalletFragmentMain : Fragment() {
 
         if (transactions.count() > prevtransactions.count()) {
             prevtransactions = transactions
-            for (i in 0 until transactions.count()) {
-
+            var tcount = transactions.count()
+            if (tcount > 25) {
+                tcount = 25
+            }
+            for (i in 0 until tcount) {
                 //Add new line
-                var line = LinearLayout(context)
+                var line = ConstraintLayout(context)
                 line.id = i
-                line.orientation = LinearLayout.HORIZONTAL
+                //line.orientation = LinearLayout.HORIZONTAL
                 val llparams =
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ConstraintLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.MATCH_PARENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT
                     )
                 line.layoutParams = llparams
                 line.setPadding(10, 10, 10, 10)
 
-                //Add textview and image in the line
-                val textaddress = TextView(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply {
-                        setPadding(10, 10, 0, 10)
-                        setMargins(20,0,0,0)
-                        gravity = Gravity.RIGHT
-                    }
-                    text = transactions[i].destAddressesList[0].substring(4,20) +"..."
-                }
+                //ADDRESS
+                val textaddress = TextView(context)
                 textaddress.id = View.generateViewId()
+                textaddress.text = transactions[i].destAddressesList[0].substring(4,20) +"..."
                 line.addView(textaddress)
+                //In/Out Icon
                 val icon = ImageView(context)
+                icon.id = View.generateViewId()
                 val amount:Float = transactions[i].amount.toFloat()/ 1073741824
                 if (amount < 0) {
                     icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
@@ -102,24 +101,51 @@ class WalletFragmentMain : Fragment() {
                     icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
                 }
                 line.addView(icon)
-                val textamount = TextView(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    text = "PKT%.2f".format(amount)
-                }
+                //AMOUNT
+                val textamount = TextView(context)
+                textamount.id = View.generateViewId()
+                textamount.text = "PKT%.2f".format(amount)
                 line.addView(textamount)
-                val textDate = TextView(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply {
-                        gravity = Gravity.LEFT
-                    }
-                    text = simpleDate.format(Date(transactions[i].timeStamp * 1000))
-                }
+                //DATE
+                val textDate = TextView(context)
+                textDate.id = View.generateViewId()
+                textDate.text = simpleDate.format(Date(transactions[i].timeStamp * 1000))
                 line.addView(textDate)
+
+                val set = ConstraintSet()
+                set.clear(textaddress.id)
+                set.clear(icon.id)
+                set.clear(textamount.id)
+                set.clear(textDate.id)
+                //address with start
+                set.connect(textaddress.id, ConstraintSet.START, line.id, ConstraintSet.START, 10)
+                //date with end
+                set.connect(textDate.id, ConstraintSet.END, line.id, ConstraintSet.END, 10)
+                //address with icon
+                set.connect(icon.id, ConstraintSet.START, textaddress.id, ConstraintSet.END,0)
+                set.connect(textaddress.id, ConstraintSet.END, icon.id, ConstraintSet.START,0)
+                //icon with amount
+                set.connect(textamount.id, ConstraintSet.START, icon.id, ConstraintSet.END,0)
+                set.connect(icon.id, ConstraintSet.END, textamount.id, ConstraintSet.START,0)
+                //amount with date
+                set.connect(textDate.id, ConstraintSet.START, textamount.id, ConstraintSet.END,0)
+                set.connect(textamount.id, ConstraintSet.END, textDate.id, ConstraintSet.START,0)
+                val chainViews = intArrayOf(textaddress.id, textDate.id)
+                val chainWeights = floatArrayOf(0f,0f)
+                set.createHorizontalChain(
+                    ConstraintSet.PARENT_ID, ConstraintSet.RIGHT,
+                    ConstraintSet.PARENT_ID, ConstraintSet.LEFT,
+                    chainViews, chainWeights,
+                    ConstraintSet.CHAIN_SPREAD)
+                set.constrainWidth(textaddress.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainWidth(textamount.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainWidth(textDate.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainHeight(textaddress.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainHeight(textamount.id, ConstraintSet.WRAP_CONTENT)
+                set.constrainHeight(textDate.id, ConstraintSet.WRAP_CONTENT)
+                set.applyTo(line)
                 listsLayout.addView(line)
             }
         }//transactions
