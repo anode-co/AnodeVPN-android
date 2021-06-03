@@ -21,7 +21,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="q">
-        <activity android:name=".SendPaymentActivity"
+        <activity android:name=".TransactionHistoryActivity"></activity>
+        <activity
+            android:name=".SendPaymentActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".DebugWalletActivity" />
         <activity

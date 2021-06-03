@@ -61,7 +61,8 @@ class WalletFragmentMain : Fragment() {
 
         history.setOnClickListener {
             AnodeClient.eventLog(requireContext(), "Button: Older transactions clicked")
-            //TODO: open new activity
+            val transactionsActivity = Intent(context, TransactionHistoryActivity::class.java)
+            startActivityForResult(transactionsActivity, 0)
         }
 
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
