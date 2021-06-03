@@ -78,182 +78,37 @@
         app:layout_constraintTop_toBottomOf="@+id/walletAddress"
         app:layout_constraintStart_toStartOf="parent"
         android:textSize="8pt"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:layout_marginStart="20dp"
         android:text="@string/wallet_payments"/>
-    <LinearLayout
-        android:id="@+id/paymentsList"
+    <ScrollView
+        android:id="@+id/scrolllist"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@+id/walletPaymentsLabel">
-
-    </LinearLayout>
-    <!-- 1st Payment Row -->
-    <!--<LinearLayout
-        android:id="@+id/PaymentRowFirstLayout"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:visibility="invisible"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/walletPaymentsLabel"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="10dp">
-        <TextView
-            android:id="@+id/firstaddress"
-            android:layout_width="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/button_sendPayment"
+        android:layout_marginBottom="10dp"
+        android:fillViewport="true">
+        <LinearLayout
+            android:id="@+id/paymentsList"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="cqgy3jlggz8vrmt3q6q"
-            android:maxLength="19"
-            android:layout_marginEnd="20dp"/>
-        <ImageView
-            android:id="@+id/firstpaymenticon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:tint="@android:color/holo_green_light"
-            android:src="@drawable/ic_baseline_arrow_downward_24"/>
-        <TextView
-            android:id="@+id/firstpaymentamount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:text="PKT132"/>
-        <TextView
-            android:id="@+id/firstpaymentdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="23/05/2021"/>
-    </LinearLayout>-->
-    <!-- 2nd Payment Row -->
-    <!--<LinearLayout
-       android:id="@+id/PaymentRowSecondLayout"
-       android:orientation="horizontal"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:visibility="invisible"
-       app:layout_constraintTop_toBottomOf="@+id/PaymentRowFirstLayout"
-       app:layout_constraintStart_toStartOf="parent"
-       android:layout_marginStart="20dp"
-       android:layout_marginEnd="20dp"
-       android:layout_marginTop="10dp"
-       android:padding="10dp">
-       <TextView
-           android:id="@+id/Secondaddress"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="cqgy3jlggz8vrmt3q6q"
-           android:maxLength="19"
-           android:layout_marginEnd="20dp"/>
-       <ImageView
-           android:id="@+id/Secondpaymenticon"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_marginEnd="20dp"
-           app:tint="@android:color/holo_green_light"
-           android:src="@drawable/ic_baseline_arrow_downward_24"/>
-       <TextView
-           android:id="@+id/Secondpaymentamount"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_marginEnd="20dp"
-           android:text="PKT132"/>
-       <TextView
-           android:id="@+id/Secondpaymentdate"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="23/05/2021"/>
-   </LinearLayout>
+            android:orientation="vertical"
+            android:layout_marginTop="10dp">
+        </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/PaymentRowThirdLayout"
-        android:orientation="horizontal"
+    </ScrollView>
+    <TextView
+        android:id="@+id/texthistory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrolllist"
+        android:text="@string/wallet_see_history"
         android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@+id/PaymentRowSecondLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="10dp"
-        android:padding="10dp">
-        <TextView
-            android:id="@+id/Thirdaddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cqgy3jlggz8vrmt3q6q"
-            android:maxLength="19"
-            android:layout_marginEnd="20dp"/>
-        <ImageView
-            android:id="@+id/Thirdpaymenticon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:tint="@android:color/holo_green_light"
-            android:src="@drawable/ic_baseline_arrow_downward_24"/>
-        <TextView
-            android:id="@+id/Thirdpaymentamount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:text="PKT132"/>
-        <TextView
-            android:id="@+id/Thirdpaymentdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="23/05/2021"/>
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/PaymentRowFourthLayout"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@+id/PaymentRowThirdLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="10dp"
-        android:padding="10dp">
-        <TextView
-            android:id="@+id/Fourthaddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cqgy3jlggz8vrmt3q6q"
-            android:maxLength="19"
-            android:layout_marginEnd="20dp"/>
-        <ImageView
-            android:id="@+id/Fourthpaymenticon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:tint="@android:color/holo_green_light"
-            android:src="@drawable/ic_baseline_arrow_downward_24"/>
-        <TextView
-            android:id="@+id/Fourthpaymentamount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:text="PKT132"/>
-        <TextView
-            android:id="@+id/Fourthpaymentdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="23/05/2021"/>
-    </LinearLayout>-->
-<!--
-   <TextView
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       app:layout_constraintEnd_toEndOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/PaymentRowFourthLayout"
-       android:text="@string/wallet_see_history"
-       android:layout_marginEnd="20dp"
-       android:layout_marginTop="20dp"/>
--->
+        android:layout_marginTop="20dp"/>
+
    <Button
        android:id="@+id/button_sendPayment"
        android:layout_width="60dp"
@@ -261,7 +116,6 @@
        android:layout_alignParentEnd="true"
        android:layout_marginBottom="20dp"
        android:background="@drawable/button_round_send"
-       android:rotation="-45"
        app:layout_constraintBottom_toBottomOf="parent"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintEnd_toEndOf="parent"/>
