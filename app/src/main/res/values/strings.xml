@@ -10,6 +10,7 @@
     <string name="action_skip">Skip</string>
     <string name="action_wallet">Wallet</string>
     <string name="action_wallet_debug">Wallet debug</string>
+    <string name="action_wallet_stats">Wallet stats</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
@@ -79,6 +80,7 @@
     <string name="wallet_see_history">Older transactions</string>
     <string name="wallet_coin">PKT</string>
     <string name="action_older_transactions">Transactions</string>
+    <string name="action_view_wallet_log">View Wallet Logs</string>
     <!-- Wallet Setup fragment -->
     <string name="wallet_create">Create PKT wallet</string>
     <string name="wallet_import">Import PKT wallet</string>

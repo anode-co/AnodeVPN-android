@@ -544,10 +544,10 @@ class MainActivity : AppCompatActivity() {
             val walletactivity = Intent(applicationContext, WalletActivity::class.java)
             startActivity(walletactivity)
             return true
-        } else if (id == R.id.action_wallet_debug) {
-            Log.i(LOGTAG, "Open wallet debug activity")
-            val walletdebugactivity = Intent(applicationContext, DebugWalletActivity::class.java)
-            startActivity(walletdebugactivity)
+        } else if (id == R.id.action_wallet_stats) {
+            Log.i(LOGTAG, "Open wallet stats activity")
+            val walletstatsactivity = Intent(applicationContext, WalletStatsActivity::class.java)
+            startActivity(walletstatsactivity)
             return true
         } else if (id == R.id.action_closeapp) {
             closeApp()

@@ -91,12 +91,11 @@ object LndRPCController {
         return "OK"
     }
 
-    fun getPubKey() {
+    fun getInfo(): GetInfoResponse? {
         Log.i(LOGTAG, "LndRPCController.getPubKey")
-        if (!this::mSecureChannel.isInitialized) { return }
+        if (!this::mSecureChannel.isInitialized) { return null}
         val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
-        val response = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
-        val pubkey = response.identityPubkey
+        return lndstub.getInfo(GetInfoRequest.getDefaultInstance())
     }
 
     fun generateAddress() : String {

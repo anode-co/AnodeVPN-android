@@ -43,16 +43,16 @@ class WalletFragmentMain : Fragment() {
         }
         Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
 
-        var address = prefs.getString("lndwalletaddress", "")
-        if (address == "") {
-            address = LndRPCController.generateAddress()
+        var myaddress = prefs.getString("lndwalletaddress", "")
+        if (myaddress == "") {
+            myaddress = LndRPCController.generateAddress()
             with(prefs.edit()) {
-                putString("lndwalletaddress", address)
+                putString("lndwalletaddress", myaddress)
                 commit()
             }
         }
         val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
-        walletAddress.text = address
+        walletAddress.text = myaddress
         walletAddress.setOnClickListener {
             AnodeClient.eventLog(requireContext(), "Button: Copy wallet address clicked")
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
@@ -90,6 +90,9 @@ class WalletFragmentMain : Fragment() {
                         for (i in 0 until tcount) {
                             //Add new line
                             var line = ConstraintLayout(context)
+                            line.setOnClickListener {
+                                //TODO: open transaction details activity
+                            }
                             line.id = i
                             //line.orientation = LinearLayout.HORIZONTAL
                             val llparams =
@@ -103,24 +106,28 @@ class WalletFragmentMain : Fragment() {
                             //ADDRESS
                             val textaddress = TextView(context)
                             textaddress.id = View.generateViewId()
-                            textaddress.width = 550
-                            textaddress.text =
-                                transactions[i].destAddressesList[0].substring(4, 20) + "..."
-                            line.addView(textaddress)
+                            textaddress.width = 450
+
                             //In/Out Icon
                             val icon = ImageView(context)
                             icon.id = View.generateViewId()
                             val amount: Float = transactions[i].amount.toFloat() / 1073741824
                             if (amount < 0) {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
+                                textaddress.text = transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(transactions[i].destAddressesList[0].length-8)
                             } else {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
+                                //TODO: get next address
+                                if (transactions[i].destAddressesList[0] == myaddress) {
+                                    textaddress.text = transactions[i].destAddressesList[1].substring(0, 6) + "..." + transactions[i].destAddressesList[1].substring(transactions[i].destAddressesList[0].length-8)
+                                }
                             }
+                            line.addView(textaddress)
                             line.addView(icon)
                             //AMOUNT
                             val textamount = TextView(context)
                             textamount.id = View.generateViewId()
-                            textamount.width = 300
+                            textamount.width = 250
                             textamount.text = "PKT%.2f".format(amount)
                             line.addView(textamount)
                             //DATE
@@ -230,7 +237,7 @@ class WalletFragmentMain : Fragment() {
             AnodeClient.eventLog(requireContext(), "Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $address")
+                putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $myaddress")
                 type = "text/plain"
             }
             val shareIntent = Intent.createChooser(sendIntent, null)

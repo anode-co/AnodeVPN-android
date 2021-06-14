@@ -24,9 +24,9 @@
         android:title="@string/action_wallet"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_wallet_debug"
+        android:id="@+id/action_wallet_stats"
         android:orderInCategory="100"
-        android:title="@string/action_wallet_debug"
+        android:title="@string/action_wallet_stats"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_checkupdates"
