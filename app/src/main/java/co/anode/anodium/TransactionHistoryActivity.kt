@@ -1,5 +1,6 @@
 package co.anode.anodium
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -9,6 +10,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.github.lightningnetwork.lnd.lnrpc.Transaction
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,6 +28,8 @@ class TransactionHistoryActivity : AppCompatActivity() {
         val context = applicationContext
         var prevtransactions : MutableList<Transaction> = ArrayList()
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        var myaddress = prefs.getString("lndwalletaddress", "")
         Thread(Runnable {
             var transactions = LndRPCController.getTransactions()
             var prevtransactions : MutableList<Transaction> = ArrayList()
@@ -37,6 +41,20 @@ class TransactionHistoryActivity : AppCompatActivity() {
                         for (i in 0 until transactions.count()) {
                             //Add new line
                             var line = ConstraintLayout(context)
+                            line.setOnClickListener {
+                                val transactiondetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
+                                val bundle = Bundle()
+                                bundle.putString("txid", transactions[i].txHash)
+                                for (a in 0 until transactions[i].destAddressesCount) {
+                                    bundle.putString("address$a",transactions[i].getDestAddresses(a))
+                                }
+                                bundle.putLong("amount", transactions[i].amount)
+                                bundle.putInt("blockheight", transactions[i].blockHeight)
+                                bundle.putString("blockhash", transactions[i].blockHash)
+
+                                transactiondetailsFragment.arguments = bundle
+                                transactiondetailsFragment.show(supportFragmentManager, "")
+                            }
                             line.id = i
                             //line.orientation = LinearLayout.HORIZONTAL
                             val llparams =
@@ -50,7 +68,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             //ADDRESS
                             val textaddress = TextView(context)
                             textaddress.id = View.generateViewId()
-                            textaddress.width = 550
+                            textaddress.width = 450
                             textaddress.text =
                                 transactions[i].destAddressesList[0].substring(4, 20) + "..."
                             line.addView(textaddress)
@@ -60,15 +78,19 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             val amount: Float = transactions[i].amount.toFloat() / 1073741824
                             if (amount < 0) {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
+                                textaddress.text = transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(transactions[i].destAddressesList[0].length-8)
                             } else {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
+                                if (transactions[i].destAddressesList[0] == myaddress) {
+                                    textaddress.text = transactions[i].destAddressesList[1].substring(0, 6) + "..." + transactions[i].destAddressesList[1].substring(transactions[i].destAddressesList[0].length-8)
+                                }
                             }
                             line.addView(icon)
                             //AMOUNT
                             val textamount = TextView(context)
                             textamount.id = View.generateViewId()
-                            textamount.width = 300
-                            textamount.text = "PKT%.2f".format(amount)
+                            textamount.width = 250
+                            textamount.text = "PKT %.2f".format(amount)
                             line.addView(textamount)
                             //DATE
                             val textDate = TextView(context)

@@ -50,6 +50,7 @@
         android:id="@+id/wstats_bheight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
         app:layout_constraintStart_toEndOf="@+id/wstats_bheight_label"
         app:layout_constraintBottom_toBottomOf="@+id/wstats_bheight_label"
         android:text="sample block height" />

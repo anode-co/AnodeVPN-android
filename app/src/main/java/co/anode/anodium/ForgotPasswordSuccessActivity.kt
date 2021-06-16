@@ -43,7 +43,6 @@ class ForgotPasswordSuccessActivity : AppCompatActivity() {
         }
         AnodeClient.eventLog(baseContext,"Activity: Forgot password success created")
     }
-    //TODO: close activity after password reset
 
     inner class resendEmail() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {

@@ -43,12 +43,11 @@ class DebugWalletActivity : AppCompatActivity() {
                     if (newlog.length > oldlog.length) {
                         oldlog = newlog
                         logtext.text = newlog
-                        if (scrollposition + 10 > scroll.getChildAt(0).height) {
+                        if (scrollposition + 6 > scroll.getChildAt(0).height) {
                             scroll.scrollTo(0,scroll.getChildAt(0).height)
                         } else {
                             scroll.scrollTo(0,scrollposition)
                         }
-
                         sleep = 2000
                     } else {
                         sleep = 500

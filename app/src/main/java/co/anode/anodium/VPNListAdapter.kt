@@ -76,8 +76,6 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
 
         holder.connectButton.setOnClickListener {
             AnodeClient.eventLog(context, "Button CONNECT to " + dataitem["name"])
-            //TODO: add new peer ???
-            //CjdnsSocket.addPeer("","","","")
             val intent: Intent = Intent()
             intent.putExtra("action", "connect")
             intent.putExtra("publickey", dataitem["publicKey"])

@@ -20,6 +20,7 @@ import androidx.core.view.marginBottom
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.github.lightningnetwork.lnd.lnrpc.Transaction
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -91,7 +92,18 @@ class WalletFragmentMain : Fragment() {
                             //Add new line
                             var line = ConstraintLayout(context)
                             line.setOnClickListener {
-                                //TODO: open transaction details activity
+                                val transactiondetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
+                                val bundle = Bundle()
+                                bundle.putString("txid", transactions[i].txHash)
+                                for (a in 0 until transactions[i].destAddressesCount) {
+                                    bundle.putString("address$a",transactions[i].getDestAddresses(a))
+                                }
+                                bundle.putLong("amount", transactions[i].amount)
+                                bundle.putInt("blockheight", transactions[i].blockHeight)
+                                bundle.putString("blockhash", transactions[i].blockHash)
+                                bundle.putInt("confirmations", transactions[i].numConfirmations)
+                                transactiondetailsFragment.arguments = bundle
+                                transactiondetailsFragment.show(requireActivity().supportFragmentManager, "")
                             }
                             line.id = i
                             //line.orientation = LinearLayout.HORIZONTAL
@@ -117,7 +129,6 @@ class WalletFragmentMain : Fragment() {
                                 textaddress.text = transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(transactions[i].destAddressesList[0].length-8)
                             } else {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
-                                //TODO: get next address
                                 if (transactions[i].destAddressesList[0] == myaddress) {
                                     textaddress.text = transactions[i].destAddressesList[1].substring(0, 6) + "..." + transactions[i].destAddressesList[1].substring(transactions[i].destAddressesList[0].length-8)
                                 }
@@ -128,7 +139,7 @@ class WalletFragmentMain : Fragment() {
                             val textamount = TextView(context)
                             textamount.id = View.generateViewId()
                             textamount.width = 250
-                            textamount.text = "PKT%.2f".format(amount)
+                            textamount.text = "PKT %.2f".format(amount)
                             line.addView(textamount)
                             //DATE
                             val textDate = TextView(context)

@@ -230,7 +230,6 @@ class AnodeUtil(c: Context?) {
             try {
                 logFile.createNewFile()
             } catch (e: IOException) {
-                // TODO Auto-generated catch block
                 e.printStackTrace()
             }
         }

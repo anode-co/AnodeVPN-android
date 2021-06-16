@@ -541,8 +541,13 @@ class MainActivity : AppCompatActivity() {
             return true
         } else if (id == R.id.action_wallet) {
             Log.i(LOGTAG, "Open wallet activity")
-            val walletactivity = Intent(applicationContext, WalletActivity::class.java)
-            startActivity(walletactivity)
+            val walletfile = File(baseContext.filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
+            if (walletfile.exists() && !prefs.getBoolean("lndwalletopened", false)){
+                Toast.makeText(baseContext, "PKT wallet is not unlocked please try again later.", Toast.LENGTH_LONG).show()
+            } else {
+                val walletactivity = Intent(applicationContext, WalletActivity::class.java)
+                startActivity(walletactivity)
+            }
             return true
         } else if (id == R.id.action_wallet_stats) {
             Log.i(LOGTAG, "Open wallet stats activity")

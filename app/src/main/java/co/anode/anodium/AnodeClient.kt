@@ -568,10 +568,8 @@ object AnodeClient {
             if (iconnected) {
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
-                //Intent(mycontext, AnodeVpnService::class.java).putExtra("applicationcontext", mycontext)
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-                //TODO: should we wait until we get new public ip to show connected?
                 //mainButtonState(BUTTON_STATE_CONNECTED)
                 vpnConnected = true
                 //Start Thread for checking connection
