@@ -47,8 +47,7 @@ class DebugWalletActivity : AppCompatActivity() {
             while (true) {
                 this.runOnUiThread(Runnable {
                     if (toBottom) {
-                        var newlog =
-                            File(anodeUtil.CJDNS_PATH + "/" + anodeUtil.PLTD_LOG).readText()
+                        var newlog = File(anodeUtil.CJDNS_PATH + "/" + anodeUtil.PLTD_LOG).readText()
                         if (newlog.length > oldlog.length) {
                             oldlog = newlog
                             logtext.text = newlog
