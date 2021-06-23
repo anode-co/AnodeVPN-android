@@ -164,7 +164,7 @@ private String setVersionNumberByTag() {
         commandLine 'git', 'describe', '--tags', 'HEAD'
         standardOutput = stdout
     }
-    def String verByGit = stdout.toString().tokenize("-")[1].trim()
+    def String verByGit = stdout.toString().tokenize("-")[0].trim()
     def (major, minor, patch) = verByGit.tokenize(".");
     ext.versionMajor = Integer.parseInt(major);
     ext.versionMinor = Integer.parseInt(minor);
