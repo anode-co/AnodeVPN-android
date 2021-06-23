@@ -4,7 +4,7 @@ on:
       [created]
   push:
     tags:
-      - *
+      - anodevpn-*.*.*
 
 jobs:
   release:
