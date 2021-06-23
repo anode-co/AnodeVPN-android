@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function publish() {
-  local archive
-  archive="${1}"
+  local apk
+  apk="${1}"
 
   local checksum
-  checksum=$(sha256sum ${archive} | cut -d ' ' -f 1)
+  checksum=$(sha256sum ${apk} | cut -d ' ' -f 1)
 
   local event_data
   # See https://docs.github.com/en/actions/reference/environment-variables
@@ -26,10 +26,10 @@ function publish() {
 
   curl \
     -X POST \
-    --data-binary @${archive} \
+    --data-binary @${apk} \
     -H 'Content-Type: application/octet-stream' \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${upload_url}?name=${name}.${archive/tmp./}"
+    "${upload_url}?name=${name}.${apk/tmp./}"
 
   curl \
     -X POST \
@@ -38,6 +38,6 @@ function publish() {
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
     "${upload_url}?name=${name}.sha256sum"
 
-  source anode-co/AnodeVPN-android/release_notify.sh
+  source /home/runner/work/AnodeVPN-android/AnodeVPN-android/tools/release_notify.sh
 }
-publish "anode-co/AnodeVPN-android/app-release.apk"
+publish "/home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.apk"

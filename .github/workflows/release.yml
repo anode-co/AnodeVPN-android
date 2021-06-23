@@ -49,7 +49,7 @@ jobs:
       - uses: actions/upload-artifact@main
         with:
           name: release apk
-          path: anode-co/AnodeVPN-android/app-release.apk
+          path: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.apk
 
       - name: Publish release
         run: /bin/bash -c 'source ./tools/publish.sh'
