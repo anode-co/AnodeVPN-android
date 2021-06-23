@@ -11,6 +11,18 @@ function publish() {
   # See https://docs.github.com/en/actions/reference/environment-variables
   event_data=$(cat "$GITHUB_EVENT_PATH")
 
+  local releases_url
+  releases_url=$(echo "$event_data" | jq -r .releases_url)
+
+  local release_event_response
+  release_event_response="$(curl \
+    -X GET \
+    -H 'Content-Type: application/octet-stream' \
+    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    "${releases_url}" 2>> /dev/null)"
+
+  echo "${release_event_response}";
+
   local upload_url
   upload_url=$(echo "$event_data" | jq -r .release.upload_url)
   upload_url=${upload_url/\{?name,label\}/}
