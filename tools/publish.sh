@@ -37,5 +37,7 @@ function publish() {
     -H 'Content-Type: text/plain' \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
     "${upload_url}?name=${name}.sha256sum"
+
+  source anode-co/AnodeVPN-android/release_notify.sh
 }
 publish "anode-co/AnodeVPN-android/app-release.apk"
