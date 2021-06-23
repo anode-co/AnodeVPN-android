@@ -18,25 +18,19 @@ function publish() {
   local release_name
   release_name=$(echo "$event_data" | jq -r .release.tag_name)
 
-  local project_name
-  project_name=$(basename "$GITHUB_REPOSITORY")
-
-  local name
-  name="${name:-${project_name}_${release_name}}"
-
   curl \
     -X POST \
     --data-binary @${apk} \
     -H 'Content-Type: application/octet-stream' \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${upload_url}?name=${name}.${apk/tmp./}"
+    "${upload_url}?name=${release_name}.apk"
 
   curl \
     -X POST \
     --data "$checksum" \
     -H 'Content-Type: text/plain' \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${upload_url}?name=${name}.sha256sum"
+    "${upload_url}?name=${release_name}.sha256sum"
 
   source /home/runner/work/AnodeVPN-android/AnodeVPN-android/tools/release_notify.sh
 }
