@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 die() { echo "$1"; exit 1; }
 if test "x$ANODE_APIKEY" = "x"; then
   die "No API key present"
@@ -39,3 +40,5 @@ curl -X POST "https://vpn.anode.co/api/0.3/vpn/clients/versions/android/" \
   -H "Content-Type: application/json" \
   -H "Authorization: Api-Key $ANODE_APIKEY" \
   -d "{\"clientOs\":\"android\",\"majorNumber\":$MAJOR,\"minorNumber\":$MINOR,\"revisionNumber\":$PATCH,\"clientSoftwareVersion\":\"android-0.0.1\",\"binaryDownloadUrl\":\"$DOWNLOAD_URL\",\"certificateUrl\":\"$CERT_URL\"}"
+
+echo 'Released a new version'
