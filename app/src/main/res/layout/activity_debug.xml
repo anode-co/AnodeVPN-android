@@ -252,6 +252,28 @@
             android:layout_marginEnd="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/label_listconnections"/>
+        <TextView
+            android:id="@+id/label_errorfiles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:text="Error files:"
+            app:layout_constraintStart_toStartOf="@id/label_listconnections"
+            app:layout_constraintTop_toBottomOf="@id/text_rpc" />
+        <TextView
+            android:id="@+id/text_errorfiles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            app:layout_constraintStart_toEndOf="@+id/label_errorfiles"
+            app:layout_constraintBottom_toBottomOf="@+id/label_errorfiles"/>
         <Button
             android:id="@+id/button_SubmitLogs"
             android:layout_width="wrap_content"
@@ -263,7 +285,7 @@
             android:background="@drawable/buttonshape"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_rpc"/>
+            app:layout_constraintTop_toBottomOf="@id/text_errorfiles"/>
         <Button
             android:id="@+id/button_Deleteaccount"
             android:layout_width="wrap_content"
