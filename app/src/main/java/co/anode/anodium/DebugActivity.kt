@@ -48,7 +48,13 @@ class DebugActivity : AppCompatActivity() {
             AnodeClient.eventLog(baseContext, "Delete account selected")
             AnodeClient.DeleteAccount().execute()
         }
-
+        val text = findViewById<TextView>(R.id.text_errorfiles)
+        val files = filesDir.listFiles { file -> file.name.startsWith("error-uploadme-") }
+        if (files.isEmpty()) {
+            text.text = "0"
+        } else {
+            text.text = files.size.toString()
+        }
         Thread(Runnable {
             Log.i(LOGTAG, "DebugActivity.RefreshValues startup")
             val anodeUtil = AnodeUtil(application)
