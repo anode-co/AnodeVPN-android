@@ -30,7 +30,7 @@ echo "$GIT_ID" | sed 's/anodium-\|\.\|-/\n/g' | awk '
 source "$file"
 rm "$file"
 
-DOWNLOAD_URL="https://github.com/anode-co/AnodeVPN-android/releases/download/anodevpn-$MAJOR.$MINOR.$PATCH/app-release.apk"
+DOWNLOAD_URL="https://github.com/anode-co/AnodeVPN-android/releases/download/anodevpn-$MAJOR.$MINOR.$PATCH/anodevpn-$MAJOR.$MINOR.$PATCH.apk"
 CERT_URL="https://anode.co/nonexistant/nonesuch"
 
 echo "{\"clientOs\":\"android\",\"majorNumber\":$MAJOR,\"minorNumber\":$MINOR,\"revisionNumber\":$PATCH,\"clientSoftwareVersion\":\"android-0.0.1\",\"binaryDownloadUrl\":\"$DOWNLOAD_URL\",\"certificateUrl\":\"$CERT_URL\"}"
