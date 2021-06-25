@@ -7,28 +7,22 @@ function publish() {
   local checksum
   checksum=$(sha256sum ${apk} | cut -d ' ' -f 1)
 
-  local event_data
-  # See https://docs.github.com/en/actions/reference/environment-variables
-  event_data=$(cat "$GITHUB_EVENT_PATH")
-
-  local releases_url
-  releases_url=$(echo "$event_data" | jq -r .releases_url)
-
-  local release_event_response
-  release_event_response="$(curl \
-    -X GET \
+  local upload_url
+  upload_url="$(curl \
     -H 'Content-Type: application/octet-stream' \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${releases_url}" 2>> /dev/null)"
-
-  echo "${release_event_response}";
-
-  local upload_url
-  upload_url=$(echo "$event_data" | jq -r .release.upload_url)
+    https://api.github.com/repos/anode-co/AnodeVPN-android/releases 2>> /dev/null | \
+    jq -r '.[] | .upload_url' | \
+    head -n1)"
   upload_url=${upload_url/\{?name,label\}/}
 
   local release_name
-  release_name=$(echo "$event_data" | jq -r .release.tag_name)
+  release_name="$(curl \
+    -H 'Content-Type: application/octet-stream' \
+    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    https://api.github.com/repos/anode-co/AnodeVPN-android/releases 2>> /dev/null | \
+    jq -r '.[] | .tag_name' | \
+    head -n1)"
 
   curl \
     -X POST \
