@@ -18,6 +18,7 @@ import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
 import co.anode.anodium.CjdnsSocket.UDPInterface_beginConnection
 import org.json.JSONArray
 import org.json.JSONException
@@ -72,6 +73,15 @@ object AnodeClient {
         mainActivity = activity
     }
 
+    fun showToast(message: String) {
+        Log.e(LOGTAG, message)
+        if (mainActivity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            mainActivity.runOnUiThread {
+                Toast.makeText(mycontext, message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     fun stackString(e: Throwable): String {
         val sw = StringWriter()
         e.printStackTrace(PrintWriter(sw))
@@ -96,42 +106,18 @@ object AnodeClient {
                     return "Log submitted successfully"
                 }
                 else if (json.has("status") and (json.getString("status") != "success")) {
-                    Log.e(LOGTAG, "Error invalid status posting ${file.name}: $resp")
-                    mainActivity.runOnUiThread {
-                        Toast.makeText(
-                            mycontext,
-                            "Error invalid status posting ${file.name}: $resp",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    showToast("Error invalid status posting ${file.name}: $resp")
                     return "Error invalid status posting ${file.name}: $resp"
                 } else {
-                    mainActivity.runOnUiThread {
-                        Toast.makeText(
-                            mycontext,
-                            "Error posting ${file.name} to server: $resp",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    showToast("Error posting ${file.name} to server: $resp")
                     return "Error posting ${file.name} to server: $resp"
                 }
             } catch (e:Exception) {
-                mainActivity.runOnUiThread {
-                    Toast.makeText(
-                        mycontext,
-                        "Error posting ${file.name}: $resp",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                Log.e(LOGTAG, "Error posting ${file.name}: $resp")
+                showToast("Error posting ${file.name}: $resp")
                 return "Error posting ${file.name}: $resp"
             }
         } catch (e: Exception) {
-            mainActivity.runOnUiThread {
-                Toast.makeText(mycontext, "Error reporting error: ${e.message}", Toast.LENGTH_LONG)
-                    .show()
-            }
-            Log.e(LOGTAG, "Error reporting error: ${e.message}\n${stackString(e)}")
+            showToast("Error reporting error: ${e.message}")
             return "Error reporting error: ${e.message}\n${stackString(e)}"
         }
     }
@@ -392,16 +378,10 @@ object AnodeClient {
                 showInstallOption(destination)
             } else {
                 downloadFails++
-                mainActivity.runOnUiThread {
-                    Toast.makeText(mycontext, "ERROR downloading", Toast.LENGTH_LONG).show()
-                }
+                showToast("ERROR downloading")
             }
         } catch (e: IllegalArgumentException) {
-            Log.e(LOGTAG, "ERROR downloading file ${e.message}")
-            mainActivity.runOnUiThread {
-                Toast.makeText(mycontext, "ERROR downloading file ${e.message}", Toast.LENGTH_LONG)
-                    .show()
-            }
+            showToast("ERROR downloading file ${e.message}")
         }
         return downloadReference
     }
@@ -478,9 +458,7 @@ object AnodeClient {
                     Log.i(LOGTAG, "ERROR updating APK from $result")
                 } else if (result == "none"){
                     if (notifyUser) {
-                        mainActivity.runOnUiThread {
-                            Toast.makeText(mycontext,"Application already at latest version", Toast.LENGTH_LONG).show()
-                        }
+                        showToast("Application already at latest version")
                     }
                 }
             }
@@ -760,8 +738,8 @@ object AnodeClient {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            mainActivity.runOnUiThread {
-                Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
+            if (result != null) {
+                showToast(result)
             }
         }
     }
@@ -794,10 +772,7 @@ object AnodeClient {
                     val jsonObj = JSONObject(result)
                     if (jsonObj.has("status")) {
                         if (jsonObj.getString("status") == "success") {
-                            mainActivity.runOnUiThread {
-                                Toast.makeText(mycontext, "User logged out", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+                            showToast("User logged out")
                             //Sign user out
                             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                             with(prefs.edit()) {
@@ -811,14 +786,10 @@ object AnodeClient {
                         }
                     }
                 } catch (e: JSONException) {
-                    mainActivity.runOnUiThread {
-                        Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
-                    }
+                    showToast(result)
                 }
-            } else {
-                mainActivity.runOnUiThread {
-                    Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
-                }
+            } else if (result != null) {
+               showToast(result)
             }
         }
     }
@@ -841,14 +812,10 @@ object AnodeClient {
                         UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
                     }
                 } catch (e: JSONException) {
-                    mainActivity.runOnUiThread {
-                        Toast.makeText(mycontext, "Error, invalid JSON", Toast.LENGTH_SHORT).show()
-                    }
+                    showToast("Error, invalid JSON")
                 }
-            } else {
-                mainActivity.runOnUiThread {
-                    Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
-                }
+            } else if (result != null) {
+                showToast(result)
             }
         }
     }
@@ -871,13 +838,7 @@ object AnodeClient {
                     val jsonObj = JSONObject(result)
                     if (jsonObj.has("status")) {
                         if (jsonObj.getString("status") == "success") {
-                            mainActivity.runOnUiThread {
-                                Toast.makeText(
-                                    mycontext,
-                                    jsonObj.getString("message"),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                            showToast(jsonObj.getString("message"))
                             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putBoolean("SignedIn", false)
@@ -891,14 +852,10 @@ object AnodeClient {
                         }
                     }
                 } catch (e: JSONException) {
-                    mainActivity.runOnUiThread {
-                        Toast.makeText(mycontext, "Error, invalid JSON", Toast.LENGTH_SHORT).show()
-                    }
+                    showToast("Error, invalid JSON")
                 }
-            } else {
-                mainActivity.runOnUiThread {
-                    Toast.makeText(mycontext, result, Toast.LENGTH_SHORT).show()
-                }
+            } else if (result != null){
+                showToast(result)
             }
         }
     }
