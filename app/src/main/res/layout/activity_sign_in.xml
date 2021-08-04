@@ -41,8 +41,7 @@
                 android:layout_centerVertical="true"
                 android:ems="10"
                 android:inputType="textEmailAddress"
-                android:hint="@string/prompt_email"
-                android:autofillHints="" />
+                android:hint="@string/prompt_email" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordLayout"
@@ -59,8 +58,7 @@
                     android:layout_marginTop="24dp"
                     android:ems="10"
                     android:inputType="textPassword"
-                    android:hint="@string/prompt_password"
-                    android:autofillHints="" />
+                    android:hint="@string/prompt_password" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView

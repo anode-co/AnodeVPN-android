@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -338,7 +337,7 @@ class MainActivity : AppCompatActivity() {
         }, "MainActivity.CheckUpdates").start()
     }
 
-    fun bigbuttonState(state: Int) {
+    private fun bigbuttonState(state: Int) {
         val status = findViewById<TextView>(R.id.textview_status)
         val buttonconnectvpns = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         when(state) {
@@ -595,7 +594,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun requestStoragePermission() {
+    private fun requestStoragePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL)
         } else {
@@ -619,7 +618,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun internetConnection(): Boolean? {
+    private fun internetConnection(): Boolean? {
         val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
         return if (activeNetwork?.isConnected == null)
@@ -628,7 +627,7 @@ class MainActivity : AppCompatActivity() {
             activeNetwork.isConnected
     }
 
-    fun disconnectVPN(showRatingBar: Boolean) {
+    private fun disconnectVPN(showRatingBar: Boolean) {
         AnodeClient.AuthorizeVPN().cancel(true)
         AnodeClient.stopThreads()
         CjdnsSocket.IpTunnel_removeAllConnections()
@@ -643,7 +642,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun GetPublicIPv4(): String {
+    private fun GetPublicIPv4(): String {
         //return URL("http://ipv4bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
         val getURL = "http://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
 
@@ -666,7 +665,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun GetPublicIPv6(): String {
+    private fun GetPublicIPv6(): String {
         //return URL("http://ipv6bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
         val getURL = "http://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
 
@@ -689,7 +688,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun closeApp() {
+    private fun closeApp() {
         Log.d(LOGTAG, "Closing anodium application")
         disconnectVPN(false)
         finish()
@@ -705,6 +704,7 @@ class MainActivity : AppCompatActivity() {
             h = handler
             c = context
         }
+        @SuppressLint("StaticFieldLeak")
         override fun run() {
             h?.removeCallbacks(connectingDialog)
             //if (!AnodeClient.vpnConnected) {
