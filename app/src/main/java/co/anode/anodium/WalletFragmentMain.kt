@@ -58,6 +58,7 @@ class WalletFragmentMain : Fragment() {
         }
 
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
+        walletBalance.text = ""
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val context = requireContext()
         var prevtransactions : MutableList<Transaction> = ArrayList()
@@ -66,9 +67,12 @@ class WalletFragmentMain : Fragment() {
         //Updating main wallet screen every 10 secs
         Thread(Runnable {
             var prevtransactions = 0
-            if (walletlocked) {
+            //Try unlocking the wallet
+            while (walletlocked) {
                 openPKTWallet()
+                Thread.sleep(1000)
             }
+            //Refresh UI with wallet values
             while(true) {
                 if (prefs.getBoolean("lndwalletopened", false)) {
                     if (myaddress == "") {
@@ -80,6 +84,7 @@ class WalletFragmentMain : Fragment() {
                         walletAddress.text = myaddress
                     }
                     var transactions = LndRPCController.getTransactions()
+                    walletBalance.text = "%.2f".format(0.0)
                     if (transactions.count() > prevtransactions) {
                         prevtransactions = transactions.count()
                         var tcount = transactions.count()

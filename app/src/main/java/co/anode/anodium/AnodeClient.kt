@@ -191,10 +191,10 @@ object AnodeClient {
         }
 
     fun storeError(ctx: Context, type: String, e: Throwable) {
-        val err = errorJsonObj(ctx, type, e).toString(1)
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
-        File(ctx.filesDir,fname).appendText(err)
+        val err = errorJsonObj(ctx, type, e).toString(1)
         Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
+        File(ctx.filesDir,fname).appendText(err)
     }
 
     fun storeRating(ctx: Context, pubkey: String, rating: Float, comment: String) {
@@ -216,9 +216,7 @@ object AnodeClient {
     }
 
     fun errorCount(ctx: Context): Int {
-        return ctx.filesDir.listFiles { file ->
-            file.name.startsWith("error-uploadme-")
-        }.size
+        return ctx.filesDir.listFiles { file -> file.name.startsWith("error-uploadme-") }.size
     }
 
     fun ignoreErr(l: ()->Unit) = try { l() } catch (t: Throwable) { }
@@ -243,7 +241,11 @@ object AnodeClient {
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
-        jsonObject.accumulate("message", err.message)
+        if (err.message?.length!! < 254) {
+            jsonObject.accumulate("message", err.message)
+        } else {
+            jsonObject.accumulate("message", err.message?.substring(0, 254))
+        }
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodium.log")
         val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodium.log")
