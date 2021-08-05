@@ -58,7 +58,7 @@ class WalletFragmentMain : Fragment() {
         }
 
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
-        walletBalance.text = ""
+        walletBalance.text = "0.0"
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val context = requireContext()
         var prevtransactions : MutableList<Transaction> = ArrayList()
@@ -84,7 +84,6 @@ class WalletFragmentMain : Fragment() {
                         walletAddress.text = myaddress
                     }
                     var transactions = LndRPCController.getTransactions()
-                    walletBalance.text = "%.2f".format(0.0)
                     if (transactions.count() > prevtransactions) {
                         prevtransactions = transactions.count()
                         var tcount = transactions.count()
@@ -263,7 +262,12 @@ class WalletFragmentMain : Fragment() {
                             }
                         }
                     }
-                    Thread.sleep(10000)
+                    //If there were no transactions it may have been due to error so try again sooner (1sec)
+                    var sleepInterval:Long = 10000
+                    if (transactions.count() == 0) {
+                        sleepInterval = 1000
+                    }
+                    Thread.sleep(sleepInterval)
                 } else {
                     Thread.sleep(500)
                 }
@@ -329,23 +333,13 @@ class WalletFragmentMain : Fragment() {
                                         putBoolean("lndwalletopened", true)
                                         commit()
                                     }
-                                    Toast.makeText(
-                                        requireActivity(),
-                                        "PKT wallet is open",
-                                        Toast.LENGTH_LONG
-                                    )
-                                        .show()
+                                    Toast.makeText(requireActivity(),"PKT wallet is open",Toast.LENGTH_LONG).show()
                                 } else {
                                     with(prefs.edit()) {
                                         putBoolean("lndwalletopened", false)
                                         commit()
                                     }
-                                    Toast.makeText(
-                                        requireActivity(),
-                                        "Wrong password.",
-                                        Toast.LENGTH_LONG
-                                    )
-                                        .show()
+                                    Toast.makeText(requireActivity(),"Wrong password.",Toast.LENGTH_LONG).show()
                                 }
                             }
                         })
