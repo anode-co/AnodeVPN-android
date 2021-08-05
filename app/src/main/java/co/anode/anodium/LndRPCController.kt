@@ -133,9 +133,16 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
-        val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-        return (walletBalanceResponse.totalBalance / 1073741824).toFloat()
+        return try {
+            val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
+            val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
+            (walletBalanceResponse.totalBalance / 1073741824).toFloat()
+        } catch (e:Exception) {
+            Log.e(LOGTAG, e.toString())
+            //throw LndRPCException("LndRPCException: "+e.message)
+            //Return an empty list
+            -1.1f
+        }
     }
 
     fun sendCoins(address: String, amount: Long) {
@@ -143,26 +150,38 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        val sendcoinsrequest = SendCoinsRequest.newBuilder()
-        sendcoinsrequest.addr = address
-        sendcoinsrequest.amount = amount * 1073741824
-        sendcoinsrequest.targetConf = 0
-        sendcoinsrequest.satPerByte = 0
-        sendcoinsrequest.sendAll = false
-        sendcoinsrequest.label = ""
-        sendcoinsrequest.minConfs = 1
-        sendcoinsrequest.spendUnconfirmed = false
-        val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
-        val hash = sendcoinsresponse.hashCode()
+        try {
+            val sendcoinsrequest = SendCoinsRequest.newBuilder()
+            sendcoinsrequest.addr = address
+            sendcoinsrequest.amount = amount * 1073741824
+            sendcoinsrequest.targetConf = 0
+            sendcoinsrequest.satPerByte = 0
+            sendcoinsrequest.sendAll = false
+            sendcoinsrequest.label = ""
+            sendcoinsrequest.minConfs = 1
+            sendcoinsrequest.spendUnconfirmed = false
+            val sendcoinsresponse =
+                LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
+            val hash = sendcoinsresponse.hashCode()
+        } catch (e: Exception) {
+            Log.e(LOGTAG, e.toString())
+        }
     }
 
     fun getTransactions(): MutableList<Transaction> {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        val transactionsrequest = GetTransactionsRequest.newBuilder().build()
-        val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsrequest)
-        return transactions.transactionsList
+        return try {
+            val transactionsrequest = GetTransactionsRequest.newBuilder().build()
+            val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsrequest)
+            transactions.transactionsList
+        } catch (e:Exception) {
+            Log.e(LOGTAG, e.toString())
+            //throw LndRPCException("LndRPCException: "+e.message)
+            //Return an empty list
+            mutableListOf<Transaction>()
+        }
     }
 
     // ByteString values when using for example "paymentRequest.getDescriptionBytes()" can for some reason not directly be used as they are double in length
