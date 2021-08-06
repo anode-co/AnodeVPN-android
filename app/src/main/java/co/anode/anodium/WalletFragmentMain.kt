@@ -272,7 +272,7 @@ class WalletFragmentMain : Fragment() {
                     Thread.sleep(500)
                 }
             }
-        }, "SendPaymentActivity.RefreshValues").start()
+        }, "WalletFragmentMain.RefreshValues").start()
 
         val sharebutton = v.findViewById<Button>(R.id.walletAddressSharebutton)
         sharebutton.setOnClickListener {
