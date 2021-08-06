@@ -93,9 +93,14 @@ object LndRPCController {
 
     fun getInfo(): GetInfoResponse? {
         Log.i(LOGTAG, "LndRPCController.getPubKey")
-        if (!this::mSecureChannel.isInitialized) { return null}
-        val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
-        return lndstub.getInfo(GetInfoRequest.getDefaultInstance())
+        if (!this::mSecureChannel.isInitialized) { return null }
+        return try {
+            val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
+            lndstub.getInfo(GetInfoRequest.getDefaultInstance())
+        } catch (e: Exception) {
+            Log.e(LOGTAG, e.toString())
+            null
+        }
     }
 
     fun generateAddress() : String {
@@ -103,9 +108,15 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
-        val addressResponse = LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
-        return addressResponse.address
+        return try {
+            val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
+            val addressResponse =
+                LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
+            addressResponse.address
+        } catch (e:Exception) {
+            Log.e(LOGTAG, e.toString())
+            return ""
+        }
     }
 
     fun getConfirmedBalance():Long {

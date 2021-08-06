@@ -431,9 +431,6 @@ class MainActivity : AppCompatActivity() {
             //Show/Hide Registration on menu
             mainMenu!!.findItem(R.id.action_account_settings).isVisible =
                 !prefs.getBoolean("Registered", false)
-            //Show/Hide Wallet Stats
-            mainMenu!!.findItem(R.id.action_wallet_stats).isVisible =
-                prefs.getBoolean("lndwalletopened", false)
         }
         //Set button to correct status
         val status = findViewById<TextView>(R.id.textview_status)
@@ -446,11 +443,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         uiInForeground = true
-        if (mainMenu != null) {
-            val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-            mainMenu!!.findItem(R.id.action_wallet_stats).isVisible =
-                prefs.getBoolean("lndwalletopened", false)
-        }
         AnodeClient.eventLog(baseContext, "Application launched")
     }
 
