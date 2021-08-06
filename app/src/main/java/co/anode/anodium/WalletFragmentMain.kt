@@ -34,7 +34,7 @@ class WalletFragmentMain : Fragment() {
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
         AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
-        val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val walletfile = File(requireContext().filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
         if (!walletfile.exists()) {
             return
@@ -296,7 +296,7 @@ class WalletFragmentMain : Fragment() {
 
 
     fun openPKTWallet(): Boolean {
-        val prefs = requireContext().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
         Log.i(LOGTAG, "MainActivity trying to open wallet")
         var result = LndRPCController.openWallet(prefs)
         if (result.contains("ErrWrongPassphrase")) {
@@ -358,7 +358,7 @@ class WalletFragmentMain : Fragment() {
             Log.w(LOGTAG, "Can not open PKT wallet")
             //wrong password prompt user to type password again
             val datadir =
-                File(requireContext().filesDir.toString() + "/lnd/data/chain/pkt/mainnet")
+                File(requireActivity().filesDir.toString() + "/lnd/data/chain/pkt/mainnet")
             var checkwallet = result
             if (!datadir.exists()) {
                 Log.e(LOGTAG, "expected folder structure not available")
