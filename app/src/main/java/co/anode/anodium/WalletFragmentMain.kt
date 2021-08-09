@@ -22,8 +22,6 @@ import java.util.*
 
 
 class WalletFragmentMain : Fragment() {
-    private var walletlocked = true
-
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -68,7 +66,7 @@ class WalletFragmentMain : Fragment() {
         Thread(Runnable {
             var prevtransactions = 0
             //Try unlocking the wallet
-            while (walletlocked) {
+            while (!prefs.getBoolean("lndwalletopened", false)) {
                 openPKTWallet()
                 Thread.sleep(1000)
             }
@@ -77,11 +75,10 @@ class WalletFragmentMain : Fragment() {
                 if (prefs.getBoolean("lndwalletopened", false)) {
                     if (myaddress == "") {
                         myaddress = LndRPCController.generateAddress()
-                        with(prefs.edit()) {
-                            putString("lndwalletaddress", myaddress)
-                            commit()
+                        prefs.edit().putString("lndwalletaddress", myaddress).apply()
+                        activity?.runOnUiThread {
+                            walletAddress.text = myaddress
                         }
-                        walletAddress.text = myaddress
                     }
                     var transactions = LndRPCController.getTransactions()
                     if (transactions.count() > prevtransactions) {
@@ -113,10 +110,7 @@ class WalletFragmentMain : Fragment() {
                                     bundle.putString("blockhash", transactions[i].blockHash)
                                     bundle.putInt("confirmations", transactions[i].numConfirmations)
                                     transactiondetailsFragment.arguments = bundle
-                                    transactiondetailsFragment.show(
-                                        requireActivity().supportFragmentManager,
-                                        ""
-                                    )
+                                    transactiondetailsFragment.show(requireActivity().supportFragmentManager,"")
                                 }
                                 line.id = i
                                 //line.orientation = LinearLayout.HORIZONTAL
@@ -329,16 +323,8 @@ class WalletFragmentMain : Fragment() {
                                 }
                                 val result = LndRPCController.openWallet(prefs)
                                 if (result == "OK") {
-                                    with(prefs.edit()) {
-                                        putBoolean("lndwalletopened", true)
-                                        commit()
-                                    }
                                     Toast.makeText(requireActivity(),"PKT wallet is open",Toast.LENGTH_LONG).show()
                                 } else {
-                                    with(prefs.edit()) {
-                                        putBoolean("lndwalletopened", false)
-                                        commit()
-                                    }
                                     Toast.makeText(requireActivity(),"Wrong password.",Toast.LENGTH_LONG).show()
                                 }
                             }
@@ -374,11 +360,6 @@ class WalletFragmentMain : Fragment() {
             }
             return false
         } else if (result == "OK") {
-            walletlocked = false
-            with(prefs.edit()) {
-                putBoolean("lndwalletopened", true)
-                commit()
-            }
             return true
         }
         return false

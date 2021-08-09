@@ -14,8 +14,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class WalletStatsActivity : AppCompatActivity() {
-    private var walletlocked = true
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet_stats)
@@ -44,7 +42,7 @@ class WalletStatsActivity : AppCompatActivity() {
 
         myaddress.text = prefs.getString("lndwalletaddress", "")
         Thread(Runnable {
-            while (walletlocked) {
+            while (!prefs.getBoolean("lndwalletopened", false)) {
                 openPKTWallet()
                 Thread.sleep(500)
             }
@@ -108,16 +106,8 @@ class WalletStatsActivity : AppCompatActivity() {
                                 }
                                 val result = LndRPCController.openWallet(prefs)
                                 if (result == "OK") {
-                                    with(prefs.edit()) {
-                                        putBoolean("lndwalletopened", true)
-                                        commit()
-                                    }
                                     Toast.makeText(this,"PKT wallet is open",Toast.LENGTH_LONG).show()
                                 } else {
-                                    with(prefs.edit()) {
-                                        putBoolean("lndwalletopened", false)
-                                        commit()
-                                    }
                                     Toast.makeText(this,"Wrong password.",Toast.LENGTH_LONG).show()
                                 }
                             }
@@ -153,11 +143,6 @@ class WalletStatsActivity : AppCompatActivity() {
             }
             return false
         } else if (result == "OK") {
-            walletlocked = false
-            with(prefs.edit()) {
-                putBoolean("lndwalletopened", true)
-                commit()
-            }
             return true
         }
         return false

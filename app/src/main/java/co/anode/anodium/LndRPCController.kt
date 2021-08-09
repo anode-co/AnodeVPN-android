@@ -81,13 +81,13 @@ object LndRPCController {
             var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
             val walletpassword: ByteString =
                 ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
-            val response = stub.unlockWallet(
-                UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build()
-            )
+            val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
         } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
+            preferences.edit().putBoolean("lndwalletopened", false).apply()
             return e.toString()
         }
+        preferences.edit().putBoolean("lndwalletopened", true).apply()
         return "OK"
     }
 
