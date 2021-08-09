@@ -89,10 +89,8 @@ class MainActivity : AppCompatActivity() {
 
         anodeUtil = AnodeUtil(application)
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-        with(prefs.edit()) {
-            putBoolean("lndwalletopened", false)
-            commit()
-        }
+        prefs.edit().putBoolean("lndwalletopened", false).apply()
+
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)

@@ -358,6 +358,9 @@ object AnodeClient {
                 var query = DownloadManager.Query()
 
                 query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
+                //TODO: move below code to a thread outside the UI
+                //was causing app to freeze
+                /*
                 downloadingUpdate = true
                 while (downloadingUpdate) {
                     val c = downloadManager.query(query)
@@ -373,7 +376,7 @@ object AnodeClient {
                             break
                         }
                     }
-                }
+                }*/
             }
             if (flag) {
                 downloadFails = 0
