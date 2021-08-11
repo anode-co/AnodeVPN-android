@@ -141,6 +141,8 @@ class WalletStatsActivity : AppCompatActivity() {
             } else {
                 checkwallet += " walletpassword is not empty"
             }
+            val status = LndRPCController.isPltdRunning()
+            checkwallet += " PLTD status: $status"
             return false
         } else if (result == "OK") {
             return true
