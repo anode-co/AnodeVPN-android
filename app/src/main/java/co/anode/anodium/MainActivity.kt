@@ -27,6 +27,7 @@ import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.charset.Charset
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -50,9 +51,13 @@ class MainActivity : AppCompatActivity() {
     fun exception(paramThrowable: Throwable) {
         //Toast message before exiting app
         var type = "other"
-        if (paramThrowable.cause.toString().contains("CjdnsException") ) type = "cjdnsSocket"
-        else if (paramThrowable.cause.toString().contains("AnodeUtilException") ) type = "cjdroute"
-        else if (paramThrowable.cause.toString().contains("AnodeVPNException") ) type = "vpnService"
+        if (paramThrowable.toString().contains("CjdnsException") ) type = "cjdnsSocket"
+        else if (paramThrowable.toString().contains("AnodeUtilException") ) type = "cjdroute"
+        else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
+        else if (paramThrowable.toString().contains("LndRPCException") ) {
+            type = "other"
+            AnodeClient.storeFileAsError(application, type, "data/data/co.anode.anodium/files/pltd.log")
+        }
         // we'll post the error on next startup
         AnodeClient.storeError(application, type, paramThrowable)
 

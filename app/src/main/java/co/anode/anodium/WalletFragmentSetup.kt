@@ -52,7 +52,7 @@ class WalletFragmentSetup : Fragment() {
                 password = input.text.toString()
                 dialog.dismiss()
 
-                if ((prefs != null) && (!password.isNullOrEmpty())) {
+                if ((prefs != null) && (password.isNotEmpty())) {
                     val result = LndRPCController.createLocalWallet(prefs, password)
                     if (result.contains("Success")) {
                         Toast.makeText(requireContext(), "PKT wallet created", Toast.LENGTH_LONG).show()
