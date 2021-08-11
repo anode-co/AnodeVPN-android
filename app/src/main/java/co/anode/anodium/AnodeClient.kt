@@ -190,6 +190,22 @@ object AnodeClient {
             } ?: false
         }
 
+    fun storeFileAsError(ctx: Context, type: String, filename:String) {
+        val anodeUtil: AnodeUtil = AnodeUtil(mycontext)
+        val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
+        var e = Throwable()
+        //rename filename to anodium.log so it will be posted as current log file
+        File(anodeUtil.CJDNS_PATH+"/anodium.log").renameTo(File(anodeUtil.CJDNS_PATH+"/tempanodium.log"))
+        File(filename).renameTo(File(anodeUtil.CJDNS_PATH+"/anodium.log"))
+        val err = errorJsonObj(ctx, type, e).toString(1)
+        //rename it back
+        //anodium.log back to filename
+        File(anodeUtil.CJDNS_PATH+"/anodium.log").renameTo(File(filename))
+        //tempanodium back to anodium.log
+        File(anodeUtil.CJDNS_PATH+"/tempanodium.log").renameTo(File(anodeUtil.CJDNS_PATH+"/anodium.log"))
+        File(ctx.filesDir,fname).appendText(err)
+    }
+
     fun storeError(ctx: Context, type: String, e: Throwable) {
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
         val err = errorJsonObj(ctx, type, e).toString(1)
@@ -241,10 +257,13 @@ object AnodeClient {
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
-        if (err.message?.length!! < 254) {
+
+        if ((!err.message.isNullOrEmpty()) && (err.message?.length!! < 254)) {
             jsonObject.accumulate("message", err.message)
-        } else {
+        } else if (!err.message.isNullOrEmpty()){
             jsonObject.accumulate("message", err.message?.substring(0, 254))
+        } else {
+            jsonObject.accumulate("message", "")
         }
         val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
         val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodium.log")
@@ -256,7 +275,7 @@ object AnodeClient {
         ignoreErr {
             debugmsg += "peerStats: " + CjdnsSocket.logpeerStats + "\nshowConnections: " + CjdnsSocket.logshowConnections
         }
-        if (err.message!! == "Submit logs")
+        if ((!err.message.isNullOrEmpty()) && (err.message!! == "Submit logs"))
         {
             ignoreErr {
                 if (currlogfile.exists()) jsonObject.accumulate("newAndroidLog", currlogfile.readText(Charsets.UTF_8))

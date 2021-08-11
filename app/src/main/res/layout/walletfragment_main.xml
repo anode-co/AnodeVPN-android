@@ -8,7 +8,7 @@
     tools:context=".WalletFragmentMain"
     android:id="@+id/wallet_fragmentMain"
     android:fitsSystemWindows="true"
-    android:background="@android:color/white">
+    android:background="@android:color/darker_gray">
 
     <TextView
         android:id="@+id/walletBalanceLabel"
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="15pt"
-            android:text="0"/>
+            android:text="#.#"/>
     </LinearLayout>
     <TextView
         android:id="@+id/walletAddressLabel"

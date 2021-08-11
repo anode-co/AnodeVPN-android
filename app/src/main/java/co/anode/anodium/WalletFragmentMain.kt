@@ -1,5 +1,6 @@
 package co.anode.anodium
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -29,6 +30,7 @@ class WalletFragmentMain : Fragment() {
         return inflater.inflate(R.layout.walletfragment_main, container, false)
     }
 
+    @SuppressLint("SimpleDateFormat", "SetTextI18n")
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
         AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
@@ -45,7 +47,7 @@ class WalletFragmentMain : Fragment() {
         walletAddress.text = myaddress
         walletAddress.setOnClickListener {
             AnodeClient.eventLog(requireContext(), "Button: Copy wallet address clicked")
-            Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG)
+            Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG).show()
         }
         val history = v.findViewById<TextView>(R.id.texthistory)
 
@@ -56,7 +58,6 @@ class WalletFragmentMain : Fragment() {
         }
 
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
-        walletBalance.text = "0.0"
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val context = requireContext()
         var prevtransactions : MutableList<Transaction> = ArrayList()
@@ -64,11 +65,21 @@ class WalletFragmentMain : Fragment() {
 
         //Updating main wallet screen every 10 secs
         Thread(Runnable {
+            var failedtoUnlock = 0
             var prevtransactions = 0
+            var walletResult = ""
             //Try unlocking the wallet
             while (!prefs.getBoolean("lndwalletopened", false)) {
-                openPKTWallet()
+                walletResult = openPKTWallet()
+                failedtoUnlock++
+                if (failedtoUnlock > 60) {
+                   throw LndRPCException("Error unlocking wallet: $walletResult")
+                }
                 Thread.sleep(1000)
+            }
+            activity?.runOnUiThread {
+                val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
+                activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
             }
             //Refresh UI with wallet values
             while(true) {
@@ -80,7 +91,7 @@ class WalletFragmentMain : Fragment() {
                             walletAddress.text = myaddress
                         }
                     }
-                    var transactions = LndRPCController.getTransactions()
+                    val transactions = LndRPCController.getTransactions()
                     if (transactions.count() > prevtransactions) {
                         prevtransactions = transactions.count()
                         var tcount = transactions.count()
@@ -255,11 +266,15 @@ class WalletFragmentMain : Fragment() {
                                 history.visibility = View.VISIBLE
                             }
                         }
+                    } else {
+                        activity?.runOnUiThread {
+                            walletBalance.text = "%.2f".format(LndRPCController.getTotalBalance())
+                        }
                     }
-                    //If there were no transactions it may have been due to error so try again sooner (1sec)
+                    //If there were no transactions it may have been due to error so try again sooner (2sec)
                     var sleepInterval:Long = 10000
                     if (transactions.count() == 0) {
-                        sleepInterval = 1000
+                        sleepInterval = 2000
                     }
                     Thread.sleep(sleepInterval)
                 } else {
@@ -289,7 +304,7 @@ class WalletFragmentMain : Fragment() {
     }
 
 
-    fun openPKTWallet(): Boolean {
+    fun openPKTWallet(): String {
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
         Log.i(LOGTAG, "MainActivity trying to open wallet")
         var result = LndRPCController.openWallet(prefs)
@@ -358,11 +373,11 @@ class WalletFragmentMain : Fragment() {
             } else {
                 checkwallet += " walletpassword is not empty"
             }
-            return false
+            return checkwallet
         } else if (result == "OK") {
-            return true
+            return result
         }
-        return false
+        return result
     }
 }
 
