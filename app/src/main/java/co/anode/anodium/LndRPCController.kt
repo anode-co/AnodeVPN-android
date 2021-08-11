@@ -7,6 +7,8 @@ import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.lang.Exception
 import javax.net.ssl.HostnameVerifier
 
@@ -171,8 +173,7 @@ object LndRPCController {
             sendcoinsrequest.label = ""
             sendcoinsrequest.minConfs = 1
             sendcoinsrequest.spendUnconfirmed = false
-            val sendcoinsresponse =
-                LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
+            val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
             val hash = sendcoinsresponse.hashCode()
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
@@ -199,6 +200,12 @@ object LndRPCController {
     private fun byteStringFromHex(hexString: String): ByteString? {
         val hexBytes = BaseEncoding.base16().decode(hexString.toUpperCase())
         return ByteString.copyFrom(hexBytes)
+    }
+
+    fun isPltdRunning(): Boolean {
+        val process = Runtime.getRuntime().exec("pidof pltd")
+        val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
+        return bufferedReader.readText().isNotEmpty()
     }
 }
 

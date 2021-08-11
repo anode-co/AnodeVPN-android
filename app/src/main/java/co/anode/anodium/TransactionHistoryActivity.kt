@@ -31,7 +31,6 @@ class TransactionHistoryActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         var myaddress = prefs.getString("lndwalletaddress", "")
         Thread(Runnable {
-            var transactions = LndRPCController.getTransactions()
             var prevtransactions : MutableList<Transaction> = ArrayList()
             while(true) {
                 var transactions = LndRPCController.getTransactions()

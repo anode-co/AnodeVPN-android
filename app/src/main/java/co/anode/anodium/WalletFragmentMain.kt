@@ -73,7 +73,8 @@ class WalletFragmentMain : Fragment() {
                 walletResult = openPKTWallet()
                 failedtoUnlock++
                 if (failedtoUnlock > 60) {
-                   throw LndRPCException("Error unlocking wallet: $walletResult")
+                   val pltdStatus = LndRPCController.isPltdRunning()
+                   throw LndRPCException("Error unlocking wallet: $walletResult. PLTD status: $pltdStatus")
                 }
                 Thread.sleep(1000)
             }
@@ -373,6 +374,8 @@ class WalletFragmentMain : Fragment() {
             } else {
                 checkwallet += " walletpassword is not empty"
             }
+            val status = LndRPCController.isPltdRunning()
+            checkwallet += " PLTD status: $status"
             return checkwallet
         } else if (result == "OK") {
             return result
