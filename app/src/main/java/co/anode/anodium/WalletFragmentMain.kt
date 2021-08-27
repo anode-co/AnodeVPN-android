@@ -68,15 +68,63 @@ class WalletFragmentMain : Fragment() {
             var failedtoUnlock = 0
             var prevtransactions = 0
             var walletResult = ""
+            var sleepinterval: Long = 1000
             //Try unlocking the wallet
             while (!prefs.getBoolean("lndwalletopened", false)) {
                 walletResult = openPKTWallet()
+                if (walletResult.contains("ErrWrongPassphrase")) {
+                    var password = ""
+                    val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
+                    if (builder != null) {
+                        builder.setTitle("PKT Wallet")
+                        builder.setMessage("Please type your PKT Wallet password")
+                    }
+                    val input = EditText(activity)
+                    val lp = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT
+                    )
+                    input.layoutParams = lp
+                    if (builder != null) {
+                        requireActivity().runOnUiThread {
+                            builder.setView(input)
+                            builder.setPositiveButton(
+                                        "Submit",
+                                DialogInterface.OnClickListener { dialog, _ ->
+                                    password = input.text.toString()
+                                    dialog.dismiss()
+
+                                    if ((prefs != null) && (password.isNotEmpty())) {
+                                        with(prefs.edit()) {
+                                            putString("walletpassword", password)
+                                            commit()
+                                        }
+                                        val result = LndRPCController.openWallet(prefs)
+                                        if (result == "OK") {
+                                            Toast.makeText(requireActivity(),"PKT wallet is open",Toast.LENGTH_LONG).show()
+                                        } else {
+                                            Toast.makeText(requireActivity(),"Wrong password.",Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                })
+
+                            builder.setNegativeButton(
+                                "Cancel",
+                                DialogInterface.OnClickListener { dialog, _ ->
+                                    dialog.dismiss()
+                                })
+                            val alert: androidx.appcompat.app.AlertDialog = builder.create()
+                            alert.show()
+                        }
+                    }
+                    sleepinterval = 10000
+                }
                 failedtoUnlock++
                 if (failedtoUnlock > 60) {
                    val pltdStatus = LndRPCController.isPltdRunning()
                    throw LndRPCException("Error unlocking wallet: $walletResult. PLTD status: $pltdStatus")
                 }
-                Thread.sleep(1000)
+                Thread.sleep(sleepinterval)
             }
             activity?.runOnUiThread {
                 val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
@@ -91,6 +139,10 @@ class WalletFragmentMain : Fragment() {
                         activity?.runOnUiThread {
                             walletAddress.text = myaddress
                         }
+                    }
+                    activity?.runOnUiThread {
+                        Toast.makeText(context, "requesting transactions", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     val transactions = LndRPCController.getTransactions()
                     if (transactions.count() > prevtransactions) {
@@ -183,66 +235,18 @@ class WalletFragmentMain : Fragment() {
                                 set.clear(textamount.id)
                                 set.clear(textDate.id)
                                 //address with start
-                                set.connect(
-                                    textaddress.id,
-                                    ConstraintSet.START,
-                                    line.id,
-                                    ConstraintSet.START,
-                                    10
-                                )
+                                set.connect(textaddress.id,ConstraintSet.START,line.id,ConstraintSet.START,10)
                                 //date with end
-                                set.connect(
-                                    textDate.id,
-                                    ConstraintSet.END,
-                                    line.id,
-                                    ConstraintSet.END,
-                                    10
-                                )
+                                set.connect(textDate.id,ConstraintSet.END,line.id,ConstraintSet.END,10)
                                 //address with icon
-                                set.connect(
-                                    icon.id,
-                                    ConstraintSet.START,
-                                    textaddress.id,
-                                    ConstraintSet.END,
-                                    0
-                                )
-                                set.connect(
-                                    textaddress.id,
-                                    ConstraintSet.END,
-                                    icon.id,
-                                    ConstraintSet.START,
-                                    0
-                                )
+                                set.connect(icon.id, ConstraintSet.START, textaddress.id, ConstraintSet.END, 0)
+                                set.connect(textaddress.id, ConstraintSet.END, icon.id, ConstraintSet.START, 0)
                                 //icon with amount
-                                set.connect(
-                                    textamount.id,
-                                    ConstraintSet.START,
-                                    icon.id,
-                                    ConstraintSet.END,
-                                    0
-                                )
-                                set.connect(
-                                    icon.id,
-                                    ConstraintSet.END,
-                                    textamount.id,
-                                    ConstraintSet.START,
-                                    0
-                                )
+                                set.connect(textamount.id, ConstraintSet.START, icon.id, ConstraintSet.END, 0)
+                                set.connect(icon.id, ConstraintSet.END, textamount.id, ConstraintSet.START, 0)
                                 //amount with date
-                                set.connect(
-                                    textDate.id,
-                                    ConstraintSet.START,
-                                    textamount.id,
-                                    ConstraintSet.END,
-                                    0
-                                )
-                                set.connect(
-                                    textamount.id,
-                                    ConstraintSet.END,
-                                    textDate.id,
-                                    ConstraintSet.START,
-                                    0
-                                )
+                                set.connect(textDate.id, ConstraintSet.START, textamount.id, ConstraintSet.END, 0)
+                                set.connect(textamount.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
                                 val chainViews = intArrayOf(textaddress.id, textDate.id)
                                 val chainWeights = floatArrayOf(0f, 0f)
                                 set.createHorizontalChain(
@@ -275,7 +279,7 @@ class WalletFragmentMain : Fragment() {
                     //If there were no transactions it may have been due to error so try again sooner (2sec)
                     var sleepInterval:Long = 10000
                     if (transactions.count() == 0) {
-                        sleepInterval = 2000
+                        sleepInterval = 1000
                     }
                     Thread.sleep(sleepInterval)
                 } else {
@@ -310,51 +314,7 @@ class WalletFragmentMain : Fragment() {
         Log.i(LOGTAG, "MainActivity trying to open wallet")
         var result = LndRPCController.openWallet(prefs)
         if (result.contains("ErrWrongPassphrase")) {
-            var password = ""
-            val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
-            if (builder != null) {
-                builder.setTitle("PKT Wallet")
-                builder.setMessage("Please type your PKT Wallet password")
-            }
-            val input = EditText(activity)
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            input.layoutParams = lp
-            if (builder != null) {
-                requireActivity().runOnUiThread {
-                    builder.setView(input)
-                    builder.setPositiveButton(
-
-                        "Submit",
-                        DialogInterface.OnClickListener { dialog, _ ->
-                            password = input.text.toString()
-                            dialog.dismiss()
-
-                            if ((prefs != null) && (password.isNotEmpty())) {
-                                with(prefs.edit()) {
-                                    putString("walletpassword", password)
-                                    commit()
-                                }
-                                val result = LndRPCController.openWallet(prefs)
-                                if (result == "OK") {
-                                    Toast.makeText(requireActivity(),"PKT wallet is open",Toast.LENGTH_LONG).show()
-                                } else {
-                                    Toast.makeText(requireActivity(),"Wrong password.",Toast.LENGTH_LONG).show()
-                                }
-                            }
-                        })
-
-                    builder.setNegativeButton(
-                        "Cancel",
-                        DialogInterface.OnClickListener { dialog, _ ->
-                            dialog.dismiss()
-                        })
-                    val alert: androidx.appcompat.app.AlertDialog = builder.create()
-                    alert.show()
-                }
-            }
+            return result
         } else if (result != "OK") {
             //can not open wallet
             Log.w(LOGTAG, "Can not open PKT wallet")
