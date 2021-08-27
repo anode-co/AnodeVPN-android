@@ -122,6 +122,34 @@ object AnodeClient {
         }
     }
 
+    fun httpPostMessage(type:String, message: String): String {
+        try {
+            val message = messageJsonObj(mycontext, type, message).toString(1)
+            val resp = APIHttpReq(API_ERROR_URL,message, "POST", false, false)
+
+            try {
+                val json = JSONObject(resp)
+                if (json.has("status") and (json.getString("status") == "success")) {
+                    Log.e(LOGTAG, "Message submitted successfully")
+                    return "Log submitted successfully"
+                }
+                else if (json.has("status") and (json.getString("status") != "success")) {
+                    showToast("Error invalid status posting: $resp")
+                    return "Error invalid status posting: $resp"
+                } else {
+                    showToast("Error posting to server: $resp")
+                    return "Error posting to server: $resp"
+                }
+            } catch (e:Exception) {
+                showToast("Error posting: $resp")
+                return "Error posting: $resp"
+            }
+        } catch (e: Exception) {
+            showToast("Error reporting error: ${e.message}")
+            return "Error reporting error: ${e.message}\n${stackString(e)}"
+        }
+    }
+
     fun httpPostEvent(dir: File): String {
         try {
             if (!dir.exists()) { return "No event log files to be submitted" }
@@ -295,6 +323,33 @@ object AnodeClient {
             }
         }
         jsonObject.accumulate("debuggingMessages", debugmsg)
+        return jsonObject
+    }
+
+    @Throws(JSONException::class)
+    private fun messageJsonObj(ctx: Context, type: String, message:String): JSONObject {
+        val anodeUtil: AnodeUtil = AnodeUtil(ctx)
+        val jsonObject = JSONObject()
+        var pubkey = ""
+        ignoreErr{ pubkey = anodeUtil.getPubKey() }
+        if (pubkey == "") pubkey = "unknown"
+        jsonObject.accumulate("publicKey", pubkey)
+        jsonObject.accumulate("error", type)
+        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_CODE)
+        jsonObject.accumulate("clientOs", "Android")
+        jsonObject.accumulate("clientOsVersion", android.os.Build.VERSION.RELEASE)
+        ignoreErr{ jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now())) }
+        ignoreErr{ jsonObject.accumulate("ip4Address", CjdnsSocket.ipv4Address) }
+        ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
+        ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", "0") }
+        ignoreErr{ jsonObject.accumulate("availableMemoryBytes", anodeUtil.readMemUsage()) }
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val username = prefs!!.getString("username","")
+        ignoreErr{ jsonObject.accumulate("username", username) }
+        val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
+        val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodium.log")
+        val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodium.log")
+        jsonObject.accumulate("debuggingMessages", message)
         return jsonObject
     }
 

@@ -86,6 +86,9 @@ object LndRPCController {
             val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
         } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("other", "Failed to open wallet ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             preferences.edit().putBoolean("lndwalletopened", false).apply()
             return e.toString()
         }
@@ -152,6 +155,9 @@ object LndRPCController {
             (walletBalanceResponse.totalBalance / 1073741824).toFloat()
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("other", "Failed to get balance ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             //throw LndRPCException("LndRPCException: "+e.message)
             //Return an empty list
             -1.1f
@@ -177,6 +183,9 @@ object LndRPCController {
             val hash = sendcoinsresponse.hashCode()
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("other", "Failed to send coins ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
         }
     }
 
@@ -190,6 +199,9 @@ object LndRPCController {
             transactions.transactionsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("other", "Failed to get transactions ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             //throw LndRPCException("LndRPCException: "+e.message)
             //Return an empty list
             mutableListOf<Transaction>()
