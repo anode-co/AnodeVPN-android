@@ -140,10 +140,11 @@ class WalletFragmentMain : Fragment() {
                             walletAddress.text = myaddress
                         }
                     }
+                    /*
                     activity?.runOnUiThread {
                         Toast.makeText(context, "requesting transactions", Toast.LENGTH_SHORT)
                             .show()
-                    }
+                    }*/
                     val transactions = LndRPCController.getTransactions()
                     if (transactions.count() > prevtransactions) {
                         prevtransactions = transactions.count()
