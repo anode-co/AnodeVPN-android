@@ -22,6 +22,7 @@ object LndRPCController {
         val hostnameVerifier: HostnameVerifier? = null
         mSecureChannel = OkHttpChannelBuilder
                 .forAddress("localhost", 10009)
+                .maxInboundMessageSize(10000000)
                 .hostnameVerifier(hostnameVerifier) // null = default hostnameVerifier
                 .usePlaintext()
                 .build()
