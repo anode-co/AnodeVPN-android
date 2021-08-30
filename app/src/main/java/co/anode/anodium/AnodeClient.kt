@@ -396,6 +396,7 @@ object AnodeClient {
     fun checkNewVersion(notify: Boolean): Boolean {
         notifyUser = notify
         Log.i(LOGTAG, "Checking for latest APK")
+        downloadingUpdate = true
         getLatestAPK().execute()
         return false
     }
@@ -432,25 +433,25 @@ object AnodeClient {
                 var query = DownloadManager.Query()
 
                 query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
-                //TODO: move below code to a thread outside the UI
-                //was causing app to freeze
-                /*
                 downloadingUpdate = true
-                while (downloadingUpdate) {
-                    val c = downloadManager.query(query)
-                    if (c.moveToFirst()) {
-                        var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                        if (status == DownloadManager.STATUS_FAILED) {
-                            flag = false
-                            downloadingUpdate = false
-                            break
-                        } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                            downloadingUpdate = false
-                            flag = true
-                            break
+                Thread(Runnable {
+                    while (downloadingUpdate) {
+                        val c = downloadManager.query(query)
+                        if (c.moveToFirst()) {
+                            var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                            if (status == DownloadManager.STATUS_FAILED) {
+                                flag = false
+                                downloadingUpdate = false
+                                break
+                            } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                                downloadingUpdate = false
+                                flag = true
+                                break
+                            }
                         }
                     }
-                }*/
+                }, "AnodeClient.downloadfile").start()
+
             }
             if (flag) {
                 downloadFails = 0
@@ -535,10 +536,12 @@ object AnodeClient {
                     downloadFile(Uri.parse(url), version, filesize)
                 } else if (result.contains("error")) {
                     Log.i(LOGTAG, "ERROR updating APK from $result")
+                    downloadingUpdate = false
                 } else if (result == "none"){
                     if (notifyUser) {
                         showToast("Application already at latest version")
                     }
+                    downloadingUpdate = false
                 }
             }
         }
