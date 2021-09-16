@@ -161,7 +161,7 @@ private String setVersionNumberByTag() {
  */
     def stdout = new ByteArrayOutputStream()
     exec {
-        commandLine 'git', 'describe', 'master', '--tags'
+        commandLine 'git', 'describe', '--tags', 'HEAD'
         standardOutput = stdout
     }
     def String verByGit = stdout.toString().tokenize("-")[1].trim()
