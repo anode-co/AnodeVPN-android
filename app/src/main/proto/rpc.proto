@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package lnrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.lnrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc";
 
 /*
  * Comments in this file will be directly parsed into the API
@@ -31,6 +30,11 @@ service Lightning {
     of the wallet.
     */
     rpc WalletBalance (WalletBalanceRequest) returns (WalletBalanceResponse);
+
+    /* lncli: `getaddressbalances`
+    GetAddressBalances returns the balance for each of the addresses in the wallet.
+     */                                                                                              
+     rpc GetAddressBalances (GetAddressBalancesRequest) returns (GetAddressBalancesResponse);
 
     /* lncli: `channelbalance`
     ChannelBalance returns a report on the total funds across all open channels,
@@ -583,6 +587,9 @@ message GetTransactionsRequest {
     default to this option.
     */
     int32 end_height = 2;
+    int32 txns_limit = 3;
+    int32 txns_skip = 4;
+    int32 coinbase = 5;
 }
 
 message TransactionDetails {
@@ -2222,6 +2229,49 @@ message WalletBalanceResponse {
     int64 unconfirmed_balance = 3;
 }
 
+message GetAddressBalancesRequest {                                                                                                                                                                        
+    // Minimum number of confirmations for coins to be considered received                                                                                                                                 
+    int32 minconf = 1;                                                                                                                                                                                     
+                                                                                                                                                                                                           
+    // If true then addresses which have been created but carry zero balance will be included
+    bool showzerobalance = 2;
+}
+
+message GetAddressBalancesResponseAddr{
+    // The address which has this balance
+    string address = 1;
+
+    // Total balance in coins
+    double total = 2;
+
+    // Total balance (atomic units)
+    int64 stotal = 3;
+
+    // Balance which is currently spendable (coins)
+    double spendable = 4;
+
+    // Balance which is currently spendable (atomic units)
+    int64 sspendable = 5;
+
+    // Mined coins which have not yet matured (coins)
+    double immaturereward = 6;
+
+    // Mined coins which have not yet matured (atomic units)
+    int64 simmaturereward = 7;
+
+    // Unconfirmed balance in coins
+    double unconfirmed = 8;
+
+    // Unconfirmed balance in atomic units
+    int64 sunconfirmed = 9;
+
+    // The number of transaction outputs which make up the balance
+    int32 outputcount = 10;
+}
+message GetAddressBalancesResponse{
+    repeated GetAddressBalancesResponseAddr addrs = 1;
+}
+
 message Amount {
     // Value denominated in satoshis.
     uint64 sat = 1;
@@ -2695,15 +2745,9 @@ message GraphTopologyUpdate {
 message NodeUpdate {
     repeated string addresses = 1;
     string identity_key = 2;
-    bytes global_features = 3 [deprecated = true];
+    bytes global_features = 3;
     string alias = 4;
     string color = 5;
-
-    /*
-    Features that the node has advertised in the init message, node
-    announcements and invoices.
-    */
-    map<uint32, Feature> features = 6;
 }
 message ChannelEdgeUpdate {
     /*
@@ -2904,13 +2948,6 @@ message Invoice {
     [EXPERIMENTAL].
     */
     bool is_keysend = 25;
-
-    /*
-    The payment address of this invoice. This value will be used in MPP
-    payments, and also for newer invoies that always require the MPP paylaod
-    for added end-to-end security.
-    */
-    bytes payment_addr = 26;
 }
 
 enum InvoiceHTLCState {
@@ -2969,13 +3006,6 @@ message AddInvoiceResponse {
     invoices with an add_index greater than this one.
     */
     uint64 add_index = 16;
-
-    /*
-    The payment address of the generated invoice. This value should be used
-    in all payments for this invoice as we require it for end to end
-    security.
-    */
-    bytes payment_addr = 17;
 }
 message PaymentHash {
     /*
@@ -3282,12 +3312,6 @@ enum FeatureBit {
     PAYMENT_ADDR_OPT = 15;
     MPP_REQ = 16;
     MPP_OPT = 17;
-    WUMBO_CHANNELS_REQ = 18;
-    WUMBO_CHANNELS_OPT = 19;
-    ANCHORS_REQ = 20;
-    ANCHORS_OPT = 21;
-    ANCHORS_ZERO_FEE_HTLC_REQ = 22;
-    ANCHORS_ZERO_FEE_HTLC_OPT = 23;
 }
 
 message Feature {

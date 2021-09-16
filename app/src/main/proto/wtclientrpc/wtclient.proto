@@ -2,9 +2,7 @@ syntax = "proto3";
 
 package wtclientrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.wtclientrpc";
-option java_multiple_files = true;
-
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/wtclientrpc";
 
 // WatchtowerClient is a service that grants access to the watchtower client
 // functionality of the daemon.
@@ -151,19 +149,7 @@ message StatsResponse {
     uint32 num_sessions_exhausted = 5;
 }
 
-enum PolicyType {
-    // Selects the policy from the legacy tower client.
-    LEGACY = 0;
-
-    // Selects the policy from the anchor tower client.
-    ANCHOR = 1;
-}
-
 message PolicyRequest {
-    /*
-    The client type from which to retrieve the active offering policy.
-    */
-    PolicyType policy_type = 1;
 }
 
 message PolicyResponse {

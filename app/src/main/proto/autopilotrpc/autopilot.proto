@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package autopilotrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.autopilotrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/autopilotrpc";
 
 // Autopilot is a service that can be used to get information about the current
 // state of the daemon's autopilot agent, and also supply it with information

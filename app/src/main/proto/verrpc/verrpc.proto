@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package verrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.verrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/verrpc";
 
 // Versioner is a service that can be used to get information about the version
 // and build information of the running daemon.

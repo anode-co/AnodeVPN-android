@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package signrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.signrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/signrpc";
 
 // Signer is a service that gives access to the signing functionality of the
 // daemon's wallet.

@@ -1,12 +1,11 @@
 syntax = "proto3";
 
-import "lnrpc.proto";
-import "signer.proto";
+import "rpc.proto";
+import "signrpc/signer.proto";
 
 package walletrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.walletrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/walletrpc";
 
 // WalletKit is a service that gives access to the core functionalities of the
 // daemon's wallet.

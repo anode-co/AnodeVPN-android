@@ -1,11 +1,10 @@
 syntax = "proto3";
 
-import "lnrpc.proto";
+import "rpc.proto";
 
 package routerrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.routerrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc/routerrpc";
 
 // Router is a service that offers advanced interaction with the router
 // subsystem of the daemon.
@@ -137,9 +136,6 @@ message SendPaymentRequest {
     timelock for the final hop.
     */
     int32 final_cltv_delta = 4;
-
-    // An optional payment addr to be included within the last hop of the route.
-    bytes payment_addr = 20;
 
     /*
     A bare-bones invoice for a payment within the Lightning Network.  With the
@@ -398,9 +394,6 @@ message BuildRouteRequest {
     pubkey.
     */
     repeated bytes hop_pubkeys = 4;
-
-    // An optional payment addr to be included within the last hop of the route.
-    bytes payment_addr = 5;
 }
 
 message BuildRouteResponse {
