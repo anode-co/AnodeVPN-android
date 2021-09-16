@@ -1,11 +1,10 @@
 syntax = "proto3";
 
-import "lnrpc.proto";
+import "rpc.proto";
 
 package lnrpc;
 
-option java_package = "com.github.lightningnetwork.lnd.lnrpc";
-option java_multiple_files = true;
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc";
 
 /*
  * Comments in this file will be directly parsed into the API
