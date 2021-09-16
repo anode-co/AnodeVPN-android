@@ -10,6 +10,8 @@
       <map>
         <entry key="app/src/main/res/layout/activity_debug_wallet.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/activity_wallet_stats.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/fragment_transactiondetails.xml" value="0.2804198800342759" />
+        <entry key="app/src/main/res/layout/statusbar.xml" value="0.23981481481481481" />
         <entry key="app/src/main/res/layout/walletfragment_main.xml" value="0.1787037037037037" />
       </map>
     </option>

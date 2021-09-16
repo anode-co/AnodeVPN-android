@@ -2,15 +2,19 @@ package co.anode.anodium
 
 import android.content.SharedPreferences
 import android.util.Log
-import com.github.lightningnetwork.lnd.lnrpc.*
 import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
+import lnrpc.LightningGrpc
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.Exception
 import javax.net.ssl.HostnameVerifier
+import lnrpc.Rpc
+import lnrpc.Rpc.*
+import lnrpc.WalletUnlockerGrpc
+import lnrpc.Walletunlocker
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
@@ -22,7 +26,7 @@ object LndRPCController {
         val hostnameVerifier: HostnameVerifier? = null
         mSecureChannel = OkHttpChannelBuilder
                 .forAddress("localhost", 10009)
-                .maxInboundMessageSize(10000000)
+                .maxInboundMessageSize(100000000)
                 .hostnameVerifier(hostnameVerifier) // null = default hostnameVerifier
                 .usePlaintext()
                 .build()
@@ -44,8 +48,8 @@ object LndRPCController {
         }
         try {
             var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
-            val gsr = stub.genSeed(GenSeedRequest.newBuilder().build())
-            val bldr = InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
+            val gsr = stub.genSeed(Walletunlocker.GenSeedRequest.newBuilder().build())
+            val bldr = Walletunlocker.InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
             val seed: MutableList<String> = mutableListOf()
             for (i in 0 until gsr.cipherSeedMnemonicCount) {
                 seed.add(gsr.getCipherSeedMnemonic(i))
@@ -84,12 +88,13 @@ object LndRPCController {
             var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
             val walletpassword: ByteString =
                 ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
-            val response = stub.unlockWallet(UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
+            val response = stub.unlockWallet(Walletunlocker.UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
         } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            /*Thread(Runnable {
                 AnodeClient.httpPostMessage("other", "Failed to open wallet ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
+             */
             preferences.edit().putBoolean("lndwalletopened", false).apply()
             return e.toString()
         }
@@ -97,12 +102,12 @@ object LndRPCController {
         return "OK"
     }
 
-    fun getInfo(): GetInfoResponse? {
+    fun getInfo(): Rpc.GetInfoResponse? {
         Log.i(LOGTAG, "LndRPCController.getPubKey")
         if (!this::mSecureChannel.isInitialized) { return null }
         return try {
             val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
-            lndstub.getInfo(GetInfoRequest.getDefaultInstance())
+            lndstub.getInfo(Rpc.GetInfoRequest.getDefaultInstance())
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
             null
@@ -115,9 +120,8 @@ object LndRPCController {
             createSecurechannel()
         }
         return try {
-            val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
-            val addressResponse =
-                LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
+            val addressRequest = Rpc.NewAddressRequest.newBuilder().setTypeValue(0).build()
+            val addressResponse = LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
             addressResponse.address
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
@@ -130,7 +134,7 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
+        val walletBallanceRequest = Rpc.WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
         return walletBalanceResponse.confirmedBalance/1073741824
     }
@@ -161,11 +165,26 @@ object LndRPCController {
             }, "LndRPCController.UploadMessageThread").start()
             //throw LndRPCException("LndRPCException: "+e.message)
             //Return an empty list
-            -1.1f
+            -1.0f
         }
     }
 
-    fun sendCoins(address: String, amount: Long) {
+    fun getAddresses(): MutableList<GetAddressBalancesResponseAddr>? {
+        Log.i(LOGTAG, "LndRPCController.getAddresses")
+        if (!this::mSecureChannel.isInitialized) {
+            createSecurechannel()
+        }
+        try {
+            var addressBalancesRequest = GetAddressBalancesRequest.newBuilder().build()
+            val addressBalancesResponce = LightningGrpc.newBlockingStub(mSecureChannel).getAddressBalances(addressBalancesRequest)
+            return addressBalancesResponce.addrsList
+        } catch (e:Exception) {
+            Log.e(LOGTAG, e.toString())
+            return null
+        }
+    }
+
+    fun sendCoins(address: String, amount: Long): String {
         Log.i(LOGTAG, "LndRPCController.sendCoins")
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
@@ -182,11 +201,13 @@ object LndRPCController {
             sendcoinsrequest.spendUnconfirmed = false
             val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
             val hash = sendcoinsresponse.hashCode()
+            return "OK"
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            return e.toString()
+            /*Thread(Runnable {
                 AnodeClient.httpPostMessage("other", "Failed to send coins ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            }, "LndRPCController.UploadMessageThread").start()*/
         }
     }
 

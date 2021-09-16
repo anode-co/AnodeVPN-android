@@ -9,6 +9,7 @@
     android:id="@+id/wallet_fragmentMain"
     android:fitsSystemWindows="true"
     android:background="@android:color/darker_gray">
+    e<include layout="@layout/statusbar"/>
 
     <TextView
         android:id="@+id/walletBalanceLabel"

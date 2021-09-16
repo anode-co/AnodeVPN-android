@@ -18,6 +18,7 @@ class SendPaymentActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
         val sendbutton = findViewById<Button>(R.id.button_sendPKTPayment)
+
         sendbutton.setOnClickListener {
             var sendcoins = true
             val bspassword: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
@@ -42,9 +43,17 @@ class SendPaymentActivity : AppCompatActivity() {
             }
             //Send coins
             if (sendcoins) {
-                LndRPCController.sendCoins(address.text.toString(), amount.text.toString().toLong())
-                Toast.makeText(applicationContext, "Payment of ${amount.text}PKT send", Toast.LENGTH_SHORT).show()
-                finish()
+                val result = LndRPCController.sendCoins(address.text.toString(), amount.text.toString().toLong())
+                if (result == "OK") {
+                    Toast.makeText(applicationContext, "Payment of ${amount.text}PKT send", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else if (result.contains("InsufficientFundsError",true)){
+                    Toast.makeText(applicationContext, "Wallet does not have enough balance", Toast.LENGTH_SHORT).show()
+                } else if (result.contains("custom checksum failed", true)) {
+                    Toast.makeText(applicationContext, "Invalid address.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, result, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

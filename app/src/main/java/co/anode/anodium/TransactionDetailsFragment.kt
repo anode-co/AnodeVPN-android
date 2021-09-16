@@ -1,5 +1,6 @@
 package co.anode.anodium
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Html
@@ -20,6 +21,7 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         super.onCreate(savedInstanceState)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_transactiondetails, container, false)
@@ -43,21 +45,48 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
             }
         }
 
-        val amount = v.findViewById<TextView>(R.id.trdetails_amount)
-        amount.text = "PKT %.2f".format((requireArguments().getLong("amount") / 1073741824).toFloat())
+        val textamount = v.findViewById<TextView>(R.id.trdetails_amount)
+        var amount = requireArguments().getLong("amount").toFloat()
+        val onePKT = 1073741824
+        val mPKT = 1073741.824F
+        val uPKT  = 1073.741824F
+        val nPKT  = 1.073741824F
+        if (amount > 1000000000) {
+            amount /= onePKT
+            textamount.text = "PKT %.2f".format(amount)
+        } else if (amount > 1000000) {
+            amount /= mPKT
+            textamount.text = "mPKT %.2f".format(amount)
+        } else if (amount > 1000) {
+            amount /= uPKT
+            textamount.text = "μPKT %.2f".format(amount)
+        } else if (amount < 1000000000) {
+            amount /= onePKT
+            textamount.text = "PKT %.2f".format(amount)
+        } else if (amount < 1000000) {
+            amount /= mPKT
+            textamount.text = "mPKT %.2f".format(amount)
+        } else if (amount < 1000) {
+            amount /= uPKT
+            textamount.text = "μPKT %.2f".format(amount)
+        } else {
+            amount /= nPKT
+            textamount.text = "nPKT %.2f".format(amount)
+        }
+
         val block = v.findViewById<TextView>(R.id.trdetails_block)
         val bheight = requireArguments().getInt("blockheight")
         val bhash = requireArguments().getString("blockhash")
-        val confirmations = v.findViewById<TextView>(R.id.trdetails_confirmations)
+        //val confirmations = v.findViewById<TextView>(R.id.trdetails_confirmations)
         if (bheight>0) {
             val blocklink: Spanned = HtmlCompat.fromHtml("<a href='https://explorer.pkt.cash/block/$bhash'>$bheight</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
             block.movementMethod = LinkMovementMethod.getInstance()
             block.text = blocklink
-            confirmations.visibility = View.VISIBLE
-            confirmations.text = "Confirmations: "+requireArguments().getInt("confirmations").toString()
+            //confirmations.visibility = View.VISIBLE
+            //confirmations.text = "Confirmations: "+requireArguments().getInt("confirmations").toString()
         } else {
             block.text = "Unconfirmed"
-            confirmations.visibility = View.INVISIBLE
+            //confirmations.visibility = View.INVISIBLE
         }
         val txidlink = v.findViewById<TextView>(R.id.trdetails_txid)
         val txid = requireArguments().getString("txid")
