@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
-import com.github.lightningnetwork.lnd.lnrpc.Transaction
+import lnrpc.Rpc.Transaction
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.io.File
 import java.text.SimpleDateFormat
@@ -23,6 +23,8 @@ import java.util.*
 
 
 class WalletFragmentMain : Fragment() {
+    lateinit var statusbar: TextView
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -42,7 +44,6 @@ class WalletFragmentMain : Fragment() {
         Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
 
         var myaddress = prefs.getString("lndwalletaddress", "")
-
         val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
         walletAddress.text = myaddress
         walletAddress.setOnClickListener {
@@ -56,7 +57,7 @@ class WalletFragmentMain : Fragment() {
             val transactionsActivity = Intent(context, TransactionHistoryActivity::class.java)
             startActivityForResult(transactionsActivity, 0)
         }
-
+        statusbar = v.findViewById<TextView>(R.id.textview_status)
         val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val context = requireContext()
@@ -70,6 +71,9 @@ class WalletFragmentMain : Fragment() {
             var walletResult = ""
             var sleepinterval: Long = 1000
             //Try unlocking the wallet
+            activity?.runOnUiThread {
+                statusbar.text = "Trying to unlock wallet..."
+            }
             while (!prefs.getBoolean("lndwalletopened", false)) {
                 walletResult = openPKTWallet()
                 if (walletResult.contains("ErrWrongPassphrase")) {
@@ -127,24 +131,32 @@ class WalletFragmentMain : Fragment() {
                 Thread.sleep(sleepinterval)
             }
             activity?.runOnUiThread {
+                statusbar.text = "Wallet unlocked"
                 val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
                 activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
             }
             //Refresh UI with wallet values
             while(true) {
                 if (prefs.getBoolean("lndwalletopened", false)) {
+                    val tmpmyaddresses = LndRPCController.getAddresses()
+                    var myaddresses: MutableList<String> = mutableListOf()
+                    for (i in tmpmyaddresses!!.indices) {
+                        myaddresses.add(tmpmyaddresses[i].address)
+                    }
+                    activity?.runOnUiThread {
+                        statusbar.text = ""
+                    }
                     if (myaddress == "") {
-                        myaddress = LndRPCController.generateAddress()
+                        if (myaddresses.size == 0) {
+                            myaddress = LndRPCController.generateAddress()
+                        } else {
+                            myaddress = myaddresses[0]
+                        }
                         prefs.edit().putString("lndwalletaddress", myaddress).apply()
                         activity?.runOnUiThread {
                             walletAddress.text = myaddress
                         }
                     }
-                    /*
-                    activity?.runOnUiThread {
-                        Toast.makeText(context, "requesting transactions", Toast.LENGTH_SHORT)
-                            .show()
-                    }*/
                     val transactions = LndRPCController.getTransactions()
                     if (transactions.count() > prevtransactions) {
                         prevtransactions = transactions.count()
@@ -155,56 +167,62 @@ class WalletFragmentMain : Fragment() {
                         activity?.runOnUiThread {
                             listsLayout.removeAllViews()
                             //Set balance
-                            walletBalance.text = "%.2f".format(LndRPCController.getTotalBalance())
+                            val balance = LndRPCController.getTotalBalance()
+                            if ( balance < 0) {
+                                //Error in getting balance
+                                statusbar.text = "Error in retrieving balance"
+                                walletBalance.text = "0"
+                            } else {
+                                walletBalance.text = "%.2f".format(balance)
+                            }
                             for (i in 0 until tcount) {
                                 //Add new line
                                 var line = ConstraintLayout(context)
                                 line.setOnClickListener {
-                                    val transactiondetailsFragment: BottomSheetDialogFragment =
-                                        TransactionDetailsFragment()
+                                    val transactiondetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
                                     val bundle = Bundle()
                                     bundle.putString("txid", transactions[i].txHash)
                                     for (a in 0 until transactions[i].destAddressesCount) {
-                                        bundle.putString(
-                                            "address$a",
-                                            transactions[i].getDestAddresses(a)
-                                        )
+                                        //Remove any addresses that are from the same wallet
+                                        if (!myaddresses.contains(transactions[i].getDestAddresses(a))) {
+                                            bundle.putString("address$a", transactions[i].getDestAddresses(a))
+                                        }
                                     }
                                     bundle.putLong("amount", transactions[i].amount)
                                     bundle.putInt("blockheight", transactions[i].blockHeight)
                                     bundle.putString("blockhash", transactions[i].blockHash)
-                                    bundle.putInt("confirmations", transactions[i].numConfirmations)
+                                    //Do not include confirmations
+                                    //bundle.putInt("confirmations", transactions[i].numConfirmations)
                                     transactiondetailsFragment.arguments = bundle
                                     transactiondetailsFragment.show(requireActivity().supportFragmentManager,"")
                                 }
                                 line.id = i
                                 //line.orientation = LinearLayout.HORIZONTAL
-                                val llparams =
-                                    ConstraintLayout.LayoutParams(
-                                        ConstraintLayout.LayoutParams.MATCH_PARENT,
-                                        ConstraintLayout.LayoutParams.WRAP_CONTENT
-                                    )
+                                val llparams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
                                 line.layoutParams = llparams
                                 line.setPadding(10, 20, 10, 20)
 
                                 //ADDRESS
                                 val textaddress = TextView(context)
                                 textaddress.id = View.generateViewId()
-                                textaddress.width = 450
+                                textaddress.width = 350
 
                                 //In/Out Icon
                                 val icon = ImageView(context)
                                 icon.id = View.generateViewId()
-                                val amount: Float = transactions[i].amount.toFloat() / 1073741824
+                                var amount: Float = transactions[i].amount.toFloat()
+                                val onePKT = 1073741824
+                                val mPKT = 1073741.824F
+                                val uPKT  = 1073.741824F
+                                val nPKT  = 1.073741824F
                                 if (amount < 0) {
                                     icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
-                                    textaddress.text =
-                                        transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(
-                                            transactions[i].destAddressesList[0].length - 8)
+                                    textaddress.text = transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(transactions[i].destAddressesList[0].length - 8)
                                 } else {
                                     icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
+                                    textaddress.text = ""
                                     //If address is same as our address get next one
-                                    if (transactions[i].destAddressesList[0] == myaddress) {
+                                    /*if (transactions[i].destAddressesList[0] == myaddress) {
                                         textaddress.text =
                                             transactions[i].destAddressesList[1].substring(0,6) + "..." + transactions[i].destAddressesList[1].substring(
                                                 transactions[i].destAddressesList[0].length - 8)
@@ -213,15 +231,36 @@ class WalletFragmentMain : Fragment() {
                                         textaddress.text =
                                             transactions[i].destAddressesList[0].substring(0,6) + "..." + transactions[i].destAddressesList[1].substring(
                                                 transactions[i].destAddressesList[0].length - 8)
-                                    }
+                                    }*/
                                 }
                                 line.addView(textaddress)
                                 line.addView(icon)
                                 //AMOUNT
                                 val textamount = TextView(context)
                                 textamount.id = View.generateViewId()
-                                textamount.width = 250
-                                textamount.text = "PKT %.2f".format(amount)
+                                textamount.width = 350
+                                if (amount > 1000000000) {
+                                    amount /= onePKT
+                                    textamount.text = "PKT %.2f".format(amount)
+                                } else if (amount > 1000000) {
+                                    amount /= mPKT
+                                    textamount.text = "mPKT %.2f".format(amount)
+                                } else if (amount > 1000) {
+                                    amount /= uPKT
+                                    textamount.text = "μPKT %.2f".format(amount)
+                                } else if (amount < 1000000000) {
+                                    amount /= onePKT
+                                    textamount.text = "PKT %.2f".format(amount)
+                                } else if (amount < 1000000) {
+                                    amount /= mPKT
+                                    textamount.text = "mPKT %.2f".format(amount)
+                                } else if (amount < 1000) {
+                                    amount /= uPKT
+                                    textamount.text = "μPKT %.2f".format(amount)
+                                } else {
+                                    amount /= nPKT
+                                    textamount.text = "nPKT %.2f".format(amount)
+                                }
                                 line.addView(textamount)
                                 //DATE
                                 val textDate = TextView(context)
@@ -250,12 +289,7 @@ class WalletFragmentMain : Fragment() {
                                 set.connect(textamount.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
                                 val chainViews = intArrayOf(textaddress.id, textDate.id)
                                 val chainWeights = floatArrayOf(0f, 0f)
-                                set.createHorizontalChain(
-                                    ConstraintSet.PARENT_ID, ConstraintSet.RIGHT,
-                                    ConstraintSet.PARENT_ID, ConstraintSet.LEFT,
-                                    chainViews, chainWeights,
-                                    ConstraintSet.CHAIN_SPREAD
-                                )
+                                set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
                                 set.constrainWidth(textaddress.id, ConstraintSet.WRAP_CONTENT)
                                 set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
                                 set.constrainWidth(textamount.id, ConstraintSet.WRAP_CONTENT)
@@ -273,8 +307,14 @@ class WalletFragmentMain : Fragment() {
                             }
                         }
                     } else {
+                        var balance = LndRPCController.getTotalBalance()
+                        if ( balance < 0) {
+                            //Error in getting balance
+                            statusbar.text = "Error in retrieving balance"
+                            balance = 0.0F
+                        }
                         activity?.runOnUiThread {
-                            walletBalance.text = "%.2f".format(LndRPCController.getTotalBalance())
+                            walletBalance.text = "%.2f".format(balance)
                         }
                     }
                     //If there were no transactions it may have been due to error so try again sooner (2sec)

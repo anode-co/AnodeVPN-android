@@ -89,14 +89,13 @@
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintBottom_toBottomOf="@+id/trdetails_block_label"
             android:text="456789"/>
-        <TextView
+        <!--<TextView
             android:id="@+id/trdetails_confirmations"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="9pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintTop_toBottomOf="@+id/trdetails_block"
-            android:text="123"/>
-
+            android:text="123"/>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

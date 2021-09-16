@@ -9,8 +9,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.github.lightningnetwork.lnd.lnrpc.Transaction
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import lnrpc.Rpc.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -67,14 +67,14 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             //ADDRESS
                             val textaddress = TextView(context)
                             textaddress.id = View.generateViewId()
-                            textaddress.width = 450
+                            textaddress.width = 350
                             textaddress.text =
                                 transactions[i].destAddressesList[0].substring(4, 20) + "..."
                             line.addView(textaddress)
                             //In/Out Icon
                             val icon = ImageView(context)
                             icon.id = View.generateViewId()
-                            val amount: Float = transactions[i].amount.toFloat() / 1073741824
+                            var amount: Float = transactions[i].amount.toFloat() / 1073741824
                             if (amount < 0) {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
                                 textaddress.text = transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(transactions[i].destAddressesList[0].length-8)
@@ -88,8 +88,33 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             //AMOUNT
                             val textamount = TextView(context)
                             textamount.id = View.generateViewId()
-                            textamount.width = 250
-                            textamount.text = "PKT %.2f".format(amount)
+                            textamount.width = 350
+                            val onePKT = 1073741824
+                            val mPKT = 1073741.824F
+                            val uPKT  = 1073.741824F
+                            val nPKT  = 1.073741824F
+                            if (amount > 1000000000) {
+                                amount /= onePKT
+                                textamount.text = "PKT %.2f".format(amount)
+                            } else if (amount > 1000000) {
+                                amount /= mPKT
+                                textamount.text = "mPKT %.2f".format(amount)
+                            } else if (amount > 1000) {
+                                amount /= uPKT
+                                textamount.text = "μPKT %.2f".format(amount)
+                            } else if (amount < 1000000000) {
+                                amount /= onePKT
+                                textamount.text = "PKT %.2f".format(amount)
+                            } else if (amount < 1000000) {
+                                amount /= mPKT
+                                textamount.text = "mPKT %.2f".format(amount)
+                            } else if (amount < 1000) {
+                                amount /= uPKT
+                                textamount.text = "μPKT %.2f".format(amount)
+                            } else {
+                                amount /= nPKT
+                                textamount.text = "nPKT %.2f".format(amount)
+                            }
                             line.addView(textamount)
                             //DATE
                             val textDate = TextView(context)

@@ -12,13 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
-import com.github.lightningnetwork.lnd.lnrpc.*
-import com.google.protobuf.ByteString
-import io.grpc.ManagedChannel
-import io.grpc.okhttp.OkHttpChannelBuilder
 import java.net.URL
-import javax.net.ssl.HostnameVerifier
-
 
 class DebugActivity : AppCompatActivity() {
 
