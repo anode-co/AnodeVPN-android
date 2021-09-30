@@ -81,6 +81,7 @@
     <string name="wallet_coin">PKT</string>
     <string name="action_older_transactions">Transactions</string>
     <string name="action_view_wallet_log">View Wallet Logs</string>
+    <string name="action_view_wallet_info">View Wallet Info</string>
     <!-- Wallet Setup fragment -->
     <string name="wallet_create">Create PKT wallet</string>
     <string name="wallet_import">Import PKT wallet</string>
@@ -111,4 +112,5 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_wallet_info">WalletInfoActivity</string>
 </resources>

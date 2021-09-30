@@ -9,6 +9,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_debug_wallet.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/activity_wallet_info.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_wallet_stats.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/fragment_transactiondetails.xml" value="0.2804198800342759" />
         <entry key="app/src/main/res/layout/statusbar.xml" value="0.23981481481481481" />

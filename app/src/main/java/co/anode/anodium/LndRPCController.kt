@@ -6,15 +6,12 @@ import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
-import lnrpc.LightningGrpc
+import lnrpc.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.Exception
 import javax.net.ssl.HostnameVerifier
-import lnrpc.Rpc
 import lnrpc.Rpc.*
-import lnrpc.WalletUnlockerGrpc
-import lnrpc.Walletunlocker
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
@@ -102,12 +99,14 @@ object LndRPCController {
         return "OK"
     }
 
-    fun getInfo(): Rpc.GetInfoResponse? {
+    fun getInfo(): Metaservice.GetInfo2Responce? {
         Log.i(LOGTAG, "LndRPCController.getPubKey")
         if (!this::mSecureChannel.isInitialized) { return null }
         return try {
             val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
-            lndstub.getInfo(Rpc.GetInfoRequest.getDefaultInstance())
+            val getinforesponse = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
+            val metaservice = MetaServiceGrpc.newBlockingStub(mSecureChannel)
+            metaservice.getInfo2(Metaservice.GetInfo2Request.newBuilder().setInfoResponse(getinforesponse).build())
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
             null
