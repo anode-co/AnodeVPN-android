@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package lnrpc;
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc";
+
+message NeutrinoBan {
+    string addr = 1;
+    string reason = 2;
+    string end_time = 3;
+}
+
+message NeutrinoQuery {
+	string peer = 1;   
+	string command = 2;        
+	uint32 req_num = 3;  
+	uint32 create_time = 4;      
+	uint32 last_request_time = 5;  
+	uint32 last_response_time = 6;
+}
+
+message NeutrinoInfo {
+    repeated PeerDesc peers = 1;
+    repeated NeutrinoBan bans = 2;
+    repeated NeutrinoQuery queries = 3;
+    string block_hash = 4;
+    int32 height = 5;
+    string block_timestamp = 6;
+    bool is_syncing = 7;
+}
+
+message WalletInfo {
+    string current_block_hash = 1;
+    int32 current_height = 2;
+    string current_block_timestamp = 3;
+    int32 wallet_version = 4;
+    WalletStats wallet_stats = 5;
+}
+
+message PeerDesc {
+    uint64 bytes_received = 1;
+	uint64 bytes_sent = 2;
+	string last_recv = 3;   
+	string last_send = 4;   
+	bool connected = 5;
+	string addr = 6;
+	bool inbound = 7;
+	string na = 8; //netaddress address:port
+	int32 id = 9;
+	string user_agent = 10;            
+	string services = 11;
+	bool version_known = 12;
+	uint32 advertised_proto_ver = 13;
+	uint32 protocol_version = 14;
+	bool send_headers_preferred = 15;
+	bool ver_ack_received = 16;
+	bool witness_enabled = 17;
+	string wire_encoding = 18;
+	int64 time_offset = 19;    
+	string time_connected = 20;
+	int32 starting_height = 21; 
+	int32 last_block = 22;
+	bytes last_announced_block = 23; 
+	uint64 last_ping_nonce = 24;
+	string last_ping_time = 25;
+	int64 last_ping_micros = 26;  
+}
+
+message WalletStats {
+    bool maintenance_in_progress = 1;
+    string maintenance_name = 2;
+    int32 maintenance_cycles = 3;
+    int32 maintenance_last_block_visited = 4;
+    string time_of_last_maintenance = 5;
+    bool syncing = 6;
+    string sync_started = 7;
+    int64 sync_remaining_seconds = 8;
+    int32 sync_current_block = 9;
+    int32 sync_from = 10;
+    int32 sync_to = 11;
+    int32 birthday_block = 12;
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package lnrpc;
+
+import "pkt.proto";
+import "rpc.proto";
+
+option go_package = "github.com/pkt-cash/pktd/lnd/lnrpc";
+
+service MetaService {
+    rpc GetInfo2 (GetInfo2Request) returns (GetInfo2Responce);
+}
+
+message GetInfo2Request {
+    GetInfoResponse InfoResponse = 1;
+}
+
+message GetInfo2Responce { 
+    NeutrinoInfo neutrino = 1;
+    WalletInfo wallet = 2;
+    GetInfoResponse lightning = 3;
+}
