@@ -1,21 +1,22 @@
 package co.anode.anodium
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContentProviderCompat.requireContext
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
+import android.widget.ArrayAdapter
 
 class WalletStatsActivity : AppCompatActivity() {
     var updating = true
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet_stats)
@@ -45,32 +46,117 @@ class WalletStatsActivity : AppCompatActivity() {
             return
         }
 
+
         val myaddress = findViewById<TextView>(R.id.wstats_address)
         val mybalance = findViewById<TextView>(R.id.wstats_balance)
 
+        val peersExpandbutton = findViewById<TextView>(R.id.peers_expand)
+        val bannedExpandbutton = findViewById<TextView>(R.id.banned_expand)
+        val queriesExpandbutton = findViewById<TextView>(R.id.queries_expand)
+
+        val peersListView = findViewById<ListView>(R.id.peers_list)
+        val bannedListView = findViewById<ListView>(R.id.banned_list)
+        val queriesListView = findViewById<ListView>(R.id.queries_list)
+        peersListView.visibility = View.GONE
+        bannedListView.visibility = View.GONE
+        queriesListView.visibility = View.GONE
+
+        peersExpandbutton.setOnClickListener {
+            if (peersListView.visibility == View.VISIBLE) {
+                peersListView.visibility = View.GONE
+            } else {
+                peersListView.visibility = View.VISIBLE
+            }
+        }
+        bannedExpandbutton.setOnClickListener {
+            if (bannedListView.visibility == View.VISIBLE) {
+                bannedListView.visibility = View.GONE
+            } else {
+                bannedListView.visibility = View.VISIBLE
+            }
+        }
+        queriesExpandbutton.setOnClickListener {
+            if (queriesListView.visibility == View.VISIBLE) {
+                queriesListView.visibility = View.GONE
+            } else {
+                queriesListView.visibility = View.VISIBLE
+            }
+        }
         myaddress.text = prefs.getString("lndwalletaddress", "")
         Thread(Runnable {
             while (!prefs.getBoolean("lndwalletopened", false)) {
                 openPKTWallet()
                 Thread.sleep(500)
             }
+            val walletsync = findViewById<TextView>(R.id.wstats_walletsync)
+            val neutrinosync = findViewById<TextView>(R.id.wstats_neutrinosync)
+            val connectedServers = findViewById<TextView>(R.id.wstats_connectedservers)
+            val bannedServers = findViewById<TextView>(R.id.wstats_bannedservers)
+            val numqueries = findViewById<TextView>(R.id.wstats_queries)
             while(updating) {
                 runOnUiThread {
-                    mybalance.text = "PKT %.2f".format(LndRPCController.getTotalBalance())
-                    val response = LndRPCController.getInfo()
-                    if (response != null) {
-                        val blockHeight = findViewById<TextView>(R.id.wstats_bheight)
-                        blockHeight.text = response.lightning.blockHeight.toString()
-                        val blockhash = findViewById<TextView>(R.id.wstats_bhash)
-                        blockhash.text = response.lightning.blockHash
-                        val headertimestamp = findViewById<TextView>(R.id.wstats_bheader)
-                        val simpleDate = SimpleDateFormat("dd/MM/yyyy")
-                        headertimestamp.text = simpleDate.format(Date(response.lightning.bestHeaderTimestamp * 1000))
-                        val synced = findViewById<TextView>(R.id.wstats_synced)
-                        synced.text = response.lightning.syncedToChain.toString()
+                    mybalance.text = "Requesting data"
+                    walletsync.text = "Requesting data\n "
+                    neutrinosync.text = "Requesting data\n "
+                    connectedServers.text = "-"
+                    bannedServers.text = "-"
+                    numqueries.text = "-"
+                }
+                val getinforesponse = LndRPCController.getInfo()
+                val balance = LndRPCController.getTotalBalance()
+                val peersList = mutableListOf<String>()
+                val bansList = mutableListOf<String>()
+                val queriesList = mutableListOf<String>()
+                if (getinforesponse != null)  {
+                    if (getinforesponse.neutrino != null) {
+                        for (i in 0 until getinforesponse?.neutrino?.peersList?.size!!) {
+                            val peerDesc = getinforesponse.neutrino?.peersList?.get(i)
+                            peersList.add("Address: " + peerDesc?.addr)
+                            peersList.add("Version: " + peerDesc?.userAgent)
+                            peersList.add("Sync: " + peerDesc?.lastBlock.toString())
+                        }
+                        for (i in 0 until getinforesponse.neutrino?.bansList?.size!!) {
+                            val ban = getinforesponse.neutrino?.bansList?.get(i)
+                            bansList.add("Address: "+ban?.addr)
+                            bansList.add("Reason: "+ban?.reason)
+                            bansList.add("Endtime: "+ban?.endTime)
+                        }
+                        for (i in 0 until getinforesponse.neutrino?.queriesList?.size!!) {
+                            val query = getinforesponse.neutrino?.queriesList?.get(i)
+                            queriesList.add("Server: "+query?.peer)
+                            queriesList.add("Request: "+query?.command)
+                            queriesList.add("Created: "+query?.createTime)
+                            if (query?.lastResponseTime!! > 0) {
+                                val datetime = query.lastResponseTime.toLong().let { Date(it) }
+                                queriesList.add("Waiting since: $datetime")
+                            } else {
+                                queriesList.add("Waiting since: ")
+                            }
+                        }
                     }
                 }
-                Thread.sleep(1000)
+                val peersadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, peersList)
+                val bannedadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, bansList)
+                val queriesadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, queriesList)
+
+                runOnUiThread {
+                    peersListView.adapter = peersadapter
+                    bannedListView.adapter = bannedadapter
+                    queriesListView.adapter = queriesadapter
+                    if (balance < 0) {
+                        mybalance.text = "Error retrieving balance"
+                    } else {
+                        mybalance.text = "PKT %.2f".format(balance)
+                    }
+                    if (getinforesponse != null) {
+                        walletsync.text = getinforesponse.wallet.currentHeight.toString()+"\n"+getinforesponse.wallet.currentBlockTimestamp
+                        neutrinosync.text = getinforesponse.neutrino.height.toString()+"\n"+getinforesponse.neutrino.blockTimestamp
+                        connectedServers.text = getinforesponse.neutrino?.peersList?.size.toString()
+                        bannedServers.text = getinforesponse.neutrino?.bansList?.size.toString()
+                        numqueries.text = getinforesponse.neutrino?.queriesList?.size.toString()
+                    }
+                }
+                Thread.sleep(5000)
             }
         }, "WalletStats.RefreshValues").start()
     }

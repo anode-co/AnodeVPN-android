@@ -5,119 +5,200 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".WalletStatsActivity">
-
-    <TextView
-        android:id="@+id/wstats_address_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:text="Address"/>
-    <TextView
-        android:id="@+id/wstats_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="sample address..."
-        android:textIsSelectable="true"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_address_label"
-        app:layout_constraintStart_toStartOf="@+id/wstats_address_label"/>
-    <TextView
-        android:id="@+id/wstats_balance_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_address"
-        app:layout_constraintStart_toStartOf="@+id/wstats_address"
-        android:text="Balance"/>
-    <TextView
-        android:id="@+id/wstats_balance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        app:layout_constraintBottom_toBottomOf="@+id/wstats_balance_label"
-        app:layout_constraintStart_toEndOf="@+id/wstats_balance_label"
-        android:textIsSelectable="true"
-        android:layout_marginStart="20dp"/>
-    <TextView
-        android:id="@+id/wstats_bheight_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Block height"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_balance_label"
-        app:layout_constraintStart_toStartOf="@+id/wstats_balance_label"/>
-    <TextView
-        android:id="@+id/wstats_bheight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintStart_toEndOf="@+id/wstats_bheight_label"
-        app:layout_constraintBottom_toBottomOf="@+id/wstats_bheight_label"
-        android:text="sample block height" />
-    <TextView
-        android:id="@+id/wstats_bhash_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Block Hash"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_bheight"
-        app:layout_constraintStart_toStartOf="@+id/wstats_bheight_label"/>
-    <TextView
-        android:id="@+id/wstats_bhash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="block hash sample"
-        app:layout_constraintStart_toStartOf="@+id/wstats_bhash_label"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_bhash_label"
-        android:textIsSelectable="true" />
-    <TextView
-        android:id="@+id/wstats_bheader_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Header timestamp"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_bhash"
-        app:layout_constraintStart_toStartOf="@+id/wstats_bhash_label"/>
-    <TextView
-        android:id="@+id/wstats_bheader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="timestamp"
-        app:layout_constraintStart_toEndOf="@+id/wstats_bheader_label"
-        app:layout_constraintBottom_toBottomOf="@+id/wstats_bheader_label"
-        android:layout_marginStart="20dp"/>
-    <TextView
-        android:id="@+id/wstats_synced_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Synced"
-        app:layout_constraintTop_toBottomOf="@+id/wstats_bheader_label"
-        app:layout_constraintStart_toStartOf="@+id/wstats_bheader_label"/>
-    <TextView
-        android:id="@+id/wstats_synced"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="synced to chain"
-        app:layout_constraintStart_toEndOf="@+id/wstats_synced_label"
-        app:layout_constraintBottom_toBottomOf="@+id/wstats_synced_label"
-        android:layout_marginStart="20dp"/>
-
+    <ScrollView
+        android:id="@+id/wallet_stats_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/wstats_address_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp"
+                android:text="Address"/>
+            <TextView
+                android:id="@+id/wstats_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading"
+                android:textIsSelectable="true"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_address_label"
+                app:layout_constraintStart_toStartOf="@+id/wstats_address_label"/>
+            <TextView
+                android:id="@+id/wstats_balance_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_address"
+                app:layout_constraintStart_toStartOf="@+id/wstats_address"
+                android:text="Balance"/>
+            <TextView
+                android:id="@+id/wstats_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_balance_label"
+                app:layout_constraintStart_toStartOf="@+id/wstats_balance_label"
+                android:textIsSelectable="true" />
+            <TextView
+                android:id="@+id/wstats_walletsync_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wallet sync"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_balance"
+                app:layout_constraintStart_toStartOf="@+id/wstats_balance_label"/>
+            <TextView
+                android:id="@+id/wstats_walletsync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/wstats_walletsync_label"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_walletsync_label"
+                android:text="Loading" />
+            <TextView
+                android:id="@+id/wstats_neutrinosync_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Neutrino sync"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_walletsync"
+                app:layout_constraintStart_toStartOf="@+id/wstats_walletsync_label"/>
+            <TextView
+                android:id="@+id/wstats_neutrinosync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading"
+                app:layout_constraintStart_toStartOf="@+id/wstats_neutrinosync_label"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_neutrinosync_label"
+                android:textIsSelectable="true" />
+            <TextView
+                android:id="@+id/wstats_connectedservers_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connected servers"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_neutrinosync"
+                app:layout_constraintStart_toStartOf="@+id/wstats_neutrinosync_label"/>
+            <TextView
+                android:id="@+id/wstats_connectedservers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading"
+                app:layout_constraintStart_toEndOf="@+id/wstats_connectedservers_label"
+                app:layout_constraintBottom_toBottomOf="@+id/wstats_connectedservers_label"
+                android:layout_marginStart="20dp"/>
+            <TextView
+                android:id="@+id/peers_expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="click to expand"
+                android:clickable="true"
+                android:textSize="5pt"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/wstats_connectedservers"
+                android:layout_marginStart="10dp" />
+            <ListView
+                android:id="@+id/peers_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_connectedservers">
+            </ListView>
+            <TextView
+                android:id="@+id/wstats_bannedservers_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Banned servers"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                app:layout_constraintTop_toBottomOf="@+id/peers_list"
+                app:layout_constraintStart_toStartOf="@+id/wstats_connectedservers_label"/>
+            <TextView
+                android:id="@+id/wstats_bannedservers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading"
+                app:layout_constraintStart_toEndOf="@+id/wstats_bannedservers_label"
+                app:layout_constraintBottom_toBottomOf="@+id/wstats_bannedservers_label"
+                android:layout_marginStart="20dp"/>
+            <TextView
+                android:id="@+id/banned_expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="click to expand"
+                android:clickable="true"
+                android:textSize="5pt"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/wstats_bannedservers"
+                android:layout_marginStart="10dp" />
+            <ListView
+                android:id="@+id/banned_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_bannedservers">
+            </ListView>
+            <TextView
+                android:id="@+id/wstats_queries_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Active queries"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                app:layout_constraintTop_toBottomOf="@+id/banned_list"
+                app:layout_constraintStart_toStartOf="@+id/wstats_bannedservers_label"/>
+            <TextView
+                android:id="@+id/wstats_queries"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading"
+                app:layout_constraintStart_toEndOf="@+id/wstats_queries_label"
+                app:layout_constraintBottom_toBottomOf="@+id/wstats_queries_label"
+                android:layout_marginStart="20dp"/>
+            <TextView
+                android:id="@+id/queries_expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="click to expand"
+                android:clickable="true"
+                android:textSize="5pt"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/wstats_queries"
+                android:layout_marginStart="10dp" />
+            <ListView
+                android:id="@+id/queries_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_bannedservers">
+            </ListView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
     <Button
         android:id="@+id/buttonViewWalletInfo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/buttonViewWalletLog"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/button_margin"
-        android:layout_marginRight="@dimen/button_margin"
-        android:layout_marginBottom="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttonViewWalletLog"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="40dp"
         android:text="@string/action_view_wallet_info"
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape"/>
     <Button
         android:id="@+id/buttonViewWalletLog"
-        android:layout_marginLeft="@dimen/button_margin"
-        android:layout_marginRight="@dimen/button_margin"
-        android:layout_width="match_parent"
+        app:layout_constraintStart_toEndOf="@+id/buttonViewWalletInfo"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/action_view_wallet_log"
         android:textSize="16sp"
