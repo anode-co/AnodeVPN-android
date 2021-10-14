@@ -12,13 +12,9 @@ import java.io.InputStreamReader
 import java.lang.Exception
 import javax.net.ssl.HostnameVerifier
 import lnrpc.Rpc.*
-import java.util.*
-import kotlin.concurrent.timerTask
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
-    private var throwError = true
-    private const val PostErrorInterval: Long = 60000
     private const val LOGTAG = "co.anode.anodium"
 
     fun createSecurechannel() {
@@ -92,15 +88,9 @@ object LndRPCController {
         } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
             preferences.edit().putBoolean("lndwalletopened", false).apply()
-            if (throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to open wallet ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to open wallet ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             return e.toString()
         }
         preferences.edit().putBoolean("lndwalletopened", true).apply()
@@ -117,15 +107,9 @@ object LndRPCController {
             metaservice.getInfo2(Metaservice.GetInfo2Request.newBuilder().setInfoResponse(getinforesponse).build())
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            if (throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to get info ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to get info ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             null
         }
     }
@@ -141,15 +125,9 @@ object LndRPCController {
             addressResponse.address
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            if(throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to generate address ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to generate address ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             return ""
         }
     }
@@ -185,15 +163,9 @@ object LndRPCController {
             (walletBalanceResponse.totalBalance / 1073741824).toFloat()
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            if (throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to get balance ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to get balance ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             -1.0f
         }
     }
@@ -209,15 +181,9 @@ object LndRPCController {
             return addressBalancesResponce.addrsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            if (throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to get addresses ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to get addresses ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             return null
         }
     }
@@ -242,15 +208,9 @@ object LndRPCController {
             return "OK"
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            if (throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to send coins ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to send coins ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             return e.toString()
         }
     }
@@ -265,15 +225,9 @@ object LndRPCController {
             transactions.transactionsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            if (throwError) {
-                Thread(Runnable {
-                    AnodeClient.httpPostMessage("other", "Failed to get transactions ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            throwError = false
-            Timer().schedule(timerTask {
-                throwError = true
-            },PostErrorInterval)
+            Thread(Runnable {
+                AnodeClient.httpPostMessage("lnd", "Failed to get transactions ${e.toString()}")
+            }, "LndRPCController.UploadMessageThread").start()
             //Return an empty list
             mutableListOf<Transaction>()
         }

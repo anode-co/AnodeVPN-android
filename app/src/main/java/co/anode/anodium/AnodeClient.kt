@@ -64,6 +64,8 @@ object AnodeClient {
     private var notifyUser = false
     var downloadFails = 0
     var downloadingUpdate = false
+    private const val PostMessageInterval = 60000
+    var lastpostmessage: Long = 0
     val h = Handler()
 
     fun init(context: Context, mainActivity_textview: TextView, button: ToggleButton, activity: AppCompatActivity)  {
@@ -123,6 +125,12 @@ object AnodeClient {
     }
 
     fun httpPostMessage(type:String, message: String): String {
+        //Allow a single post message every minute
+        if ((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) {
+            return ""
+        }
+        lastpostmessage = System.currentTimeMillis()
+        Log.i(LOGTAG, "Posting error at $lastpostmessage")
         try {
             val message = messageJsonObj(mycontext, type, message).toString(1)
             val resp = APIHttpReq(API_ERROR_URL,message, "POST", false, false)

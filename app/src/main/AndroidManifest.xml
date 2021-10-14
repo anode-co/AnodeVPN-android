@@ -21,9 +21,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="q">
-        <activity
-            android:name=".WalletInfoActivity"
-            android:exported="true" />
+        <activity android:name=".WalletInfoActivity" />
         <activity android:name=".WalletStatsActivity" />
         <activity android:name=".TransactionHistoryActivity" />
         <activity

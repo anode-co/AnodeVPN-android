@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         else if (paramThrowable.toString().contains("AnodeUtilException") ) type = "cjdroute"
         else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
         else if (paramThrowable.toString().contains("LndRPCException") ) {
-            type = "other"
+            type = "lnd"
             AnodeClient.storeFileAsError(application, type, "data/data/co.anode.anodium/files/pltd.log")
         }
         // we'll post the error on next startup
