@@ -20,6 +20,7 @@ class AnodeUtil(c: Context?) {
     val CJDROUTE_LOG = "cjdroute.log"
     val PLTD_LOG = "pltd.log"
     val PLTD_BINFILE = "pltd"
+    var isPltdRunning = false
     lateinit var pltd_pb: Process
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
@@ -157,6 +158,14 @@ class AnodeUtil(c: Context?) {
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = CJDNS_PATH
             pltd_pb = processBuilder.start()
+            isPltdRunning = true
+            Thread( Runnable {
+                //If pltd fails, send error msg and relaunch it
+                pltd_pb.waitFor()
+                isPltdRunning = false
+                AnodeClient.httpPostMessage("lnd", "Pltd stopped")
+                launchpltd()
+            }).start()
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute pltd " + e.message)
         }

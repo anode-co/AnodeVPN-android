@@ -102,8 +102,10 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     override fun run() {
         try {
             main()
+            //TODO: DEBUG for testing notifications
+            /*
             var time = System.currentTimeMillis()
-            val interval = 10 * 60 * 1000 //10min
+            val interval: Long = 10 * 60 * 1000 //10min
             while (true) {
                 if(System.currentTimeMillis() > (time + interval)) {
                     time = System.currentTimeMillis()
@@ -119,8 +121,8 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
                         notify(notificationId, builder.build())
                     }
                 }
-                Thread.sleep(1000)
-            }
+                Thread.sleep(interval)
+            }*/
         } catch (e: InterruptedException) {
             if (mInterface != null) {
                 stopVPN()

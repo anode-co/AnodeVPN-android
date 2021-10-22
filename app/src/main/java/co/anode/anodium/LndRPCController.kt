@@ -220,7 +220,11 @@ object LndRPCController {
             createSecurechannel()
         }
         return try {
-            val transactionsrequest = GetTransactionsRequest.newBuilder().build()
+            //coinbase 0=Include, 1=Exclude, 2=Only
+                //TODO: check TxnsLimit
+            val transactionsrequest = GetTransactionsRequest.newBuilder()
+                .setCoinbase(1)
+                .build()
             val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsrequest)
             transactions.transactionsList
         } catch (e:Exception) {

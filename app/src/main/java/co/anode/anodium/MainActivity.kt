@@ -259,9 +259,9 @@ class MainActivity : AppCompatActivity() {
                     }
                     runOnUiThread {
                         textPublicIP.text = Html.fromHtml("<b>" + baseContext.resources.getString(R.string.text_publicipv6) + "</b>&nbsp;" + publicip)
-                        /*if (AnodeClient.vpnConnected) {
+                        if (AnodeClient.vpnConnected) {
                             bigbuttonState(BUTTON_STATE_CONNECTED)
-                        }*/
+                        }
                     }
                 }
                 Thread.sleep(publicIpThreadSleep)
@@ -638,12 +638,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun GetPublicIPv4(): String {
-        //return URL("http://ipv4bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
         val getURL = "http://v4.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
-
         val url = URL(getURL)
         val conn = url.openConnection() as HttpURLConnection
-
         conn.connectTimeout = 3000
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
         conn.requestMethod = "GET"
@@ -661,12 +658,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun GetPublicIPv6(): String {
-        //return URL("http://ipv6bot.whatismyipaddress.com/").readText(Charsets.UTF_8)
         val getURL = "http://v6.vpn.anode.co/api/0.3/vpn/clients/ipaddress/"
-
         val url = URL(getURL)
         val conn = url.openConnection() as HttpURLConnection
-
         conn.connectTimeout = 3000
         conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
         conn.requestMethod = "GET"
@@ -675,11 +669,11 @@ class MainActivity : AppCompatActivity() {
         } catch (e: java.lang.Exception) {
             return "None"
         }
-        try {
+        return try {
             val json = JSONObject(conn.inputStream.bufferedReader().readText())
-            return json.getString("ipAddress")
+            json.getString("ipAddress")
         } catch (e: Exception) {
-            return "None"
+            "None"
         }
     }
 
@@ -702,30 +696,29 @@ class MainActivity : AppCompatActivity() {
         @SuppressLint("StaticFieldLeak")
         override fun run() {
             h?.removeCallbacks(connectingDialog)
-            //if (!AnodeClient.vpnConnected) {
-            if (c!=null) {
-                val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
-                builder.setTitle("VPN Connecting")
-                builder.setMessage("Taking a long time to connect, VPN server may not be working.")
+            if (!AnodeClient.vpnConnected) {
+                if (c!=null) {
+                    val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
+                    builder.setTitle("VPN Connecting")
+                    builder.setMessage("Taking a long time to connect, VPN server may not be working.")
 
-                builder.setPositiveButton("Keep waiting", DialogInterface.OnClickListener { dialog, which ->
-                    dialog.dismiss()
-                })
+                    builder.setPositiveButton("Keep waiting", DialogInterface.OnClickListener { dialog, which ->
+                        dialog.dismiss()
+                    })
 
-                builder.setNegativeButton("Disconnect", DialogInterface.OnClickListener { dialog, which ->
-                    //MainActivity().disconnectVPN(false)
-                    AnodeClient.AuthorizeVPN().cancel(true)
-                    AnodeClient.stopThreads()
-                    CjdnsSocket.IpTunnel_removeAllConnections()
-                    CjdnsSocket.Core_stopTun()
-                    CjdnsSocket.clearRoutes()
-                    c!!.startService(Intent(c!!, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                    dialog.dismiss()
-                })
-                val alert: AlertDialog = builder.create()
-                alert.show()
+                    builder.setNegativeButton("Disconnect", DialogInterface.OnClickListener { dialog, which ->
+                        AnodeClient.AuthorizeVPN().cancel(true)
+                        AnodeClient.stopThreads()
+                        CjdnsSocket.IpTunnel_removeAllConnections()
+                        CjdnsSocket.Core_stopTun()
+                        CjdnsSocket.clearRoutes()
+                        c!!.startService(Intent(c!!, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                        dialog.dismiss()
+                    })
+                    val alert: AlertDialog = builder.create()
+                    alert.show()
+                }
             }
-            //}
         }
     }
 }
