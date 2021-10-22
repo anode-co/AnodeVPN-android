@@ -2,7 +2,7 @@ package co.anode.anodium
 
 import kotlin.Long
 
-class Benc(val str: String) {
+class Benc(private val str: String) {
     var i: Int = 0
     private fun read(n: Int): String {
         val out = str.substring(i, i + n)

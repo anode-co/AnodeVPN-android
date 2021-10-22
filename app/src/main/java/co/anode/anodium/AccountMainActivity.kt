@@ -12,23 +12,20 @@ import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
 import android.util.Log
 import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.text.HtmlCompat
 import org.json.JSONException
 import org.json.JSONObject
 
 
 class AccountMainActivity : AppCompatActivity() {
-    private val API_VERSION = "0.3"
-    private var API_EMAIL_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<username>/initialemail/"
-    private var API_PASSWORD_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<username>/initialpassword/"
+    private val apiVersion = "0.3"
+    private var apiEmailRegistrationUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<username>/initialemail/"
+    private var apiPasswordRegistrationUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<username>/initialpassword/"
     var prefs: SharedPreferences? = null
 
     @SuppressLint("WrongViewCast")
@@ -42,10 +39,10 @@ class AccountMainActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
         prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        val signin: TextView = findViewById(R.id.textSignIn)
+        val signIn: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-        signin.movementMethod = LinkMovementMethod.getInstance()
-        signin.text = link
+        signIn.movementMethod = LinkMovementMethod.getInstance()
+        signIn.text = link
         val createAccountButton: Button = findViewById(R.id.buttonCreateAccount)
         createAccountButton.setOnClickListener() {
             AnodeClient.eventLog(baseContext, "Button: CREATE ACCOUNT pressed")
@@ -141,11 +138,11 @@ class AccountMainActivity : AppCompatActivity() {
             }
             when {
                 params[0] == "email" -> {
-                    url = API_EMAIL_REGISTRATION_URL.replace("<username>", username, false)
+                    url = apiEmailRegistrationUrl.replace("<username>", username, false)
                     jsonObject.accumulate("email", params[1])
                 }
                 params[0] == "password" -> {
-                    url = API_PASSWORD_REGISTRATION_URL.replace("<username>", username, false)
+                    url = apiPasswordRegistrationUrl.replace("<username>", username, false)
                     jsonObject.accumulate("password", params[1])
                 }
                 else -> {

@@ -12,7 +12,6 @@ ext.minimumSdkVersion = 26
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "29.0.3"
 
     defaultConfig {
         //buildPltd()

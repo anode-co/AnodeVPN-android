@@ -90,7 +90,7 @@ class AnodeUtil(c: Context?) {
 
 
     fun launch() {
-        launchpltd()
+        launchPltd()
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
             initializeCjdrouteConfFile()
@@ -147,7 +147,7 @@ class AnodeUtil(c: Context?) {
         }
     }
 
-    private fun launchpltd() {
+    private fun launchPltd() {
         try {
             Log.e(LOGTAG, "Launching pltd (file size: " +
                     File("$CJDNS_PATH/$PLTD_BINFILE").length() + ")")
@@ -164,7 +164,7 @@ class AnodeUtil(c: Context?) {
                 pltd_pb.waitFor()
                 isPltdRunning = false
                 AnodeClient.httpPostMessage("lnd", "Pltd stopped")
-                launchpltd()
+                launchPltd()
             }).start()
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute pltd " + e.message)
@@ -207,9 +207,9 @@ class AnodeUtil(c: Context?) {
     }
 
     fun getPubKey(): String {
-        var pubkey: String
-        val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
-        val json = JSONObject(filecontent)
+        val pubkey: String
+        val fileContent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
+        val json = JSONObject(fileContent)
         pubkey = json.getString("publicKey")
         return pubkey
     }
@@ -227,10 +227,10 @@ class AnodeUtil(c: Context?) {
     }
 
     fun readMemUsage(): String {
-        val runtime = Runtime.getRuntime();
-        val usedMemInMB=(runtime.totalMemory() - runtime.freeMemory()) / 1048576L;
-        val maxHeapSizeInMB=runtime.maxMemory() / 1048576L;
-        return (maxHeapSizeInMB - usedMemInMB).toString();
+        val runtime = Runtime.getRuntime()
+        val usedMemInMB=(runtime.totalMemory() - runtime.freeMemory()) / 1048576L
+        val maxHeapSizeInMB=runtime.maxMemory() / 1048576L
+        return (maxHeapSizeInMB - usedMemInMB).toString()
     }
 
     fun eventLog(message: String) {

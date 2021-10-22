@@ -4,19 +4,17 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import java.io.FileDescriptor
 import java.lang.Exception
 
 
 class AnodeVpnService : VpnService() {
     var mThread: Thread? = null
-    val ACTION_CONNECT = "co.anode.anodium.START"
-    val ACTION_DISCONNECT = "co.anode.anodium.STOP"
+    val actionConnect = "co.anode.anodium.START"
+    val actionDisconnect = "co.anode.anodium.STOP"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent != null && ACTION_DISCONNECT == intent.action) {
+        if (intent != null && actionDisconnect == intent.action) {
             this.onDestroy()
             return START_NOT_STICKY;
         } else {

@@ -39,7 +39,6 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
 
 
-@SuppressLint("StaticFieldLeak")
 object AnodeClient {
     lateinit var mycontext: Context
     lateinit var statustv: TextView
@@ -58,8 +57,8 @@ object AnodeClient {
     private const val API_PEERING_LINES = "https://vpn.anode.co/api/$API_VERSION/vpn/cjdns/peeringlines/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
     private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
-    private val BUTTON_STATE_DISCONNECTED = 0
-    private val BUTTON_STATE_CONNECTING = 1
+    private const val buttonStateConnected = 0
+    private const val buttonStateConnecting = 1
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     private var notifyUser = false
     var downloadFails = 0
@@ -94,7 +93,7 @@ object AnodeClient {
         try {
             if (!dir.exists()) { return "No log files to be submitted" }
             val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
-            if (files.isEmpty()) { return "No log files to be submitted" }
+            if ((files != null) && (files.isEmpty())) { return "No log files to be submitted" }
             val file = files.random()
 
             val resp = APIHttpReq(API_ERROR_URL,file.readText(), "POST", false, false)
@@ -132,8 +131,8 @@ object AnodeClient {
         lastpostmessage = System.currentTimeMillis()
         Log.i(LOGTAG, "Posting error at $lastpostmessage")
         try {
-            val message = messageJsonObj(mycontext, type, message).toString(1)
-            val resp = APIHttpReq(API_ERROR_URL,message, "POST", false, false)
+            val msg = messageJsonObj(mycontext, type, message).toString(1)
+            val resp = APIHttpReq(API_ERROR_URL,msg, "POST", false, false)
 
             try {
                 val json = JSONObject(resp)
@@ -162,7 +161,7 @@ object AnodeClient {
         try {
             if (!dir.exists()) { return "No event log files to be submitted" }
             val files = dir.listFiles { file -> file.name.startsWith("anodium-events") }
-            if (files.isEmpty()) { return "No event log files to be submitted" }
+            if ((files != null) && (files.isEmpty())) { return "No event log files to be submitted" }
             val file = files.random()
             val eventLog = eventJsonObj().toString(1)
             val resp = APIHttpReq(API_ERROR_URL,eventLog, "POST", false, false)
@@ -249,7 +248,7 @@ object AnodeClient {
         File(ctx.filesDir,fname).appendText(err)
     }
 
-    fun storeRating(ctx: Context, pubkey: String, rating: Float, comment: String) {
+    fun storeRating(pubkey: String, rating: Float, comment: String) {
         val anodeUtil: AnodeUtil = AnodeUtil(mycontext)
         var jsonRatings: JSONArray = JSONArray()
         if (pubkey.isEmpty()) { return }
@@ -354,9 +353,6 @@ object AnodeClient {
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
-        val cjdroutelogfile = File(anodeUtil.CJDNS_PATH+"/"+ anodeUtil.CJDROUTE_LOG)
-        val lastlogfile = File(anodeUtil.CJDNS_PATH+"/last_anodium.log")
-        val currlogfile = File(anodeUtil.CJDNS_PATH+"/anodium.log")
         jsonObject.accumulate("debuggingMessages", message)
         return jsonObject
     }
@@ -590,7 +586,7 @@ object AnodeClient {
         override fun onCancelled() {
             super.onCancelled()
             vpnConnected = false
-            mainButtonState(BUTTON_STATE_DISCONNECTED)
+            mainButtonState(buttonStateConnected)
         }
 
         @SuppressLint("SetTextI18n")
@@ -637,11 +633,11 @@ object AnodeClient {
                                 putLong("LastAuthorized", 0)
                                 commit()
                             }
-                            mainButtonState(BUTTON_STATE_DISCONNECTED)
+                            mainButtonState(buttonStateConnected)
                             CjdnsSocket.IpTunnel_removeAllConnections()
                             CjdnsSocket.Core_stopTun()
                             CjdnsSocket.clearRoutes()
-                            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
+                            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
                         }
                     }
                 } catch (e: JSONException) {
@@ -672,8 +668,8 @@ object AnodeClient {
             if (iconnected) {
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionConnect))
                 //mainButtonState(BUTTON_STATE_CONNECTED)
                 vpnConnected = true
                 //Start Thread for checking connection
@@ -681,7 +677,7 @@ object AnodeClient {
             } else {
                 Log.i(LOGTAG,"VPN connection failed")
                 vpnConnected = false
-                mainButtonState(BUTTON_STATE_DISCONNECTED)
+                mainButtonState(buttonStateConnected)
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 //Stop UI thread
                 h.removeCallbacks(runnableConnection)
@@ -768,8 +764,8 @@ object AnodeClient {
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 CjdnsSocket.clearRoutes()
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                mainButtonState(BUTTON_STATE_DISCONNECTED)
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
+                mainButtonState(buttonStateConnected)
             }
             val newip4address = CjdnsSocket.ipv4Address
             val newip6address = CjdnsSocket.ipv6Address
@@ -778,11 +774,11 @@ object AnodeClient {
                 statustv.post(Runnable {
                     statustv.text  = mycontext.resources.getString(R.string.status_connecting)
                 } )
-                mainButtonState(BUTTON_STATE_CONNECTING)
+                mainButtonState(buttonStateConnecting)
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_DISCONNECT))
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionConnect))
             } else if (CjdnsSocket.VPNipv6Address != "") {
                 //mainButtonState(BUTTON_STATE_CONNECTED)
             }
@@ -975,14 +971,14 @@ object AnodeClient {
 
     fun mainButtonState(state: Int) {
         when(state) {
-            BUTTON_STATE_DISCONNECTED -> {
+            buttonStateConnected -> {
                 //Status bar
                 statustv.text = ""
                 //Button
                 connectButton.alpha = 1.0f
                 connectButton.isChecked = false
             }
-            BUTTON_STATE_CONNECTING -> {
+            buttonStateConnecting -> {
                 statustv.text = mycontext.resources.getString(R.string.status_connecting)
                 connectButton.textOn = "Cancel"
                 connectButton.alpha = 0.5f

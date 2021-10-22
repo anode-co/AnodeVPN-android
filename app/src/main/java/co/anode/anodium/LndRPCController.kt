@@ -1,8 +1,8 @@
 package co.anode.anodium
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.util.Log
-import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
@@ -28,22 +28,15 @@ object LndRPCController {
                 .build()
     }
 
-    fun clearWalletinPreferences(preferences: SharedPreferences) {
-        with(preferences.edit()) {
-            putString("admin_macaroon", "")
-            commit()
-        }
-    }
-
     fun createLocalWallet(preferences: SharedPreferences, password:String):String {
         Log.i(LOGTAG, "LndRPCController.createLocalWallet")
-        var result = ""
+        var result: String
         val walletpassword: ByteString = ByteString.copyFrom(password, Charsets.UTF_8)
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
         try {
-            var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+            val stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
             val gsr = stub.genSeed(Walletunlocker.GenSeedRequest.newBuilder().build())
             val bldr = Walletunlocker.InitWalletRequest.newBuilder().setWalletPassword(walletpassword)
             val seed: MutableList<String> = mutableListOf()
@@ -75,20 +68,21 @@ object LndRPCController {
         return result
     }
 
+    @SuppressLint("CheckResult")
     fun openWallet(preferences: SharedPreferences):String {
         Log.i(LOGTAG, "LndRPCController.openWallet")
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
         try {
-            var stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
+            val stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
             val walletpassword: ByteString =
                 ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
-            val response = stub.unlockWallet(Walletunlocker.UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
+            stub.unlockWallet(Walletunlocker.UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
         } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
             preferences.edit().putBoolean("lndwalletopened", false).apply()
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to open wallet ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
             return e.toString()
@@ -107,7 +101,7 @@ object LndRPCController {
             metaservice.getInfo2(Metaservice.GetInfo2Request.newBuilder().setInfoResponse(getinforesponse).build())
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to get info ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
             null
@@ -120,12 +114,12 @@ object LndRPCController {
             createSecurechannel()
         }
         return try {
-            val addressRequest = Rpc.NewAddressRequest.newBuilder().setTypeValue(0).build()
+            val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
             val addressResponse = LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
             addressResponse.address
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to generate address ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
             return ""
@@ -137,19 +131,9 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        val walletBallanceRequest = Rpc.WalletBalanceRequest.newBuilder().build()
-        val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-        return walletBalanceResponse.confirmedBalance/1073741824
-    }
-
-    fun getUncofirmedBalance():Long {
-        Log.i(LOGTAG, "LndRPCController.getUncofirmedBalance")
-        if (!this::mSecureChannel.isInitialized) {
-            createSecurechannel()
-        }
         val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
         val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-        return walletBalanceResponse.unconfirmedBalance / 1073741824
+        return walletBalanceResponse.confirmedBalance/1073741824
     }
 
     fun getTotalBalance(): Float {
@@ -163,7 +147,7 @@ object LndRPCController {
             (walletBalanceResponse.totalBalance / 1073741824).toFloat()
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to get balance ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
             -1.0f
@@ -175,16 +159,16 @@ object LndRPCController {
         if (!this::mSecureChannel.isInitialized) {
             createSecurechannel()
         }
-        try {
-            var addressBalancesRequest = GetAddressBalancesRequest.newBuilder().build()
+        return try {
+            val addressBalancesRequest = GetAddressBalancesRequest.newBuilder().build()
             val addressBalancesResponce = LightningGrpc.newBlockingStub(mSecureChannel).getAddressBalances(addressBalancesRequest)
-            return addressBalancesResponce.addrsList
+            addressBalancesResponce.addrsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to get addresses ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
-            return null
+            null
         }
     }
 
@@ -194,21 +178,21 @@ object LndRPCController {
             createSecurechannel()
         }
         try {
-            val sendcoinsrequest = SendCoinsRequest.newBuilder()
-            sendcoinsrequest.addr = address
-            sendcoinsrequest.amount = amount * 1073741824
-            sendcoinsrequest.targetConf = 0
-            sendcoinsrequest.satPerByte = 0
-            sendcoinsrequest.sendAll = false
-            sendcoinsrequest.label = ""
-            sendcoinsrequest.minConfs = 1
-            sendcoinsrequest.spendUnconfirmed = false
-            val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendcoinsrequest.build())
-            val hash = sendcoinsresponse.hashCode()
+            val sendCoinsRequest = SendCoinsRequest.newBuilder()
+            sendCoinsRequest.addr = address
+            sendCoinsRequest.amount = amount * 1073741824
+            sendCoinsRequest.targetConf = 0
+            sendCoinsRequest.satPerByte = 0
+            sendCoinsRequest.sendAll = false
+            sendCoinsRequest.label = ""
+            sendCoinsRequest.minConfs = 1
+            sendCoinsRequest.spendUnconfirmed = false
+            val sendcoinsresponse = LightningGrpc.newBlockingStub(mSecureChannel).sendCoins(sendCoinsRequest.build())
+            //sendcoinsresponse.hashCode()
             return "OK"
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to send coins ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
             return e.toString()
@@ -222,25 +206,19 @@ object LndRPCController {
         return try {
             //coinbase 0=Include, 1=Exclude, 2=Only
                 //TODO: check TxnsLimit
-            val transactionsrequest = GetTransactionsRequest.newBuilder()
+            val transactionsRequest = GetTransactionsRequest.newBuilder()
                 .setCoinbase(1)
                 .build()
-            val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsrequest)
+            val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsRequest)
             transactions.transactionsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread(Runnable {
+            Thread({
                 AnodeClient.httpPostMessage("lnd", "Failed to get transactions ${e.toString()}")
             }, "LndRPCController.UploadMessageThread").start()
             //Return an empty list
             mutableListOf<Transaction>()
         }
-    }
-
-    // ByteString values when using for example "paymentRequest.getDescriptionBytes()" can for some reason not directly be used as they are double in length
-    private fun byteStringFromHex(hexString: String): ByteString? {
-        val hexBytes = BaseEncoding.base16().decode(hexString.toUpperCase())
-        return ByteString.copyFrom(hexBytes)
     }
 
     fun isPltdRunning(): Boolean {
