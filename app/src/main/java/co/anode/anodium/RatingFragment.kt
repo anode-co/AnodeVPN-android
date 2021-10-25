@@ -1,3 +1,4 @@
+@file:Suppress("NAME_SHADOWING")
 package co.anode.anodium
 
 import android.content.Context
@@ -29,7 +30,7 @@ class RatingFragment : BottomSheetDialogFragment() {
         val buttonSubmitRating = v.findViewById<Button>(R.id.buttonSubmitRating)
         buttonSubmitRating.visibility = View.GONE
 
-        ratingBar.setOnRatingBarChangeListener { ratingBar, rating, fromUser ->
+        ratingBar.setOnRatingBarChangeListener { ratingBar, rating, _ ->
             showComments(v)
             buttonSubmitRating.visibility = View.VISIBLE
             if (rating in 0f..1f) {
@@ -119,16 +120,15 @@ class RatingFragment : BottomSheetDialogFragment() {
             }
             comment = comment.dropLast(1)
             val rating = ratingBar.rating
-            var ServerPublicKey = ""
-            ServerPublicKey = prefs.getString("ServerPublicKey", "").toString()
-            context?.let { it1 -> AnodeClient.storeRating(it1, ServerPublicKey, rating, comment) }
+            val serverPublicKey = prefs.getString("ServerPublicKey", "").toString()
+            AnodeClient.storeRating(serverPublicKey, rating, comment)
             dismiss()
         }
 
         return v
     }
 
-    fun hideComments(v: View) {
+    private fun hideComments(v: View) {
         val tb1: ToggleButton = v.findViewById(R.id.toggleButton1)
         val tb2: ToggleButton = v.findViewById(R.id.toggleButton2)
         val tb3: ToggleButton = v.findViewById(R.id.toggleButton3)
@@ -141,7 +141,7 @@ class RatingFragment : BottomSheetDialogFragment() {
         tb5.visibility = View.GONE
     }
 
-    fun showComments(v: View) {
+    private fun showComments(v: View) {
         val tb1: ToggleButton = v.findViewById(R.id.toggleButton1)
         val tb2: ToggleButton = v.findViewById(R.id.toggleButton2)
         val tb3: ToggleButton = v.findViewById(R.id.toggleButton3)
@@ -157,25 +157,5 @@ class RatingFragment : BottomSheetDialogFragment() {
         tb3.isChecked = false
         tb4.isChecked = false
         tb5.isChecked = false
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment RatingFragment.
-         */
-        @JvmStatic
-        //fun newInstance(param1: String, param2: String) =
-        fun newInstance() =
-                RatingFragment().apply {
-                    arguments = Bundle().apply {
-                        //putString(ARG_PARAM1, param1)
-                        //putString(ARG_PARAM2, param2)
-                    }
-                }
     }
 }
