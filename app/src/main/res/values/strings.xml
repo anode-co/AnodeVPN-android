@@ -92,7 +92,7 @@
     <!-- Wallet Send transaction fragment -->
     <string name="send_pkt_title">Send Transaction</string>
     <string name="send_pkt_receivers_address">Receiver\'s PKT address</string>
-    <string name="send_pkt_amount">PKT ammount</string>
+    <string name="send_pkt_amount">PKT amount</string>
     <string name="send_pkt_password">Account password</string>
     <string name="send_pkt_send_payment">Send payment</string>
     <!-- Status bar states-->

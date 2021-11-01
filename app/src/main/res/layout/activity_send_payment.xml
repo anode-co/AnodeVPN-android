@@ -37,14 +37,14 @@
                 android:id="@+id/editTextReceiverAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
+                android:layout_above="@+id/editTextPKTAmount"
                 android:layout_marginStart="@dimen/editfield_margin"
                 android:layout_marginEnd="@dimen/editfield_margin"
-                android:inputType="text"
-                android:hint="@string/send_pkt_receivers_address"
-                android:layout_above="@+id/editTextPKTAmount"
                 android:layout_marginBottom="20dp"
-                android:autofillHints="test" />
+                android:autofillHints="test"
+                android:ems="10"
+                android:hint="@string/send_pkt_receivers_address"
+                android:inputType="textNoSuggestions|textVisiblePassword" />
             <EditText
                 android:id="@+id/editTextPKTAmount"
                 android:layout_width="match_parent"
@@ -80,7 +80,7 @@
     <LinearLayout
         android:id="@+id/bottomContainer"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/singlebutton_bottom_container"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:orientation="vertical"

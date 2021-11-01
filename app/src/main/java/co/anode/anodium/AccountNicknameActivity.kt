@@ -18,13 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.IOException
 
 
 class AccountNicknameActivity : AppCompatActivity() {
-    private val API_VERSION = "0.3"
-    private var API_USERNAME_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
-    private var API_USERNAME_GENERATE = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/username/"
+    private val apiVersion = "0.3"
+    private var apiUsernameRegistrationURL = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/"
+    private var apiUsernameGenerate = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/username/"
     var username = ""
     var usernameText: EditText? = null
 
@@ -43,36 +42,36 @@ class AccountNicknameActivity : AppCompatActivity() {
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signin.movementMethod = LinkMovementMethod.getInstance()
         signin.text = link
-        signin.setMovementMethod(object : TextViewLinkHandler() {
+        signin.movementMethod = object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
                 AnodeClient.eventLog(baseContext,"Button: Sing in link pressed")
                 val signInActivity = Intent(applicationContext, SignInActivity::class.java)
                 startActivityForResult(signInActivity, 0)
             }
-        })
+        }
 
         val prefsusername = prefs.getString("username","")
         usernameText = findViewById(R.id.editTextNickname)
         if (prefsusername!!.isEmpty()) {
-            usernameGenerate().execute()
+            UsernameGenerate().execute()
         } else {
             usernameText?.setText(prefsusername)
         }
 
         val generateusername: Button = findViewById(R.id.button_generateusername)
-        generateusername.setOnClickListener() {
+        generateusername.setOnClickListener {
             AnodeClient.eventLog(baseContext,"Button: Generate username pressed")
-            usernameGenerate().execute()
+            UsernameGenerate().execute()
         }
 
         val continueButton: Button = findViewById(R.id.button_continue)
-        continueButton.setOnClickListener() {
+        continueButton.setOnClickListener {
             AnodeClient.eventLog(baseContext,"Button: Continue pressed")
             username = usernameText?.text.toString()
             if (username.isEmpty()) {
                 Toast.makeText(baseContext, "Please enter or generate a username", Toast.LENGTH_SHORT).show()
             } else {
-                usernameRegistration().execute(username)
+                UsernameRegistration().execute(username)
             }
         }
         AnodeClient.eventLog(baseContext,"Activity: Nickname created")
@@ -106,7 +105,7 @@ class AccountNicknameActivity : AppCompatActivity() {
             val line = layout.getLineForVertical(y)
             val off = layout.getOffsetForHorizontal(line, x.toFloat())
             val link = buffer.getSpans(off, off, URLSpan::class.java)
-            if (link.size != 0) {
+            if (link.isNotEmpty()) {
                 onLinkClick(link[0].url)
             }
             return true
@@ -122,16 +121,17 @@ class AccountNicknameActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    inner class usernameGenerate() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
-            val resp = AnodeClient.APIHttpReq(API_USERNAME_GENERATE, "", "GET", true, false)
+    private inner class UsernameGenerate : AsyncTask<String, Void, String>() {
+
+        override fun doInBackground(vararg params: String?): String {
+            val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_USERNAME_GENERATE: $result")
+            Log.i(LOGTAG,"Received from $apiUsernameGenerate: $result")
             if ((result.isNullOrBlank())) {
                 finish()
             } else if (result.contains("400") || result.contains("401")) {
@@ -155,18 +155,18 @@ class AccountNicknameActivity : AppCompatActivity() {
         }
     }
 
-    inner class usernameRegistration() : AsyncTask<String, Void, String>() {
+    inner class UsernameRegistration : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val jsonObject = JSONObject()
             jsonObject.accumulate("username", params[0])
-            val resp = AnodeClient.APIHttpReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST", true, false)
+            val resp = AnodeClient.APIHttpReq(apiUsernameRegistrationURL, jsonObject.toString(), "POST", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_USERNAME_REGISTRATION_URL: $result")
+            Log.i(LOGTAG,"Received from $apiUsernameRegistrationURL: $result")
             if ((result.isNullOrBlank())) {
                 finish()
             } else if (result.contains("ERROR: ") ) {
