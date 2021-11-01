@@ -27,6 +27,7 @@
     <string name="button_resend_email">Resend Email</string>
     <string name="button_goto_email">Go to Email</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_close">Close</string>
     <!-- Strings used for fragments for navigation -->
     <string name="downloading_update">Downloading new version…</string>
     <string name="title_activity_vpn_servers_list">VPN Servers</string>

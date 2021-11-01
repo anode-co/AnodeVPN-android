@@ -7,7 +7,7 @@
     tools:context=".WalletFragmentSetup"
     android:id="@+id/wallet_fragmentCreate"
     android:background="@android:color/white">
-
+    e<include layout="@layout/statusbar"/>
     <TextView
         android:id="@+id/text_walletcreate_label"
         android:layout_width="wrap_content"
@@ -50,14 +50,14 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:textSize="8pt"
-            android:text="1. dfkjdfsl\n2.fdsklfdksfj\n3. fdks;lfd"/>
+            android:text=""/>
         <TextView
             android:layout_marginStart="20dp"
             android:id="@+id/seed_column2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="8pt"
-            android:text="1. dfkjdfsl\n2.fdsklfdksfj\n3. fdks;lfd"/>
+            android:text=""/>
     </LinearLayout>
 
     <Button
@@ -76,7 +76,7 @@
         android:id="@+id/button_wallet_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Close"
+        android:text="@string/button_close"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
