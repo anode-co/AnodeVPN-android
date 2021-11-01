@@ -17,48 +17,51 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
-
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/signin_bottom_container">
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_above="@+id/editTextTextEmailAddress"
-                android:layout_marginBottom="40dp"
+                android:layout_above="@+id/emailLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
                 app:srcCompat="@drawable/ic_login"
                 android:contentDescription="@string/contentdescription_login_image" />
-            <EditText
-                android:id="@+id/editTextTextEmailAddress"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/emailLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
+                android:layout_centerInParent="true"
                 android:layout_marginLeft="@dimen/editfield_margin"
-                android:layout_marginRight="@dimen/editfield_margin"
-                android:ems="10"
-                android:hint="@string/prompt_email"
-                android:inputType="textEmailAddress" />
-
+                android:layout_marginTop="50dp"
+                android:layout_marginRight="@dimen/editfield_margin">
+                <EditText
+                    android:id="@+id/editTextTextEmailAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:ems="10"
+                    android:hint="@string/prompt_email"
+                    android:inputType="textNoSuggestions|textWebEmailAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/editTextTextEmailAddress"
+                android:layout_alignTop="@+id/emailLayout"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="@dimen/editfield_margin"
                 android:layout_marginTop="50dp"
                 android:layout_marginRight="@dimen/editfield_margin"
                 app:passwordToggleEnabled="true">
-
                 <EditText
                     android:id="@+id/editTextTextPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_marginTop="24dp"
                     android:ems="10"
                     android:inputType="textPassword"
@@ -75,32 +78,33 @@
         app:layout_constraintRight_toRightOf="parent"
         android:orientation="vertical"
         android:gravity="end">
+        <LinearLayout
+            android:id="@+id/bottomButtonsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginBottom="@dimen/bottom_button_margin">
         <Button
             android:id="@+id/buttonCreateAccount"
-            android:layout_marginLeft="@dimen/button_margin"
-            android:layout_marginRight="@dimen/button_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="20dp"
             android:textSize="16sp"
             android:text="@string/action_create_account"
-            app:layout_constraintBottom_toTopOf="@+id/buttonSkip"
             android:layout_gravity="center_horizontal"
             android:textColor="#C9DDE9"
             android:background="@drawable/buttonshape"/>
         <Button
             android:id="@+id/buttonSkip"
-            android:layout_marginLeft="@dimen/button_margin"
-            android:layout_marginRight="@dimen/button_margin"
-            android:layout_width="match_parent"
+            android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:text="@string/action_skip"
-            android:layout_marginBottom="@dimen/bottom_button_margin"
             android:textSize="16sp"
             android:layout_gravity="center_horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:textColor="#C9DDE9"
             android:background="@drawable/buttonshape"/>
+        </LinearLayout>
         <TextView
             android:id="@+id/textSignIn"
             android:layout_width="wrap_content"
