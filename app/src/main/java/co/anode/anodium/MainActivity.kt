@@ -608,7 +608,7 @@ class MainActivity : AppCompatActivity() {
         CjdnsSocket.IpTunnel_removeAllConnections()
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
-        startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
+        startService(Intent(this, AnodeVpnService::class.java).setAction("co.anode.anodium.STOP"))
         bigbuttonState(buttonStateDisconnected)
         //Rating bar
         if (showRatingBar) {
@@ -664,7 +664,7 @@ class MainActivity : AppCompatActivity() {
         exitProcess(0)
     }
 
-    @SuppressLint("StaticFieldLeak")
+
     object ConnectingDialog: Runnable {
         private var h: Handler? = null
         private var c: Context? = null
@@ -673,7 +673,7 @@ class MainActivity : AppCompatActivity() {
             h = handler
             c = context
         }
-        @SuppressLint("StaticFieldLeak")
+
         override fun run() {
             h?.removeCallbacks(ConnectingDialog)
             if (!AnodeClient.vpnConnected) {
@@ -682,21 +682,17 @@ class MainActivity : AppCompatActivity() {
                     builder.setTitle("VPN Connecting")
                     builder.setMessage("Taking a long time to connect, VPN server may not be working.")
 
-                    builder.setPositiveButton("Keep waiting") { dialog, which ->
+                    builder.setPositiveButton("Keep waiting") { dialog, _ ->
                         dialog.dismiss()
                     }
 
-                    builder.setNegativeButton("Disconnect") { dialog, which ->
+                    builder.setNegativeButton("Disconnect") { dialog, _ ->
                         AnodeClient.AuthorizeVPN().cancel(true)
                         AnodeClient.stopThreads()
                         CjdnsSocket.IpTunnel_removeAllConnections()
                         CjdnsSocket.Core_stopTun()
                         CjdnsSocket.clearRoutes()
-                        c!!.startService(
-                            Intent(c!!, AnodeVpnService::class.java).setAction(
-                                AnodeVpnService().actionDisconnect
-                            )
-                        )
+                        c!!.startService(Intent(c!!, AnodeVpnService::class.java).setAction("co.anode.anodium.STOP"))
                         dialog.dismiss()
                     }
                     val alert: AlertDialog = builder.create()

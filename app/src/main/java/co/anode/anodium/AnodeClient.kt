@@ -637,7 +637,7 @@ object AnodeClient {
                             CjdnsSocket.IpTunnel_removeAllConnections()
                             CjdnsSocket.Core_stopTun()
                             CjdnsSocket.clearRoutes()
-                            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
+                            mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
                         }
                     }
                 } catch (e: JSONException) {
@@ -663,13 +663,12 @@ object AnodeClient {
                 iconnected = CjdnsSocket.getCjdnsRoutes()
                 tries++
                 Thread.sleep(2000)
-                //CjdnsSocket.SessionManager_sessionStatsByIP("fc18:0f9f:6054:ea50:43b6:7a4d:4e0d:db1c")
             }
             if (iconnected) {
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionConnect))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.START"))
                 //mainButtonState(BUTTON_STATE_CONNECTED)
                 vpnConnected = true
                 //Start Thread for checking connection
@@ -764,7 +763,7 @@ object AnodeClient {
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 CjdnsSocket.Core_stopTun()
                 CjdnsSocket.clearRoutes()
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
                 mainButtonState(buttonStateConnected)
             }
             val newip4address = CjdnsSocket.ipv4Address
@@ -777,8 +776,8 @@ object AnodeClient {
                 mainButtonState(buttonStateConnecting)
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionDisconnect))
-                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction(AnodeVpnService().actionConnect))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.START"))
             } else if (CjdnsSocket.VPNipv6Address != "") {
                 //mainButtonState(BUTTON_STATE_CONNECTED)
             }

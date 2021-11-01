@@ -9,20 +9,34 @@ import java.lang.Exception
 
 
 class AnodeVpnService : VpnService() {
+    var mInterface: ParcelFileDescriptor? = null
     var mThread: Thread? = null
-    val actionConnect = "co.anode.anodium.START"
-    val actionDisconnect = "co.anode.anodium.STOP"
+    private val actionConnect = "co.anode.anodium.START"
+    private val actionDisconnect = "co.anode.anodium.DISCONNECT"
+    private val actionStop = "co.anode.anodium.STOP"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent != null && actionDisconnect == intent.action) {
-            this.onDestroy()
-            return START_NOT_STICKY;
+        if (intent != null) {
+            when (intent.action) {
+                actionConnect -> {
+                    mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
+                    mThread!!.start()
+                }
+                actionDisconnect -> {
+                    this.onDestroy()
+                }
+                actionStop -> {
+                    stopSelf()
+                    stopForeground(true)
+                    mInterface!!.close()
+                    mInterface = null
+                }
+            }
         } else {
             mThread = Thread(VpnThread(this), "AnodeVpnService.VpnThread")
-            //start the service
             mThread!!.start()
-            return START_STICKY;
         }
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -50,7 +64,7 @@ class AnodeVpnService : VpnService() {
 }
 
 class VpnThread(private val avpn: AnodeVpnService) : Runnable {
-    private var mInterface: ParcelFileDescriptor? = null
+
     private var myIp6: String = ""
 
     private fun configVpn() {
@@ -70,9 +84,9 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
             b.addAddress(CjdnsSocket.ipv6Address, CjdnsSocket.ipv6AddressPrefix) //64
         }
 
-        mInterface = b.establish()
+        avpn.mInterface = b.establish()
         Log.i(LOGTAG, "interface vpn")
-        val fdNum = CjdnsSocket.Admin_importFd(mInterface!!.fileDescriptor)
+        val fdNum = CjdnsSocket.Admin_importFd(avpn.mInterface!!.fileDescriptor)
         Log.i(LOGTAG, "imported vpn fd $fdNum")
         Log.i(LOGTAG, CjdnsSocket.Core_initTunfd(fdNum).toString())
         Log.i(LOGTAG, "vpn launched")
@@ -93,8 +107,8 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     }
 
     private fun stopVPN() {
-        mInterface!!.close()
-        mInterface = null
+        avpn.mInterface!!.close()
+        avpn.mInterface = null
     }
 
     override fun run() {
@@ -122,7 +136,7 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
                 Thread.sleep(interval)
             }*/
         } catch (e: InterruptedException) {
-            if (mInterface != null) {
+            if (avpn.mInterface != null) {
                 stopVPN()
             }
             e.printStackTrace()
