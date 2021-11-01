@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.text.InputType
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -47,8 +49,10 @@ class WalletFragmentSetup : Fragment() {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT)
             input.layoutParams = lp
+            input.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+            input.transformationMethod = PasswordTransformationMethod.getInstance()
             builder.setView(input)
-            builder.setPositiveButton("Submit", DialogInterface.OnClickListener { dialog, which ->
+            builder.setPositiveButton("Submit", DialogInterface.OnClickListener { dialog, _ ->
                 password = input.text.toString()
                 dialog.dismiss()
 
@@ -62,19 +66,19 @@ class WalletFragmentSetup : Fragment() {
                         val label = view.findViewById<TextView>(R.id.text_walletcreate_label)
                         label.text = context?.resources?.getString(R.string.wallet_create_seed_label)
                         textview.visibility = View.VISIBLE
-                        val seedarray = seed.split(" ")
-                        val seedcol1 = view.findViewById<TextView>(R.id.seed_column1)
-                        val seedcol2 = view.findViewById<TextView>(R.id.seed_column2)
+                        val seedArray = seed.split(" ")
+                        val seedCol1 = view.findViewById<TextView>(R.id.seed_column1)
+                        val seedCol2 = view.findViewById<TextView>(R.id.seed_column2)
                         var seed1 = ""
                         var seed2 = ""
                         for (i in 0 until 12) {
-                            seed1 += (i+1).toString()+". " + seedarray[i]+"\n"
+                            seed1 += (i+1).toString()+". " + seedArray[i]+"\n"
                         }
-                        for (i in 12 until seedarray.size-1) {
-                            seed2 += (i+1).toString()+". " + seedarray[i]+"\n"
+                        for (i in 12 until seedArray.size-1) {
+                            seed2 += (i+1).toString()+". " + seedArray[i]+"\n"
                         }
-                        seedcol1.text = seed1
-                        seedcol2.text = seed2
+                        seedCol1.text = seed1
+                        seedCol2.text = seed2
                         seedlayout.visibility = View.VISIBLE
                         createbutton.visibility = View.GONE
                         closebutton.visibility = View.VISIBLE
@@ -90,7 +94,6 @@ class WalletFragmentSetup : Fragment() {
             })
             val alert: androidx.appcompat.app.AlertDialog = builder.create()
             alert.show()
-
         }
 
         closebutton.setOnClickListener {
