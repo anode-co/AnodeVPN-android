@@ -1,17 +1,13 @@
 package co.anode.anodium
 
-//import kotlin.collections.ArrayList
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-//import kotlinx.android.synthetic.main.activity_vpn_servers_list.*
 import org.json.JSONArray
-import org.json.JSONObject
-import java.net.URL
 
 
 class VpnListActivity : AppCompatActivity() {
@@ -23,8 +19,8 @@ class VpnListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vpn_servers_list)
-        val vpnlist_toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.vpnlist_toolbar)
-        setSupportActionBar(vpnlist_toolbar)
+        val vpnListToolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.vpnlist_toolbar)
+        setSupportActionBar(vpnListToolbar)
         //actionbar
         val actionbar = supportActionBar
         //set back button
@@ -67,7 +63,10 @@ class VpnListActivity : AppCompatActivity() {
                 //return URL(url).readText(Charsets.UTF_8)
                 return AnodeClient.APIHttpReq(url,"", "GET", true, false)
             } catch (e: Exception) {
-                Toast.makeText(baseContext, "Error: "+e.message, Toast.LENGTH_LONG).show()
+                Log.e(LOGTAG, "Error: "+e.message)
+                runOnUiThread {
+                    Toast.makeText(baseContext, "Error: "+e.message, Toast.LENGTH_LONG).show()
+                }
                 return null
             }
         }
@@ -83,22 +82,20 @@ class VpnListActivity : AppCompatActivity() {
             //val prefs = baseContext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
 
             for (i in 0 until serversArr.length()) {
-                val serverdetails = serversArr.getJSONObject(i)
+                val serverDetails = serversArr.getJSONObject(i)
                 val map = HashMap<String, String>()
-                //if (!serverdetails.getBoolean("isFake")) {
-                map["publicKey"] = serverdetails.getString("publicKey")
-                map["name"] = serverdetails.getString("name")
-                map["countryCode"] = serverdetails.getString("countryCode")
-                map["averageRating"] = serverdetails.getString("averageRating")
-                map["cost"] = serverdetails.getString("cost")
-                map["load"] = serverdetails.getInt("load").toString()
-                map["quality"] = serverdetails.getInt("quality").toString()
-                map["isFavorite"] = serverdetails.getString("isFavorite")
-                map["onlineSinceDatetime"] = serverdetails.getString("onlineSinceDatetime")
-                map["lastSeenDatetime"] = serverdetails.getString("lastSeenDatetime")
-                map["numRatings"] = serverdetails.getInt("numRatings").toString()
+                map["publicKey"] = serverDetails.getString("publicKey")
+                map["name"] = serverDetails.getString("name")
+                map["countryCode"] = serverDetails.getString("countryCode")
+                map["averageRating"] = serverDetails.getString("averageRating")
+                map["cost"] = serverDetails.getString("cost")
+                map["load"] = serverDetails.getInt("load").toString()
+                map["quality"] = serverDetails.getInt("quality").toString()
+                map["isFavorite"] = serverDetails.getString("isFavorite")
+                map["onlineSinceDatetime"] = serverDetails.getString("onlineSinceDatetime")
+                map["lastSeenDatetime"] = serverDetails.getString("lastSeenDatetime")
+                map["numRatings"] = serverDetails.getInt("numRatings").toString()
                 dataList.add(map)
-                //}
             }
             //Sort list by country
             dataList.sortWith(compareBy {it.get("countryCode")})

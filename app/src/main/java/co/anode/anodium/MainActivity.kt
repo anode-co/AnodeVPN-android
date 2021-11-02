@@ -205,10 +205,7 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 if ((internetConnection() == false) && (uiInForeground)) {
                     runOnUiThread {
-                        val toast = Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG)
-                        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
-                        toast.show()
-                        //bigbuttonState(BUTTON_STATE_DISCONNECTED)
+                        Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG).show()
                     }
                 }
                 Thread.sleep(3000)

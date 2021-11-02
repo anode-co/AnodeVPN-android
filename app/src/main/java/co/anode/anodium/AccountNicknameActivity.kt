@@ -133,7 +133,7 @@ class AccountNicknameActivity : AppCompatActivity() {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $apiUsernameGenerate: $result")
             if ((result.isNullOrBlank())) {
-                finish()
+                return
             } else if (result.contains("400") || result.contains("401")) {
                 val json = result.split("-")[1]
                 var msg = result

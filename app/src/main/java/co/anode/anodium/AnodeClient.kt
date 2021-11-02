@@ -727,8 +727,11 @@ object AnodeClient {
         } catch (e: SocketTimeoutException) {
             if (url.toString().contains(cjdnsServerAddress)) {
                 APIHttpReq(address,body,method,needsAuth,true)
-                return ""
             }
+            return ""
+        } catch (e: Exception) {
+            Log.w(LOGTAG,"Can not connect at ${url.toString()}")
+            return ""
         }
         //Send body
         if (conn.requestMethod == "POST") conn.outputStream.write(bytes)
@@ -882,9 +885,14 @@ object AnodeClient {
     class GetPeeringLines : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val url = API_PEERING_LINES
-            val resp = APIHttpReq( url, "","GET", false , false)
-            Log.i(LOGTAG, resp)
-            return resp
+            if (checkNetworkConnection()) {
+                val resp = APIHttpReq(url, "", "GET", false, false)
+                Log.i(LOGTAG, resp)
+                return resp
+            } else {
+                //No internet
+                return ""
+            }
         }
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
@@ -898,8 +906,12 @@ object AnodeClient {
                     }
                 } catch (e: JSONException) {
                     showToast("Error, invalid JSON")
+                } catch (e: java.lang.Exception) {
+                    showToast("Error: "+e.message)
                 }
-            } else if (result != null) {
+            } else if (result.isNullOrEmpty()) {
+                //TODO:???
+            }else if (result != null) {
                 showToast(result)
             }
         }
