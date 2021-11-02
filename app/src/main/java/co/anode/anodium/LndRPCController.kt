@@ -91,7 +91,7 @@ object LndRPCController {
         return "OK"
     }
 
-    fun getInfo(): Metaservice.GetInfo2Responce? {
+    fun getInfo(): Metaservice.GetInfo2Response? {
         Log.i(LOGTAG, "LndRPCController.getPubKey")
         if (!this::mSecureChannel.isInitialized) { return null }
         return try {
