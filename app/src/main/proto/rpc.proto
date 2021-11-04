@@ -105,14 +105,6 @@ service Lightning {
     */
     rpc SignMessage (SignMessageRequest) returns (SignMessageResponse);
 
-    /* lncli: `verifymessage`
-    VerifyMessage verifies a signature over a msg. The signature must be
-    zbase32 encoded and signed by an active node in the resident node's
-    channel database. In addition to returning the validity of the signature,
-    VerifyMessage also returns the recovered pubkey from the signature.
-    */
-    rpc VerifyMessage (VerifyMessageRequest) returns (VerifyMessageResponse);
-
     /* lncli: `connect`
     ConnectPeer attempts to establish a connection to a remote peer. This is at
     the networking level, and is used for communication between nodes. This is
@@ -519,6 +511,48 @@ service Lightning {
     */
     rpc ListPermissions (ListPermissionsRequest)
         returns (ListPermissionsResponse);
+
+    /*Scan over the chain to find any transactions which may not have been recorded in the wallet's database*/
+    rpc ReSync (ReSyncChainRequest) returns (ReSyncChainResponse);
+
+    /*Stop a re-synchronization job before it's completion*/
+    rpc StopReSync (StopReSyncRequest) returns (StopReSyncResponse);
+
+    /*Get the wallet seed words for this wallet*/
+    rpc GetWalletSeed (GetWalletSeedRequest) returns (GetWalletSeedResponse);
+
+    /*Get a secret seed which is generated using the wallet's private key, this can be used as a password for another application*/
+    rpc GetSecret (GetSecretRequest) returns (GetSecretResponse);
+
+    /*Imports a WIF-encoded private key to the 'imported' account.*/
+    rpc ImportPrivKey (ImportPrivKeyRequest) returns (ImportPrivKeyResponse);
+
+    /*Returns the private key in WIF encoding that controls some wallet address.*/
+    rpc DumpPrivKey (DumpPrivKeyRequest) returns (DumpPrivKeyResponse);
+
+    /*Returns a JSON array of outpoints marked as locked (with lockunspent) for this wallet session.*/
+    rpc ListLockUnspent (ListLockUnspentRequest) returns (ListLockUnspentResponse);
+
+    /*Locks or unlocks an unspent output*/
+    rpc LockUnspent (LockUnspentRequest) returns (LockUnspentResponse);
+
+    /*Create a transaction but do not send it to the chain*/
+    rpc CreateTransaction (CreateTransactionRequest) returns (CreateTransactionResponse);
+
+    /*Generates and returns a new payment address*/
+    rpc GetNewAddress (GetNewAddressRequest) returns (GetNewAddressResponse);
+
+    /*Returns a JSON object with details regarding a transaction relevant to this wallet.*/
+    rpc GetTransaction (GetTransactionRequest) returns (GetTransactionResponse);
+
+    /*Configure the wallet to vote for a network steward when making payments (note: payments to segwit addresses cannot vote)*/
+    rpc SetNetworkStewardVote (SetNetworkStewardVoteRequest) returns (SetNetworkStewardVoteResponse);
+    
+    /*Find out how the wallet is currently configured to vote in a network steward election*/
+    rpc GetNetworkStewardVote (GetNetworkStewardVoteRequest) returns (GetNetworkStewardVoteResponse);
+
+    /*Broadcast a transaction*/
+    rpc BcastTransaction (BcastTransactionRequest) returns (BcastTransactionResponse);
 }
 
 message Utxo {
@@ -567,7 +601,7 @@ message Transaction {
     repeated string dest_addresses = 8;
 
     // The raw transaction hex.
-    string raw_tx_hex = 9;
+    bytes raw_tx_hex = 9;
 
     // A label that was optionally set on transaction broadcast.
     string label = 10;
@@ -1013,28 +1047,11 @@ message SignMessageRequest {
     base64.
     */
     bytes msg = 1;
+    string address = 2;
 }
 message SignMessageResponse {
     // The signature for the given message
     string signature = 1;
-}
-
-message VerifyMessageRequest {
-    /*
-    The message over which the signature is to be verified. When using REST,
-    this field must be encoded as base64.
-    */
-    bytes msg = 1;
-
-    // The signature to be verified over the given message
-    string signature = 2;
-}
-message VerifyMessageResponse {
-    // Whether the signature was valid over the given message
-    bool valid = 1;
-
-    // The pubkey recovered from the signature
-    string pubkey = 2;
 }
 
 message ConnectPeerRequest {
@@ -1140,7 +1157,7 @@ message Channel {
     bool active = 1;
 
     // The identity pubkey of the remote node
-    string remote_pubkey = 2;
+    bytes remote_pubkey = 2;
 
     /*
     The outpoint (txid:index) of the funding transaction. With this value, Bob
@@ -1326,7 +1343,7 @@ message ChannelCloseSummary {
     string closing_tx_hash = 4;
 
     // Public key of the remote peer that we formerly had a channel with.
-    string remote_pubkey = 5;
+    bytes remote_pubkey = 5;
 
     // Total capacity of the channel.
     int64 capacity = 6;
@@ -1457,7 +1474,7 @@ message ClosedChannelsResponse {
 
 message Peer {
     // The identity pubkey of the peer
-    string pub_key = 1;
+    bytes pub_key = 1;
 
     // Network address of the peer; eg `127.0.0.1:10011`
     string address = 3;
@@ -1553,7 +1570,7 @@ message PeerEventSubscription {
 
 message PeerEvent {
     // The identity pubkey of the peer.
-    string pub_key = 1;
+    bytes pub_key = 1;
 
     enum EventType {
         PEER_ONLINE = 0;
@@ -1573,7 +1590,7 @@ message GetInfoResponse {
     string commit_hash = 20;
 
     // The identity pubkey of the current node.
-    string identity_pubkey = 1;
+    bytes identity_pubkey = 1;
 
     // If applicable, the alias of the current node, e.g. "bob"
     string alias = 2;
@@ -2036,7 +2053,7 @@ message PendingChannelsRequest {
 }
 message PendingChannelsResponse {
     message PendingChannel {
-        string remote_node_pub = 1;
+        bytes remote_node_pub = 1;
         string channel_point = 2;
 
         int64 capacity = 3;
@@ -2641,8 +2658,8 @@ message ChannelEdge {
 
     uint32 last_update = 3 [deprecated = true];
 
-    string node1_pub = 4;
-    string node2_pub = 5;
+    bytes node1_pub = 4;
+    bytes node2_pub = 5;
 
     int64 capacity = 6;
 
@@ -3279,13 +3296,13 @@ message PayReqString {
     string pay_req = 1;
 }
 message PayReq {
-    string destination = 1;
-    string payment_hash = 2;
+    bytes destination = 1;
+    bytes payment_hash = 2;
     int64 num_satoshis = 3;
     int64 timestamp = 4;
     int64 expiry = 5;
     string description = 6;
-    string description_hash = 7;
+    bytes description_hash = 7;
     string fallback_addr = 8;
     int64 cltv_expiry = 9;
     repeated RouteHint route_hints = 10;
@@ -3555,7 +3572,7 @@ message BakeMacaroonRequest {
 }
 message BakeMacaroonResponse {
     // The hex encoded macaroon, serialized in binary format.
-    string macaroon = 1;
+    bytes macaroon = 1;
 }
 
 message ListMacaroonIDsRequest {
@@ -3761,4 +3778,154 @@ message MacaroonId {
 message Op {
     string entity = 1;
     repeated string actions = 2;
+}
+
+message ReSyncChainRequest {
+    int32 from_height = 1;
+    int32 to_height = 2;
+    repeated string addresses = 3;
+    bool drop_db = 4;
+}
+
+message ReSyncChainResponse {
+}
+
+message StopReSyncRequest{}
+
+message StopReSyncResponse{
+    string value = 1;
+}
+
+message GetWalletSeedRequest{}
+
+message GetWalletSeedResponse{
+    string seed = 1;
+}
+
+message GetSecretRequest{
+    string name = 1;
+}
+
+message GetSecretResponse{
+    string secret = 1;
+}
+
+message ImportPrivKeyRequest{
+    string private_key = 1;
+    bool rescan = 2;
+    bool legacy = 3;
+}
+
+message ImportPrivKeyResponse{
+    string address = 1;
+}
+
+message ListLockUnspentRequest{}
+
+message ListLockUnspentResponse{
+    repeated string locked_unspent = 1;
+}
+
+message LockUnspentTransaction {
+    string txid = 1;
+    int32 vout = 2;
+}
+message LockUnspentRequest{
+    bool unlock = 1;
+    repeated LockUnspentTransaction transactions = 2;
+    string lockname = 3;
+}
+
+message LockUnspentResponse{
+    bool result = 1;
+}
+
+message CreateTransactionRequest{
+    string to_address = 1;
+    int32 amount = 2;
+    repeated string from_address = 3;
+    bool electrum_format = 4;
+    string change_address = 5;
+    int32 input_min_height = 6;
+    int32 min_conf = 7;
+    bool vote = 8;
+    int32 max_inputs = 9;
+    string autolock = 10;
+    bool sign = 11;
+}
+
+message CreateTransactionResponse{
+    bytes transaction = 1;
+}
+
+message DumpPrivKeyRequest{
+    string address = 1;
+}
+
+message DumpPrivKeyResponse{
+    string private_key = 1;
+}
+
+message GetNewAddressRequest{
+    bool legacy = 1;
+}
+
+message GetNewAddressResponse{
+    string address = 1;
+}
+
+message GetTransactionRequest{
+    string txid = 1;
+    bool includewatchonly = 2;
+}
+
+message GetTransactionDetailsResult {
+    string address = 1;
+    double amount = 2;
+    string category = 3;
+    uint32 vout = 4;
+    uint64 amount_units = 5;
+}
+
+message TransactionResult{
+    double amount = 1;
+    uint64 amount_units = 2;
+    double fee = 3;
+    uint64 fee_units = 4;
+    int64 confirmations = 5;
+    string block_hash = 6;
+    int64 block_index = 7;
+    int64 block_time = 8;
+    string txid = 9;
+    repeated string wallet_conflicts = 10;
+    int64 time = 11;
+    int64 time_received = 12;
+    repeated GetTransactionDetailsResult details = 13;
+    bytes raw = 14;
+}
+
+message GetTransactionResponse{
+    TransactionResult transaction = 1;
+}
+
+message GetNetworkStewardVoteRequest{}
+
+message GetNetworkStewardVoteResponse{
+    string vote_against = 1;
+    string vote_for = 2;
+}
+
+message SetNetworkStewardVoteRequest{
+    string vote_against = 1;
+    string vote_for = 2;
+}
+
+message SetNetworkStewardVoteResponse{}
+
+message BcastTransactionRequest{
+    string txn_hash = 1;
+}
+
+message BcastTransactionResponse{
+    string txn_hash = 1;
 }
