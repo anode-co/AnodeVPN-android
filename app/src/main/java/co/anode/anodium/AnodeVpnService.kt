@@ -28,7 +28,7 @@ class AnodeVpnService : VpnService() {
                 actionStop -> {
                     stopSelf()
                     stopForeground(true)
-                    mInterface!!.close()
+                    mInterface?.close()
                     mInterface = null
                 }
             }
