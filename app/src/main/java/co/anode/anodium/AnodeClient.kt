@@ -125,7 +125,7 @@ object AnodeClient {
 
     fun httpPostMessage(type:String, message: String): String {
         //Allow a single post message every minute
-        if ((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) {
+        if (((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) || (message.contains("io.grpc.StatusRuntimeException: UNAVAILABLE"))) {
             return ""
         }
         lastpostmessage = System.currentTimeMillis()
