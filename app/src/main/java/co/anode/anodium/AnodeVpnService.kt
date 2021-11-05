@@ -68,6 +68,11 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     private var myIp6: String = ""
 
     private fun configVpn() {
+        if (CjdnsSocket.ipv4Address.isEmpty() && CjdnsSocket.ipv6Address.isEmpty()) {
+            Log.i(LOGTAG, "AnodeVPNService: At least one address must be specified")
+            return
+        }
+
         val b = avpn.builder().setSession("AnodeVpnService")
                 //.addAddress(myIp6, 128)
                 //.addRoute("fc00::",8)
