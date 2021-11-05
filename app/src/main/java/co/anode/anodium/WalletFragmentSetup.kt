@@ -19,8 +19,8 @@ class WalletFragmentSetup : Fragment() {
     lateinit var statusbar: TextView
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.walletfragment_setup, container, false)
@@ -29,7 +29,7 @@ class WalletFragmentSetup : Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentCreate created")
+        AnodeClient.eventLog(requireContext(), "Activity: WalletFragmentCreate created")
         val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         var seed = ""
         val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
@@ -41,7 +41,7 @@ class WalletFragmentSetup : Fragment() {
         val createButton = view.findViewById<Button>(R.id.button_wallet_create)
         statusbar = view.findViewById<TextView>(R.id.textview_status)
         createButton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(),"Button: Create PKT wallet clicked")
+            AnodeClient.eventLog(requireContext(), "Button: Create PKT wallet clicked")
             Log.i(LOGTAG, "WalletFragmentSetup creating wallet")
             var password = ""
             val builder: androidx.appcompat.app.AlertDialog.Builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -49,8 +49,8 @@ class WalletFragmentSetup : Fragment() {
             builder.setMessage("Please set your password")
             val input = EditText(context)
             val lp = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT)
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT)
             input.layoutParams = lp
             input.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
             input.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -60,20 +60,16 @@ class WalletFragmentSetup : Fragment() {
                 dialog.dismiss()
 
                 if ((prefs != null) && (password.isNotEmpty())) {
-                    Thread(Runnable {
-                        activity?.runOnUiThread(Runnable {
-                                statusbar.text = "Creating wallet please wait..."
-                                val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
-                                activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
-                            })
+                    Thread({
+                        activity?.runOnUiThread {
+                            statusbar.text = "Creating wallet please wait..."
+                            val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
+                            activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
+                        }
                         val result = LndRPCController.createLocalWallet(prefs, password)
                         if (result.contains("Success")) {
-                            activity?.runOnUiThread(Runnable {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "PKT wallet created",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                            activity?.runOnUiThread {
+                                Toast.makeText(requireContext(), "PKT wallet created", Toast.LENGTH_LONG).show()
                                 statusbar.text = ""
                                 val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                                 activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
@@ -99,12 +95,13 @@ class WalletFragmentSetup : Fragment() {
                                 seedLayout.visibility = View.VISIBLE
                                 createButton.visibility = View.GONE
                                 closeButton.visibility = View.VISIBLE
-                            })
+                            }
                         } else {
                             Log.i(LOGTAG, "WalletFragmentSetup Error from trying to create wallet")
-                            Toast.makeText(requireContext(), "Error: $result", Toast.LENGTH_LONG).show()
+                            activity?.runOnUiThread {
+                                Toast.makeText(requireContext(), "Error: $result", Toast.LENGTH_LONG).show()
+                            }
                         }
-
                     }, "WalletFragmentSetup.CreateWallet").start()
                 }
             })
