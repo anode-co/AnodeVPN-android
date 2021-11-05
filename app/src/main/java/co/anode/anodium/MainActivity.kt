@@ -1,7 +1,6 @@
 package co.anode.anodium
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -13,7 +12,6 @@ import android.net.VpnService
 import android.os.*
 import android.text.Html
 import android.util.Log
-import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.*
@@ -40,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var uiInForeground = true
     private var previousPublicIPv4 = ""
     val myPermissionsRequestWriteExternal = 1
+    private val vpnConnectionWaitingInterval = 30000L
     val h = Handler()
 
     companion object {
@@ -114,9 +113,10 @@ class MainActivity : AppCompatActivity() {
         var mLastClickTime: Long = 0
         val buttonConnectVPNs = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         buttonConnectVPNs.setOnClickListener() {
+            anodeUtil!!.preventTwoClick(it)
             //avoid accidental double clicks
-            if (SystemClock.uptimeMillis() - mLastClickTime > minClickInterval) {
-                mLastClickTime = SystemClock.uptimeMillis()
+            if (SystemClock.elapsedRealtime() - mLastClickTime > minClickInterval) {
+                mLastClickTime = SystemClock.elapsedRealtime()
                 if (!buttonConnectVPNs.isChecked) {
                     disconnectVPN(true)
                 } else {
@@ -325,6 +325,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }, "MainActivity.CheckUpdates").start()
+
+        //Initialize VPN connecting waiting dialog
+        VpnConnectionWaitingDialog.init(h, this@MainActivity)
     }
 
     private fun bigbuttonState(state: Int) {
@@ -333,28 +336,25 @@ class MainActivity : AppCompatActivity() {
         when(state) {
             buttonStateDisconnected -> {
                 AnodeClient.eventLog(baseContext, "Main button status DISCONNECTING")
+                h.removeCallbacks(VpnConnectionWaitingDialog)
                 //Status bar
                 status.text = ""
                 //Show disconnected on toast so it times out
-                val toast = Toast.makeText(applicationContext, getString(R.string.status_disconnected), Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
-                toast.show()
+                Toast.makeText(applicationContext, getString(R.string.status_disconnected), Toast.LENGTH_LONG).show()
                 //Button
                 buttonconnectvpns.alpha = 1.0f
-                h.removeCallbacks(ConnectingDialog)
             }
             buttonStateConnecting -> {
                 AnodeClient.eventLog(baseContext, "Main button status for CONNECTING")
                 //Start 30sec timer
-                ConnectingDialog.init(h, this@MainActivity)
-                h.postDelayed(ConnectingDialog, 30000)
+                h.postDelayed(VpnConnectionWaitingDialog, vpnConnectionWaitingInterval)
                 status.text = resources.getString(R.string.status_connecting)
                 buttonconnectvpns.text = getString(R.string.button_cancel)
                 buttonconnectvpns.alpha = 0.5f
             }
             buttonStateConnected -> {
                 AnodeClient.eventLog(baseContext, "Main button status for CONNECTED")
-                h.removeCallbacks(ConnectingDialog)
+                h.removeCallbacks(VpnConnectionWaitingDialog)
                 status.text = ""
                 buttonconnectvpns.alpha = 1.0f
                 /*val toast = Toast.makeText(applicationContext, getString(R.string.status_connected), Toast.LENGTH_LONG)
@@ -662,8 +662,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    object ConnectingDialog: Runnable {
-        private var h: Handler? = null
+    object VpnConnectionWaitingDialog: Runnable {
+        private lateinit var h: Handler
         private var c: Context? = null
 
         fun init(handler: Handler, context: Context)  {
@@ -672,17 +672,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun run() {
-            h?.removeCallbacks(ConnectingDialog)
+            h.removeCallbacks(VpnConnectionWaitingDialog)
             if (!AnodeClient.vpnConnected) {
                 if (c!=null) {
                     val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
                     builder.setTitle("VPN Connecting")
                     builder.setMessage("Taking a long time to connect, VPN server may not be working.")
-
                     builder.setPositiveButton("Keep waiting") { dialog, _ ->
                         dialog.dismiss()
                     }
-
                     builder.setNegativeButton("Disconnect") { dialog, _ ->
                         AnodeClient.AuthorizeVPN().cancel(true)
                         AnodeClient.stopThreads()

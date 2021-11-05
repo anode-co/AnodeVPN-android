@@ -3,6 +3,7 @@ package co.anode.anodium
 import android.content.Context
 import android.system.Os
 import android.util.Log
+import android.view.View
 import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
@@ -24,6 +25,7 @@ class AnodeUtil(c: Context?) {
     lateinit var pltd_pb: Process
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
+    private val clickInterval = 1000L
 
     init {
         context = c
@@ -251,6 +253,14 @@ class AnodeUtil(c: Context?) {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+
+    fun preventTwoClick(view: View) {
+        view.setEnabled(false)
+        view.postDelayed(
+            { view.setEnabled(true) },
+            clickInterval
+        )
     }
 }
 
