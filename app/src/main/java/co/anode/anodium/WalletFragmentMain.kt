@@ -59,6 +59,9 @@ class WalletFragmentMain : Fragment() {
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val context = requireContext()
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
+        val sendPaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
+        //Disable it while trying to unlock wallet
+        sendPaymentButton.isEnabled = false
 
         //Updating main wallet screen every 10 secs
         Thread({
@@ -131,6 +134,7 @@ class WalletFragmentMain : Fragment() {
                 statusBar.text = "Wallet unlocked"
                 val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
                 activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+                sendPaymentButton.isEnabled = true
             }
             //Refresh UI with wallet values
             while(true) {
@@ -340,7 +344,6 @@ class WalletFragmentMain : Fragment() {
             startActivity(shareIntent)
         }
 
-        val sendPaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
         sendPaymentButton.setOnClickListener {
             AnodeClient.eventLog(requireContext(), "Button: Send PKT clicked")
             val sendPaymentActivity = Intent(context, SendPaymentActivity::class.java)

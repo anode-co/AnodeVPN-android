@@ -2,6 +2,8 @@ package co.anode.anodium
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -18,12 +20,40 @@ class SendPaymentActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
         val sendButton = findViewById<Button>(R.id.button_sendPKTPayment)
+        val address = findViewById<EditText>(R.id.editTextReceiverAddress)
+        var ignoreTextChanged = false
+        //automatically trim pasted addresses
+        address.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (ignoreTextChanged) {
+                    ignoreTextChanged = false
+                    return
+                }
+                val longRegex = "(pkt1)([a-zA-Z0-9]{59})".toRegex()
+                val shortRegex = "(pkt1)([a-zA-Z0-9]{39})".toRegex()
+                var trimmedAddress = longRegex.find(s.toString(),0)
+                if ((trimmedAddress != null) && (trimmedAddress.value.isEmpty()) ){
+                    trimmedAddress = shortRegex.find(s.toString(),0)
+                    if ((trimmedAddress != null) && (trimmedAddress.value.isEmpty())) {
+                        Toast.makeText(applicationContext, "PKT address is invalid", Toast.LENGTH_SHORT).show()
+                    } else {
+                        ignoreTextChanged = true
+                        address.setText(trimmedAddress?.value!!)
+                    }
+                } else {
+                    ignoreTextChanged = true
+                    address.setText(trimmedAddress?.value)
+                }
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         sendButton.setOnClickListener {
             var sendcoins = true
             val bsPassword: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
             //Check fields
-            val address = findViewById<EditText>(R.id.editTextReceiverAddress)
+            
             if (address.text.toString().isEmpty()) {
                 Toast.makeText(applicationContext, "Please fill in the receiver's address", Toast.LENGTH_SHORT).show()
                 sendcoins = false
