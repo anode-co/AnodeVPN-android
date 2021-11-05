@@ -70,7 +70,8 @@ class WalletFragmentMain : Fragment() {
             activity?.runOnUiThread {
                 statusBar.text = "Trying to unlock wallet..."
             }
-            while (!prefs.getBoolean("lndwalletopened", false)) {
+            //Check that fragment is added to the activity before trying to open the wallet
+            while ((isAdded) && (!prefs.getBoolean("lndwalletopened", false))) {
                 walletResult = openPKTWallet()
                 if (walletResult.contains("ErrWrongPassphrase")) {
                     var password: String

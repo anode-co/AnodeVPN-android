@@ -59,7 +59,7 @@ class WalletFragmentSetup : Fragment() {
                 password = input.text.toString()
                 dialog.dismiss()
 
-                if ((prefs != null) && (password.isNotEmpty())) {
+                if ((isAdded) && (prefs != null) && (password.isNotEmpty())) {
                     Thread({
                         activity?.runOnUiThread {
                             statusbar.text = "Creating wallet please wait..."
