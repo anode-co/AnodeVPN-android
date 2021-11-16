@@ -43,6 +43,28 @@ class AccountMainActivity : AppCompatActivity() {
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
         signIn.movementMethod = LinkMovementMethod.getInstance()
         signIn.text = link
+
+        val skipButton: Button = findViewById(R.id.buttonSkip)
+        skipButton.setOnClickListener() {
+            AnodeClient.eventLog(baseContext, "Button: SKIP pressed")
+            setResult(0)
+            finish()
+        }
+
+        //val signInLink = findViewById<TextView>(R.id.textSignIn)
+        signIn.movementMethod = object : TextViewLinkHandler() {
+            override fun onLinkClick(url: String?) {
+                AnodeClient.eventLog(baseContext, "Button: Sing in Link pressed")
+                val signInActivity = Intent(applicationContext, SignInActivity::class.java)
+                startActivityForResult(signInActivity, 0)
+            }
+        }
+        AnodeClient.eventLog(baseContext, "Activity: AcccountMain created")
+
+    }
+
+    override fun onStart() {
+        super.onStart()
         val createAccountButton: Button = findViewById(R.id.buttonCreateAccount)
         createAccountButton.setOnClickListener() {
             AnodeClient.eventLog(baseContext, "Button: CREATE ACCOUNT pressed")
@@ -64,23 +86,6 @@ class AccountMainActivity : AppCompatActivity() {
                 fieldRegistration().execute("email", email.text.toString(), username)
             }
         }
-        val skipButton: Button = findViewById(R.id.buttonSkip)
-        skipButton.setOnClickListener() {
-            AnodeClient.eventLog(baseContext, "Button: SKIP pressed")
-            setResult(0)
-            finish()
-        }
-
-        val signinLink = findViewById<TextView>(R.id.textSignIn)
-        signinLink.setMovementMethod(object : TextViewLinkHandler() {
-            override fun onLinkClick(url: String?) {
-                AnodeClient.eventLog(baseContext, "Button: Sing in Link pressed")
-                val signInActivity = Intent(applicationContext, SignInActivity::class.java)
-                startActivityForResult(signInActivity, 0)
-            }
-        })
-        AnodeClient.eventLog(baseContext, "Activity: AcccountMain created")
-
     }
 
     override fun onSupportNavigateUp(): Boolean {

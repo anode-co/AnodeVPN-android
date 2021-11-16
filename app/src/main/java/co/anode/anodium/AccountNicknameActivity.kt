@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.ref.WeakReference
 
 
 class AccountNicknameActivity : AppCompatActivity() {
@@ -36,13 +37,13 @@ class AccountNicknameActivity : AppCompatActivity() {
         actionbar!!.title = "Sign up"
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
 
-        val signin: TextView = findViewById(R.id.textSignIn)
+
+        val signIn: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-        signin.movementMethod = LinkMovementMethod.getInstance()
-        signin.text = link
-        signin.movementMethod = object : TextViewLinkHandler() {
+        signIn.movementMethod = LinkMovementMethod.getInstance()
+        signIn.text = link
+        signIn.movementMethod = object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
                 AnodeClient.eventLog(baseContext,"Button: Sing in link pressed")
                 val signInActivity = Intent(applicationContext, SignInActivity::class.java)
@@ -50,16 +51,8 @@ class AccountNicknameActivity : AppCompatActivity() {
             }
         }
 
-        val prefsusername = prefs.getString("username","")
-        usernameText = findViewById(R.id.editTextNickname)
-        if (prefsusername!!.isEmpty()) {
-            UsernameGenerate().execute()
-        } else {
-            usernameText?.setText(prefsusername)
-        }
-
-        val generateusername: Button = findViewById(R.id.button_generateusername)
-        generateusername.setOnClickListener {
+        val generateUsername: Button = findViewById(R.id.button_generateusername)
+        generateUsername.setOnClickListener {
             AnodeClient.eventLog(baseContext,"Button: Generate username pressed")
             UsernameGenerate().execute()
         }
@@ -71,10 +64,22 @@ class AccountNicknameActivity : AppCompatActivity() {
             if (username.isEmpty()) {
                 Toast.makeText(baseContext, "Please enter or generate a username", Toast.LENGTH_SHORT).show()
             } else {
-                UsernameRegistration().execute(username)
+                UsernameRegistration(this).execute(username)
             }
         }
         AnodeClient.eventLog(baseContext,"Activity: Nickname created")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefsUsername = prefs.getString("username","")
+        usernameText = findViewById(R.id.editTextNickname)
+        if (prefsUsername!!.isEmpty()) {
+            UsernameGenerate().execute()
+        } else {
+            usernameText?.setText(prefsUsername)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -155,20 +160,27 @@ class AccountNicknameActivity : AppCompatActivity() {
         }
     }
 
-    inner class UsernameRegistration : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    private class UsernameRegistration(context: AccountNicknameActivity): AsyncTask<String, Void, String>() {
+        private val activityReference: WeakReference<AccountNicknameActivity> = WeakReference(context)
+
+        override fun doInBackground(vararg params: String?): String {
             val jsonObject = JSONObject()
             jsonObject.accumulate("username", params[0])
-            val resp = AnodeClient.APIHttpReq(apiUsernameRegistrationURL, jsonObject.toString(), "POST", true, false)
+            val activity = activityReference.get()
+            if (activity == null || activity.isFinishing) return ""
+            val resp = AnodeClient.APIHttpReq(activity.apiUsernameRegistrationURL, jsonObject.toString(), "POST", true, false)
             Log.i(LOGTAG, resp)
             return resp
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
+            val activity = activityReference.get()
+            if (activity == null || activity.isFinishing) return
+            val apiUsernameRegistrationURL = activity.apiUsernameRegistrationURL
             Log.i(LOGTAG,"Received from $apiUsernameRegistrationURL: $result")
             if ((result.isNullOrBlank())) {
-                finish()
+                activity.finish()
             } else if (result.contains("ERROR: ") ) {
                 val json = result.split("-")[1]
                 var msg = result
@@ -178,22 +190,22 @@ class AccountNicknameActivity : AppCompatActivity() {
                 }catch (e: JSONException) {
                     msg += " Invalid JSON"
                 }
-                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
             } else {
                 val jsonObj = JSONObject(result)
                 val passwordRecoveryToken = jsonObj.getString("passwordRecoveryToken")
                 //Save username
-                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                val prefs = activity.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 with (prefs.edit()) {
-                    putString("username",username)
+                    putString("username",activity.username)
                     putBoolean("SignedIn",true)
                     putBoolean("Registered",false)
                     putString("passwordRecoveryToken",passwordRecoveryToken)
                     commit()
                 }
                 //Start activity
-                val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
-                startActivityForResult(accountMainActivity, 0)
+                val accountMainActivity = Intent(activity, AccountMainActivity::class.java)
+                activity.startActivityForResult(accountMainActivity, 0)
             }
         }
     }
