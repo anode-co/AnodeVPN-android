@@ -80,18 +80,12 @@ class WalletFragmentSetup : Fragment() {
                                 label.text = context?.resources?.getString(R.string.wallet_create_seed_label)
                                 textview.visibility = View.VISIBLE
                                 val seedArray = seed.split(" ")
-                                val seedCol1 = view.findViewById<TextView>(R.id.seed_column1)
-                                val seedCol2 = view.findViewById<TextView>(R.id.seed_column2)
-                                var seed1 = ""
-                                var seed2 = ""
-                                for (i in 0 until 12) {
-                                    seed1 += (i + 1).toString() + ". " + seedArray[i] + "\n"
+                                val seedCol = view.findViewById<TextView>(R.id.seed_column)
+                                var seedtext = ""
+                                for (i in 0 until seedArray.size - 1) {
+                                    seedtext += seedArray[i] + " "
                                 }
-                                for (i in 12 until seedArray.size - 1) {
-                                    seed2 += (i + 1).toString() + ". " + seedArray[i] + "\n"
-                                }
-                                seedCol1.text = seed1
-                                seedCol2.text = seed2
+                                seedCol.text = seedtext
                                 seedLayout.visibility = View.VISIBLE
                                 createButton.visibility = View.GONE
                                 closeButton.visibility = View.VISIBLE
