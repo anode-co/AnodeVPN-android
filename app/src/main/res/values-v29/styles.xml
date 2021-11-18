@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionBarStyle">@style/MyActionBarStyle</item>
+        <item name="actionBarTheme">@style/MyActionBarStyle</item>
+        <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
+        <item name="android:fontFamily">@font/lato</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="actionBarStyle">@style/MyActionBarStyle</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+    <style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/colorPrimaryDarkText</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+    <style name="MyActionBarStyle"  parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/colorPrimaryDarkText</item>
+        <item name="android:background">@color/colorPrimarybackground</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

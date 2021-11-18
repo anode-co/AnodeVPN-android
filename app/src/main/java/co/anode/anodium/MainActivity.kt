@@ -17,7 +17,6 @@ import android.view.MenuItem
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
@@ -43,6 +42,158 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val LOGTAG = "co.anode.anodium"
+    }
+
+    fun startBackgroundThreads() {
+        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
+        prefs.edit().putBoolean("lndwalletopened", false).apply()
+
+        //Check internet connectivity & public IP
+        Thread({
+            while (true) {
+                if ((internetConnection() == false) && (uiInForeground)) {
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.toast_no_internet), Toast.LENGTH_LONG).show()
+                    }
+                }
+                Thread.sleep(3000)
+            }
+        }, "MainActivity.CheckInternetConnectivity").start()
+
+        //Get v4 public IP
+        Thread({
+            while (true) {
+                if (internetConnection() && uiInForeground) {
+                    val textPublicIP = findViewById<TextView>(R.id.v4publicip)
+                    val publicIP = getPublicIPv4()
+                    if (!publicIP.contains("Error")) {
+                        publicIpThreadSleep = 10000
+                    }
+                    runOnUiThread {
+                        textPublicIP.text = Html.fromHtml("<b>" + this.resources.getString(R.string.text_publicipv4) + "</b>&nbsp;" + publicIP)
+                        if ((AnodeClient.vpnConnected) &&
+                            (previousPublicIPv4 != publicIP) &&
+                            ((publicIP != "None") || (!publicIP.contains("Error")))) {
+                            bigbuttonState(buttonStateConnected)
+                        }
+                    }
+                    previousPublicIPv4 = publicIP
+                }
+                Thread.sleep(publicIpThreadSleep)
+            }
+        }, "MainActivity.GetPublicIPv4").start()
+
+        //Get v6 public IP
+        Thread({
+            while (true) {
+                if (internetConnection() && uiInForeground) {
+                    val textPublicIP = findViewById<TextView>(R.id.v6publicip)
+                    val publicIP = getPublicIPv6()
+                    if (!publicIP.contains("Error")) {
+                        publicIpThreadSleep = 10000
+                    }
+                    runOnUiThread {
+                        textPublicIP.text = Html.fromHtml("<b>" + this.resources.getString(R.string.text_publicipv6) + "</b>&nbsp;" + publicIP)
+                        if (AnodeClient.vpnConnected) {
+                            bigbuttonState(buttonStateConnected)
+                        }
+                    }
+                }
+                Thread.sleep(publicIpThreadSleep)
+            }
+        }, "MainActivity.GetPublicIPv4").start()
+
+        //Check for event log files daily
+        Thread({
+            Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
+            val filesDir = this.filesDir.toString()
+            while (true) {
+                AnodeClient.ignoreErr {
+                    //Check if 24 hours have passed since last log file submitted
+                    if ((System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted", 0) > 86400000) or
+                        (System.currentTimeMillis() - prefs.getLong("LastRatingSubmitted", 0) > 86400000)) {
+                        val bEvents = File(filesDir + "/anodium-events.log").exists()
+                        val bRatings = File(filesDir + "/anodium-rating.json").exists()
+                        var timetosleep: Long = 60000
+                        if ((!bEvents) or (!bRatings)) {
+                            Log.d(LOGTAG, "No events or ratings to report, sleeping")
+                            Thread.sleep((60 * 60000).toLong())
+                        } else if (!AnodeClient.checkNetworkConnection()) {
+                            // try again in 10 seconds, waiting for internet
+                            Log.i(LOGTAG, "Waiting for internet connection to report events")
+                            Thread.sleep(10000)
+                        } else {
+                            if (bEvents) {
+                                Log.i(LOGTAG, "Reporting an events log file")
+                                if (AnodeClient.httpPostEvent(this.filesDir).contains("Error")) {
+                                    timetosleep = 60000
+                                } else {
+                                    //Log posted, sleep for a day
+                                    timetosleep = (60000 * 60 * 24).toLong()
+                                }
+                            }
+                            if (bRatings) {
+                                Log.i(LOGTAG, "Reporting ratings")
+                                if (AnodeClient.httpPostRating().contains("Error")) {
+                                    timetosleep = 60000
+                                } else {
+                                    with(prefs.edit()) {
+                                        putLong("LastRatingSubmitted", java.lang.System.currentTimeMillis())
+                                        commit()
+                                    }
+                                    timetosleep = (60000 * 60 * 24).toLong()
+                                }
+                            }
+                            Thread.sleep(timetosleep)
+                        }
+                    }
+                    Thread.sleep((60 * 60000).toLong())
+                }
+            }
+        }, "MainActivity.UploadEventsThread").start()
+        //Check for uploading Errors
+        Thread({
+            Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
+            while (true) {
+                AnodeClient.ignoreErr {
+                    val erCount = AnodeClient.errorCount(this)
+                    if (erCount == 0) {
+                        // Wait for errors for 30 seconds
+                        Log.d(LOGTAG, "No errors to report, sleeping")
+                        Thread.sleep(30000)
+                    } else if (!AnodeClient.checkNetworkConnection()) {
+                        // try again in a second, waiting for internet
+                        Log.i(LOGTAG, "Waiting for internet connection to report $erCount errors")
+                        Thread.sleep(1000)
+                    } else {
+                        Log.i(LOGTAG, "Reporting a random error out of $erCount")
+                        if (AnodeClient.httpPostError(application.filesDir).contains("Error")) {
+                            // There was an error posting, lets wait 1 minute so as not to generate
+                            // tons of crap
+                            Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")
+                            Thread.sleep(60000)
+                        }
+                    }
+                }
+            }
+        }, "MainActivity.UploadErrorsThread").start()
+        //Check for updates every 5min
+        Thread({
+            Log.i(LOGTAG, "MainActivity.CheckUpdates")
+            while (true) {
+                AnodeClient.checkNewVersion(false)
+                if (AnodeClient.downloadFails > 1) {
+                    //In case of >1 failure delete old apk files and retry after 20min
+                    AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
+                    Thread.sleep((20 * 60000).toLong())
+                } else if (AnodeClient.downloadingUpdate) {
+                    Thread.sleep((20 * 60000).toLong())
+                } else {
+                    //check for new version every 5min
+                    Thread.sleep((5 * 60000).toLong())
+                }
+            }
+        }, "MainActivity.CheckUpdates").start()
     }
 
     fun exception(paramThrowable: Throwable) {
@@ -73,15 +224,44 @@ class MainActivity : AppCompatActivity() {
         exitProcess(1)
     }
 
+    fun initNotifications() {
+        //Create notification channel
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelID = "anodium_channel_01"
+            val name = "anodium_channel"
+            val descriptionText = "Anodium channel"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(channelID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    fun startVPNService() {
+        val intent = VpnService.prepare(this)
+        if (intent != null) {
+            startActivityForResult(intent, 0)
+        } else {
+            onActivityResult(0, RESULT_OK, null)
+            //Get list of peering lines and add them as peers
+            AnodeClient.GetPeeringLines().execute()
+        }
+        initNotifications()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         //Disable night mode (dark mode)
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        anodeUtil = AnodeUtil(application)
+        anodeUtil = AnodeUtil(this)
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         prefs.edit().putBoolean("lndwalletopened", false).apply()
 
@@ -105,7 +285,7 @@ class MainActivity : AppCompatActivity() {
         anodeUtil!!.initializeApp()
         anodeUtil!!.launch()
         //Initialize AnodeClient
-        AnodeClient.mycontext = baseContext
+        AnodeClient.mycontext = this
         AnodeClient.statustv = findViewById(R.id.textview_status)
         AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
         AnodeClient.mainActivity = this
@@ -127,205 +307,20 @@ class MainActivity : AppCompatActivity() {
         }
         val buttonVPNList = findViewById<Button>(R.id.buttonVPNList)
         buttonVPNList.setOnClickListener() {
-            val vpnListActivity = Intent(applicationContext, VpnListActivity::class.java)
+            val vpnListActivity = Intent(this, VpnListActivity::class.java)
             startActivityForResult(vpnListActivity, 0)
         }
+        //Starting VPN Service
+        startVPNService()
 
-        val intent = VpnService.prepare(applicationContext)
-        //Connect to CJDNS
-        //startService(Intent(this, AnodeVpnService::class.java).setAction(AnodeVpnService().ACTION_CONNECT))
-
-        if (intent != null) {
-            startActivityForResult(intent, 0)
-        } else {
-            onActivityResult(0, RESULT_OK, null)
-            //Get list of peering lines and add them as peers
-            AnodeClient.GetPeeringLines().execute()
-        }
-
-        //Create notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelID = "anodium_channel_01"
-            val name = "anodium_channel"
-            val descriptionText = "Anodium channel"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(channelID, name, importance).apply {
-                description = descriptionText
-            }
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                    getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-
-
-        // Removed public key from main
-        // val pubkey: TextView = findViewById(R.id.textViewPubkey)
-        //pubkey.text = baseContext?.resources?.getString(R.string.public_key) +" "+ AnodeUtil(this).getPubKey()
-
-        //Check for internet connectivity every 15 seconds
-        /* Disable internet connectivity check
-        val mHandler = Handler();
-        val mHandlerTask: Runnable = object : Runnable {
-            override fun run() {
-                checkInternetConnection().execute(findViewById(R.id.textview_status))
-                mHandler.postDelayed(this, 19000)
-            }
-        }
-        mHandlerTask.run()
-        */
-        Thread({
-            Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
-            while (true) {
-                AnodeClient.ignoreErr {
-                    val erCount = AnodeClient.errorCount(application)
-                    if (erCount == 0) {
-                        // Wait for errors for 30 seconds
-                        Log.d(LOGTAG, "No errors to report, sleeping")
-                        Thread.sleep(30000)
-                    } else if (!AnodeClient.checkNetworkConnection()) {
-                        // try again in a second, waiting for internet
-                        Log.i(LOGTAG, "Waiting for internet connection to report $erCount errors")
-                        Thread.sleep(1000)
-                    } else {
-                        Log.i(LOGTAG, "Reporting a random error out of $erCount")
-                        if (AnodeClient.httpPostError(application.filesDir).contains("Error")) {
-                            // There was an error posting, lets wait 1 minute so as not to generate
-                            // tons of crap
-                            Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")
-                            Thread.sleep(60000)
-                        }
-                    }
-                }
-            }
-        }, "MainActivity.UploadErrorsThread").start()
-
-        //Check internet connectivity & public IP
-        Thread({
-            while (true) {
-                if ((internetConnection() == false) && (uiInForeground)) {
-                    runOnUiThread {
-                        Toast.makeText(applicationContext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG).show()
-                    }
-                }
-                Thread.sleep(3000)
-            }
-        }, "MainActivity.CheckInternetConnectivity").start()
-
-        //Get v4 public IP
-        Thread({
-            while (true) {
-                if (internetConnection() && uiInForeground) {
-                    val textPublicIP = findViewById<TextView>(R.id.v4publicip)
-                    val publicIP = getPublicIPv4()
-                    if (!publicIP.contains("Error")) {
-                        publicIpThreadSleep = 10000
-                    }
-                    runOnUiThread {
-                        textPublicIP.text = Html.fromHtml("<b>" + baseContext.resources.getString(R.string.text_publicipv4) + "</b>&nbsp;" + publicIP)
-                        if ((AnodeClient.vpnConnected) &&
-                                (previousPublicIPv4 != publicIP) &&
-                                ((publicIP != "None") || (!publicIP.contains("Error")))) {
-                            bigbuttonState(buttonStateConnected)
-                        }
-                    }
-                    previousPublicIPv4 = publicIP
-                }
-                Thread.sleep(publicIpThreadSleep)
-            }
-        }, "MainActivity.GetPublicIPv4").start()
-
-        //Get v6 public IP
-        Thread({
-            while (true) {
-                if (internetConnection() && uiInForeground) {
-                    val textPublicIP = findViewById<TextView>(R.id.v6publicip)
-                    val publicIP = getPublicIPv6()
-                    if (!publicIP.contains("Error")) {
-                        publicIpThreadSleep = 10000
-                    }
-                    runOnUiThread {
-                        textPublicIP.text = Html.fromHtml("<b>" + baseContext.resources.getString(R.string.text_publicipv6) + "</b>&nbsp;" + publicIP)
-                        if (AnodeClient.vpnConnected) {
-                            bigbuttonState(buttonStateConnected)
-                        }
-                    }
-                }
-                Thread.sleep(publicIpThreadSleep)
-            }
-        }, "MainActivity.GetPublicIPv4").start()
-
-        //Check for event log files daily
-        Thread({
-            Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
-            while (true) {
-                AnodeClient.ignoreErr {
-                    //Check if 24 hours have passed since last log file submitted
-                    if ((System.currentTimeMillis() - prefs.getLong("LastEventLogFileSubmitted", 0) > 86400000) or
-                            (System.currentTimeMillis() - prefs.getLong("LastRatingSubmitted", 0) > 86400000)) {
-                        val bEvents = File(applicationContext.filesDir.toString() + "/anodium-events.log").exists()
-                        val bRatings = File(applicationContext.filesDir.toString() + "/anodium-rating.json").exists()
-                        var timetosleep: Long = 60000
-                        if ((!bEvents) or (!bRatings)) {
-                            Log.d(LOGTAG, "No events or ratings to report, sleeping")
-                            Thread.sleep((60 * 60000).toLong())
-                        } else if (!AnodeClient.checkNetworkConnection()) {
-                            // try again in 10 seconds, waiting for internet
-                            Log.i(LOGTAG, "Waiting for internet connection to report events")
-                            Thread.sleep(10000)
-                        } else {
-                            if (bEvents) {
-                                Log.i(LOGTAG, "Reporting an events log file")
-                                if (AnodeClient.httpPostEvent(application.filesDir).contains("Error")) {
-                                    timetosleep = 60000
-                                } else {
-                                    //Log posted, sleep for a day
-                                    timetosleep = (60000 * 60 * 24).toLong()
-                                }
-                            }
-                            if (bRatings) {
-                                Log.i(LOGTAG, "Reporting ratings")
-                                if (AnodeClient.httpPostRating().contains("Error")) {
-                                    timetosleep = 60000
-                                } else {
-                                    with(prefs.edit()) {
-                                        putLong("LastRatingSubmitted", System.currentTimeMillis())
-                                        commit()
-                                    }
-                                    timetosleep = (60000 * 60 * 24).toLong()
-                                }
-                            }
-                            Thread.sleep(timetosleep)
-                        }
-                    }
-                    Thread.sleep((60 * 60000).toLong())
-                }
-            }
-        }, "MainActivity.UploadEventsThread").start()
         //Delete old APK files
-        AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
+        AnodeClient.deleteFiles(this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
         AnodeClient.downloadFails = 0
-        //Automatic update
+
         //Get storage permission for downloading APK
         checkStoragePermission()
-        //Check for updates every 5min
-        Thread({
-            Log.i(LOGTAG, "MainActivity.CheckUpdates")
-            while (true) {
-                AnodeClient.checkNewVersion(false)
-                if (AnodeClient.downloadFails > 1) {
-                    //In case of >1 failure delete old apk files and retry after 20min
-                    AnodeClient.deleteFiles(application?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
-                    Thread.sleep((20 * 60000).toLong())
-                } else if (AnodeClient.downloadingUpdate) {
-                    Thread.sleep((20 * 60000).toLong())
-                } else {
-                    //check for new version every 5min
-                    Thread.sleep((5 * 60000).toLong())
-                }
-            }
-        }, "MainActivity.CheckUpdates").start()
-
+        //Start background threads for checking public IP, new version, uploading errors etc
+        startBackgroundThreads()
         //Initialize VPN connecting waiting dialog
         VpnConnectionWaitingDialog.init(h, this@MainActivity)
     }
@@ -533,16 +528,6 @@ class MainActivity : AppCompatActivity() {
         }
         //On first run show nickname activity
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-        /*
-        if (prefs.getBoolean("FirstRun", true)) {
-            Log.i(LOGTAG, "First run: Start nickname activity")
-            with(prefs.edit()) {
-                putBoolean("FirstRun", false)
-                commit()
-            }
-            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-            startActivity(accountNicknameActivity)
-        }*/
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
             val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
