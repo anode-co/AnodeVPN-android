@@ -24,6 +24,7 @@ object CjdnsSocket {
     var ipv6AddressPrefix: Int = 0
     var logpeerStats: String = ""
     var logshowConnections: String = ""
+    val cjdnsPath = "data/data/co.anode.anodium/files/cjdroute.sock"
 
     fun init(path:String ) {
         var tries = 0
@@ -70,6 +71,10 @@ object CjdnsSocket {
                     Benc.dict("q", name)
                 }
         Log.i(LOGTAG,benc.toString())
+        //Check if socket has connected, in case cjdns has not been initialized yet
+        while (!ls.isConnected) {
+            init(cjdnsPath)
+        }
         ls.outputStream.write(benc.bytes())
         val x = read()
         //Log.i(LOGTAG, "$benc-->$x")
