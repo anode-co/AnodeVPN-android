@@ -726,11 +726,16 @@ object AnodeClient {
             conn.connect()
         } catch (e: SocketTimeoutException) {
             if (url.toString().contains(cjdnsServerAddress)) {
-                APIHttpReq(address,body,method,needsAuth,true)
+                APIHttpReq(address, body, method, needsAuth, true)
+            } else {
+                Log.w(LOGTAG,"SocketTimeoutException: "+e.printStackTrace())
             }
             return ""
+        } catch (e: IOException) {
+            Log.w(LOGTAG,"IOException: "+e.printStackTrace())
+            return ""
         } catch (e: Exception) {
-            Log.w(LOGTAG,"Can not connect at ${url.toString()}")
+            Log.w(LOGTAG,"Exception: "+ e.printStackTrace())
             return ""
         }
         //Send body
