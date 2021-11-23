@@ -400,22 +400,41 @@ class MainActivity : AppCompatActivity() {
         val signin_backpressed = prefs.getBoolean("SignInActivity_BackPressed", false)
         //Exit app if user is not signed in
         if (!signedin and (nickname_backpressed or signin_backpressed)) {
-            //TODO: handle back when comes through other use cases
             with(prefs.edit()) {
                 putBoolean("NicknameActivity_BackPressed", false)
                 putBoolean("SignInActivity_BackPressed", false)
                 commit()
             }
-            //Close app
-            finishAffinity()
-            exitProcess(0)
+            // User may have pressed back without signing in.
+            // Notify user that they need to sign in or exit the app
+            if (prefs.getString("username", "").isNullOrEmpty()) {
+                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+                builder.setTitle("Sign in")
+                builder.setMessage("Please sign in to use the application")
+                builder.setPositiveButton("OK") { dialog, _ ->
+                    startActivity(accountNicknameActivity)
+                    dialog.dismiss()
+                }
+                builder.setNegativeButton("Exit") { dialog, _ ->
+                    dialog.dismiss()
+                    //Close app
+                    finishAffinity()
+                    exitProcess(0)
+                }
+                val alert: AlertDialog = builder.create()
+                alert.show()
+            } else {
+                //Close app
+                finishAffinity()
+                exitProcess(0)
+            }
         }
         setUsernameTopBar()
 
         if (mainMenu != null) {
             //Show/Hide Registration on menu
-            mainMenu!!.findItem(R.id.action_account_settings).isVisible =
-                !prefs.getBoolean("Registered", false)
+            mainMenu!!.findItem(R.id.action_account_settings).isVisible = !prefs.getBoolean("Registered", false)
         }
         //Set button to correct status
         val status = findViewById<TextView>(R.id.textview_status)
