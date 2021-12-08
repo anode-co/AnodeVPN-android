@@ -24,10 +24,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
-import java.net.HttpURLConnection
-import java.net.NetworkInterface
-import java.net.SocketTimeoutException
-import java.net.URL
+import java.net.*
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.MessageDigest
@@ -733,6 +730,9 @@ object AnodeClient {
             return ""
         } catch (e: IOException) {
             Log.w(LOGTAG,"IOException: "+e.printStackTrace())
+            return ""
+        } catch (e: SocketException) {
+            Log.w(LOGTAG,"socketException: "+e.printStackTrace())
             return ""
         } catch (e: Exception) {
             Log.w(LOGTAG,"Exception: "+ e.printStackTrace())

@@ -16,6 +16,7 @@ import lnrpc.Rpc.*
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
     private const val LOGTAG = "co.anode.anodium"
+    private const val PostErrorLogs = false
 
     fun createSecurechannel() {
         Log.i(LOGTAG, "LndRPCController.createSecurechannel")
@@ -76,15 +77,16 @@ object LndRPCController {
         }
         try {
             val stub = WalletUnlockerGrpc.newBlockingStub(mSecureChannel)
-            val walletpassword: ByteString =
-                ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
+            val walletpassword: ByteString = ByteString.copyFrom(preferences.getString("walletpassword", ""), Charsets.UTF_8)
             stub.unlockWallet(Walletunlocker.UnlockWalletRequest.newBuilder().setWalletPassword(walletpassword).build())
         } catch(e:Exception) {
             Log.e(LOGTAG, e.toString())
             preferences.edit().putBoolean("lndwalletopened", false).apply()
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to open wallet ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to open wallet ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             return e.toString()
         }
         preferences.edit().putBoolean("lndwalletopened", true).apply()
@@ -101,9 +103,11 @@ object LndRPCController {
             metaservice.getInfo2(Metaservice.GetInfo2Request.newBuilder().setInfoResponse(getinforesponse).build())
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to get info ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to get info ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             null
         }
     }
@@ -119,9 +123,11 @@ object LndRPCController {
             addressResponse.address
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to generate address ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to generate address ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             return ""
         }
     }
@@ -147,9 +153,11 @@ object LndRPCController {
             (walletBalanceResponse.totalBalance / 1073741824).toFloat()
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to get balance ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to get balance ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             -1.0f
         }
     }
@@ -165,9 +173,11 @@ object LndRPCController {
             addressBalancesResponce.addrsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to get addresses ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to get addresses ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             null
         }
     }
@@ -192,9 +202,11 @@ object LndRPCController {
             return "OK"
         } catch (e: Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to send coins ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to send coins ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             return e.toString()
         }
     }
@@ -213,9 +225,11 @@ object LndRPCController {
             transactions.transactionsList
         } catch (e:Exception) {
             Log.e(LOGTAG, e.toString())
-            Thread({
-                AnodeClient.httpPostMessage("lnd", "Failed to get transactions ${e.toString()}")
-            }, "LndRPCController.UploadMessageThread").start()
+            if (PostErrorLogs) {
+                Thread({
+                    AnodeClient.httpPostMessage("lnd", "Failed to get transactions ${e.toString()}")
+                }, "LndRPCController.UploadMessageThread").start()
+            }
             //Return an empty list
             mutableListOf<Transaction>()
         }

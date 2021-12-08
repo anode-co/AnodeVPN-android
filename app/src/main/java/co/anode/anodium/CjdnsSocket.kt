@@ -3,7 +3,9 @@ package co.anode.anodium
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
+import kotlinx.coroutines.delay
 import java.io.FileDescriptor
+import java.io.IOException
 import java.net.InetAddress
 import kotlin.concurrent.thread
 import kotlin.experimental.and
@@ -63,7 +65,8 @@ object CjdnsSocket {
         return String(b)
     }
 
-    @Synchronized fun call(name: String, args: Benc.Bdict?): Benc.Obj {
+    @Synchronized
+    fun call(name: String, args: Benc.Bdict?): Benc.Obj {
         val benc =
                 if (args != null) {
                     Benc.dict("q", name, "args", args)
@@ -75,14 +78,24 @@ object CjdnsSocket {
         while (!ls.isConnected) {
             init(cjdnsPath)
         }
-        ls.outputStream.write(benc.bytes())
+        var tries = 0
+        while (true) {
+            try {
+                ls.outputStream.write(benc.bytes())
+                break
+            } catch (e: IOException) {
+                tries++
+                if (tries > 9) {
+                    throw CjdnsException("Can NOT write to socket.")
+                }
+            }
+            Thread.sleep(50)
+        }
         val x = read()
-        //Log.i(LOGTAG, "$benc-->$x")
-        val dec: Benc.Obj
         if (x.isEmpty()) {
             throw CjdnsException("Empty reply, call to $name")
         }
-        dec = Benc(x).decode()
+        val dec: Benc.Obj = Benc(x).decode()
         val err = dec["error"]
         if (err.toString() != "null") {
             if (err.str().contains("no tun currently")) {
