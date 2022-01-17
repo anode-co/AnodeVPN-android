@@ -32,7 +32,7 @@ class SendPaymentActivity : AppCompatActivity() {
                 val longRegex = "(pkt1)([a-zA-Z0-9]{59})".toRegex()
                 val shortRegex = "(pkt1)([a-zA-Z0-9]{39})".toRegex()
                 var trimmedAddress = longRegex.find(s.toString(),0)
-                if ((trimmedAddress != null) && (trimmedAddress.value.isEmpty()) ){
+                if ((trimmedAddress == null) || (trimmedAddress.value.isEmpty()) ){
                     trimmedAddress = shortRegex.find(s.toString(),0)
                     if ((trimmedAddress != null) && (trimmedAddress.value.isEmpty())) {
                         Toast.makeText(applicationContext, "PKT address is invalid", Toast.LENGTH_SHORT).show()

@@ -33,6 +33,7 @@
                 android:textSize="24sp"
                 android:text="@string/send_pkt_title"
                 android:layout_marginBottom="30dp"/>
+
             <EditText
                 android:id="@+id/editTextReceiverAddress"
                 android:layout_width="match_parent"
@@ -41,10 +42,9 @@
                 android:layout_marginStart="@dimen/editfield_margin"
                 android:layout_marginEnd="@dimen/editfield_margin"
                 android:layout_marginBottom="20dp"
-                android:autofillHints="test"
+                android:autofillHints=""
                 android:ems="10"
-                android:hint="@string/send_pkt_receivers_address"
-                android:inputType="textNoSuggestions|textVisiblePassword" />
+                android:hint="@string/send_pkt_receivers_address" />
             <EditText
                 android:id="@+id/editTextPKTAmount"
                 android:layout_width="match_parent"
@@ -56,7 +56,7 @@
                 android:hint="@string/send_pkt_amount"
                 android:layout_above="@+id/paymentpasswordLayout"
                 android:layout_marginBottom="20dp"
-                android:autofillHints="test" />
+                android:autofillHints="" />
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/paymentpasswordLayout"
                 android:layout_width="match_parent"

@@ -327,7 +327,7 @@ class WalletFragmentMain : Fragment() {
                     }
                     Thread.sleep(sleepInterval)
                 } else {
-                    Thread.sleep(500)
+                    Thread.sleep(1000)
                 }
             }
         }, "WalletFragmentMain.RefreshValues").start()
