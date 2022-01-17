@@ -22,7 +22,7 @@ class WalletActivity : AppCompatActivity() {
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
         //Check if wallet exists
-        val walletfile = File(baseContext.filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
+        val walletfile = File(baseContext.filesDir.toString() + "/pkt/wallet.db")
         if (walletfile.exists()) {
             val createfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
             if (createfragment != null) {

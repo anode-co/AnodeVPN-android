@@ -14,7 +14,7 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        //buildPltd()
+        buildPld()
         setVersionNumberByTag()
         applicationId 'co.anode.anodium'
         minSdkVersion 26
@@ -170,7 +170,7 @@ private String setVersionNumberByTag() {
     ext.versionPatch = Integer.parseInt(patch);
 }
 
-private void buildPltd() {
+private void buildPld() {
     def stdout = new ByteArrayOutputStream()
 
     exec {

@@ -40,7 +40,7 @@ class WalletStatsActivity : AppCompatActivity() {
         }
 
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-        val walletfile = File("$filesDir/lnd/data/chain/pkt/mainnet/wallet.db")
+        val walletfile = File("$filesDir/pkt/wallet.db")
         if (!walletfile.exists()) {
             Toast.makeText(baseContext, "PKT wallet does not exist.", Toast.LENGTH_LONG).show()
             return
@@ -250,8 +250,8 @@ class WalletStatsActivity : AppCompatActivity() {
             } else {
                 checkwallet += " walletpassword is not empty"
             }
-            val status = LndRPCController.isPltdRunning()
-            checkwallet += " PLTD status: $status"
+            val status = LndRPCController.isPldRunning()
+            checkwallet += " PLD status: $status"
             return false
         } else if (result == "OK") {
             return true

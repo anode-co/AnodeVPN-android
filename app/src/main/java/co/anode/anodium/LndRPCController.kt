@@ -12,6 +12,7 @@ import java.io.InputStreamReader
 import java.lang.Exception
 import javax.net.ssl.HostnameVerifier
 import lnrpc.Rpc.*
+import kotlin.math.roundToLong
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
@@ -190,7 +191,7 @@ object LndRPCController {
         try {
             val sendCoinsRequest = SendCoinsRequest.newBuilder()
             sendCoinsRequest.addr = address
-            sendCoinsRequest.amount = amount * 1073741824
+            sendCoinsRequest.amount = (amount.toDouble() * 1073741824).roundToLong()
             sendCoinsRequest.targetConf = 0
             sendCoinsRequest.satPerByte = 0
             sendCoinsRequest.sendAll = false
@@ -235,8 +236,8 @@ object LndRPCController {
         }
     }
 
-    fun isPltdRunning(): Boolean {
-        val process = Runtime.getRuntime().exec("pidof pltd")
+    fun isPldRunning(): Boolean {
+        val process = Runtime.getRuntime().exec("pidof pld")
         val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
         return bufferedReader.readText().isNotEmpty()
     }

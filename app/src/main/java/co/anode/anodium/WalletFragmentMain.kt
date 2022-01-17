@@ -34,7 +34,7 @@ class WalletFragmentMain : Fragment() {
         super.onViewCreated(v, savedInstanceState)
         AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        val walletFile = File(requireContext().filesDir.toString() + "/lnd/data/chain/pkt/mainnet/wallet.db")
+        val walletFile = File(requireContext().filesDir.toString() + "/pkt/wallet.db")
         if (!walletFile.exists()) {
             return
         }
@@ -125,8 +125,8 @@ class WalletFragmentMain : Fragment() {
                 }
                 failedToUnlock++
                 if (failedToUnlock > 60) {
-                   val pltdStatus = LndRPCController.isPltdRunning()
-                   throw LndRPCException("Error unlocking wallet: $walletResult. PLTD status: $pltdStatus")
+                   val pldStatus = LndRPCController.isPldRunning()
+                   throw LndRPCException("Error unlocking wallet: $walletResult. PLD status: $pldStatus")
                 }
                 Thread.sleep(sleepInterval)
             }
@@ -376,8 +376,8 @@ class WalletFragmentMain : Fragment() {
             } else {
                 checkWallet += " walletpassword is not empty"
             }
-            val status = LndRPCController.isPltdRunning()
-            checkWallet += " PLTD status: $status"
+            val status = LndRPCController.isPldRunning()
+            checkWallet += " PLD status: $status"
             return checkWallet
         } else if (result == "OK") {
             return result

@@ -19,10 +19,10 @@ class AnodeUtil(c: Context?) {
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
     val CJDROUTE_LOG = "cjdroute.log"
-    val PLTD_LOG = "pltd.log"
-    val PLTD_BINFILE = "pltd"
-    var isPltdRunning = false
-    lateinit var pltd_pb: Process
+    val PLD_LOG = "pld.log"
+    val PLD_BINFILE = "pld"
+    var isPldRunning = false
+    lateinit var pld_pb: Process
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
     private val clickInterval = 1000L
@@ -45,54 +45,35 @@ class AnodeUtil(c: Context?) {
         var oldPath = "$nativelibdir/libcjdroute.so"
         var newPath = "$filesdir/cjdroute"
         Os.symlink(oldPath, newPath)
-        //Create symbolic link for pltd
-        val pltdfile = File("$filesdir/pltd")
-        pltdfile.delete()
-        oldPath = "$nativelibdir/libpltd.so"
-        newPath = "$filesdir/pltd"
+        //Create symbolic link for pld
+        val pldfile = File("$filesdir/pld")
+        pldfile.delete()
+        oldPath = "$nativelibdir/libpld.so"
+        newPath = "$filesdir/pld"
         Os.symlink(oldPath,newPath)
-
-
+        //Create needed directories
+        val pktwalletdir = File("$CJDNS_PATH/.pktwallet")
+        if (!pktwalletdir.exists()) {
+            pktwalletdir.mkdir()
+        }
+        val pktdir = File("$CJDNS_PATH/.pktwallet/pkt")
+        if (!pktdir.exists()) {
+            pktdir.mkdir()
+        }
+        val mainnetdir = File("$CJDNS_PATH/.pktwallet/pkt/mainnet")
+        if (!mainnetdir.exists()) {
+            mainnetdir.mkdir()
+        }
         //Create lnd directory
-        val lnddir = File("$CJDNS_PATH/lnd")
+        val lnddir = File("$CJDNS_PATH/.pktwallet/lnd")
         if (!lnddir.exists()) {
             lnddir.mkdir()
-        }
-        //Copy tls files
-        var `in`: InputStream
-        var out: OutputStream?
-        val am = context!!.assets
-        try {
-            val buffer = ByteArray(1024)
-            var read: Int
-            val tlscert = File("$CJDNS_PATH/lnd/tls.cert")
-            if (!tlscert.exists()) {
-                `in` = am.open("tls.cert")
-                out = FileOutputStream("$CJDNS_PATH/lnd/tls.cert")
-                while (`in`.read(buffer).also { read = it } != -1) {
-                    out.write(buffer, 0, read)
-                }
-                `in`.close()
-                out.close()
-            }
-            val tlskey = File("$CJDNS_PATH/lnd/tls.key")
-            if (!tlskey.exists()) {
-                `in` = am.open("tls.key")
-                out = FileOutputStream("$CJDNS_PATH/lnd/tls.key")
-                while (`in`.read(buffer).also { read = it } != -1) {
-                    out.write(buffer, 0, read)
-                }
-                `in`.close()
-                out.close()
-            }
-        }catch (e: IOException) {
-            throw AnodeUtilException("Failed to copy pltd or tls files " + e.message)
         }
     }
 
 
     fun launch() {
-        launchPltd()
+        launchPld()
         val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
             initializeCjdrouteConfFile()
@@ -149,27 +130,26 @@ class AnodeUtil(c: Context?) {
         }
     }
 
-    private fun launchPltd() {
+    private fun launchPld() {
         try {
-            Log.e(LOGTAG, "Launching pltd (file size: " +
-                    File("$CJDNS_PATH/$PLTD_BINFILE").length() + ")")
+            Log.e(LOGTAG, "Launching pld (file size: " +
+                    File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
-
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLTD_BINFILE","--notls","--no-macaroons","--lnddir=/data/data/co.anode.anodium/files/lnd","--configfile=/data/data/co.anode.anodium/files/config.go","--datadir=/data/data/co.anode.anodium/files/lnddata")
-                    .redirectOutput(File(CJDNS_PATH, PLTD_LOG))
+            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLD_BINFILE","--no-macaroons","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
+                    .redirectOutput(File(CJDNS_PATH, PLD_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = CJDNS_PATH
-            pltd_pb = processBuilder.start()
-            isPltdRunning = true
+            pld_pb = processBuilder.start()
+            isPldRunning = true
             Thread( Runnable {
-                //If pltd fails, send error msg and relaunch it
-                pltd_pb.waitFor()
-                isPltdRunning = false
-                AnodeClient.httpPostMessage("lnd", "Pltd stopped")
-                launchPltd()
+                //If pld fails, send error msg and relaunch it
+                pld_pb.waitFor()
+                isPldRunning = false
+                AnodeClient.httpPostMessage("lnd", "Pld stopped")
+                launchPld()
             }).start()
         } catch (e: Exception) {
-            throw AnodeUtilException("Failed to execute pltd " + e.message)
+            throw AnodeUtilException("Failed to execute pld " + e.message)
         }
     }
 

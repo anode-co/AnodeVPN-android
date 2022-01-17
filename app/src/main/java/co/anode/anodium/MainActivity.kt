@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity() {
         else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
         else if (paramThrowable.toString().contains("LndRPCException") ) {
             type = "lnd"
-            AnodeClient.storeFileAsError(application, type, "data/data/co.anode.anodium/files/pltd.log")
+            AnodeClient.storeFileAsError(application, type, "data/data/co.anode.anodium/files/pld.log")
         }
         // we'll post the error on next startup
         AnodeClient.storeError(application, type, paramThrowable)
