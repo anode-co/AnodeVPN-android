@@ -102,32 +102,34 @@ class WalletStatsActivity : AppCompatActivity() {
                     bannedServers.text = "-"
                     numqueries.text = "-"
                 }
-                val getinforesponse = LndRPCController.getInfo()
-                val balance = LndRPCController.getTotalBalance()
+                val getinforesponse = LndRPCController.getInfo(applicationContext)
+                val balanceString = ""//LndRPCController.getBalance(applicationContext)
                 val peersList = mutableListOf<String>()
                 val bansList = mutableListOf<String>()
                 val queriesList = mutableListOf<String>()
+                val neutrino = getinforesponse.getJSONObject("neutrino")
                 if (getinforesponse != null)  {
-                    if (getinforesponse.neutrino != null) {
-                        for (i in 0 until getinforesponse?.neutrino?.peersList?.size!!) {
-                            val peerDesc = getinforesponse.neutrino?.peersList?.get(i)
-                            peersList.add("Address: " + peerDesc?.addr)
-                            peersList.add("Version: " + peerDesc?.userAgent)
-                            peersList.add("Sync: " + peerDesc?.lastBlock.toString())
+                    if (neutrino != null) {
+                        val neutrinoPeers = neutrino.getJSONArray("peers")
+                        for (i in 0 until neutrinoPeers.length()) {
+                            val peerDesc = neutrinoPeers.getJSONObject(i)
+                            peersList.add("Address: " + peerDesc.getString("addr"))
+                            peersList.add("Version: " + peerDesc.getString("userAgent"))
+                            peersList.add("Sync: " + peerDesc.getString("last_block").toString())
                         }
-                        for (i in 0 until getinforesponse.neutrino?.bansList?.size!!) {
-                            val ban = getinforesponse.neutrino?.bansList?.get(i)
-                            bansList.add("Address: "+ban?.addr)
-                            bansList.add("Reason: "+ban?.reason)
-                            bansList.add("Endtime: "+ban?.endTime)
+                        for (i in 0 until neutrino.getJSONArray("bans").length()) {
+                            val ban = neutrino.getJSONArray("bans").getJSONObject(i)
+                            bansList.add("Address: "+ban.getString("addr"))
+                            bansList.add("Reason: "+ban.getString("reason"))
+                            bansList.add("Endtime: "+ban.getString("endTime"))
                         }
-                        for (i in 0 until getinforesponse.neutrino?.queriesList?.size!!) {
-                            val query = getinforesponse.neutrino?.queriesList?.get(i)
-                            queriesList.add("Server: "+query?.peer)
-                            queriesList.add("Request: "+query?.command)
-                            queriesList.add("Created: "+query?.createTime)
-                            if (query?.lastResponseTime!! > 0) {
-                                val datetime = query.lastResponseTime.toLong().let { Date(it) }
+                        for (i in 0 until neutrino.getJSONArray("queries").length()) {
+                            val query = neutrino.getJSONArray("queries").getJSONObject(i)
+                            queriesList.add("Server: "+query.getString("peer"))
+                            queriesList.add("Request: "+query.getString("command"))
+                            queriesList.add("Created: "+query.getString("createTime"))
+                            if (query.getLong("last_response_time") > 0) {
+                                val datetime = Date(query.getLong("last_response_time"))
                                 queriesList.add("Waiting since: $datetime")
                             } else {
                                 queriesList.add("Waiting since: ")
@@ -143,17 +145,15 @@ class WalletStatsActivity : AppCompatActivity() {
                     peersListView.adapter = peersadapter
                     bannedListView.adapter = bannedadapter
                     queriesListView.adapter = queriesadapter
-                    if (balance < 0) {
-                        mybalance.text = "Error retrieving balance"
-                    } else {
-                        mybalance.text = "PKT %.2f".format(balance)
-                    }
+                    mybalance.text = balanceString
+
                     if (getinforesponse != null) {
-                        walletsync.text = getinforesponse.wallet.currentHeight.toString()+"\n"+getinforesponse.wallet.currentBlockTimestamp
-                        neutrinosync.text = getinforesponse.neutrino.height.toString()+"\n"+getinforesponse.neutrino.blockTimestamp
-                        connectedServers.text = getinforesponse.neutrino?.peersList?.size.toString()
-                        bannedServers.text = getinforesponse.neutrino?.bansList?.size.toString()
-                        numqueries.text = getinforesponse.neutrino?.queriesList?.size.toString()
+                        val walletInfo = getinforesponse.getJSONObject("wallet")
+                        walletsync.text = walletInfo.getInt("current_height").toString()+"\n"+walletInfo.getString("current_block_timestamp")
+                        neutrinosync.text = neutrino.getLong("height").toString()+"\n"+neutrino.getString("block_timestamp")
+                        connectedServers.text = neutrino.getJSONArray("peers").length().toString()
+                        bannedServers.text = neutrino.getJSONArray("bans").length().toString()
+                        numqueries.text = neutrino.getJSONArray("queries").length().toString()
                     }
                 }
                 Thread.sleep(5000)

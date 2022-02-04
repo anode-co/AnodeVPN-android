@@ -21,7 +21,7 @@ class WalletInfoActivity : AppCompatActivity() {
             Log.i(LOGTAG, "WalletInfoActivity.RefreshValues")
             val infotext = findViewById<TextView>(R.id.walletinfotext)
             while (true) {
-                val response = LndRPCController.getInfo()
+                val response = LndRPCController.getInfo(this)//LndRPCController.getInfo()
                 this.runOnUiThread(Runnable {
                     infotext.text = response.toString()
                 })

@@ -271,6 +271,8 @@ class MainActivity : AppCompatActivity() {
 
         /*
         with (prefs.edit()) {
+            putString("walletpassword", "pktwallet")
+            putString("lndwalletaddress", "")
             putString("username","")
             putBoolean("Registered",false)
             putBoolean("SignedIn",false)

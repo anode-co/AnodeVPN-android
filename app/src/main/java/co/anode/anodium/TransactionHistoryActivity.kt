@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import lnrpc.Rpc.Transaction
+import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,25 +32,26 @@ class TransactionHistoryActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         var myaddress = prefs.getString("lndwalletaddress", "")
         Thread(Runnable {
-            var prevtransactions : MutableList<Transaction> = ArrayList()
+            var prevtransactions : JSONArray = JSONArray()
             while(true) {
-                var transactions = LndRPCController.getTransactions()
-                if (transactions.count() > prevtransactions.count()) {
+                var transactions = LndRPCController.getTransactions(context)
+                if (transactions.length() > prevtransactions.length()) {
                     prevtransactions = transactions
                     runOnUiThread {
-                        for (i in 0 until transactions.count()) {
+                        for (i in 0 until transactions.length()) {
+                            val transaction = transactions.getJSONObject(i)
                             //Add new line
                             var line = ConstraintLayout(context)
                             line.setOnClickListener {
                                 val transactiondetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
                                 val bundle = Bundle()
-                                bundle.putString("txid", transactions[i].txHash)
-                                for (a in 0 until transactions[i].destAddressesCount) {
-                                    bundle.putString("address$a",transactions[i].getDestAddresses(a))
+                                bundle.putString("txid", transaction.getString("tx_hash"))
+                                for (a in 0 until transaction.getJSONArray("dest_addresses").length()) {
+                                    bundle.putString("address$a",transaction.getJSONArray("dest_addresses").getString(a))
                                 }
-                                bundle.putLong("amount", transactions[i].amount)
-                                bundle.putInt("blockheight", transactions[i].blockHeight)
-                                bundle.putString("blockhash", transactions[i].blockHash)
+                                bundle.putLong("amount", transaction.getString("amount").toLong())
+                                bundle.putInt("blockheight", transaction.getInt("block_height"))
+                                bundle.putString("blockhash", transaction.getString("block_hash"))
 
                                 transactiondetailsFragment.arguments = bundle
                                 transactiondetailsFragment.show(supportFragmentManager, "")
@@ -68,20 +70,21 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             val textaddress = TextView(context)
                             textaddress.id = View.generateViewId()
                             textaddress.width = 350
-                            textaddress.text =
-                                transactions[i].destAddressesList[0].substring(4, 20) + "..."
+                            val destAddress = transaction.getJSONArray("dest_addresses").getString(0)
+                            textaddress.text = destAddress.substring(4, 20) + "..."
                             line.addView(textaddress)
                             //In/Out Icon
                             val icon = ImageView(context)
                             icon.id = View.generateViewId()
-                            var amount: Float = transactions[i].amount.toFloat() / 1073741824
+                            var amount: Float = transaction.getString("amount").toFloat() / 1073741824
                             if (amount < 0) {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
-                                textaddress.text = transactions[i].destAddressesList[0].substring(0, 6) + "..." + transactions[i].destAddressesList[0].substring(transactions[i].destAddressesList[0].length-8)
+                                textaddress.text = destAddress.substring(0, 6) + "..." + destAddress.substring(destAddress.length-8)
                             } else {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
-                                if (transactions[i].destAddressesList[0] == myaddress) {
-                                    textaddress.text = transactions[i].destAddressesList[1].substring(0, 6) + "..." + transactions[i].destAddressesList[1].substring(transactions[i].destAddressesList[0].length-8)
+                                if (destAddress == myaddress) {
+                                    val destAddress2 = transaction.getJSONArray("dest_addresses").getString(1)
+                                    textaddress.text = destAddress2.substring(0, 6) + "..." + destAddress2.substring(destAddress2.length-8)
                                 }
                             }
                             line.addView(icon)
@@ -120,7 +123,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             val textDate = TextView(context)
                             textDate.id = View.generateViewId()
                             textDate.text =
-                                simpleDate.format(Date(transactions[i].timeStamp * 1000))
+                                simpleDate.format(Date(transaction.getString("time_stamp").toLong() * 1000))
                             line.addView(textDate)
 
                             val set = ConstraintSet()

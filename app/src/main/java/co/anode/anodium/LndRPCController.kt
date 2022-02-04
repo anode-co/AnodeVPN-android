@@ -1,8 +1,15 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.google.gson.JsonObject
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
@@ -12,12 +19,157 @@ import java.io.InputStreamReader
 import java.lang.Exception
 import javax.net.ssl.HostnameVerifier
 import lnrpc.Rpc.*
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import kotlin.math.roundToLong
 
 object LndRPCController {
     private lateinit var mSecureChannel: ManagedChannel
     private const val LOGTAG = "co.anode.anodium"
     private const val PostErrorLogs = false
+    private const val baseRestAPIURL = "http://localhost:8080"
+    private const val getInfo2URL = "$baseRestAPIURL/pkt/v1/getinfo2"
+    private const val getBalanceURL = "$baseRestAPIURL/v1/balance/blockchain"
+    private const val getNewAddressURL = "$baseRestAPIURL/pkt/v1/getnewaddress/false"
+    private const val unlockWalletURL = "$baseRestAPIURL/v1/unlockwallet"
+    private const val getTransactionsURL = "$baseRestAPIURL/v1/transactions"
+    private var volleyQueue: RequestQueue? = null
+
+    fun getRequest(ctx: Context, url: String): String{
+        if (volleyQueue == null) {
+            volleyQueue = Volley.newRequestQueue(ctx)
+        }
+        var stringResponse = ""
+        val stringRequest = JsonObjectRequest(Request.Method.GET, url, null, {
+                response -> stringResponse = response.toString()
+        }, { error -> stringResponse = "Error: $error" })
+        volleyQueue!!.add(stringRequest)
+        return stringResponse
+    }
+
+    fun postRequest(ctx: Context, url: String, jsonRequest: JSONObject): String {
+        if (volleyQueue == null) {
+            volleyQueue = Volley.newRequestQueue(ctx)
+        }
+        var stringResponse = ""
+        val stringRequest = JsonObjectRequest(Request.Method.POST, url, jsonRequest, {
+            response -> stringResponse = response.toString()
+        }, { error -> stringResponse = "Error: $error" })
+        volleyQueue!!.add(stringRequest)
+        return stringResponse
+    }
+    /**
+     * Returns a JSON containing information about neutrino, wallet and lighning
+     * using the getinfo2 REST command
+     *
+     * @param Context
+     * @return JSONObject
+     */
+    fun getInfo(ctx: Context): JSONObject {
+        Log.i(LOGTAG, "LndRPCController.getInfo")
+        val infoString = getRequest(ctx, getInfo2URL)
+        if (infoString.isNotEmpty()) {
+            return JSONObject(infoString)
+        }
+        return  JSONObject()
+    }
+
+    /**
+     * Returns the wallet's balance in satoshis
+     *
+     * @param Context
+     * @return Double
+     */
+//    fun getBalance(ctx: Context): String {
+//        Log.i(LOGTAG, "LndRPCController.getBalance")
+//        val balanceString = getRequest(ctx, getBalanceURL)
+//        if (balanceString.isNotEmpty()) {
+//            val json = JSONObject(balanceString)
+//            return satoshisToPKT( json.getString("total_balance").toLong())
+//        }
+//        return "unknown"
+//    }
+
+    /**
+     * Returns a PKT address after making a REST call to getnewaddress
+     *
+     * @param Context
+     */
+    fun generateAddress(ctx: Context) : String {
+        Log.i(LOGTAG, "LndRPCController.generateAddress")
+        val response = JSONObject(postRequest(ctx, getNewAddressURL, JSONObject("")))
+        if (response.has("address")) {
+            return response.getString("address")
+        }
+        return ""
+    }
+    fun satoshisToPKT(satoshis: Long):String {
+        var amount = satoshis.toFloat()
+        val onePKT = 1073741824
+        val mPKT = 1073741.824F
+        val uPKT  = 1073.741824F
+        val nPKT  = 1.073741824F
+        if (amount > 1000000000) {
+            amount /= onePKT
+            return "PKT %.2f".format(amount)
+        } else if (amount > 1000000) {
+            amount /= mPKT
+            return "mPKT %.2f".format(amount)
+        } else if (amount > 1000) {
+            amount /= uPKT
+            return "μPKT %.2f".format(amount)
+        } else if (amount < 1000000000) {
+            amount /= onePKT
+            return "PKT %.2f".format(amount)
+        } else if (amount < 1000000) {
+            amount /= mPKT
+            return "mPKT %.2f".format(amount)
+        } else if (amount < 1000) {
+            amount /= uPKT
+            return "μPKT %.2f".format(amount)
+        } else {
+            amount /= nPKT
+            return "nPKT %.2f".format(amount)
+        }
+    }
+    /**
+     * Unlocks the PKT wallet using unlockwallet REST command
+     *
+     * @param Context
+     * @return Boolean
+     */
+    fun unlockWallet(ctx: Context, password: String): Boolean {
+        Log.i(LOGTAG, "LndRPCController.unlockWallet")
+        var jsonRequest = JSONObject()
+        val bytesPassword: ByteString = ByteString.copyFrom(password, Charsets.UTF_8)
+        jsonRequest.put("wallet_password", bytesPassword)
+        val response = JSONObject(postRequest(ctx, unlockWalletURL, jsonRequest))
+        if (response.length() > 2) {
+            Log.d(LOGTAG, "Error trying to unlock wallet: $response")
+            return false
+        }
+        Log.i(LOGTAG, "PKT Wallet opened!")
+        return true
+    }
+
+    /**
+     * Retrieves transactions from unlocked wallet
+     * using the transactions REST command
+     *
+     * @returns JSONArray List of transactions
+     */
+    fun getTransactions(ctx: Context): JSONArray {
+        Log.i(LOGTAG, "LndRPCController.getTransactions")
+        var jsonRequest = JSONObject()
+        jsonRequest.put("coinbase", 1)
+        val stringTransactions = postRequest(ctx, getTransactionsURL, jsonRequest)
+        if (stringTransactions.isNotEmpty()) {
+            val json = JSONObject(stringTransactions)
+            return json.getJSONArray("transactions")
+        }
+        return JSONArray()
+    }
 
     fun createSecurechannel() {
         Log.i(LOGTAG, "LndRPCController.createSecurechannel")
@@ -51,8 +203,6 @@ object LndRPCController {
             if (walletresponse.isInitialized) {
                 Log.i(LOGTAG, "LndRPCController wallet created")
                 with(preferences.edit()) {
-                    //adminMacaroon is empty!
-                    putString("admin_macaroon", walletresponse.adminMacaroon.toStringUtf8())
                     putString("walletpassword", password)
                     putBoolean("lndwalletopened", true)
                     commit()
@@ -92,75 +242,6 @@ object LndRPCController {
         }
         preferences.edit().putBoolean("lndwalletopened", true).apply()
         return "OK"
-    }
-
-    fun getInfo(): Metaservice.GetInfo2Response? {
-        Log.i(LOGTAG, "LndRPCController.getPubKey")
-        if (!this::mSecureChannel.isInitialized) { return null }
-        return try {
-            val lndstub = LightningGrpc.newBlockingStub(mSecureChannel).withCallCredentials(null)
-            val getinforesponse = lndstub.getInfo(GetInfoRequest.getDefaultInstance())
-            val metaservice = MetaServiceGrpc.newBlockingStub(mSecureChannel)
-            metaservice.getInfo2(Metaservice.GetInfo2Request.newBuilder().setInfoResponse(getinforesponse).build())
-        } catch (e: Exception) {
-            Log.e(LOGTAG, e.toString())
-            if (PostErrorLogs) {
-                Thread({
-                    AnodeClient.httpPostMessage("lnd", "Failed to get info ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            null
-        }
-    }
-
-    fun generateAddress() : String {
-        Log.i(LOGTAG, "LndRPCController.generateAddress")
-        if (!this::mSecureChannel.isInitialized) {
-            createSecurechannel()
-        }
-        return try {
-            val addressRequest = NewAddressRequest.newBuilder().setTypeValue(0).build()
-            val addressResponse = LightningGrpc.newBlockingStub(mSecureChannel).newAddress(addressRequest)
-            addressResponse.address
-        } catch (e:Exception) {
-            Log.e(LOGTAG, e.toString())
-            if (PostErrorLogs) {
-                Thread({
-                    AnodeClient.httpPostMessage("lnd", "Failed to generate address ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            return ""
-        }
-    }
-
-    fun getConfirmedBalance():Long {
-        Log.i(LOGTAG, "LndRPCController.getConfirmedBalance")
-        if (!this::mSecureChannel.isInitialized) {
-            createSecurechannel()
-        }
-        val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
-        val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-        return walletBalanceResponse.confirmedBalance/1073741824
-    }
-
-    fun getTotalBalance(): Float {
-        Log.i(LOGTAG, "LndRPCController.getTotalBalance")
-        if (!this::mSecureChannel.isInitialized) {
-            createSecurechannel()
-        }
-        return try {
-            val walletBallanceRequest = WalletBalanceRequest.newBuilder().build()
-            val walletBalanceResponse = LightningGrpc.newBlockingStub(mSecureChannel).walletBalance(walletBallanceRequest)
-            (walletBalanceResponse.totalBalance / 1073741824).toFloat()
-        } catch (e:Exception) {
-            Log.e(LOGTAG, e.toString())
-            if (PostErrorLogs) {
-                Thread({
-                    AnodeClient.httpPostMessage("lnd", "Failed to get balance ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            -1.0f
-        }
     }
 
     fun getAddresses(): MutableList<GetAddressBalancesResponseAddr>? {
@@ -209,30 +290,6 @@ object LndRPCController {
                 }, "LndRPCController.UploadMessageThread").start()
             }
             return e.toString()
-        }
-    }
-
-    fun getTransactions(): MutableList<Transaction> {
-        if (!this::mSecureChannel.isInitialized) {
-            createSecurechannel()
-        }
-        return try {
-            //coinbase 0=Include, 1=Exclude, 2=Only
-                //TODO: check TxnsLimit
-            val transactionsRequest = GetTransactionsRequest.newBuilder()
-                .setCoinbase(1)
-                .build()
-            val transactions = LightningGrpc.newBlockingStub(mSecureChannel).getTransactions(transactionsRequest)
-            transactions.transactionsList
-        } catch (e:Exception) {
-            Log.e(LOGTAG, e.toString())
-            if (PostErrorLogs) {
-                Thread({
-                    AnodeClient.httpPostMessage("lnd", "Failed to get transactions ${e.toString()}")
-                }, "LndRPCController.UploadMessageThread").start()
-            }
-            //Return an empty list
-            mutableListOf<Transaction>()
         }
     }
 

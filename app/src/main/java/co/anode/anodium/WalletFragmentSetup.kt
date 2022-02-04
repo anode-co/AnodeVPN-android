@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
 import android.text.method.PasswordTransformationMethod
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,9 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import co.anode.anodium.volley.APIController
+import co.anode.anodium.volley.ServiceVolley
+import org.json.JSONObject
 
 
 class WalletFragmentSetup : Fragment() {
@@ -66,34 +70,65 @@ class WalletFragmentSetup : Fragment() {
                             val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                             activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
                         }
-                        val result = LndRPCController.createLocalWallet(prefs, password)
-                        if (result.contains("Success")) {
-                            activity?.runOnUiThread {
-                                Toast.makeText(requireContext(), "PKT wallet created", Toast.LENGTH_LONG).show()
-                                statusbar.text = ""
-                                val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
-                                activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
-                                Log.i(LOGTAG, "WalletFragmentSetup retrieved seed phrase")
-                                seed = result.substring("Success".length)
-                                //Change label
-                                val label = view.findViewById<TextView>(R.id.text_walletcreate_label)
-                                label.text = context?.resources?.getString(R.string.wallet_create_seed_label)
-                                textview.visibility = View.VISIBLE
-                                val seedArray = seed.split(" ")
-                                val seedCol = view.findViewById<TextView>(R.id.seed_column)
-                                var seedtext = ""
-                                for (i in 0 until seedArray.size - 1) {
-                                    seedtext += seedArray[i] + " "
+                        //val result = LndRPCController.createLocalWallet(prefs, password)
+                        //TODO: use REST and volley
+                        //B64encode password
+                        val b64Passphrase = Base64.encodeToString(password.toByteArray(), Base64.DEFAULT)
+                        //Initialize Volley Service
+                        val service = ServiceVolley()
+                        val apiController = APIController(service)
+                        val jsonData = JSONObject()
+                        jsonData.put("wallet_password", b64Passphrase)
+                        Log.i(LOGTAG, "creating PKT wallet...")
+                        apiController.post("http://localhost:8080/pkt/v1/createwallet", jsonData)
+                        //Handle response from createwallet REST request
+                        { response ->
+                            if (response!!.has("seed")) {
+                                //Wallet created succesfully
+                                Log.i(LOGTAG, "PKT create wallet success")
+                                //Get seed
+                                val seedText = view.findViewById<TextView>(R.id.seed_column)
+                                val seedArray = response.getJSONArray("seed")
+                                var seedString = ""
+                                for (i in 0 until seedArray.length() - 1) {
+                                    seedString += seedArray.getString(i)
                                 }
-                                seedCol.text = seedtext
-                                seedLayout.visibility = View.VISIBLE
-                                createButton.visibility = View.GONE
-                                closeButton.visibility = View.VISIBLE
+                                seedText.text = seedString
+                            } else {
+                                Log.i(LOGTAG, "PKT create wallet failed")
+                                //Wallet creation failed, parse error, log and notify user
                             }
-                        } else {
-                            Log.i(LOGTAG, "WalletFragmentSetup Error from trying to create wallet")
-                            activity?.runOnUiThread {
-                                Toast.makeText(requireContext(), "Error: $result", Toast.LENGTH_LONG).show()
+
+
+
+                            if (result.contains("Success")) {
+                                activity?.runOnUiThread {
+                                    Toast.makeText(requireContext(), "PKT wallet created", Toast.LENGTH_LONG).show()
+                                    statusbar.text = ""
+                                    val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
+                                    activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+                                    Log.i(LOGTAG, "WalletFragmentSetup retrieved seed phrase")
+                                    seed = result.substring("Success".length)
+                                    //Change label
+                                    val label = view.findViewById<TextView>(R.id.text_walletcreate_label)
+                                    label.text = context?.resources?.getString(R.string.wallet_create_seed_label)
+                                    textview.visibility = View.VISIBLE
+                                    val seedArray = seed.split(" ")
+
+                                    var seedtext = ""
+                                    for (i in 0 until seedArray.size - 1) {
+                                        seedtext += seedArray[i] + " "
+                                    }
+                                    seedCol.text = seedtext
+                                    seedLayout.visibility = View.VISIBLE
+                                    createButton.visibility = View.GONE
+                                    closeButton.visibility = View.VISIBLE
+                                }
+                            } else {
+                                Log.i(LOGTAG, "WalletFragmentSetup Error from trying to create wallet")
+                                activity?.runOnUiThread {
+                                    Toast.makeText(requireContext(), "Error: $result", Toast.LENGTH_LONG).show()
+                                }
                             }
                         }
                     }, "WalletFragmentSetup.CreateWallet").start()

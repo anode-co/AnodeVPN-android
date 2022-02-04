@@ -242,6 +242,36 @@ class AnodeUtil(c: Context?) {
             clickInterval
         )
     }
+
+    fun satoshisToPKT(satoshis: Long):String {
+        var amount = satoshis.toFloat()
+        val onePKT = 1073741824
+        val mPKT = 1073741.824F
+        val uPKT  = 1073.741824F
+        val nPKT  = 1.073741824F
+        if (amount > 1000000000) {
+            amount /= onePKT
+            return "PKT %.2f".format(amount)
+        } else if (amount > 1000000) {
+            amount /= mPKT
+            return "mPKT %.2f".format(amount)
+        } else if (amount > 1000) {
+            amount /= uPKT
+            return "μPKT %.2f".format(amount)
+        } else if (amount < 1000000000) {
+            amount /= onePKT
+            return "PKT %.2f".format(amount)
+        } else if (amount < 1000000) {
+            amount /= mPKT
+            return "mPKT %.2f".format(amount)
+        } else if (amount < 1000) {
+            amount /= uPKT
+            return "μPKT %.2f".format(amount)
+        } else {
+            amount /= nPKT
+            return "nPKT %.2f".format(amount)
+        }
+    }
 }
 
 class AnodeUtilException(message: String): Exception(message)

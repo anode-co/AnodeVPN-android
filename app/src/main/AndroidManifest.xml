@@ -20,7 +20,9 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:targetApi="q">
+        tools:targetApi="q"
+        android:name=".volley.BackendVolley">
+
         <activity android:name=".WalletInfoActivity" />
         <activity android:name=".WalletStatsActivity" />
         <activity android:name=".TransactionHistoryActivity" />
