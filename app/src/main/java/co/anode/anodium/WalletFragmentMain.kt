@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -52,9 +57,7 @@ class WalletFragmentMain : Fragment() {
         //Initialize Volley Service
         val service = ServiceVolley()
         apiController = APIController(service)
-
         val params = JSONObject()
-
         Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
         val anodeUtil = AnodeUtil(null)
         var myaddress = prefs.getString("lndwalletaddress", "")
@@ -362,10 +365,15 @@ class WalletFragmentMain : Fragment() {
     private fun openPKTWallet(): String {
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
         Log.i(LOGTAG, "MainActivity trying to open wallet")
+        var walletPassword = getPasswordFromEncSharedPreferences()
         var jsonRequest = JSONObject()
-        Base64.getEncoder().encodeToString()
-        jsonRequest.put("wallet_password", )
-        apiController.post(unlockWalletURL,)
+
+        val b64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
+        jsonRequest.put("wallet_password", b64Password)
+        apiController.post(unlockWalletURL,jsonRequest) { response ->
+            //Handle unlockwallet REST call response
+            //TODO: ...
+        }
 
         if (result.contains("ErrWrongPassphrase")) {
             return result
@@ -394,6 +402,35 @@ class WalletFragmentMain : Fragment() {
             return result
         }
         return result
+    }
+
+    private fun getPasswordFromEncSharedPreferences(): String {
+        val spec = KeyGenParameterSpec.Builder(
+            MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
+            .build()
+
+        val masterKey = MasterKey.Builder(requireContext())
+            .setKeyGenParameterSpec(spec)
+            .build()
+        val encSharedPreferences: SharedPreferences =
+            EncryptedSharedPreferences.create(
+                requireContext(),
+                "co.anode.anodium-encrypted-sharedPreferences",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        val password : String? = encSharedPreferences.getString("wallet_password", "")
+        if (password.isNullOrEmpty()) {
+            return ""
+        } else {
+            return password
+        }
     }
 }
 
