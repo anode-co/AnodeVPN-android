@@ -20,40 +20,90 @@
         android:textSize="12pt"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="20dp"/>
-    <TextView
-        android:id="@+id/text_walletcreate_seed_instructions"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/wallet_create_seed_instructions"
-        app:layout_constraintTop_toBottomOf="@id/text_walletcreate_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="20dp"
-        android:textAlignment="center"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"
-        android:textSize="8pt" />
     <LinearLayout
-        android:id="@+id/seed_layout"
+        android:id="@+id/create_wallet_password_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@+id/text_walletcreate_seed_instructions"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginTop="20dp">
-        <TextView
-            android:id="@+id/seed_column"
-            android:layout_width="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/text_walletcreate_label">
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/newwalletpasswordLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:textIsSelectable="true"
-            android:textSize="10pt"
-            android:text=""/>
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="@dimen/editfield_margin"
+            android:layout_marginEnd="@dimen/editfield_margin"
+            app:passwordToggleEnabled="true"
+            app:errorEnabled="true">
+            <EditText
+                android:id="@+id/editTextWalletPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/prompt_newpassword"
+                android:inputType="textPassword"
+                android:autofillHints="test" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/confirmwalletpasswordLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="@dimen/editfield_margin"
+            android:layout_marginEnd="@dimen/editfield_margin"
+            app:passwordToggleEnabled="true"
+            tools:layout_editor_absoluteX="0dp"
+            app:errorEnabled="true">
+            <EditText
+                android:id="@+id/editTextconfirmWalletPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/prompt_confirmpassword"
+                android:inputType="textPassword"
+                android:autofillHints="test" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
-
+    <LinearLayout
+        android:id="@+id/create_wallet_show_seed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/text_walletcreate_label">
+        <TextView
+            android:id="@+id/text_walletcreate_seed_instructions"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/wallet_create_seed_instructions"
+            app:layout_constraintTop_toBottomOf="@id/text_walletcreate_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="20dp"
+            android:textAlignment="center"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:textSize="8pt" />
+        <LinearLayout
+            android:id="@+id/seed_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/text_walletcreate_seed_instructions"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginTop="20dp">
+            <TextView
+                android:id="@+id/seed_column"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:textIsSelectable="true"
+                android:textSize="10pt"
+                android:text=""/>
+        </LinearLayout>
+    </LinearLayout>
     <Button
         android:id="@+id/button_wallet_create"
         android:layout_width="wrap_content"

@@ -2,6 +2,7 @@ package co.anode.anodium.volley
 
 import android.util.Log
 import com.android.volley.AuthFailureError
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyLog
 import com.android.volley.toolbox.JsonObjectRequest
@@ -20,14 +21,7 @@ class ServiceVolley : ServiceInterface {
             Response.ErrorListener { error ->
                 VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
                 completionHandler(null)
-            }) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                return headers
-            }
-        }
+            }) {}
 
         BackendVolley.instance?.addToRequestQueue(jsonObjReq, TAG)
     }
@@ -40,7 +34,10 @@ class ServiceVolley : ServiceInterface {
             },
             Response.ErrorListener { error ->
                 VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
-                completionHandler(null)
+                val errorString = String(error.networkResponse.data)
+                val jsonError = JSONObject()
+                jsonError.put("error", errorString)
+                completionHandler(jsonError)
             }) {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
@@ -49,7 +46,20 @@ class ServiceVolley : ServiceInterface {
                 return headers
             }
         }
-
+        //Increase timeout when we are creating a wallet
+        if (url.contains("createwallet")) {
+            jsonObjReq.retryPolicy = DefaultRetryPolicy(
+                40000,
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            )
+        } else if (url.contains("unlockwallet")) {
+            jsonObjReq.retryPolicy = DefaultRetryPolicy(
+                15000,
+                3,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+            )
+        }
         BackendVolley.instance?.addToRequestQueue(jsonObjReq, TAG)
     }
 }

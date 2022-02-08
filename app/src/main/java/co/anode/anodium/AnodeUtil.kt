@@ -1,9 +1,15 @@
 package co.anode.anodium
 
+import android.R.attr.process
 import android.content.Context
+import android.content.SharedPreferences
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.system.Os
 import android.util.Log
 import android.view.View
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
@@ -145,7 +151,12 @@ class AnodeUtil(c: Context?) {
                 //If pld fails, send error msg and relaunch it
                 pld_pb.waitFor()
                 isPldRunning = false
-                AnodeClient.httpPostMessage("lnd", "Pld stopped")
+                //Get last 100 lines from log and post it
+                var pldLines = File(CJDNS_PATH+"/"+PLD_LOG).readLines()
+                if (pldLines.size > 100) {
+                    pldLines = pldLines.drop(pldLines.size - 100)
+                }
+                AnodeClient.httpPostMessage("lnd", pldLines.toString())
                 launchPld()
             }).start()
         } catch (e: Exception) {
@@ -243,6 +254,13 @@ class AnodeUtil(c: Context?) {
         )
     }
 
+    /**
+     * Converts satoshis to PKT divisions
+     * PKT, mPKT, uPKT and nPKT and return it as string
+     *
+     * @param Long
+     * @return String
+     */
     fun satoshisToPKT(satoshis: Long):String {
         var amount = satoshis.toFloat()
         val onePKT = 1073741824
@@ -270,6 +288,72 @@ class AnodeUtil(c: Context?) {
         } else {
             amount /= nPKT
             return "nPKT %.2f".format(amount)
+        }
+    }
+
+    /**
+     * Stores a password to
+     * ecnrypted shared preferences
+     *
+     * @param password: String
+     */
+    fun storePassword(password: String) {
+        val spec = KeyGenParameterSpec.Builder(
+            MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
+            .build()
+
+        val masterKey = MasterKey.Builder(context!!)
+            .setKeyGenParameterSpec(spec)
+            .build()
+
+        val encSharedPreferences: SharedPreferences =
+            EncryptedSharedPreferences.create(
+                context!!,
+                "co.anode.anodium-encrypted-sharedPreferences",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        encSharedPreferences.edit().putString("wallet_password", password).apply()
+    }
+
+    /**
+     * Get the stored password from
+     * ecnrypted shared preferences
+     *
+     * @return password: String
+     */
+    fun getPasswordFromEncSharedPreferences(): String {
+        val spec = KeyGenParameterSpec.Builder(
+            MasterKey.DEFAULT_MASTER_KEY_ALIAS,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
+            .build()
+
+        val masterKey = MasterKey.Builder(context!!)
+            .setKeyGenParameterSpec(spec)
+            .build()
+        val encSharedPreferences: SharedPreferences =
+            EncryptedSharedPreferences.create(
+                context!!,
+                "co.anode.anodium-encrypted-sharedPreferences",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        val password : String? = encSharedPreferences.getString("wallet_password", "")
+        if (password.isNullOrEmpty()) {
+            return ""
+        } else {
+            return password
         }
     }
 }
