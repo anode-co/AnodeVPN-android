@@ -10,7 +10,6 @@ import org.json.JSONObject
 
 class ServiceVolley : ServiceInterface {
     val TAG = ServiceVolley::class.java.simpleName
-    val basePath = "https://your/backend/api/"
 
     override fun get(url: String, completionHandler: (response: JSONObject?) -> Unit) {
         val jsonObjReq = object : JsonObjectRequest(Method.GET, url, null,
@@ -20,9 +19,11 @@ class ServiceVolley : ServiceInterface {
             },
             Response.ErrorListener { error ->
                 VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
-                completionHandler(null)
+                val errorString = String(error.networkResponse.data)
+                val jsonError = JSONObject()
+                jsonError.put("error", errorString)
+                completionHandler(jsonError)
             }) {}
-
         BackendVolley.instance?.addToRequestQueue(jsonObjReq, TAG)
     }
 
@@ -34,10 +35,14 @@ class ServiceVolley : ServiceInterface {
             },
             Response.ErrorListener { error ->
                 VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
-                val errorString = String(error.networkResponse.data)
-                val jsonError = JSONObject()
-                jsonError.put("error", errorString)
-                completionHandler(jsonError)
+                if ((error.networkResponse != null) && (error.networkResponse.data != null )) {
+                    val errorString = String(error.networkResponse.data)
+                    val jsonError = JSONObject()
+                    jsonError.put("error", errorString)
+                    completionHandler(jsonError)
+                } else {
+                    completionHandler(null)
+                }
             }) {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
@@ -48,17 +53,9 @@ class ServiceVolley : ServiceInterface {
         }
         //Increase timeout when we are creating a wallet
         if (url.contains("createwallet")) {
-            jsonObjReq.retryPolicy = DefaultRetryPolicy(
-                40000,
-                0,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            )
+            jsonObjReq.retryPolicy = DefaultRetryPolicy(40000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         } else if (url.contains("unlockwallet")) {
-            jsonObjReq.retryPolicy = DefaultRetryPolicy(
-                15000,
-                3,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            )
+            jsonObjReq.retryPolicy = DefaultRetryPolicy(15000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         }
         BackendVolley.instance?.addToRequestQueue(jsonObjReq, TAG)
     }

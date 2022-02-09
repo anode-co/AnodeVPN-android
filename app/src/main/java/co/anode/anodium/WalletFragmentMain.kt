@@ -31,14 +31,15 @@ import java.util.*
 class WalletFragmentMain : Fragment() {
     lateinit var statusBar: TextView
     lateinit var apiController: APIController
+    //Have unlockwallet on 127.0.0.1 instead of localhost.
     private val baseRestAPIURL = "http://127.0.0.1:8080"
+    private val unlockWalletURL = "http://localhost:8080/v1/unlockwallet"
     private val getInfo2URL = "$baseRestAPIURL/pkt/v1/getinfo2"
     private val getBalanceURL = "$baseRestAPIURL/v1/balance/blockchain"
     private val getNewAddressURL = "$baseRestAPIURL/pkt/v1/getnewaddress/false"
-    //Have unlockwallet on 127.0.0.1 instead of localhost.
-    private val unlockWalletURL = "http://localhost:8080/v1/unlockwallet"
     private val getTransactionsURL = "$baseRestAPIURL/v1/transactions"
     private var walletUnlocked = false
+    private var neutrinoSynced = false
     private var myPKTAddress = ""
     private val refreshValuesInterval: Long = 10000
     lateinit var h: Handler
@@ -50,71 +51,71 @@ class WalletFragmentMain : Fragment() {
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
-        if (!h.hasCallbacks(refreshValues)) {
-            h.postDelayed(refreshValues, refreshValuesInterval)
+        if (this::h.isInitialized) {
+            if (!h.hasCallbacks(refreshValues)) {
+                h.postDelayed(refreshValues, refreshValuesInterval)
+            }
+            if (!h.hasCallbacks(getPldInfo)) {
+                h.postDelayed(getPldInfo, refreshValuesInterval)
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        h.removeCallbacks(refreshValues)
+        if (this::h.isInitialized) {
+            h.removeCallbacks(refreshValues)
+            h.removeCallbacks(getPldInfo)
+        }
     }
 
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
-        AnodeClient.eventLog(requireContext(),"Activity: WalletFragmentMain created")
-
+        h = Handler(Looper.getMainLooper())
+        val context = requireContext()
+        AnodeClient.eventLog(context,"Activity: WalletFragmentMain created")
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        val walletFile = File(requireContext().filesDir.toString() + "/pkt/wallet.db")
+        val walletFile = File(context.filesDir.toString() + "/pkt/wallet.db")
         if (!walletFile.exists()) {
             return
         }
         //Initialize Volley Service
         val service = ServiceVolley()
         apiController = APIController(service)
-        val anodeUtil = AnodeUtil(requireContext())
-        //Initialize handler for refreshing values
-        h = Handler(Looper.getMainLooper())
+        val anodeUtil = AnodeUtil(context)
+        //Initialize handlers
+
         refreshValues.init(v, anodeUtil)
-
-        Log.i(LOGTAG, "WalletFragmentMain getting wallet details")
-
+        getPldInfo.init(v, anodeUtil)
+        //set PKT address from shared preferences
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
+        //Force password reset to test error handling and password prompt
+        //anodeUtil.storePassword("")
+        //Start checking getInfo to see if wallet is unlocked
+        //and synced to chain
+        h.postDelayed(getPldInfo,0)
+        //Init UI elements
         val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
         walletAddress.text = myPKTAddress
         walletAddress.setOnClickListener {
-            AnodeClient.eventLog(requireContext(), "Button: Copy wallet address clicked")
+            AnodeClient.eventLog(context, "Button: Copy wallet address clicked")
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG).show()
         }
         val history =v.findViewById<TextView>(R.id.texthistory)
-
         history.setOnClickListener {
-            AnodeClient.eventLog(requireContext(), "Button: Older transactions clicked")
+            AnodeClient.eventLog(context, "Button: Older transactions clicked")
             val transactionsActivity = Intent(context, TransactionHistoryActivity::class.java)
             startActivityForResult(transactionsActivity, 0)
         }
         statusBar = v.findViewById(R.id.textview_status)
-
-
-        val context = requireContext()
-
         val sendPaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
         //Disable it while trying to unlock wallet
         sendPaymentButton.isEnabled = false
-        var walletStatus = ""
-        //Force password reset to test error handling and password prompt
-//        anodeUtil.storePassword("")
-
-        //TODO: when wallet is created pld seems to be busy downloading neutrino
-        //sometimes fails to respond to REST calls...
-
-        //Unlocking the wallet -> will call get balance -> call getTransactions etc
-        getWalletInformation(v, anodeUtil)
 
         val shareButton = v.findViewById<Button>(R.id.walletAddressSharebutton)
         shareButton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(), "Button: Share wallet address clicked")
+            AnodeClient.eventLog(context, "Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $myPKTAddress")
@@ -125,12 +126,15 @@ class WalletFragmentMain : Fragment() {
         }
 
         sendPaymentButton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(), "Button: Send PKT clicked")
+            AnodeClient.eventLog(context, "Button: Send PKT clicked")
             val sendPaymentActivity = Intent(context, SendPaymentActivity::class.java)
             startActivity(sendPaymentActivity)
         }
     }
 
+    /**
+     * getting pld info
+     */
     private fun getInfo() {
         apiController.get(getInfo2URL) { response ->
             if (response != null) {
@@ -138,13 +142,34 @@ class WalletFragmentMain : Fragment() {
                 if (response.has("wallet")) {
                     val walletHeight = response.getJSONObject("wallet").getInt("current_height")
                     walletUnlocked = true
-                } else {
-                    walletUnlocked = false
                 }
+                if ((response.has("neutrino")) && (response.getJSONObject("neutrino").has("height"))) {
+                    val neutrino = response.getJSONObject("neutrino")
+                    if (neutrino.has("peers")) {
+                        val peers = neutrino.getJSONArray("peers")
+                        if (peers.length() > 0) {
+                            val neutrinoTop = peers.getJSONObject(0).getInt("last_block")
+                            val neutrinoHeight = neutrino.getInt("height")
+                            //If neutrino current height is close to last block then we can try to unlock
+                            //otherwise we will wait
+                            if (neutrinoTop < (neutrinoHeight + 20)) {
+                                neutrinoSynced = true
+                                statusBar.text = "Chain synced"
+                            } else {
+                                neutrinoSynced = false
+                                statusBar.text = "Syncing: $neutrinoHeight out of $neutrinoTop. Please wait"
+                            }
+                        }
+                    }
+                }
+                //Keep getting updates
+                h.postDelayed(getPldInfo, 5000)
             } else {
                 //TODO: post error
                 walletUnlocked = false
+                neutrinoSynced = false
             }
+
         }
     }
     /**
@@ -154,8 +179,7 @@ class WalletFragmentMain : Fragment() {
      * prompted to enter new password
      * then will call getNewAddress, getBalance and getTransactions
      */
-    private fun getWalletInformation(v: View, a:AnodeUtil) {
-
+    private fun unlockWallet(v: View, a:AnodeUtil) {
         Log.i(LOGTAG, "Trying to unlock wallet")
         statusBar.text = "Trying to unlock wallet..."
         //Get encrypted password
@@ -189,12 +213,12 @@ class WalletFragmentMain : Fragment() {
                     //empty response is success
                     Log.i(LOGTAG, "Wallet unlocked")
                     walletUnlocked = true
-                    //Get new address
-                    getNewPKTAddress(v)
                     //Update screen
                     updateUiWalletUnlocket(v)
-                    //Get Balance
-                    getBalance(v, a)
+                    //Wait a bit before making next call
+                    Thread.sleep(300)
+                    //Get new address
+                    getNewPKTAddress(v)
                 }
             }
         }
@@ -209,9 +233,6 @@ class WalletFragmentMain : Fragment() {
                     val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                     prefs.edit().putString("lndwalletaddress", myPKTAddress).apply()
                     v.findViewById<TextView>(R.id.walletAddress).text = myPKTAddress
-                } else {
-                    //Try again
-                    getNewPKTAddress(v)
                 }
             }
         }
@@ -251,7 +272,7 @@ class WalletFragmentMain : Fragment() {
                             val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                             prefs.edit().putString("lndwalletaddress", "").apply()
                             //try unlocking the wallet with new password
-                            getWalletInformation(v, a)
+                            unlockWallet(v, a)
                         }
                     })
 
@@ -287,6 +308,7 @@ class WalletFragmentMain : Fragment() {
      * @param AnodeUtil
      */
     private fun getBalance(v: View, a: AnodeUtil) {
+        statusBar.text = "Retrieving wallet balance..."
         //Get Balance
         apiController.get(getBalanceURL) { response ->
             if (response != null) {
@@ -297,11 +319,12 @@ class WalletFragmentMain : Fragment() {
                     //Try getting transactions
                     getWalletTransactions(v, a)
                 } else {
-                    getBalance(v, a)
+                    //getBalance(v, a)
                 }
             } else {
-                getBalance(v, a)
+                //getBalance(v, a)
             }
+            statusBar.text = ""
         }
     }
 
@@ -318,9 +341,11 @@ class WalletFragmentMain : Fragment() {
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
+        statusBar.text = "Retrieving transactions..."
         apiController.post(getTransactionsURL, params) { response ->
-            if (response != null) {
+            if ((response != null) && (!response.has("error"))) {
                 transactions = response.getJSONArray("transactions")
+                if (transactions.length() == 0) return@post
                 if (transactions.length() > prevTransactions) {
                     prevTransactions = transactions.length()
                     var tcount = transactions.length()
@@ -457,7 +482,26 @@ class WalletFragmentMain : Fragment() {
                     }
                 }
             }
-//            h.postDelayed(refreshValues, refreshValuesInterval)
+            statusBar.text = ""
+            h.postDelayed(refreshValues, refreshValuesInterval)
+        }
+    }
+
+    private val getPldInfo = object : Runnable {
+        lateinit var v: View
+        lateinit var a: AnodeUtil
+
+        fun init(view: View, anodeutil: AnodeUtil)  {
+            v = view
+            a = anodeutil
+        }
+
+        override fun run() {
+            getInfo()
+            if (!walletUnlocked) {
+                unlockWallet(v, a)
+                h.postDelayed(refreshValues,refreshValuesInterval)
+            }
         }
     }
 
@@ -470,7 +514,13 @@ class WalletFragmentMain : Fragment() {
             a = anodeutil
         }
         override fun run() {
-            getBalance(v,a)
+            if (walletUnlocked) {
+                if (myPKTAddress == "") {
+                    getNewPKTAddress(v)
+                }
+                getBalance(v,a)
+                getWalletTransactions(v,a)
+            }
         }
     }
 }
