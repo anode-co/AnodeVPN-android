@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -51,13 +49,10 @@ class WalletFragmentMain : Fragment() {
         return inflater.inflate(R.layout.walletfragment_main, container, false)
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
         if (this::h.isInitialized && this.isVisible) {
-            if (!h.hasCallbacks(getPldInfo)) {
-                h.postDelayed(getPldInfo, refreshValuesInterval)
-            }
+            h.postDelayed(getPldInfo, refreshValuesInterval)
         }
     }
 
@@ -134,7 +129,6 @@ class WalletFragmentMain : Fragment() {
     /**
      * getting pld info
      */
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun getInfo() {
         apiController.get(getInfoURL) { response ->
             if (response != null) {
@@ -166,9 +160,7 @@ class WalletFragmentMain : Fragment() {
                 }
                 //Keep getting updates
                 if (this::h.isInitialized) {
-                    if (!h.hasCallbacks(getPldInfo)) {
-                        h.postDelayed(getPldInfo, 5000)
-                    }
+                    h.postDelayed(getPldInfo, 5000)
                 }
             } else {
                 //TODO: post error
@@ -499,7 +491,6 @@ class WalletFragmentMain : Fragment() {
             a = anodeutil
         }
 
-        @RequiresApi(Build.VERSION_CODES.Q)
         override fun run() {
             getInfo()
             if (!walletUnlocked) {
