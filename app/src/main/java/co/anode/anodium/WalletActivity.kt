@@ -1,6 +1,5 @@
 package co.anode.anodium
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity

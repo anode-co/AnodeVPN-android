@@ -32,17 +32,20 @@ class WalletFragmentMain : Fragment() {
     lateinit var statusBar: TextView
     lateinit var apiController: APIController
     //Have unlockwallet on 127.0.0.1 instead of localhost.
-    private val baseRestAPIURL = "http://127.0.0.1:8080"
-    private val unlockWalletURL = "http://localhost:8080/v1/unlockwallet"
-    private val getInfo2URL = "$baseRestAPIURL/pkt/v1/getinfo2"
-    private val getBalanceURL = "$baseRestAPIURL/v1/balance/blockchain"
-    private val getNewAddressURL = "$baseRestAPIURL/pkt/v1/getnewaddress/false"
-    private val getTransactionsURL = "$baseRestAPIURL/v1/transactions"
+    private val baseRestAPIURL = "http://localhost:8080/api/v1"
+    private val unlockWalletURL = "$baseRestAPIURL/wallet/unlock"
+    private val getInfoURL = "$baseRestAPIURL/meta/getinfo"
+    private val getBalanceURL = "http://127.0.0.1:8080/api/v1/lightning/walletbalance"
+    private val getNewAddressURL = "$baseRestAPIURL/lightning/getnewaddress"
+    private val getTransactionsURL = "http://127.0.0.1:8080/api/v1/lightning/gettransactions"
+    private val sendfrom = "$baseRestAPIURL/lightning/sendfrom"
     private var walletUnlocked = false
     private var neutrinoSynced = false
     private var myPKTAddress = ""
     private val refreshValuesInterval: Long = 10000
     lateinit var h: Handler
+    private var balanceLastTimeUpdated: Long = 0
+    private var transactionsLastTimeUpdated: Long = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.walletfragment_main, container, false)
@@ -51,10 +54,7 @@ class WalletFragmentMain : Fragment() {
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
-        if (this::h.isInitialized) {
-            if (!h.hasCallbacks(refreshValues)) {
-                h.postDelayed(refreshValues, refreshValuesInterval)
-            }
+        if (this::h.isInitialized && this.isVisible) {
             if (!h.hasCallbacks(getPldInfo)) {
                 h.postDelayed(getPldInfo, refreshValuesInterval)
             }
@@ -80,12 +80,11 @@ class WalletFragmentMain : Fragment() {
         if (!walletFile.exists()) {
             return
         }
-        //Initialize Volley Service
-        val service = ServiceVolley()
-        apiController = APIController(service)
+
         val anodeUtil = AnodeUtil(context)
         //Initialize handlers
-
+        val service = ServiceVolley()
+        apiController = APIController(service)
         refreshValues.init(v, anodeUtil)
         getPldInfo.init(v, anodeUtil)
         //set PKT address from shared preferences
@@ -135,20 +134,23 @@ class WalletFragmentMain : Fragment() {
     /**
      * getting pld info
      */
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun getInfo() {
-        apiController.get(getInfo2URL) { response ->
+        apiController.get(getInfoURL) { response ->
             if (response != null) {
                 //Check if wallet is unlocked
-                if (response.has("wallet")) {
+                if (response.has("wallet") &&
+                    !response.isNull("wallet") &&
+                    response.getJSONObject("wallet").has("current_height")) {
                     val walletHeight = response.getJSONObject("wallet").getInt("current_height")
                     walletUnlocked = true
                 }
-                if ((response.has("neutrino")) && (response.getJSONObject("neutrino").has("height"))) {
+                if (response.has("neutrino") && !response.isNull("neutrino") && response.getJSONObject("neutrino").has("height")) {
                     val neutrino = response.getJSONObject("neutrino")
                     if (neutrino.has("peers")) {
                         val peers = neutrino.getJSONArray("peers")
                         if (peers.length() > 0) {
-                            val neutrinoTop = peers.getJSONObject(0).getInt("last_block")
+                            val neutrinoTop = peers.getJSONObject(0).getInt("lastBlock")
                             val neutrinoHeight = neutrino.getInt("height")
                             //If neutrino current height is close to last block then we can try to unlock
                             //otherwise we will wait
@@ -163,7 +165,11 @@ class WalletFragmentMain : Fragment() {
                     }
                 }
                 //Keep getting updates
-                h.postDelayed(getPldInfo, 5000)
+                if (this::h.isInitialized) {
+                    if (!h.hasCallbacks(getPldInfo)) {
+                        h.postDelayed(getPldInfo, 5000)
+                    }
+                }
             } else {
                 //TODO: post error
                 walletUnlocked = false
@@ -205,6 +211,8 @@ class WalletFragmentMain : Fragment() {
                         //Wrong Password
                         a.storePassword("")
                         promptUserPassword(v, a)
+                        //Stop getinfo
+                        h.removeCallbacks(getPldInfo)
                     }
                     Log.d(LOGTAG, "Error unlocking wallet: $errorString")
                     //if wrong password prompt user to write password and try again
@@ -314,10 +322,9 @@ class WalletFragmentMain : Fragment() {
             if (response != null) {
                 val json = JSONObject(response.toString())
                 val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
-                if (json.has("total_balance")) {
-                    walletBalance.text = a.satoshisToPKT(json.getString("total_balance").toLong())
-                    //Try getting transactions
-                    getWalletTransactions(v, a)
+                if (json.has("totalBalance")) {
+                    walletBalance.text = a.satoshisToPKT(json.getString("totalBalance").toLong())
+                    balanceLastTimeUpdated = System.currentTimeMillis()
                 } else {
                     //getBalance(v, a)
                 }
@@ -344,6 +351,7 @@ class WalletFragmentMain : Fragment() {
         statusBar.text = "Retrieving transactions..."
         apiController.post(getTransactionsURL, params) { response ->
             if ((response != null) && (!response.has("error"))) {
+                transactionsLastTimeUpdated = System.currentTimeMillis()
                 transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
                 if (transactions.length() > prevTransactions) {
@@ -361,13 +369,9 @@ class WalletFragmentMain : Fragment() {
                             //Add new line
                             val line = ConstraintLayout(context)
                             line.setOnClickListener {
-                                val transactiondetailsFragment: BottomSheetDialogFragment =
-                                    TransactionDetailsFragment()
+                                val transactiondetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
                                 val bundle = Bundle()
-                                bundle.putString(
-                                    "txid",
-                                    transaction.getString("tx_hash")
-                                )
+                                bundle.putString("txid", transaction.getString("txHash"))
                                 /*
                                 for (a in 0 until transaction.getJSONArray("dest_addresses")
                                     .length()) {
@@ -385,8 +389,8 @@ class WalletFragmentMain : Fragment() {
                                     }
                                 }*/
                                 bundle.putLong("amount", transaction.getString("amount").toLong())
-                                bundle.putInt("blockheight", transaction.getInt("block_height"))
-                                bundle.putString("blockhash", transaction.getString("block_hash"))
+                                bundle.putInt("blockheight", transaction.getInt("blockHeight"))
+                                bundle.putString("blockhash", transaction.getString("blockHash"))
                                 //Do not include confirmations
                                 //bundle.putInt("confirmations", transactions[i].numConfirmations)
                                 transactiondetailsFragment.arguments = bundle
@@ -413,7 +417,7 @@ class WalletFragmentMain : Fragment() {
 
                             if (amount < 0) {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
-                                val destAddress = transaction.getJSONArray("dest_addresses").getString(0)
+                                val destAddress = transaction.getJSONArray("destAddresses").getString(0)
                                 textAddress.text = destAddress.substring(0, 6) + "..." + destAddress.substring(destAddress.length - 8)
                             } else {
                                 icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
@@ -441,7 +445,7 @@ class WalletFragmentMain : Fragment() {
                             //DATE
                             val textDate = TextView(context)
                             textDate.id = View.generateViewId()
-                            textDate.text = simpleDate.format(Date(transaction.getString("time_stamp").toLong() * 1000))
+                            textDate.text = simpleDate.format(Date(transaction.getString("timeStamp").toLong() * 1000))
                             line.addView(textDate)
                             val set = ConstraintSet()
                             set.clear(textAddress.id)
@@ -483,7 +487,6 @@ class WalletFragmentMain : Fragment() {
                 }
             }
             statusBar.text = ""
-            h.postDelayed(refreshValues, refreshValuesInterval)
         }
     }
 
@@ -496,12 +499,13 @@ class WalletFragmentMain : Fragment() {
             a = anodeutil
         }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun run() {
             getInfo()
             if (!walletUnlocked) {
                 unlockWallet(v, a)
-                h.postDelayed(refreshValues,refreshValuesInterval)
             }
+            h.postDelayed(refreshValues,refreshValuesInterval)
         }
     }
 
@@ -518,8 +522,12 @@ class WalletFragmentMain : Fragment() {
                 if (myPKTAddress == "") {
                     getNewPKTAddress(v)
                 }
-                getBalance(v,a)
-                getWalletTransactions(v,a)
+                if ((System.currentTimeMillis()-5000) > balanceLastTimeUpdated) {
+                    getBalance(v, a)
+                }
+                if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
+                    getWalletTransactions(v, a)
+                }
             }
         }
     }

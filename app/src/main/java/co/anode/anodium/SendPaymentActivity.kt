@@ -1,5 +1,6 @@
 package co.anode.anodium
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -7,9 +8,18 @@ import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import co.anode.anodium.volley.APIController
+import co.anode.anodium.volley.ServiceVolley
+import com.google.gson.JsonArray
 import com.google.protobuf.ByteString
+import org.json.JSONArray
+import org.json.JSONObject
 
 class SendPaymentActivity : AppCompatActivity() {
+    lateinit var apiController: APIController
+    private val sendfromURL = "http://localhost:8080/api/v1/lightning/sendfrom"
+    private var myPKTAddress = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_send_payment)
@@ -22,6 +32,13 @@ class SendPaymentActivity : AppCompatActivity() {
         val sendButton = findViewById<Button>(R.id.button_sendPKTPayment)
         val address = findViewById<EditText>(R.id.editTextReceiverAddress)
         var ignoreTextChanged = false
+        //Initialize handlers
+        val service = ServiceVolley()
+        apiController = APIController(service)
+        val anodeUtil = AnodeUtil(this)
+        //Get our PKT wallet address
+        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
         //automatically trim pasted addresses
         address.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -42,7 +59,7 @@ class SendPaymentActivity : AppCompatActivity() {
                     }
                 } else {
                     ignoreTextChanged = true
-                    address.setText(trimmedAddress?.value)
+                    address.setText(trimmedAddress.value)
                 }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -51,9 +68,11 @@ class SendPaymentActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             var sendcoins = true
-            val bsPassword: ByteString = ByteString.copyFrom("password", Charsets.UTF_8)
+            val walletPassword = anodeUtil.getPasswordFromEncSharedPreferences()
+            val storedb64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
+            val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
+            val b64Password = android.util.Base64.encodeToString(passwordField.text.toString().toByteArray(), android.util.Base64.DEFAULT)
             //Check fields
-            
             if (address.text.toString().isEmpty()) {
                 Toast.makeText(applicationContext, "Please fill in the receiver's address", Toast.LENGTH_SHORT).show()
                 sendcoins = false
@@ -63,26 +82,34 @@ class SendPaymentActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "Please fill in the PKT amount", Toast.LENGTH_SHORT).show()
                 sendcoins = false
             }
-            val password = findViewById<EditText>(R.id.editTextPKTPassword)
-            if (password.text.toString().isEmpty()) {
+            if (passwordField.text.toString().isEmpty()) {
                 Toast.makeText(applicationContext, "Please fill in the password", Toast.LENGTH_SHORT).show()
                 sendcoins = false
-            } else if (ByteString.copyFrom(password.text.toString(),Charsets.UTF_8) != bsPassword ) {
+            } else if (b64Password != storedb64Password) {
                 Toast.makeText(applicationContext, "Wrong password", Toast.LENGTH_SHORT).show()
                 sendcoins = false
             }
             //Send coins
             if (sendcoins) {
-                val result = LndRPCController.sendCoins(address.text.toString(), amount.text.toString().toLong())
-                if (result == "OK") {
-                    Toast.makeText(applicationContext, "Payment of ${amount.text}PKT send", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else if (result.contains("InsufficientFundsError",true)){
-                    Toast.makeText(applicationContext, "Wallet does not have enough balance", Toast.LENGTH_SHORT).show()
-                } else if (result.contains("custom checksum failed", true)) {
-                    Toast.makeText(applicationContext, "Invalid address.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(applicationContext, result, Toast.LENGTH_SHORT).show()
+                //val result = LndRPCController.sendCoins(address.text.toString(), amount.text.toString().toLong())
+                val params = JSONObject()
+                //Exclude mining transactions
+                params.put("to_address", address.text.toString())
+                params.put("amount", amount.text.toString().toLong())
+                val fromAddresses = JSONArray()
+                fromAddresses.put(myPKTAddress)
+                params.put("from_address", fromAddresses)
+                apiController.post(sendfromURL, params) { response ->
+                    if ((response != null) && response.has("txHash") && !response.isNull("txHash")) {
+                        Toast.makeText(applicationContext, "Payment of ${amount.text}PKT send", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else if (response.toString().contains("InsufficientFundsError",true)){
+                        Toast.makeText(applicationContext, "Wallet does not have enough balance", Toast.LENGTH_SHORT).show()
+                    } else if (response.toString().contains("custom checksum failed", true)) {
+                        Toast.makeText(applicationContext, "Invalid address.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(applicationContext, "Unknown error when trying to send", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
