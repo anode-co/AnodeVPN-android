@@ -317,7 +317,8 @@ class MainActivity : AppCompatActivity() {
         //Delete old APK files
         AnodeClient.deleteFiles(this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
         AnodeClient.downloadFails = 0
-
+        val status = findViewById<TextView>(R.id.textview_status)
+        AnodeClient.init(applicationContext, status, buttonConnectVPNs, this)
         //Get storage permission for downloading APK
         checkStoragePermission()
         //Start background threads for checking public IP, new version, uploading errors etc

@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import co.anode.anodium.CjdnsSocket.UDPInterface_beginConnection
+import co.anode.anodium.volley.APIController
+import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -41,6 +43,7 @@ object AnodeClient {
     lateinit var statustv: TextView
     lateinit var connectButton: ToggleButton
     lateinit var mainActivity: AppCompatActivity
+    lateinit var apiController: APIController
     var vpnConnected: Boolean = false
     private const val API_VERSION = "0.3"
     private const val FILE_BASE_PATH = "file://"
@@ -54,6 +57,8 @@ object AnodeClient {
     private const val API_PEERING_LINES = "https://vpn.anode.co/api/$API_VERSION/vpn/cjdns/peeringlines/"
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
     private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
+    private const val API_GET_LATEST_RELEASE = "https://api.github.com/repos/anode-co/AnodeVPN-android/releases/latest"
+    private const val API_DOWNLOAD_URL = "https://github.com/anode-co/AnodeVPN-android/releases/download/"
     private const val buttonStateConnected = 0
     private const val buttonStateConnecting = 1
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
@@ -69,6 +74,8 @@ object AnodeClient {
         statustv = mainActivity_textview
         connectButton = button
         mainActivity = activity
+        val service = ServiceVolley()
+        apiController = APIController(service)
     }
 
     fun showToast(message: String) {
@@ -393,12 +400,50 @@ object AnodeClient {
         }
     }
 
+    fun getLatestRelease() {
+        apiController.get(API_GET_LATEST_RELEASE) {
+            response ->
+            if ((response != null) && response.has("name") && !response.isNull("name")) {
+                //Check against current version
+                val versionName = BuildConfig.VERSION_NAME
+                val curMajorNumber = versionName.split(".")[0].toInt()
+                val curMinorNumber = versionName.split(".")[1].toInt()
+                val curRevisionNumber = versionName.split(".")[2].toInt()
+                val gitVersion = response.getString("name").split("-").get(1)
+                val latestMajorNumber = gitVersion.split(".")[0].toInt()
+                val latestMinorNumber = gitVersion.split(".")[1].toInt()
+                val latestRevisionNumber = gitVersion.split(".")[2].toInt()
+                if ((latestMajorNumber > curMajorNumber) ||
+                    (latestMinorNumber> curMinorNumber) ||
+                    (latestRevisionNumber> curRevisionNumber)){
+                    //Checking for update
+                    //Get assets
+                    val assets = response.getJSONArray("assets")
+                    var url = ""
+                    var filesize: Long = 0
+                    //Get apk from assets
+                    for (i in 0 until assets.length()) {
+                        if (assets.getJSONObject(i).getString("name").endsWith(".apk")) {
+                            url = assets.getJSONObject(i).getString("browser_download_url")
+                            filesize = assets.getJSONObject(i).getLong("size")
+                            downloadFile(Uri.parse(url), gitVersion, filesize)
+                            return@get
+                        }
+                    }
+                } else {
+                    showToast("Application already at latest version")
+                    return@get
+                }
+            }
+        }
+    }
 
     fun checkNewVersion(notify: Boolean): Boolean {
         notifyUser = notify
         Log.i(LOGTAG, "Checking for latest APK")
         downloadingUpdate = true
-        getLatestAPK().execute()
+//        getLatestAPK().execute()
+        getLatestRelease()
         return false
     }
 
@@ -488,64 +533,6 @@ object AnodeClient {
             }
         }
         mycontext.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-    }
-
-    class getLatestAPK(): AsyncTask<Any?, Any?, String>() {
-        override fun doInBackground(objects: Array<Any?>): String? {
-            Log.i(LOGTAG,"Checking for latest APK")
-            var result: String
-            //val versionCode = BuildConfig.VERSION_CODE
-            val versionName = BuildConfig.VERSION_NAME
-            val major_number = versionName.split(".")[0].toInt()
-            val minor_number = versionName.split(".")[1].toInt()
-            val revision_number = versionName.split(".")[2].toInt()
-            try {
-                val json = JSONObject(URL(API_UPDATE_APK).readText(Charsets.UTF_8))
-                if (json.get("clientOs") != "android") {
-                    result = "wrong os returned"
-                    return result
-                }
-                //TODO: check for client_cpu_architecture
-                if ((json.get("majorNumber").toString().toInt() > major_number) ||
-                        ((json.get("majorNumber").toString().toInt() == major_number) &&
-                                (json.get("minorNumber").toString().toInt() > minor_number)) ||
-                        ((json.get("majorNumber").toString().toInt() == major_number) &&
-                                (json.get("minorNumber").toString().toInt() == minor_number) &&
-                                (json.get("revisionNumber").toString().toInt() > revision_number))
-                ){
-                    val filesize = json.get("fileSizeBytes")
-                    return json.getString("binaryDownloadUrl")+"|"+json.get("majorNumber").toString()+"_"+json.get("minorNumber").toString()+"_"+json.get("revisionNumber").toString()+"|$filesize"
-                } else {
-                    Log.i(LOGTAG,"NO update needed")
-                    return "none"
-                }
-            } catch (e: Exception) {
-                result = "error in getting update information"
-                Log.i(LOGTAG, result)
-            }
-            return result
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            if (result != null) {
-                if (result.contains("http")) {
-                    Log.i(LOGTAG, "Updating APK from $result")
-                    val url = result.split("|")[0]
-                    val version = result.split("|")[1]
-                    val filesize = result.split("|")[2].toLong()
-                    downloadFile(Uri.parse(url), version, filesize)
-                } else if (result.contains("error")) {
-                    Log.i(LOGTAG, "ERROR updating APK from $result")
-                    downloadingUpdate = false
-                } else if (result == "none"){
-                    if (notifyUser) {
-                        showToast("Application already at latest version")
-                    }
-                    downloadingUpdate = false
-                }
-            }
-        }
     }
 
     fun generateKeys(): KeyPair? {
