@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -44,6 +45,7 @@ class WalletFragmentMain : Fragment() {
     lateinit var h: Handler
     private var balanceLastTimeUpdated: Long = 0
     private var transactionsLastTimeUpdated: Long = 0
+    private var passwordPromptActive = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.walletfragment_main, container, false)
@@ -184,7 +186,10 @@ class WalletFragmentMain : Fragment() {
         val walletPassword = a.getPasswordFromEncSharedPreferences()
         //If password is empty prompt user to enter new password
         if (walletPassword.isEmpty()) {
-            promptUserPassword(v, a)
+            if (!passwordPromptActive) {
+                passwordPromptActive = true
+                promptUserPassword(v, a)
+            }
         } else {
             val jsonRequest = JSONObject()
             var b64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
@@ -196,18 +201,15 @@ class WalletFragmentMain : Fragment() {
                     Log.i(LOGTAG, "unknown status for wallet")
                     //Store and push error
                     //TODO: push error
-                } else if (response.has("error")) {
-                    //Handle unlockwallet REST call response
-                    val errorString = response.getString("error")
-                    if (errorString.contains("ErrWrongPassphrase:")) {
-                        //Wrong Password
-                        a.storePassword("")
+                } else if ((response.has("message")) &&
+                    response.getString("message").contains("ErrWrongPassphrase")) {
+                    Log.d(LOGTAG, "Error unlocking wallet, wrong password")
+                    //Wrong Password
+                    a.storePassword("")
+                    if (!passwordPromptActive) {
+                        passwordPromptActive = true
                         promptUserPassword(v, a)
-                        //Stop getinfo
-                        h.removeCallbacks(getPldInfo)
                     }
-                    Log.d(LOGTAG, "Error unlocking wallet: $errorString")
-                    //if wrong password prompt user to write password and try again
                     walletUnlocked = false
                 } else if (response.length() == 0) {
                     //empty response is success
@@ -258,32 +260,31 @@ class WalletFragmentMain : Fragment() {
         )
         input.layoutParams = lp
         if (builder != null) {
-            requireActivity().runOnUiThread {
-                builder.setView(input)
-                builder.setPositiveButton(
-                    "Submit",
-                    DialogInterface.OnClickListener { dialog, _ ->
-                        password = input.text.toString()
-                        dialog.dismiss()
-                        if (password.isNotEmpty()) {
-                            //write password to encrypted shared preferences
-                            a.storePassword(password)
-                            //reset pkt wallet address
-                            val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                            prefs.edit().putString("lndwalletaddress", "").apply()
-                            //try unlocking the wallet with new password
-                            unlockWallet(v, a)
-                        }
-                    })
+            builder.setView(input)
+            input.transformationMethod = PasswordTransformationMethod.getInstance();
+            builder.setPositiveButton("Submit",
+                DialogInterface.OnClickListener { dialog, _ ->
+                    password = input.text.toString()
+                    dialog.dismiss()
+                    if (password.isNotEmpty()) {
+                        passwordPromptActive = false
+                        //write password to encrypted shared preferences
+                        a.storePassword(password)
+                        //reset pkt wallet address
+                        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                        prefs.edit().putString("lndwalletaddress", "").apply()
+                        //try unlocking the wallet with new password
+                        unlockWallet(v, a)
+                    }
+                })
 
-                builder.setNegativeButton(
-                    "Cancel",
-                    DialogInterface.OnClickListener { dialog, _ ->
-                        dialog.dismiss()
-                    })
-                val alert: AlertDialog = builder.create()
-                alert.show()
-            }
+            builder.setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { dialog, _ ->
+                    passwordPromptActive = false
+                    dialog.dismiss()
+                })
+            val alert: AlertDialog = builder.create()
+            alert.show()
         }
     }
 
@@ -493,10 +494,11 @@ class WalletFragmentMain : Fragment() {
 
         override fun run() {
             getInfo()
-            if (!walletUnlocked) {
+            if (walletUnlocked) {
+                h.postDelayed(refreshValues, refreshValuesInterval)
+            } else {
                 unlockWallet(v, a)
             }
-            h.postDelayed(refreshValues,refreshValuesInterval)
         }
     }
 

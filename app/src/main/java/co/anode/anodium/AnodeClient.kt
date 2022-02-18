@@ -442,7 +442,6 @@ object AnodeClient {
         notifyUser = notify
         Log.i(LOGTAG, "Checking for latest APK")
         downloadingUpdate = true
-//        getLatestAPK().execute()
         getLatestRelease()
         return false
     }
