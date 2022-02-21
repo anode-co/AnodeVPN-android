@@ -132,9 +132,9 @@ class WalletStatsActivity : AppCompatActivity() {
                     val peersList = mutableListOf<String>()
                     val bansList = mutableListOf<String>()
                     val queriesList = mutableListOf<String>()
-                    val peersadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, peersList)
-                    val bannedadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, bansList)
-                    val queriesadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, queriesList)
+                    val peersAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, peersList)
+                    val bannedAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, bansList)
+                    val queriesAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, queriesList)
                     val neutrino = response.getJSONObject("neutrino")
                     neutrinosync.text = neutrino.getLong("height").toString() + "\n" + neutrino.getString("blockTimestamp")
                     connectedServers.text = neutrino.getJSONArray("peers").length().toString()
@@ -165,9 +165,9 @@ class WalletStatsActivity : AppCompatActivity() {
                             queriesList.add("Waiting since: ")
                         }
                     }
-                    peersListView.adapter = peersadapter
-                    bannedListView.adapter = bannedadapter
-                    queriesListView.adapter = queriesadapter
+                    peersListView.adapter = peersAdapter
+                    bannedListView.adapter = bannedAdapter
+                    queriesListView.adapter = queriesAdapter
                 }
 
             }
