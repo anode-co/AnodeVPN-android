@@ -1,10 +1,14 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -12,9 +16,22 @@ import androidx.appcompat.app.AlertDialog
 import java.io.File
 import java.util.*
 import android.widget.ArrayAdapter
+import co.anode.anodium.volley.APIController
+import co.anode.anodium.volley.ServiceVolley
+import org.json.JSONObject
 
 class WalletStatsActivity : AppCompatActivity() {
     var updating = true
+    lateinit var apiController: APIController
+    lateinit var h: Handler
+    private val refreshValuesInterval: Long = 10000
+    private var walletUnlocked = false
+    private var neutrinoSynced = false
+    private var myPKTAddress = ""
+    private var balanceLastTimeUpdated: Long = 0
+    private var transactionsLastTimeUpdated: Long = 0
+    private var passwordPromptActive = false
+    lateinit var myBalance: TextView
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +44,12 @@ class WalletStatsActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
 
+        //Initialize handlers
+        val service = ServiceVolley()
+        apiController = APIController(service)
+        h = Handler(Looper.getMainLooper())
+
+        getPldInfo.init(AnodeUtil(applicationContext))
         val buttonWalletLog = findViewById<Button>(R.id.buttonViewWalletLog)
         buttonWalletLog.setOnClickListener {
             val debugWalletActivity = Intent(this, DebugWalletActivity::class.java)
@@ -46,21 +69,18 @@ class WalletStatsActivity : AppCompatActivity() {
             return
         }
 
-
+        //Initializing UI components
         val myaddress = findViewById<TextView>(R.id.wstats_address)
-        val mybalance = findViewById<TextView>(R.id.wstats_balance)
-
+        myBalance = findViewById<TextView>(R.id.wstats_balance)
         val peersExpandbutton = findViewById<TextView>(R.id.peers_expand)
         val bannedExpandbutton = findViewById<TextView>(R.id.banned_expand)
         val queriesExpandbutton = findViewById<TextView>(R.id.queries_expand)
-
         val peersListView = findViewById<ListView>(R.id.peers_list)
         val bannedListView = findViewById<ListView>(R.id.banned_list)
         val queriesListView = findViewById<ListView>(R.id.queries_list)
         peersListView.visibility = View.GONE
         bannedListView.visibility = View.GONE
         queriesListView.visibility = View.GONE
-
         peersExpandbutton.setOnClickListener {
             if (peersListView.visibility == View.VISIBLE) {
                 peersListView.visibility = View.GONE
@@ -83,82 +103,110 @@ class WalletStatsActivity : AppCompatActivity() {
             }
         }
         myaddress.text = prefs.getString("lndwalletaddress", "")
-        Thread(Runnable {
-            while (!prefs.getBoolean("lndwalletopened", false)) {
-                openPKTWallet()
-                Thread.sleep(500)
-            }
-            val walletsync = findViewById<TextView>(R.id.wstats_walletsync)
-            val neutrinosync = findViewById<TextView>(R.id.wstats_neutrinosync)
-            val connectedServers = findViewById<TextView>(R.id.wstats_connectedservers)
-            val bannedServers = findViewById<TextView>(R.id.wstats_bannedservers)
-            val numqueries = findViewById<TextView>(R.id.wstats_queries)
-            while(updating) {
-                runOnUiThread {
-                    mybalance.text = "Requesting data"
-                    walletsync.text = "Requesting data\n "
-                    neutrinosync.text = "Requesting data\n "
-                    connectedServers.text = "-"
-                    bannedServers.text = "-"
-                    numqueries.text = "-"
+    }
+
+    private fun getInfo() {
+        val walletsync = findViewById<TextView>(R.id.wstats_walletsync)
+        val neutrinosync = findViewById<TextView>(R.id.wstats_neutrinosync)
+        val connectedServers = findViewById<TextView>(R.id.wstats_connectedservers)
+        val bannedServers = findViewById<TextView>(R.id.wstats_bannedservers)
+        val numqueries = findViewById<TextView>(R.id.wstats_queries)
+        myBalance.text = "Requesting data"
+        walletsync.text = "Requesting data\n "
+        neutrinosync.text = "Requesting data\n "
+        connectedServers.text = "-"
+        bannedServers.text = "-"
+        numqueries.text = "-"
+
+        val peersListView = findViewById<ListView>(R.id.peers_list)
+        val bannedListView = findViewById<ListView>(R.id.banned_list)
+        val queriesListView = findViewById<ListView>(R.id.queries_list)
+
+        apiController.get(apiController.getInfoURL) { response ->
+            if (response != null) {
+                if (response.has("wallet") && !response.isNull("wallet")) {
+                    val walletInfo = response.getJSONObject("wallet")
+                    walletsync.text = walletInfo.getInt("currentHeight").toString() + "\n" + walletInfo.getString("currentBlockTimestamp")
                 }
-                val getinforesponse = LndRPCController.getInfo(applicationContext)
-                val balanceString = ""//LndRPCController.getBalance(applicationContext)
-                val peersList = mutableListOf<String>()
-                val bansList = mutableListOf<String>()
-                val queriesList = mutableListOf<String>()
-                val neutrino = getinforesponse.getJSONObject("neutrino")
-                if (getinforesponse != null)  {
-                    if (neutrino != null) {
-                        val neutrinoPeers = neutrino.getJSONArray("peers")
-                        for (i in 0 until neutrinoPeers.length()) {
-                            val peerDesc = neutrinoPeers.getJSONObject(i)
-                            peersList.add("Address: " + peerDesc.getString("addr"))
-                            peersList.add("Version: " + peerDesc.getString("userAgent"))
-                            peersList.add("Sync: " + peerDesc.getString("last_block").toString())
-                        }
-                        for (i in 0 until neutrino.getJSONArray("bans").length()) {
-                            val ban = neutrino.getJSONArray("bans").getJSONObject(i)
-                            bansList.add("Address: "+ban.getString("addr"))
-                            bansList.add("Reason: "+ban.getString("reason"))
-                            bansList.add("Endtime: "+ban.getString("endTime"))
-                        }
-                        for (i in 0 until neutrino.getJSONArray("queries").length()) {
-                            val query = neutrino.getJSONArray("queries").getJSONObject(i)
-                            queriesList.add("Server: "+query.getString("peer"))
-                            queriesList.add("Request: "+query.getString("command"))
-                            queriesList.add("Created: "+query.getString("createTime"))
-                            if (query.getLong("last_response_time") > 0) {
-                                val datetime = Date(query.getLong("last_response_time"))
-                                queriesList.add("Waiting since: $datetime")
-                            } else {
-                                queriesList.add("Waiting since: ")
-                            }
+                if (response.has("neutrino") && !response.isNull("neutrino")) {
+                    val peersList = mutableListOf<String>()
+                    val bansList = mutableListOf<String>()
+                    val queriesList = mutableListOf<String>()
+                    val peersadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, peersList)
+                    val bannedadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, bansList)
+                    val queriesadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, queriesList)
+                    val neutrino = response.getJSONObject("neutrino")
+                    neutrinosync.text = neutrino.getLong("height").toString() + "\n" + neutrino.getString("blockTimestamp")
+                    connectedServers.text = neutrino.getJSONArray("peers").length().toString()
+                    bannedServers.text = neutrino.getJSONArray("bans").length().toString()
+                    numqueries.text = neutrino.getJSONArray("queries").length().toString()
+                    val neutrinoPeers = neutrino.getJSONArray("peers")
+                    for (i in 0 until neutrinoPeers.length()) {
+                        val peerDesc = neutrinoPeers.getJSONObject(i)
+                        peersList.add("Address: " + peerDesc.getString("addr"))
+                        peersList.add("Version: " + peerDesc.getString("userAgent"))
+                        peersList.add("Sync: " + peerDesc.getString("lastBlock").toString())
+                    }
+                    for (i in 0 until neutrino.getJSONArray("bans").length()) {
+                        val ban = neutrino.getJSONArray("bans").getJSONObject(i)
+                        bansList.add("Address: " + ban.getString("addr"))
+                        bansList.add("Reason: " + ban.getString("reason"))
+                        bansList.add("Endtime: " + ban.getString("endTime"))
+                    }
+                    for (i in 0 until neutrino.getJSONArray("queries").length()) {
+                        val query = neutrino.getJSONArray("queries").getJSONObject(i)
+                        queriesList.add("Server: " + query.getString("peer"))
+                        queriesList.add("Request: " + query.getString("command"))
+                        queriesList.add("Created: " + query.getString("createTime"))
+                        if (query.getLong("last_response_time") > 0) {
+                            val datetime = Date(query.getLong("lastResponseTime"))
+                            queriesList.add("Waiting since: $datetime")
+                        } else {
+                            queriesList.add("Waiting since: ")
                         }
                     }
-                }
-                val peersadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, peersList)
-                val bannedadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, bansList)
-                val queriesadapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, android.R.id.text1, queriesList)
-
-                runOnUiThread {
                     peersListView.adapter = peersadapter
                     bannedListView.adapter = bannedadapter
                     queriesListView.adapter = queriesadapter
-                    mybalance.text = balanceString
-
-                    if (getinforesponse != null) {
-                        val walletInfo = getinforesponse.getJSONObject("wallet")
-                        walletsync.text = walletInfo.getInt("current_height").toString()+"\n"+walletInfo.getString("current_block_timestamp")
-                        neutrinosync.text = neutrino.getLong("height").toString()+"\n"+neutrino.getString("block_timestamp")
-                        connectedServers.text = neutrino.getJSONArray("peers").length().toString()
-                        bannedServers.text = neutrino.getJSONArray("bans").length().toString()
-                        numqueries.text = neutrino.getJSONArray("queries").length().toString()
-                    }
                 }
-                Thread.sleep(5000)
+
             }
-        }, "WalletStats.RefreshValues").start()
+            h.postDelayed(getPldInfo, refreshValuesInterval)
+        }
+    }
+
+    private val getPldInfo = object : Runnable {
+        lateinit var a: AnodeUtil
+
+        fun init(anodeutil: AnodeUtil)  {
+            a = anodeutil
+        }
+
+        override fun run() {
+            getInfo()
+            if (!walletUnlocked) {
+                unlockWallet(a)
+            } else {
+                getBalance(a)
+            }
+        }
+    }
+
+    private fun getBalance(a: AnodeUtil) {
+        //Get Balance
+        apiController.get(apiController.getBalanceURL) { response ->
+            if (response != null) {
+                val json = JSONObject(response.toString())
+                if (json.has("totalBalance")) {
+                    myBalance.text = a.satoshisToPKT(json.getString("totalBalance").toLong())
+                    balanceLastTimeUpdated = System.currentTimeMillis()
+                } else {
+                    //getBalance(v, a)
+                }
+            } else {
+                //getBalance(v, a)
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -174,88 +222,95 @@ class WalletStatsActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         updating = false
+        h.removeCallbacks(getPldInfo)
     }
 
     override fun onResume() {
         super.onResume()
+        h.postDelayed(getPldInfo, 0)
         updating = true
     }
 
-    fun openPKTWallet(): Boolean {
-        val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-        Log.i(LOGTAG, "MainActivity trying to open wallet")
-        var result = LndRPCController.openWallet(prefs)
-        if (result.contains("ErrWrongPassphrase")) {
-            var password = ""
-            val builder: AlertDialog.Builder? = this.let { AlertDialog.Builder(it) }
-            if (builder != null) {
-                builder.setTitle("PKT Wallet")
-                builder.setMessage("Please type your PKT Wallet password")
+    private fun promptUserPassword(a: AnodeUtil) {
+        var password: String
+        val builder: AlertDialog.Builder = this.let { AlertDialog.Builder(it) }
+        builder.setTitle("PKT Wallet")
+        builder.setMessage("Please type your PKT Wallet password")
+        val input = EditText(this)
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        input.layoutParams = lp
+        builder.setView(input)
+        input.transformationMethod = PasswordTransformationMethod.getInstance();
+        builder.setPositiveButton("Submit",
+            DialogInterface.OnClickListener { dialog, _ ->
+                password = input.text.toString()
+                dialog.dismiss()
+                if (password.isNotEmpty()) {
+                    passwordPromptActive = false
+                    //write password to encrypted shared preferences
+                    a.storePassword(password)
+                    //reset pkt wallet address
+                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                    prefs.edit().putString("lndwalletaddress", "").apply()
+                    //try unlocking the wallet with new password
+                    unlockWallet(a)
+                }
+            })
+
+        builder.setNegativeButton("Cancel",
+            DialogInterface.OnClickListener { dialog, _ ->
+                passwordPromptActive = false
+                dialog.dismiss()
+            })
+        val alert: AlertDialog = builder.create()
+        alert.show()
+    }
+
+    private fun unlockWallet(a:AnodeUtil) {
+        Log.i(LOGTAG, "Trying to unlock wallet")
+        //Get encrypted password
+        val walletPassword = a.getPasswordFromEncSharedPreferences()
+        //If password is empty prompt user to enter new password
+        if (walletPassword.isEmpty()) {
+            if (!passwordPromptActive) {
+                passwordPromptActive = true
+                promptUserPassword(a)
             }
-            val input = EditText(this)
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            input.layoutParams = lp
-            if (builder != null) {
-                runOnUiThread {
-                    builder.setView(input)
-                    builder.setPositiveButton(
-
-                        "Submit",
-                        DialogInterface.OnClickListener { dialog, _ ->
-                            password = input.text.toString()
-                            dialog.dismiss()
-
-                            if ((prefs != null) && (password.isNotEmpty())) {
-                                with(prefs.edit()) {
-                                    putString("walletpassword", password)
-                                    commit()
-                                }
-                                val result = LndRPCController.openWallet(prefs)
-                                if (result == "OK") {
-                                    Toast.makeText(this,"PKT wallet is open",Toast.LENGTH_LONG).show()
-                                } else {
-                                    Toast.makeText(this,"Wrong password.",Toast.LENGTH_LONG).show()
-                                }
-                            }
-                        })
-
-                    builder.setNegativeButton(
-                        "Cancel",
-                        DialogInterface.OnClickListener { dialog, _ ->
-                            dialog.dismiss()
-                        })
-                    val alert: androidx.appcompat.app.AlertDialog = builder.create()
-                    alert.show()
+        } else {
+            val jsonRequest = JSONObject()
+            var b64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
+            b64Password = b64Password.replace("\n","")
+            jsonRequest.put("wallet_password", b64Password)
+            apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
+                if (response == null) {
+                    //unknown, throw error
+                    Log.i(LOGTAG, "unknown status for wallet")
+                    //Store and push error
+                    //TODO: push error
+                } else if ((response.has("message")) &&
+                    response.getString("message").contains("ErrWrongPassphrase")) {
+                    Log.d(LOGTAG, "Error unlocking wallet, wrong password")
+                    //Wrong Password
+                    a.storePassword("")
+                    if (!passwordPromptActive) {
+                        passwordPromptActive = true
+                        promptUserPassword(a)
+                    }
+                    walletUnlocked = false
+                } else if (response.length() == 0) {
+                    //empty response is success
+                    Log.i(LOGTAG, "Wallet unlocked")
+                    walletUnlocked = true
+                    //Wait a bit before making next call
+                    Thread.sleep(300)
                 }
             }
-        } else if (result != "OK") {
-            //can not open wallet
-            Log.w(LOGTAG, "Can not open PKT wallet")
-            //wrong password prompt user to type password again
-            val datadir =
-                File("$filesDir/lnd/data/chain/pkt/mainnet")
-            var checkwallet = result
-            if (!datadir.exists()) {
-                Log.e(LOGTAG, "expected folder structure not available")
-                checkwallet += " datadir does not exist "
-            } else {
-                checkwallet += " wallet.db exists "
-            }
-            if (prefs.getString("walletpassword", "").isNullOrEmpty()) {
-                Log.e(LOGTAG, "walletpassword in shared preferences is empty")
-                checkwallet += " walletpassword is empty"
-            } else {
-                checkwallet += " walletpassword is not empty"
-            }
-            val status = LndRPCController.isPldRunning()
-            checkwallet += " PLD status: $status"
-            return false
-        } else if (result == "OK") {
-            return true
         }
-        return false
+
     }
+
+
 }
