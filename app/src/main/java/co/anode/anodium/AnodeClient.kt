@@ -457,47 +457,45 @@ object AnodeClient {
         var flag = true
         try {
             val file = File(destination)
-            if (!file.exists() or (file.length() < filesize)) {
-                mainActivity.runOnUiThread {
-                    Toast.makeText(mycontext, R.string.downloading_update, Toast.LENGTH_LONG).show()
-                }
-                val request = DownloadManager.Request(uri)
-                //Setting title of request
-                request.setTitle(filename)
-                request.setMimeType("application/vnd.android.package-archive")
-                //Setting description of request
-                request.setDescription("Your file is downloading")
-                //set notification when download completed
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                //Set the local destination for the downloaded file to a path within the application's external files directory
-                //request.setDestinationInExternalPublicDir(destination, FILE_NAME) //WORKS
-                request.setDestinationUri(destinationuri)
-                //Enqueue download and save the referenceId
-                downloadReference = downloadManager.enqueue(request)
 
-                var query = DownloadManager.Query()
+            mainActivity.runOnUiThread {
+                Toast.makeText(mycontext, R.string.downloading_update, Toast.LENGTH_LONG).show()
+            }
+            val request = DownloadManager.Request(uri)
+            //Setting title of request
+            request.setTitle(filename)
+            request.setMimeType("application/vnd.android.package-archive")
+            //Setting description of request
+            request.setDescription("Your file is downloading")
+            //set notification when download completed
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            //Set the local destination for the downloaded file to a path within the application's external files directory
+            //request.setDestinationInExternalPublicDir(destination, FILE_NAME) //WORKS
+            request.setDestinationUri(destinationuri)
+            //Enqueue download and save the referenceId
+            downloadReference = downloadManager.enqueue(request)
 
-                query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
-                downloadingUpdate = true
-                Thread(Runnable {
-                    while (downloadingUpdate) {
-                        val c = downloadManager.query(query)
-                        if (c.moveToFirst()) {
-                            var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                            if (status == DownloadManager.STATUS_FAILED) {
-                                flag = false
-                                downloadingUpdate = false
-                                break
-                            } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                downloadingUpdate = false
-                                flag = true
-                                break
-                            }
+            var query = DownloadManager.Query()
+
+            query.setFilterByStatus(DownloadManager.STATUS_FAILED or DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_SUCCESSFUL or DownloadManager.STATUS_RUNNING or DownloadManager.STATUS_PENDING)
+            downloadingUpdate = true
+            Thread(Runnable {
+                while (downloadingUpdate) {
+                    val c = downloadManager.query(query)
+                    if (c.moveToFirst()) {
+                        var status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                        if (status == DownloadManager.STATUS_FAILED) {
+                            flag = false
+                            downloadingUpdate = false
+                            break
+                        } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            downloadingUpdate = false
+                            flag = true
+                            break
                         }
                     }
-                }, "AnodeClient.downloadfile").start()
-
-            }
+                }
+            }, "AnodeClient.downloadfile").start()
             if (flag) {
                 downloadFails = 0
                 showInstallOption(destination)
@@ -524,6 +522,7 @@ object AnodeClient {
                 )
                 Log.i(LOGTAG, "Installing new apk")
                 val install = Intent(Intent.ACTION_VIEW)
+                install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 install.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 install.data = contentUri
