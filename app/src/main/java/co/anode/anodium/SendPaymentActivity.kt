@@ -17,7 +17,6 @@ import org.json.JSONObject
 
 class SendPaymentActivity : AppCompatActivity() {
     lateinit var apiController: APIController
-    private val sendfromURL = "http://localhost:8080/api/v1/lightning/sendfrom"
     private var myPKTAddress = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,7 +98,7 @@ class SendPaymentActivity : AppCompatActivity() {
                 val fromAddresses = JSONArray()
                 fromAddresses.put(myPKTAddress)
                 params.put("from_address", fromAddresses)
-                apiController.post(sendfromURL, params) { response ->
+                apiController.post(apiController.sendFromURL, params) { response ->
                     if ((response != null) && response.has("txHash") && !response.isNull("txHash")) {
                         Toast.makeText(applicationContext, "Payment of ${amount.text}PKT send", Toast.LENGTH_SHORT).show()
                         finish()

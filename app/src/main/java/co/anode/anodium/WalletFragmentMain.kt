@@ -30,14 +30,6 @@ import java.util.*
 class WalletFragmentMain : Fragment() {
     lateinit var statusBar: TextView
     lateinit var apiController: APIController
-    //Have unlockwallet on 127.0.0.1 instead of localhost.
-    private val baseRestAPIURL = "http://localhost:8080/api/v1"
-    private val unlockWalletURL = "$baseRestAPIURL/wallet/unlock"
-    private val getInfoURL = "$baseRestAPIURL/meta/getinfo"
-    private val getBalanceURL = "http://127.0.0.1:8080/api/v1/lightning/walletbalance"
-    private val getNewAddressURL = "$baseRestAPIURL/lightning/getnewaddress"
-    private val getTransactionsURL = "http://127.0.0.1:8080/api/v1/lightning/gettransactions"
-    private val sendfrom = "$baseRestAPIURL/lightning/sendfrom"
     private var walletUnlocked = false
     private var neutrinoSynced = false
     private var myPKTAddress = ""
@@ -53,8 +45,8 @@ class WalletFragmentMain : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (this::h.isInitialized && this.isVisible) {
-            h.postDelayed(getPldInfo, refreshValuesInterval)
+        if (this::h.isInitialized) {
+            h.postDelayed(getPldInfo,0)
         }
     }
 
@@ -86,11 +78,7 @@ class WalletFragmentMain : Fragment() {
         getPldInfo.init(v, anodeUtil)
         //set PKT address from shared preferences
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
-        //Force password reset to test error handling and password prompt
-        //anodeUtil.storePassword("")
-        //Start checking getInfo to see if wallet is unlocked
-        //and synced to chain
-        h.postDelayed(getPldInfo,0)
+
         //Init UI elements
         val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
         walletAddress.text = myPKTAddress
@@ -132,7 +120,7 @@ class WalletFragmentMain : Fragment() {
      * getting pld info
      */
     private fun getInfo() {
-        apiController.get(getInfoURL) { response ->
+        apiController.get(apiController.getInfoURL) { response ->
             if (response != null) {
                 //Check if wallet is unlocked
                 if (response.has("wallet") &&
@@ -195,7 +183,7 @@ class WalletFragmentMain : Fragment() {
             var b64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
             b64Password = b64Password.replace("\n","")
             jsonRequest.put("wallet_password", b64Password)
-            apiController.post(unlockWalletURL,jsonRequest) { response ->
+            apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
                 if (response == null) {
                     //unknown, throw error
                     Log.i(LOGTAG, "unknown status for wallet")
@@ -229,7 +217,7 @@ class WalletFragmentMain : Fragment() {
     private fun getNewPKTAddress(v: View) {
         //Check if we already have a stored address
         if (myPKTAddress == "") {
-            apiController.post(getNewAddressURL, JSONObject("{}")) { response ->
+            apiController.post(apiController.getNewAddressURL, JSONObject("{}")) { response ->
                 if ((response != null) && (response.has("address"))) {
                     myPKTAddress = response.getString("address")
                     val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
@@ -311,7 +299,7 @@ class WalletFragmentMain : Fragment() {
     private fun getBalance(v: View, a: AnodeUtil) {
         statusBar.text = "Retrieving wallet balance..."
         //Get Balance
-        apiController.get(getBalanceURL) { response ->
+        apiController.get(apiController.getBalanceURL) { response ->
             if (response != null) {
                 val json = JSONObject(response.toString())
                 val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
@@ -342,7 +330,7 @@ class WalletFragmentMain : Fragment() {
         //Exclude mining transactions
         params.put("coinbase", 1)
         statusBar.text = "Retrieving transactions..."
-        apiController.post(getTransactionsURL, params) { response ->
+        apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) && (!response.has("error"))) {
                 transactionsLastTimeUpdated = System.currentTimeMillis()
                 transactions = response.getJSONArray("transactions")
