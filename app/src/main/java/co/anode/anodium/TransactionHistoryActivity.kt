@@ -35,29 +35,24 @@ class TransactionHistoryActivity : AppCompatActivity() {
         actionbar!!.title = getString(R.string.action_older_transactions)
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-        val anodeUtil = AnodeUtil(applicationContext)
+
         //Initialize handlers
         val service = ServiceVolley()
         apiController = APIController(service)
-        refreshValues.init(anodeUtil)
+
         val listsLayout = findViewById<LinearLayout>(R.id.paymentsList)
         h.postDelayed(refreshValues,refreshValuesInterval)
     }
 
     private val refreshValues = object : Runnable {
-        lateinit var a: AnodeUtil
-
-        fun init(anodeutil: AnodeUtil)  {
-            a = anodeutil
-        }
         override fun run() {
             if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
-                getWalletTransactions(a)
+                getWalletTransactions()
             }
         }
     }
 
-    private fun getWalletTransactions(a: AnodeUtil) {
+    private fun getWalletTransactions() {
         val listsLayout = findViewById<LinearLayout>(R.id.paymentsList)
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
         val context = applicationContext
@@ -131,7 +126,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
                             val textAmount = TextView(context)
                             textAmount.id = View.generateViewId()
                             textAmount.width = 350
-                            textAmount.text = a.satoshisToPKT(amount)
+                            textAmount.text = AnodeUtil.satoshisToPKT(amount)
                             line.addView(textAmount)
                             //DATE
                             val textDate = TextView(context)

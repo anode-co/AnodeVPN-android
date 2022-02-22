@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     private val buttonStateDisconnected = 0
     private val buttonStateConnecting = 1
     private val buttonStateConnected = 2
-    private var anodeUtil: AnodeUtil? = null
     private var mainMenu: Menu? = null
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
@@ -259,10 +258,10 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         //Disable night mode (dark mode)
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
-        anodeUtil = AnodeUtil(this)
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         prefs.edit().putBoolean("lndwalletopened", false).apply()
+
+        AnodeUtil.init(applicationContext)
 
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
@@ -281,10 +280,10 @@ class MainActivity : AppCompatActivity() {
        */
 
         //Start the log file
-        anodeUtil!!.logFile()
+        AnodeUtil.logFile()
         //Initialize App
-        anodeUtil!!.initializeApp()
-        anodeUtil!!.launch()
+        AnodeUtil.initializeApp()
+        AnodeUtil.launch()
         //Initialize AnodeClient
         AnodeClient.mycontext = this
         AnodeClient.statustv = findViewById(R.id.textview_status)
@@ -294,7 +293,7 @@ class MainActivity : AppCompatActivity() {
         var mLastClickTime: Long = 0
         val buttonConnectVPNs = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         buttonConnectVPNs.setOnClickListener() {
-            anodeUtil!!.preventTwoClick(it)
+            AnodeUtil.preventTwoClick(it)
             //avoid accidental double clicks
             if (SystemClock.elapsedRealtime() - mLastClickTime > minClickInterval) {
                 mLastClickTime = SystemClock.elapsedRealtime()
@@ -544,7 +543,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 //Initialize CJDNS socket
-                CjdnsSocket.init(anodeUtil!!.CJDNS_PATH + "/" + anodeUtil!!.CJDROUTE_SOCK)
+                CjdnsSocket.init(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.CJDROUTE_SOCK)
             }
         }
         //On first run show nickname activity

@@ -51,7 +51,6 @@ class DebugActivity : AppCompatActivity() {
         }
         Thread(Runnable {
             Log.i(LOGTAG, "DebugActivity.RefreshValues startup")
-            val anodeUtil = AnodeUtil(application)
             while (true) {
                 this.runOnUiThread(Runnable {
                     val appversion = findViewById<TextView>(R.id.text_AppVersion)
@@ -64,7 +63,7 @@ class DebugActivity : AppCompatActivity() {
                     val internetipv6 = findViewById<TextView>(R.id.text_internetipv6)
                     internetipv6.text = CjdnsSocket.ipv6Address
                     val pubkey = findViewById<TextView>(R.id.text_pubkey)
-                    pubkey.text = anodeUtil.getPubKey()
+                    pubkey.text = AnodeUtil.getPubKey()
                     val nodeLink = findViewById<TextView>(R.id.text_nodes)
                     val link: Spanned = HtmlCompat.fromHtml("<a href='http://h.snode.cjd.li/#" + nodeinfo["myIp6"].str() + "'>Find yourself on the map</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
                     nodeLink.movementMethod = LinkMovementMethod.getInstance()

@@ -34,7 +34,7 @@ class SendPaymentActivity : AppCompatActivity() {
         //Initialize handlers
         val service = ServiceVolley()
         apiController = APIController(service)
-        val anodeUtil = AnodeUtil(this)
+
         //Get our PKT wallet address
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
@@ -67,7 +67,7 @@ class SendPaymentActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             var sendcoins = true
-            val walletPassword = anodeUtil.getPasswordFromEncSharedPreferences()
+            val walletPassword = AnodeUtil.getPasswordFromEncSharedPreferences()
             val storedb64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
             val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
             val b64Password = android.util.Base64.encodeToString(passwordField.text.toString().toByteArray(), android.util.Base64.DEFAULT)

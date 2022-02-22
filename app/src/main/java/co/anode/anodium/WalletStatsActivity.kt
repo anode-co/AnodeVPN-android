@@ -49,7 +49,6 @@ class WalletStatsActivity : AppCompatActivity() {
         apiController = APIController(service)
         h = Handler(Looper.getMainLooper())
 
-        getPldInfo.init(AnodeUtil(applicationContext))
         val buttonWalletLog = findViewById<Button>(R.id.buttonViewWalletLog)
         buttonWalletLog.setOnClickListener {
             val debugWalletActivity = Intent(this, DebugWalletActivity::class.java)
@@ -103,6 +102,12 @@ class WalletStatsActivity : AppCompatActivity() {
             }
         }
         myaddress.text = prefs.getString("lndwalletaddress", "")
+
+        val deleteButton = findViewById<Button>(R.id.buttonDeleteNeutrino)
+        deleteButton.setOnClickListener {
+            AnodeUtil.deleteNeutrino()
+            AnodeUtil.stopPld()//will restart
+        }
     }
 
     private fun getInfo() {
@@ -176,29 +181,23 @@ class WalletStatsActivity : AppCompatActivity() {
     }
 
     private val getPldInfo = object : Runnable {
-        lateinit var a: AnodeUtil
-
-        fun init(anodeutil: AnodeUtil)  {
-            a = anodeutil
-        }
-
         override fun run() {
             getInfo()
             if (!walletUnlocked) {
-                unlockWallet(a)
+                unlockWallet()
             } else {
-                getBalance(a)
+                getBalance()
             }
         }
     }
 
-    private fun getBalance(a: AnodeUtil) {
+    private fun getBalance() {
         //Get Balance
         apiController.get(apiController.getBalanceURL) { response ->
             if (response != null) {
                 val json = JSONObject(response.toString())
                 if (json.has("totalBalance")) {
-                    myBalance.text = a.satoshisToPKT(json.getString("totalBalance").toLong())
+                    myBalance.text = AnodeUtil.satoshisToPKT(json.getString("totalBalance").toLong())
                     balanceLastTimeUpdated = System.currentTimeMillis()
                 } else {
                     //getBalance(v, a)
@@ -227,11 +226,11 @@ class WalletStatsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        h.postDelayed(getPldInfo, 0)
+        h.postDelayed(getPldInfo, 500)
         updating = true
     }
 
-    private fun promptUserPassword(a: AnodeUtil) {
+    private fun promptUserPassword() {
         var password: String
         val builder: AlertDialog.Builder = this.let { AlertDialog.Builder(it) }
         builder.setTitle("PKT Wallet")
@@ -251,12 +250,12 @@ class WalletStatsActivity : AppCompatActivity() {
                 if (password.isNotEmpty()) {
                     passwordPromptActive = false
                     //write password to encrypted shared preferences
-                    a.storePassword(password)
+                    AnodeUtil.storePassword(password)
                     //reset pkt wallet address
                     val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                     prefs.edit().putString("lndwalletaddress", "").apply()
                     //try unlocking the wallet with new password
-                    unlockWallet(a)
+                    unlockWallet()
                 }
             })
 
@@ -269,15 +268,15 @@ class WalletStatsActivity : AppCompatActivity() {
         alert.show()
     }
 
-    private fun unlockWallet(a:AnodeUtil) {
+    private fun unlockWallet() {
         Log.i(LOGTAG, "Trying to unlock wallet")
         //Get encrypted password
-        val walletPassword = a.getPasswordFromEncSharedPreferences()
+        val walletPassword = AnodeUtil.getPasswordFromEncSharedPreferences()
         //If password is empty prompt user to enter new password
         if (walletPassword.isEmpty()) {
             if (!passwordPromptActive) {
                 passwordPromptActive = true
-                promptUserPassword(a)
+                promptUserPassword()
             }
         } else {
             val jsonRequest = JSONObject()
@@ -294,10 +293,10 @@ class WalletStatsActivity : AppCompatActivity() {
                     response.getString("message").contains("ErrWrongPassphrase")) {
                     Log.d(LOGTAG, "Error unlocking wallet, wrong password")
                     //Wrong Password
-                    a.storePassword("")
+                    AnodeUtil.storePassword("")
                     if (!passwordPromptActive) {
                         passwordPromptActive = true
-                        promptUserPassword(a)
+                        promptUserPassword()
                     }
                     walletUnlocked = false
                 } else if (response.length() == 0) {

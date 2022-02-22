@@ -45,8 +45,8 @@ class WalletFragmentMain : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (this::h.isInitialized) {
-            h.postDelayed(getPldInfo,0)
+        if (this::h.isInitialized && !this.isHidden) {
+            h.postDelayed(getPldInfo,500)
         }
     }
 
@@ -69,13 +69,11 @@ class WalletFragmentMain : Fragment() {
         if (!walletFile.exists()) {
             return
         }
-
-        val anodeUtil = AnodeUtil(context)
         //Initialize handlers
         val service = ServiceVolley()
         apiController = APIController(service)
-        refreshValues.init(v, anodeUtil)
-        getPldInfo.init(v, anodeUtil)
+        refreshValues.init(v)
+        getPldInfo.init(v)
         //set PKT address from shared preferences
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
 
@@ -167,16 +165,16 @@ class WalletFragmentMain : Fragment() {
      * prompted to enter new password
      * then will call getNewAddress, getBalance and getTransactions
      */
-    private fun unlockWallet(v: View, a:AnodeUtil) {
+    private fun unlockWallet(v: View) {
         Log.i(LOGTAG, "Trying to unlock wallet")
         statusBar.text = "Trying to unlock wallet..."
         //Get encrypted password
-        val walletPassword = a.getPasswordFromEncSharedPreferences()
+        val walletPassword = AnodeUtil.getPasswordFromEncSharedPreferences()
         //If password is empty prompt user to enter new password
         if (walletPassword.isEmpty()) {
             if (!passwordPromptActive) {
                 passwordPromptActive = true
-                promptUserPassword(v, a)
+                promptUserPassword(v)
             }
         } else {
             val jsonRequest = JSONObject()
@@ -193,10 +191,10 @@ class WalletFragmentMain : Fragment() {
                     response.getString("message").contains("ErrWrongPassphrase")) {
                     Log.d(LOGTAG, "Error unlocking wallet, wrong password")
                     //Wrong Password
-                    a.storePassword("")
+                    AnodeUtil.storePassword("")
                     if (!passwordPromptActive) {
                         passwordPromptActive = true
-                        promptUserPassword(v, a)
+                        promptUserPassword(v)
                     }
                     walletUnlocked = false
                 } else if (response.length() == 0) {
@@ -234,7 +232,7 @@ class WalletFragmentMain : Fragment() {
      *
      * @param AnodeUtil
      */
-    private fun promptUserPassword(v: View, a: AnodeUtil) {
+    private fun promptUserPassword(v: View) {
         var password: String
         val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
         if (builder != null) {
@@ -257,12 +255,12 @@ class WalletFragmentMain : Fragment() {
                     if (password.isNotEmpty()) {
                         passwordPromptActive = false
                         //write password to encrypted shared preferences
-                        a.storePassword(password)
+                        AnodeUtil.storePassword(password)
                         //reset pkt wallet address
                         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                         prefs.edit().putString("lndwalletaddress", "").apply()
                         //try unlocking the wallet with new password
-                        unlockWallet(v, a)
+                        unlockWallet(v)
                     }
                 })
 
@@ -296,7 +294,7 @@ class WalletFragmentMain : Fragment() {
      * @param View
      * @param AnodeUtil
      */
-    private fun getBalance(v: View, a: AnodeUtil) {
+    private fun getBalance(v: View) {
         statusBar.text = "Retrieving wallet balance..."
         //Get Balance
         apiController.get(apiController.getBalanceURL) { response ->
@@ -304,7 +302,7 @@ class WalletFragmentMain : Fragment() {
                 val json = JSONObject(response.toString())
                 val walletBalance = v.findViewById<TextView>(R.id.walletBalanceNumber)
                 if (json.has("totalBalance")) {
-                    walletBalance.text = a.satoshisToPKT(json.getString("totalBalance").toLong())
+                    walletBalance.text = AnodeUtil.satoshisToPKT(json.getString("totalBalance").toLong())
                     balanceLastTimeUpdated = System.currentTimeMillis()
                 } else {
                     //getBalance(v, a)
@@ -320,7 +318,7 @@ class WalletFragmentMain : Fragment() {
      *
      */
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
-    private fun getWalletTransactions(v: View, a: AnodeUtil) {
+    private fun getWalletTransactions(v: View) {
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
         val context = requireContext()
@@ -421,7 +419,7 @@ class WalletFragmentMain : Fragment() {
                             val textAmount = TextView(context)
                             textAmount.id = View.generateViewId()
                             textAmount.width = 350
-                            textAmount.text = a.satoshisToPKT(amount)
+                            textAmount.text = AnodeUtil.satoshisToPKT(amount)
                             line.addView(textAmount)
                             //DATE
                             val textDate = TextView(context)
@@ -473,11 +471,9 @@ class WalletFragmentMain : Fragment() {
 
     private val getPldInfo = object : Runnable {
         lateinit var v: View
-        lateinit var a: AnodeUtil
 
-        fun init(view: View, anodeutil: AnodeUtil)  {
+        fun init(view: View)  {
             v = view
-            a = anodeutil
         }
 
         override fun run() {
@@ -485,18 +481,16 @@ class WalletFragmentMain : Fragment() {
             if (walletUnlocked) {
                 h.postDelayed(refreshValues, refreshValuesInterval)
             } else {
-                unlockWallet(v, a)
+                unlockWallet(v)
             }
         }
     }
 
     private val refreshValues = object : Runnable {
         lateinit var v: View
-        lateinit var a: AnodeUtil
 
-        fun init(view: View, anodeutil: AnodeUtil)  {
+        fun init(view: View)  {
             v = view
-            a = anodeutil
         }
         override fun run() {
             if (walletUnlocked) {
@@ -504,10 +498,10 @@ class WalletFragmentMain : Fragment() {
                     getNewPKTAddress(v)
                 }
                 if ((System.currentTimeMillis()-5000) > balanceLastTimeUpdated) {
-                    getBalance(v, a)
+                    getBalance(v)
                 }
                 if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
-                    getWalletTransactions(v, a)
+                    getWalletTransactions(v)
                 }
             }
         }

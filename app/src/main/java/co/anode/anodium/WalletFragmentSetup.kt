@@ -38,7 +38,7 @@ class WalletFragmentSetup : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         AnodeClient.eventLog(requireContext(), "Activity: WalletFragmentCreate created")
-        val anodeUtil = AnodeUtil(requireContext())
+
         val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
         closeButton.visibility = View.GONE
         val textview = view.findViewById<TextView>(R.id.text_walletcreate_seed_instructions)
@@ -116,7 +116,7 @@ class WalletFragmentSetup : Fragment() {
                         createButton.visibility = View.GONE
                         closeButton.visibility = View.VISIBLE
                         //Store password to encrypted shared preferences
-                        anodeUtil.storePassword(password)
+                        AnodeUtil.storePassword(password)
                         statusbar.text = ""
                         //Update header text
                         val label = view.findViewById<TextView>(R.id.text_walletcreate_label)

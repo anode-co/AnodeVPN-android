@@ -26,8 +26,8 @@ class DebugWalletActivity : AppCompatActivity() {
         actionbar.setDisplayHomeAsUpEnabled(true)
         //Open pld log file and display it
         val logtext = findViewById<TextView>(R.id.debugwalletlogtext)
-        val anodeUtil = AnodeUtil(application)
-        logfile = File(anodeUtil.CJDNS_PATH+"/"+anodeUtil.PLD_LOG).readText()
+
+        logfile = File(AnodeUtil.CJDNS_PATH+"/"+AnodeUtil.PLD_LOG).readText()
         logtext.text = logfile
         val scroll = findViewById<ScrollView>(R.id.wallet_debug_scroll)
         scroll.post {
@@ -47,7 +47,7 @@ class DebugWalletActivity : AppCompatActivity() {
             while (true) {
                 this.runOnUiThread(Runnable {
                     if (toBottom) {
-                        var newlog = File(anodeUtil.CJDNS_PATH + "/" + anodeUtil.PLD_LOG).readText()
+                        var newlog = File(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.PLD_LOG).readText()
                         if (newlog.length > oldlog.length) {
                             oldlog = newlog
                             logtext.text = newlog
