@@ -1,7 +1,6 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Base64
@@ -15,7 +14,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
@@ -41,8 +39,8 @@ class WalletFragmentSetup : Fragment() {
 
         val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
         closeButton.visibility = View.GONE
-        val textview = view.findViewById<TextView>(R.id.text_walletcreate_seed_instructions)
-        textview.visibility = View.GONE
+        val instructionsTextview = view.findViewById<TextView>(R.id.text_walletcreate_seed_instructions)
+        instructionsTextview.visibility = View.GONE
         //Hide seed layout
         val seedLayout = view.findViewById<LinearLayout>(R.id.create_wallet_show_seed)
         seedLayout.visibility = View.GONE
@@ -95,6 +93,7 @@ class WalletFragmentSetup : Fragment() {
                     if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
                         //Wallet created succesfully
                         Log.i(LOGTAG, "PKT create wallet success")
+                        instructionsTextview.visibility = View.VISIBLE
                         //Get seed
                         val seedText = view.findViewById<TextView>(R.id.seed_column)
                         val seedArray = response.getJSONArray("seed")
@@ -142,7 +141,8 @@ class WalletFragmentSetup : Fragment() {
             }
 
             closeButton.setOnClickListener {
-                activity?.finish()
+                val walletActivity = activity as WalletActivity
+                walletActivity.switchToMain()
             }
         }
     }
