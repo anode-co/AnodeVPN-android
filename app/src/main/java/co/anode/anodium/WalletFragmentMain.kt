@@ -134,8 +134,7 @@ class WalletFragmentMain : Fragment() {
                 //Check if wallet is unlocked
                 if (response.has("wallet") &&
                     !response.isNull("wallet") &&
-                    response.getJSONObject("wallet").has("current_height")) {
-                    val walletHeight = response.getJSONObject("wallet").getInt("current_height")
+                    response.getJSONObject("wallet").has("currentHeight")) {
                     walletUnlocked = true
                 }
                 if (response.has("neutrino") && !response.isNull("neutrino") && response.getJSONObject("neutrino").has("height")) {
@@ -334,7 +333,6 @@ class WalletFragmentMain : Fragment() {
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
         val context = requireContext()
         var prevTransactions = 0
-        var transactions = JSONArray()
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
@@ -345,7 +343,7 @@ class WalletFragmentMain : Fragment() {
                 response.has("transactions") &&
                 !response.isNull("transactions")) {
                 transactionsLastTimeUpdated = System.currentTimeMillis()
-                transactions = response.getJSONArray("transactions")
+                val transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
                 if (transactions.length() > prevTransactions) {
                     prevTransactions = transactions.length()
