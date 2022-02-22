@@ -21,18 +21,18 @@ class WalletActivity : AppCompatActivity() {
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
         //Check if wallet exists
-        val walletfile = File(baseContext.filesDir.toString() + "/pkt/wallet.db")
-        if (walletfile.exists()) {
-            val createfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
-            if (createfragment != null) {
+        val walletFile = File(baseContext.filesDir.toString() + "/pkt/wallet.db")
+        if (walletFile.exists()) {
+            val createFragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
+            if (createFragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide create fragment")
-                ft.hide(createfragment)
+                ft.hide(createFragment)
             }
         } else {
-            val mainfragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain)
-            if (mainfragment != null) {
+            val mainFragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain)
+            if (mainFragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide main fragment")
-                ft.hide(mainfragment)
+                ft.hide(mainFragment)
             }
         }
         ft.commit()
@@ -40,5 +40,19 @@ class WalletActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    fun switchToMain() {
+        val ft = supportFragmentManager.beginTransaction()
+        ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
+        val createFragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
+        val mainFragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain)
+        if ((createFragment != null) && (mainFragment != null)){
+            Log.i(LOGTAG, "WalletActivity switching from setup wallet to main wallet fragment")
+            ft.remove(createFragment)
+            ft.show(mainFragment)
+            ft.commit()
+            mainFragment.onResume()
+        }
     }
 }

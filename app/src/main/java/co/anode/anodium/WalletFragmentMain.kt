@@ -50,6 +50,15 @@ class WalletFragmentMain : Fragment() {
         }
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        //This is to cover the case where we show
+        // the fragment after closing the setup wallet
+        if (!hidden) {
+            h.postDelayed(getPldInfo,0)
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         if (this::h.isInitialized) {
@@ -61,19 +70,21 @@ class WalletFragmentMain : Fragment() {
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
-        h = Handler(Looper.getMainLooper())
         val context = requireContext()
         AnodeClient.eventLog(context,"Activity: WalletFragmentMain created")
-        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        val walletFile = File(context.filesDir.toString() + "/pkt/wallet.db")
-        if (!walletFile.exists()) {
-            return
-        }
+        h = Handler(Looper.getMainLooper())
+
         //Initialize handlers
         val service = ServiceVolley()
         apiController = APIController(service)
         refreshValues.init(v)
         getPldInfo.init(v)
+        statusBar = v.findViewById(R.id.textview_status)
+        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val walletFile = File(context.filesDir.toString() + "/pkt/wallet.db")
+        if (!walletFile.exists()) {
+            return
+        }
         //set PKT address from shared preferences
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
 
@@ -90,7 +101,7 @@ class WalletFragmentMain : Fragment() {
             val transactionsActivity = Intent(context, TransactionHistoryActivity::class.java)
             startActivityForResult(transactionsActivity, 0)
         }
-        statusBar = v.findViewById(R.id.textview_status)
+
         val sendPaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
         //Disable it while trying to unlock wallet
         sendPaymentButton.isEnabled = false
@@ -329,7 +340,10 @@ class WalletFragmentMain : Fragment() {
         params.put("coinbase", 1)
         statusBar.text = "Retrieving transactions..."
         apiController.post(apiController.getTransactionsURL, params) { response ->
-            if ((response != null) && (!response.has("error"))) {
+            if ((response != null) &&
+                !response.has("error") &&
+                response.has("transactions") &&
+                !response.isNull("transactions")) {
                 transactionsLastTimeUpdated = System.currentTimeMillis()
                 transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
