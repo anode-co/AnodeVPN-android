@@ -17,7 +17,7 @@ import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 
-class AnodeUtil(c: Context?) {
+object AnodeUtil {
     private val LOGTAG = "co.anode.anodium"
     var context: Context? = null
     var CJDNS_PATH = ""
@@ -33,7 +33,7 @@ class AnodeUtil(c: Context?) {
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
     private val clickInterval = 1000L
 
-    init {
+    fun init(c: Context) {
         context = c
         if (context != null)
             CJDNS_PATH = context!!.filesDir.toString()
@@ -87,6 +87,16 @@ class AnodeUtil(c: Context?) {
         launchCJDNS()
     }
 
+    fun stopPld() {
+        pld_pb.destroy()
+    }
+
+    fun deleteNeutrino() {
+        val neutrinoDB = File("data/data/co.anode.anodium/files/pkt/neutrino.db")
+        if (neutrinoDB.exists()) {
+            neutrinoDB.delete()
+        }
+    }
 
     fun initializeCjdrouteConfFile() {
         generateConfFile()
