@@ -13,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import lnrpc.Rpc.Transaction
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
