@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity() {
             //Get list of peering lines and add them as peers
             AnodeClient.GetPeeringLines().execute()
         }
-        initNotifications()
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -312,7 +312,7 @@ class MainActivity : AppCompatActivity() {
         }
         //Starting VPN Service
         startVPNService()
-
+        initNotifications()
         //Delete old APK files
         AnodeClient.deleteFiles(this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
         AnodeClient.downloadFails = 0
