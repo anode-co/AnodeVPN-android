@@ -40,6 +40,7 @@ class WalletFragmentMain : Fragment() {
     private var chainSyncLastShown: Long = 0
     private var wallletSyncLastShown: Long = 0
     private var passwordPromptActive = false
+    private var prevTransactions = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.walletfragment_main, container, false)
@@ -342,6 +343,7 @@ class WalletFragmentMain : Fragment() {
         }
     }
 
+
     /**
      *
      */
@@ -350,7 +352,6 @@ class WalletFragmentMain : Fragment() {
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
         val simpleDate = SimpleDateFormat("yyyy-MM-dd HH:mm")
         val context = requireContext()
-        var prevTransactions = 0
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
@@ -365,17 +366,22 @@ class WalletFragmentMain : Fragment() {
                 val transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
                 if (transactions.length() > prevTransactions) {
-                    //Check for new receiving txn for notification
-
-                    prevTransactions = transactions.length()
                     var tcount = transactions.length()
                     if (tcount > 25) {
                         tcount = 25
                     }
-
                     listsLayout.removeAllViews()
+                    //When we get one new transaction
+                    //and is a receiving one, push notification
+                    val lastAmount = transactions.getJSONObject(0).getString("amount").toLong()
+                    if (( prevTransactions+1 == transactions.length()) &&
+                        (lastAmount > 0)) {
+                        AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
+                    }
+
                     for (i in 0 until tcount) {
                         val transaction = transactions.getJSONObject(i)
+
                         //Add new line
                         val line = ConstraintLayout(context)
                         val numConfirmations = transaction.getInt("numConfirmations")
@@ -403,19 +409,19 @@ class WalletFragmentMain : Fragment() {
                         textAddress.id = View.generateViewId()
                         textAddress.textSize = textSize
                         //AMOUNT
-                        val amount = transaction.getString("amount").toLong()
                         val textAmount = TextView(context)
                         textAmount.id = View.generateViewId()
                         textAmount.textSize = textSize
-
+                        val amount = transaction.getString("amount").toLong()
+                        val amountStr = AnodeUtil.satoshisToPKT(amount)
                         if (amount < 0) {
                             val destAddress = transaction.getJSONArray("destAddresses").getString(0)
                             textAddress.text = "..." + destAddress.substring(destAddress.length - 4)
-                            textAmount.text = AnodeUtil.satoshisToPKT(amount)
+                            textAmount.text = amountStr
                             textAmount.setTextColor(Color.RED)
                         } else {
                             textAddress.text = "unknown"
-                            textAmount.text = "+" + AnodeUtil.satoshisToPKT(amount)
+                            textAmount.text = "+$amountStr"
                             textAmount.setTextColor(Color.BLACK)
                         }
 
@@ -486,6 +492,7 @@ class WalletFragmentMain : Fragment() {
                     if (transactions.length() > 25) {
                         v.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
                     }
+                    prevTransactions = transactions.length()
                 }
             } else if ((response != null) &&
                     response.has("message") &&
@@ -494,6 +501,7 @@ class WalletFragmentMain : Fragment() {
             } else {
                 statusBar.text = ""
             }
+
         }
     }
 

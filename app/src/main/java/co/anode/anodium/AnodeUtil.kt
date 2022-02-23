@@ -8,6 +8,8 @@ import android.security.keystore.KeyProperties
 import android.system.Os
 import android.util.Log
 import android.view.View
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import org.json.JSONObject
@@ -301,6 +303,21 @@ object AnodeUtil {
         }
     }
 
+    fun pushNotification(title: String, text: String) {
+        val CHANNEL_ID = "anodium_channel_01"
+        if (context != null) {
+            var builder = NotificationCompat.Builder(context!!, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_logo_foreground)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            with(NotificationManagerCompat.from(context!!)) {
+                // notificationId is a unique int for each notification that you must define
+                val notificationId = 1
+                notify(notificationId, builder.build())
+            }
+        }
+    }
     /**
      * Stores a password to
      * ecnrypted shared preferences
