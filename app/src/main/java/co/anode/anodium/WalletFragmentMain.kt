@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,7 +21,6 @@ import androidx.fragment.app.Fragment
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -37,6 +37,8 @@ class WalletFragmentMain : Fragment() {
     lateinit var h: Handler
     private var balanceLastTimeUpdated: Long = 0
     private var transactionsLastTimeUpdated: Long = 0
+    private var chainSyncLastShown: Long = 0
+    private var wallletSyncLastShown: Long = 0
     private var passwordPromptActive = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -137,7 +139,10 @@ class WalletFragmentMain : Fragment() {
                     response.getJSONObject("wallet").has("currentHeight")) {
                     walletUnlocked = true
                 }
-                if (response.has("neutrino") && !response.isNull("neutrino") && response.getJSONObject("neutrino").has("height")) {
+                if (((System.currentTimeMillis() - 5000) > chainSyncLastShown) &&
+                    response.has("neutrino") &&
+                    !response.isNull("neutrino") &&
+                    response.getJSONObject("neutrino").has("height")) {
                     val neutrino = response.getJSONObject("neutrino")
                     if (neutrino.has("peers")) {
                         val peers = neutrino.getJSONArray("peers")
@@ -146,14 +151,27 @@ class WalletFragmentMain : Fragment() {
                             val neutrinoHeight = neutrino.getInt("height")
                             //If neutrino current height is close to last block then we can try to unlock
                             //otherwise we will wait
+                            chainSyncLastShown = System.currentTimeMillis()
                             if (neutrinoTop < (neutrinoHeight + 20)) {
                                 neutrinoSynced = true
                                 statusBar.text = "Chain synced"
                             } else {
                                 neutrinoSynced = false
-                                statusBar.text = "Syncing: $neutrinoHeight out of $neutrinoTop. Please wait"
+                                statusBar.text = "Chain syncing: $neutrinoHeight out of $neutrinoTop. Please wait"
                             }
                         }
+                    }
+                } else if (response.has("wallet") &&
+                        !response.isNull("wallet")) {
+                    val wallet = response.getJSONObject("wallet")
+                    val walletHeight = wallet.getInt("currentHeight")
+                    val walletSyncTo = wallet.getJSONObject("walletStats").getInt("syncTo")
+                    if (walletSyncTo == 0) {
+                        neutrinoSynced = true
+                        statusBar.text = "Wallet at height: $walletHeight"
+                    } else {
+                        neutrinoSynced = false
+                        statusBar.text = "Wallet syncing: $walletHeight to $walletSyncTo. Please wait"
                     }
                 }
                 //Keep getting updates
@@ -314,13 +332,13 @@ class WalletFragmentMain : Fragment() {
                 if (json.has("totalBalance")) {
                     walletBalance.text = AnodeUtil.satoshisToPKT(json.getString("totalBalance").toLong())
                     balanceLastTimeUpdated = System.currentTimeMillis()
-                } else {
-                    //getBalance(v, a)
+                } else if (response.has("message") &&
+                        !response.isNull("message")) {
+                    statusBar.text = response.getString("message")
                 }
             } else {
-                //getBalance(v, a)
+                statusBar.text = ""
             }
-            statusBar.text = ""
         }
     }
 
@@ -330,13 +348,14 @@ class WalletFragmentMain : Fragment() {
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     private fun getWalletTransactions(v: View) {
         val listsLayout = v.findViewById<LinearLayout>(R.id.paymentsList)
-        val simpleDate = SimpleDateFormat("dd/MM/yyyy")
+        val simpleDate = SimpleDateFormat("yyyy-MM-dd HH:mm")
         val context = requireContext()
         var prevTransactions = 0
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
         statusBar.text = "Retrieving transactions..."
+        val textSize = 15.0f
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
@@ -346,138 +365,135 @@ class WalletFragmentMain : Fragment() {
                 val transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
                 if (transactions.length() > prevTransactions) {
+                    //Check for new receiving txn for notification
+
                     prevTransactions = transactions.length()
                     var tcount = transactions.length()
                     if (tcount > 25) {
                         tcount = 25
                     }
 
-                    activity?.runOnUiThread {
-                        listsLayout.removeAllViews()
-                        for (i in 0 until tcount) {
-                            val transaction = transactions.getJSONObject(i)
+                    listsLayout.removeAllViews()
+                    for (i in 0 until tcount) {
+                        val transaction = transactions.getJSONObject(i)
+                        //Add new line
+                        val line = ConstraintLayout(context)
+                        val numConfirmations = transaction.getInt("numConfirmations")
+                        line.setOnClickListener {
+                            val transactionDetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
+                            val bundle = Bundle()
+                            bundle.putString("txid", transaction.getString("txHash"))
+                            bundle.putLong("amount", transaction.getString("amount").toLong())
+                            bundle.putInt("blockheight", transaction.getInt("blockHeight"))
+                            bundle.putString("blockhash", transaction.getString("blockHash"))
+                            transactionDetailsFragment.arguments = bundle
+                            transactionDetailsFragment.show(requireActivity().supportFragmentManager, "")
+                        }
+                        line.id = i
+                        //line.orientation = LinearLayout.HORIZONTAL
+                        val llParams = ConstraintLayout.LayoutParams(
+                            ConstraintLayout.LayoutParams.MATCH_PARENT,
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        line.layoutParams = llParams
+                        line.setPadding(20, 20, 10, 20)
 
-                            //Add new line
-                            val line = ConstraintLayout(context)
-                            line.setOnClickListener {
-                                val transactiondetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
-                                val bundle = Bundle()
-                                bundle.putString("txid", transaction.getString("txHash"))
-                                /*
-                                for (a in 0 until transaction.getJSONArray("dest_addresses")
-                                    .length()) {
-                                    //Remove any addresses that are from the same wallet
-                                    if (!myAddresses.contains(
-                                            transaction.getJSONArray("dest_addresses")
-                                                .getString(a)
-                                        )
-                                    ) {
-                                        bundle.putString(
-                                            "address$a",
-                                            transaction.getJSONArray("dest_addresses")
-                                                .getString(a)
-                                        )
-                                    }
-                                }*/
-                                bundle.putLong("amount", transaction.getString("amount").toLong())
-                                bundle.putInt("blockheight", transaction.getInt("blockHeight"))
-                                bundle.putString("blockhash", transaction.getString("blockHash"))
-                                //Do not include confirmations
-                                //bundle.putInt("confirmations", transactions[i].numConfirmations)
-                                transactiondetailsFragment.arguments = bundle
-                                transactiondetailsFragment.show(requireActivity().supportFragmentManager, "")
-                            }
-                            line.id = i
-                            //line.orientation = LinearLayout.HORIZONTAL
-                            val llParams = ConstraintLayout.LayoutParams(
-                                ConstraintLayout.LayoutParams.MATCH_PARENT,
-                                ConstraintLayout.LayoutParams.WRAP_CONTENT
-                            )
-                            line.layoutParams = llParams
-                            line.setPadding(10, 20, 10, 20)
+                        //ADDRESS
+                        val textAddress = TextView(context)
+                        textAddress.id = View.generateViewId()
+                        textAddress.textSize = textSize
+                        //AMOUNT
+                        val amount = transaction.getString("amount").toLong()
+                        val textAmount = TextView(context)
+                        textAmount.id = View.generateViewId()
+                        textAmount.textSize = textSize
 
-                            //ADDRESS
-                            val textAddress = TextView(context)
-                            textAddress.id = View.generateViewId()
-                            textAddress.width = 350
-
-                            //In/Out Icon
-                            val icon = ImageView(context)
-                            icon.id = View.generateViewId()
-                            val amount = transaction.getString("amount").toLong()
-
-                            if (amount < 0) {
-                                icon.setBackgroundResource(R.drawable.ic_baseline_arrow_upward_24)
-                                val destAddress = transaction.getJSONArray("destAddresses").getString(0)
-                                textAddress.text = destAddress.substring(0, 6) + "..." + destAddress.substring(destAddress.length - 8)
-                            } else {
-                                icon.setBackgroundResource(R.drawable.ic_baseline_arrow_downward_24)
-                                textAddress.text = ""
-                                //If address is same as our address get next one
-                                /*if (transactions[i].destAddressesList[0] == myaddress) {
-                                textaddress.text =
-                                    transactions[i].destAddressesList[1].substring(0,6) + "..." + transactions[i].destAddressesList[1].substring(
-                                        transactions[i].destAddressesList[0].length - 8)
-                            } else {
-                                //Show first address
-                                textaddress.text =
-                                    transactions[i].destAddressesList[0].substring(0,6) + "..." + transactions[i].destAddressesList[1].substring(
-                                        transactions[i].destAddressesList[0].length - 8)
-                            }*/
-                            }
-                            line.addView(textAddress)
-                            line.addView(icon)
-                            //AMOUNT
-                            val textAmount = TextView(context)
-                            textAmount.id = View.generateViewId()
-                            textAmount.width = 350
+                        if (amount < 0) {
+                            val destAddress = transaction.getJSONArray("destAddresses").getString(0)
+                            textAddress.text = "..." + destAddress.substring(destAddress.length - 4)
                             textAmount.text = AnodeUtil.satoshisToPKT(amount)
-                            line.addView(textAmount)
-                            //DATE
-                            val textDate = TextView(context)
-                            textDate.id = View.generateViewId()
-                            textDate.text = simpleDate.format(Date(transaction.getString("timeStamp").toLong() * 1000))
-                            line.addView(textDate)
-                            val set = ConstraintSet()
-                            set.clear(textAddress.id)
-                            set.clear(icon.id)
-                            set.clear(textAmount.id)
-                            set.clear(textDate.id)
-                            //address with start
-                            set.connect(textAddress.id, ConstraintSet.START, line.id, ConstraintSet.START, 10)
-                            //date with end
-                            set.connect(textDate.id, ConstraintSet.END, line.id, ConstraintSet.END, 10)
-                            //address with icon
-                            set.connect(icon.id, ConstraintSet.START, textAddress.id, ConstraintSet.END, 0)
-                            set.connect(textAddress.id, ConstraintSet.END, icon.id, ConstraintSet.START, 0)
-                            //icon with amount
-                            set.connect(textAmount.id, ConstraintSet.START, icon.id, ConstraintSet.END, 0)
-                            set.connect(icon.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 0)
-                            //amount with date
-                            set.connect(textDate.id,ConstraintSet.START,textAmount.id,ConstraintSet.END, 0 )
-                            set.connect(textAmount.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
-                            val chainViews = intArrayOf(textAddress.id, textDate.id)
-                            val chainWeights = floatArrayOf(0f, 0f)
-                            set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
-                            set.constrainWidth(textAddress.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainWidth(textAmount.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainWidth(textDate.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainHeight(textAddress.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainHeight(textAmount.id, ConstraintSet.WRAP_CONTENT)
-                            set.constrainHeight(textDate.id, ConstraintSet.WRAP_CONTENT)
-                            set.applyTo(line)
-                            listsLayout.addView(line)
+                            textAmount.setTextColor(Color.RED)
+                        } else {
+                            textAddress.text = "unknown"
+                            textAmount.text = "+" + AnodeUtil.satoshisToPKT(amount)
+                            textAmount.setTextColor(Color.BLACK)
                         }
-                        //If more than 25 transactions show link to older transactions activity
-                        if (transactions.length() > 25) {
-                            v.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
+
+                        //DATE
+                        val textDate = TextView(context)
+                        textDate.id = View.generateViewId()
+                        textDate.text = simpleDate.format(Date(transaction.getString("timeStamp").toLong() * 1000))
+                        textDate.textSize = textSize
+                        //Add columns
+                        //confirmations indicator
+                        val icon = ImageView(context)
+                        icon.id = View.generateViewId()
+                        if (numConfirmations == 1) {
+                            icon.setBackgroundResource(R.drawable.clock1)
+                        } else if (numConfirmations == 2) {
+                            icon.setBackgroundResource(R.drawable.clock2)
+                        } else if (numConfirmations == 3) {
+                            icon.setBackgroundResource(R.drawable.clock3)
+                        } else if (numConfirmations == 4) {
+                            icon.setBackgroundResource(R.drawable.clock4)
+                        } else if (numConfirmations == 5) {
+                            icon.setBackgroundResource(R.drawable.clock5)
+                        }else if (numConfirmations > 5) {
+                            icon.setBackgroundResource(R.drawable.confirmed)
                         }
+                        line.addView(icon)
+                        //Date
+                        line.addView(textDate)
+                        //Amount
+                        line.addView(textAmount)
+                        //Last 4 digits of address
+                        line.addView(textAddress)
+
+                        val set = ConstraintSet()
+                        set.clear(icon.id)
+                        set.clear(textDate.id)
+                        set.clear(textAmount.id)
+                        set.clear(textAddress.id)
+                        //icon on start
+                        set.connect(icon.id, ConstraintSet.START, line.id, ConstraintSet.START, 20)
+                        //date with icon
+                        set.connect(textDate.id, ConstraintSet.START, icon.id, ConstraintSet.END, 20)
+                        set.connect(icon.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 20)
+                        //amount with date
+                        set.connect(textAmount.id, ConstraintSet.START, textDate.id, ConstraintSet.END, 20)
+                        set.connect(textDate.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 20)
+                        //address with amount
+                        set.connect(textAddress.id,ConstraintSet.START, textAmount.id,ConstraintSet.END, 20 )
+                        set.connect(textAmount.id, ConstraintSet.END, textAddress.id, ConstraintSet.START, 20)
+                        //address with end
+                        set.connect(textAddress.id, ConstraintSet.END, line.id, ConstraintSet.END, 20)
+                        val chainViews = intArrayOf(textDate.id, textAmount.id, textAddress.id)
+                        val chainWeights = floatArrayOf(0f, 0f, 0f)
+                        set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
+                        set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainWidth(textDate.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(textDate.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainWidth(textAmount.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(textAmount.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainWidth(textAddress.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(textAddress.id, ConstraintSet.WRAP_CONTENT)
+                        set.applyTo(line)
+                        //Add lines
+                        listsLayout.addView(line)
+                    }
+                    //If more than 25 transactions show link to older transactions activity
+                    if (transactions.length() > 25) {
+                        v.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
                     }
                 }
+            } else if ((response != null) &&
+                    response.has("message") &&
+                    !response.isNull("message")) {
+                statusBar.text = response.getString("message")
+            } else {
+                statusBar.text = ""
             }
-            statusBar.text = ""
         }
     }
 
