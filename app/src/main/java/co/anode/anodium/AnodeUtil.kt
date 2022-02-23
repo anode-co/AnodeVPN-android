@@ -153,7 +153,7 @@ object AnodeUtil {
             Log.e(LOGTAG, "Launching pld (file size: " +
                     File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLD_BINFILE","--no-macaroons","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
+            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
                     .redirectOutput(File(CJDNS_PATH, PLD_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = CJDNS_PATH
