@@ -279,25 +279,25 @@ object AnodeUtil {
         val nPKT  = 1.073741824F
         if (amount > 1000000000) {
             amount /= onePKT
-            return "PKT %.2f".format(amount)
+            return "%.2f PKT".format(amount)
         } else if (amount > 1000000) {
             amount /= mPKT
-            return "mPKT %.2f".format(amount)
+            return "%.2f mPKT".format(amount)
         } else if (amount > 1000) {
             amount /= uPKT
-            return "μPKT %.2f".format(amount)
+            return "%.2f μPKT".format(amount)
         } else if (amount < 1000000000) {
             amount /= onePKT
-            return "PKT %.2f".format(amount)
+            return "%.2f PKT".format(amount)
         } else if (amount < 1000000) {
             amount /= mPKT
-            return "mPKT %.2f".format(amount)
+            return "%.2f mPKT".format(amount)
         } else if (amount < 1000) {
             amount /= uPKT
-            return "μPKT %.2f".format(amount)
+            return "%.2f μPKT".format(amount)
         } else {
             amount /= nPKT
-            return "nPKT %.2f".format(amount)
+            return "%.2f nPKT".format(amount)
         }
     }
 
