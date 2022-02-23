@@ -38,7 +38,6 @@ class WalletFragmentMain : Fragment() {
     private var balanceLastTimeUpdated: Long = 0
     private var transactionsLastTimeUpdated: Long = 0
     private var chainSyncLastShown: Long = 0
-    private var wallletSyncLastShown: Long = 0
     private var passwordPromptActive = false
     private var prevTransactions = 0
 
@@ -259,7 +258,7 @@ class WalletFragmentMain : Fragment() {
      * Create alert dialog that prompts user to enter wallet password
      * and save it in encrypted shared preferences
      *
-     * @param AnodeUtil
+     * @param v View
      */
     private fun promptUserPassword(v: View) {
         var password: String
@@ -276,7 +275,7 @@ class WalletFragmentMain : Fragment() {
         input.layoutParams = lp
         if (builder != null) {
             builder.setView(input)
-            input.transformationMethod = PasswordTransformationMethod.getInstance();
+            input.transformationMethod = PasswordTransformationMethod.getInstance()
             builder.setPositiveButton("Submit",
                 DialogInterface.OnClickListener { dialog, _ ->
                     password = input.text.toString()
@@ -306,7 +305,7 @@ class WalletFragmentMain : Fragment() {
     /**
      * Update layout elements to indicate that wallet is unlocked
      *
-     * @param View
+     * @param v View
      */
     private fun updateUiWalletUnlocket(v: View) {
         statusBar.text = "Wallet unlocked"
@@ -320,8 +319,7 @@ class WalletFragmentMain : Fragment() {
      * If it fails will keep trying...
      * On success it will update the screen
      *
-     * @param View
-     * @param AnodeUtil
+     * @param v View
      */
     private fun getBalance(v: View) {
         statusBar.text = "Retrieving wallet balance..."
@@ -464,17 +462,17 @@ class WalletFragmentMain : Fragment() {
                         set.connect(icon.id, ConstraintSet.START, line.id, ConstraintSet.START, 20)
                         //date with icon
                         set.connect(textDate.id, ConstraintSet.START, icon.id, ConstraintSet.END, 20)
-                        set.connect(icon.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 20)
+//                        set.connect(icon.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
                         //amount with date
-                        set.connect(textAmount.id, ConstraintSet.START, textDate.id, ConstraintSet.END, 20)
-                        set.connect(textDate.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 20)
+                        set.connect(textAmount.id, ConstraintSet.START, textDate.id, ConstraintSet.END, 0)
+//                        set.connect(textDate.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 0)
                         //address with amount
-                        set.connect(textAddress.id,ConstraintSet.START, textAmount.id,ConstraintSet.END, 20 )
-                        set.connect(textAmount.id, ConstraintSet.END, textAddress.id, ConstraintSet.START, 20)
+//                        set.connect(textAddress.id,ConstraintSet.START, textAmount.id,ConstraintSet.END, 0 )
+                        set.connect(textAmount.id, ConstraintSet.END, textAddress.id, ConstraintSet.START, 0)
                         //address with end
                         set.connect(textAddress.id, ConstraintSet.END, line.id, ConstraintSet.END, 20)
-                        val chainViews = intArrayOf(textDate.id, textAmount.id, textAddress.id)
-                        val chainWeights = floatArrayOf(0f, 0f, 0f)
+                        val chainViews = intArrayOf( textDate.id, textAmount.id)
+                        val chainWeights = floatArrayOf(0f, 0f)
                         set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
                         set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
                         set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
