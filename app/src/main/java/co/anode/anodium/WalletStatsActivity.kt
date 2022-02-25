@@ -163,7 +163,7 @@ class WalletStatsActivity : AppCompatActivity() {
                         queriesList.add("Server: " + query.getString("peer"))
                         queriesList.add("Request: " + query.getString("command"))
                         queriesList.add("Created: " + query.getString("createTime"))
-                        if (query.getLong("last_response_time") > 0) {
+                        if (query.getLong("lastResponseTime") > 0) {
                             val datetime = Date(query.getLong("lastResponseTime"))
                             queriesList.add("Waiting since: $datetime")
                         } else {
