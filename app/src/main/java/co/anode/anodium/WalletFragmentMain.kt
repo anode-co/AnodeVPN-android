@@ -40,6 +40,7 @@ class WalletFragmentMain : Fragment() {
     private var chainSyncLastShown: Long = 0
     private var passwordPromptActive = false
     private var prevTransactions = 0
+    private var updateConfirmations = arrayListOf<Boolean>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.walletfragment_main, container, false)
@@ -355,6 +356,7 @@ class WalletFragmentMain : Fragment() {
         params.put("coinbase", 1)
         statusBar.text = "Retrieving transactions..."
         val textSize = 15.0f
+
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
@@ -363,7 +365,8 @@ class WalletFragmentMain : Fragment() {
                 transactionsLastTimeUpdated = System.currentTimeMillis()
                 val transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
-                if (transactions.length() > prevTransactions) {
+                if ((transactions.length() > prevTransactions) || updateConfirmations.contains(true)){
+                    updateConfirmations.clear()
                     var tcount = transactions.length()
                     if (tcount > 25) {
                         tcount = 25
@@ -379,7 +382,6 @@ class WalletFragmentMain : Fragment() {
 
                     for (i in 0 until tcount) {
                         val transaction = transactions.getJSONObject(i)
-
                         //Add new line
                         val line = ConstraintLayout(context)
                         val numConfirmations = transaction.getInt("numConfirmations")
@@ -432,18 +434,28 @@ class WalletFragmentMain : Fragment() {
                         //confirmations indicator
                         val icon = ImageView(context)
                         icon.id = View.generateViewId()
-                        if (numConfirmations == 1) {
+                        if (numConfirmations == 0) {
+                            //TODO: update to hourglass or gears
+                            icon.setBackgroundResource(R.drawable.unconfirmed)
+                            updateConfirmations.add(true)
+                        }else if (numConfirmations == 1) {
                             icon.setBackgroundResource(R.drawable.clock1)
+                            updateConfirmations.add(true)
                         } else if (numConfirmations == 2) {
                             icon.setBackgroundResource(R.drawable.clock2)
+                            updateConfirmations.add(true)
                         } else if (numConfirmations == 3) {
                             icon.setBackgroundResource(R.drawable.clock3)
+                            updateConfirmations.add(true)
                         } else if (numConfirmations == 4) {
                             icon.setBackgroundResource(R.drawable.clock4)
+                            updateConfirmations.add(true)
                         } else if (numConfirmations == 5) {
                             icon.setBackgroundResource(R.drawable.clock5)
+                            updateConfirmations.add(true)
                         }else if (numConfirmations > 5) {
                             icon.setBackgroundResource(R.drawable.confirmed)
+                            updateConfirmations.add(false)
                         }
                         line.addView(icon)
                         //Date
