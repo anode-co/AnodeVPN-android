@@ -78,7 +78,7 @@
     <string name="wallet_activity_title">PKT Wallet</string>
     <string name="wallet_balance">Wallet Balance</string>
     <string name="wallet_address">My PKT wallet address</string>
-    <string name="wallet_payments">Payments</string>
+    <string name="wallet_payments">Transactions</string>
     <string name="wallet_see_history">Older transactions</string>
     <string name="wallet_coin">PKT</string>
     <string name="action_older_transactions">Transactions</string>

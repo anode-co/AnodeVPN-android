@@ -40,7 +40,7 @@ class ServiceVolley : ServiceInterface {
             },
             Response.ErrorListener { error ->
                 VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
-                if ((error.networkResponse != null) && (error.networkResponse.data != null )) {
+                if ((error.networkResponse != null) && (error.networkResponse.data != null)) {
                     val errorString = String(error.networkResponse.data)
                     val jsonError = JSONObject()
                     jsonError.put("error", errorString)
@@ -57,11 +57,11 @@ class ServiceVolley : ServiceInterface {
             }
         }
         //Increase timeout when we are creating a wallet
-        if (url.contains("wallet/create")) {
+        if ((url.contains("wallet/create")) || (url.contains("sendfrom"))) {
             jsonObjReq.retryPolicy = DefaultRetryPolicy(40000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         } else if (url.contains("wallet/unlock")) {
             jsonObjReq.retryPolicy = DefaultRetryPolicy(15000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-        } else {
+        } else{
             jsonObjReq.retryPolicy = DefaultRetryPolicy(4000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         }
         BackendVolley.instance?.addToRequestQueue(jsonObjReq, TAG)
