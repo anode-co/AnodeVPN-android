@@ -52,7 +52,7 @@
                 android:ems="10"
                 android:layout_marginStart="@dimen/editfield_margin"
                 android:layout_marginEnd="@dimen/editfield_margin"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:hint="@string/send_pkt_amount"
                 android:layout_above="@+id/paymentpasswordLayout"
                 android:layout_marginBottom="20dp"

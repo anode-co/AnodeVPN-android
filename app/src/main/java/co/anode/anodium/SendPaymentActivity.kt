@@ -54,7 +54,6 @@ class SendPaymentActivity : AppCompatActivity() {
                         Toast.makeText(applicationContext, "PKT address is invalid", Toast.LENGTH_SHORT).show()
                     } else {
                         ignoreTextChanged = true
-                        address.setText(trimmedAddress?.value!!)
                     }
                 } else {
                     ignoreTextChanged = true
@@ -94,7 +93,7 @@ class SendPaymentActivity : AppCompatActivity() {
                 val params = JSONObject()
                 //Exclude mining transactions
                 params.put("to_address", address.text.toString())
-                params.put("amount", amount.text.toString().toLong())
+                params.put("amount", amount.text.toString().toFloat())
                 val fromAddresses = JSONArray()
                 fromAddresses.put(myPKTAddress)
                 params.put("from_address", fromAddresses)
