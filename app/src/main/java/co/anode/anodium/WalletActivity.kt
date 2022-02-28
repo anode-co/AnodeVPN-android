@@ -42,6 +42,11 @@ class WalletActivity : AppCompatActivity() {
         return true
     }
 
+    fun transactionDetailsClosed(line: Int) {
+        val mainFragment = (supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain) as WalletFragmentMain)
+        mainFragment.clearLines(line)
+    }
+
     fun switchToMain() {
         val ft = supportFragmentManager.beginTransaction()
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)

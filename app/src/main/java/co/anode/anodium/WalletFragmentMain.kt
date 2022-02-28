@@ -29,7 +29,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class WalletFragmentMain : Fragment() {
     lateinit var statusBar: TextView
     lateinit var statusIcon: ImageView
@@ -199,6 +198,8 @@ class WalletFragmentMain : Fragment() {
                     !response.isNull("wallet") &&
                     response.getJSONObject("wallet").has("currentHeight")) {
                     walletUnlocked = true
+                } else {
+                    walletUnlocked = false
                 }
                 if (((System.currentTimeMillis() - refreshPldInterval) > chainSyncLastShown) &&
                     response.has("neutrino") &&
@@ -249,6 +250,7 @@ class WalletFragmentMain : Fragment() {
     private fun unlockWallet(v: View) {
         Log.i(LOGTAG, "Trying to unlock wallet")
         statusBar.text = getString(R.string.wallet_status_unlocking)
+        statusIcon.setBackgroundResource(0)
         //Get encrypted password
         val walletPassword = AnodeUtil.getPasswordFromEncSharedPreferences()
         //If password is empty prompt user to enter new password
@@ -360,6 +362,7 @@ class WalletFragmentMain : Fragment() {
      */
     private fun updateUiWalletUnlocket(v: View) {
         statusBar.text = getString(R.string.wallet_status_unlock)
+        statusIcon.setBackgroundResource(0)
         val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
         activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
         v.findViewById<Button>(R.id.button_sendPayment).isEnabled = true
@@ -385,6 +388,7 @@ class WalletFragmentMain : Fragment() {
                 } else if (response.has("message") &&
                         !response.isNull("message")) {
                     statusBar.text = response.getString("message")
+                    statusIcon.setBackgroundResource(0)
                 }
             } else {
 //                statusBar.text = ""
@@ -392,6 +396,14 @@ class WalletFragmentMain : Fragment() {
         }
     }
 
+    /**
+     * reset background color on tx line
+     * when returning from txns details
+     */
+    fun clearLines(lineID: Int) {
+        val l = requireView().findViewWithTag<ConstraintLayout>("TxLine$lineID")
+        l?.setBackgroundColor(Color.WHITE)
+    }
 
     /**
      * get Transactions
@@ -404,7 +416,6 @@ class WalletFragmentMain : Fragment() {
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
-//        statusBar.text = "Retrieving transactions..."
         val textSize = 15.0f
 
         apiController.post(apiController.getTransactionsURL, params) { response ->
@@ -449,18 +460,17 @@ class WalletFragmentMain : Fragment() {
                                 bundle.putString("address", destAddress)
                             }
                             bundle.putInt("confirmations", numConfirmations)
+                            bundle.putInt("lineID", i)
                             transactionDetailsFragment.arguments = bundle
                             transactionDetailsFragment.show(requireActivity().supportFragmentManager, "")
+                            line.setBackgroundColor(Color.GRAY)
                         }
                         line.id = i
+                        line.tag = "TxLine$i"
                         //line.orientation = LinearLayout.HORIZONTAL
-                        val llParams = ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.MATCH_PARENT,
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT
-                        )
+                        val llParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
                         line.layoutParams = llParams
                         line.setPadding(20, 20, 10, 20)
-
                         //ADDRESS
                         val textAddress = TextView(context)
                         textAddress.id = View.generateViewId()
@@ -469,9 +479,7 @@ class WalletFragmentMain : Fragment() {
                         val textAmount = TextView(context)
                         textAmount.id = View.generateViewId()
                         textAmount.textSize = textSize
-
                         if (amount < 0) {
-
                             textAddress.text = "..." + destAddress.substring(destAddress.length - 4)
                             textAmount.text = amountStr
                             textAmount.setTextColor(Color.RED)
@@ -480,7 +488,6 @@ class WalletFragmentMain : Fragment() {
                             textAmount.text = "+$amountStr"
                             textAmount.setTextColor(Color.BLACK)
                         }
-
                         //DATE
                         val textDate = TextView(context)
                         textDate.id = View.generateViewId()
@@ -562,14 +569,10 @@ class WalletFragmentMain : Fragment() {
             } else if ((response != null) &&
                     response.has("message") &&
                     !response.isNull("message")) {
-//                statusBar.text = response.getString("message")
-            } else {
-//                statusBar.text = ""
+                Log.d(LOGTAG, response.getString("message"))
             }
-
         }
     }
-
     private val getPldInfo = object : Runnable {
         lateinit var v: View
 
@@ -586,7 +589,6 @@ class WalletFragmentMain : Fragment() {
             }
         }
     }
-
     private val refreshValues = object : Runnable {
         lateinit var v: View
 
@@ -604,6 +606,8 @@ class WalletFragmentMain : Fragment() {
                 if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
                     getWalletTransactions(v)
                 }
+            } else {
+                unlockWallet(v)
             }
         }
     }
