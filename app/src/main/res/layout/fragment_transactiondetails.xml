@@ -37,7 +37,7 @@
             android:textSize="9pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintBottom_toTopOf="@+id/trdetails_amount"
-            android:text="sample tx hash"/>
+            android:text=""/>
         <TextView
             android:id="@+id/trdetails_amount_label"
             android:layout_width="wrap_content"
@@ -54,7 +54,7 @@
             android:textSize="9pt"
             app:layout_constraintStart_toEndOf="@+id/trdetails_amount_label"
             app:layout_constraintBottom_toTopOf="@+id/trdetails_addr"
-            android:text="PKT 10.00"/>
+            android:text=""/>
         <TextView
             android:id="@+id/trdetails_addr_label"
             android:layout_width="wrap_content"
@@ -70,7 +70,7 @@
             android:textSize="9pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintBottom_toTopOf="@+id/trdetails_block_label"
-            android:text="address"/>
+            android:text=""/>
         <TextView
             android:id="@+id/trdetails_block_label"
             android:layout_width="wrap_content"
@@ -88,14 +88,14 @@
             android:textSize="9pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintBottom_toBottomOf="@+id/trdetails_block_label"
-            android:text="456789"/>
-        <!--<TextView
+            android:text=""/>
+        <TextView
             android:id="@+id/trdetails_confirmations"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="9pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintTop_toBottomOf="@+id/trdetails_block"
-            android:text="123"/>-->
+            android:text=""/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
