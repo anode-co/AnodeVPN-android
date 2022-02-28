@@ -116,4 +116,12 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_wallet_info">WalletInfoActivity</string>
+
+    <!--Wallet Status messages-->
+    <string name="wallet_status_disconnected">Disconnected</string>
+    <string name="wallet_status_syncing_headers">Syncing headers:</string>
+    <string name="wallet_status_synced">Next</string>
+    <string name="wallet_status_warning">Block:</string>
+    <string name="wallet_status_unlocking">Trying to unlock wallet...</string>
+    <string name="wallet_status_unlock">Wallet unlocked</string>
 </resources>
