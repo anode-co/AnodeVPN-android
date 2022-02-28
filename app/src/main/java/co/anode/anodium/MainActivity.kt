@@ -260,9 +260,8 @@ class MainActivity : AppCompatActivity() {
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         prefs.edit().putBoolean("lndwalletopened", false).apply()
-
         AnodeUtil.init(applicationContext)
-
+        AnodeClient.mycontext = applicationContext
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
@@ -284,8 +283,7 @@ class MainActivity : AppCompatActivity() {
         //Initialize App
         AnodeUtil.initializeApp()
         AnodeUtil.launch()
-        //Initialize AnodeClient
-        AnodeClient.mycontext = this
+
         AnodeClient.statustv = findViewById(R.id.textview_status)
         AnodeClient.connectButton = findViewById(R.id.buttonconnectvpns)
         AnodeClient.mainActivity = this
