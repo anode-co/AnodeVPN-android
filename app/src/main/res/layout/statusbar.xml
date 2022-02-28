@@ -5,13 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/layout_statusbar">
+    <ImageView
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginTop="5dp"
+        android:id="@+id/status_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="20dp" />
     <TextView
         android:id="@+id/textview_status"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
+        android:layout_marginStart="-30dp"
+        app:layout_constraintStart_toEndOf="@+id/status_icon"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:gravity="center"
-        android:textColor="@color/colorPrimaryDarkText"
-        />
+        android:textColor="@color/colorPrimaryDarkText" />
 </androidx.constraintlayout.widget.ConstraintLayout>
