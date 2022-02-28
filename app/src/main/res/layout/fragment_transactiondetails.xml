@@ -15,12 +15,12 @@
             android:id="@+id/trdetails_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12pt"
+            android:textSize="10pt"
             android:text="Transaction details"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/trdetails_txid_label"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="10dp"/>
         <TextView
             android:id="@+id/trdetails_txid_label"
             android:layout_width="wrap_content"
@@ -33,7 +33,6 @@
             android:id="@+id/trdetails_txid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:textSize="9pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintBottom_toTopOf="@+id/trdetails_amount"
@@ -67,7 +66,7 @@
             android:id="@+id/trdetails_addr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="9pt"
+            android:textSize="8pt"
             app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
             app:layout_constraintBottom_toTopOf="@+id/trdetails_block_label"
             android:text=""/>
@@ -77,8 +76,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="20dp"
-            android:layout_marginBottom="50dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/trdetails_confirmations"
             android:textSize="9pt"
             android:text="Block"/>
         <TextView
@@ -94,8 +92,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="9pt"
-            app:layout_constraintStart_toStartOf="@+id/trdetails_amount"
+            app:layout_constraintStart_toStartOf="@+id/trdetails_block_label"
             app:layout_constraintTop_toBottomOf="@+id/trdetails_block"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="10dp"
             android:text=""/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

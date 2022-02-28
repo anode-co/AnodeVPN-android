@@ -1,6 +1,7 @@
 package co.anode.anodium
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -12,6 +13,7 @@ import androidx.core.text.HtmlCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class TransactionDetailsFragment : BottomSheetDialogFragment(){
+    var lineID = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -41,6 +43,7 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         val block = v.findViewById<TextView>(R.id.trdetails_block)
         val bheight = requireArguments().getInt("blockheight")
         val bhash = requireArguments().getString("blockhash")
+        lineID = requireArguments().getInt("lineID")
         val confirmations = v.findViewById<TextView>(R.id.trdetails_confirmations)
         if (bheight>0) {
             val blockLink: Spanned = HtmlCompat.fromHtml("<a href='https://explorer.pkt.cash/block/$bhash'>$bheight</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -58,6 +61,11 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         txidlink.movementMethod = LinkMovementMethod.getInstance()
         txidlink.text = transactionlink
         return v
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        (activity as WalletActivity).transactionDetailsClosed(lineID)
+        super.onDismiss(dialog)
     }
 
     companion object {
