@@ -46,6 +46,8 @@ class ServiceVolley : ServiceInterface {
                     jsonError.put("error", errorString)
                     completionHandler(jsonError)
                 } else {
+                    val jsonError = JSONObject()
+                    jsonError.put("error", "unknown")
                     completionHandler(JSONObject("{}"))
                 }
             }) {
