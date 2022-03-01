@@ -47,6 +47,7 @@
     <string name="label_forgotpassword">"To recover your password\nenter your email"</string>
     <string name="label_newpassword">"Enter a new password"</string>
     <string name="action_continue">Continue</string>
+    <string name="action_next">Next</string>
     <string name="label_passwordRecoveryMsg">"We've sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
     <string name="label_email_verification">"We 've sent a verification link to your email."</string>
     <string name="label_rating">"How is your VPN service?"</string>
@@ -120,8 +121,8 @@
     <!--Wallet Status messages-->
     <string name="wallet_status_disconnected">Disconnected</string>
     <string name="wallet_status_syncing_headers">Syncing headers:</string>
-    <string name="wallet_status_synced">Next</string>
-    <string name="wallet_status_warning">Block:</string>
-    <string name="wallet_status_unlocking">Trying to unlock wallet...</string>
+    <string name="wallet_status_syncing_transactions"> Finding transactions:</string>
+    <string name="wallet_status_synced">Block: </string>
+    <string name="wallet_status_unlocking">Unlocking wallet...</string>
     <string name="wallet_status_unlock">Wallet unlocked</string>
 </resources>

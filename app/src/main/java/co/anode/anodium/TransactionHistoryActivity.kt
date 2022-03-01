@@ -1,9 +1,13 @@
 package co.anode.anodium
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -20,10 +24,12 @@ import java.util.*
 
 class TransactionHistoryActivity : AppCompatActivity() {
     lateinit var apiController: APIController
-    private val getTransactionsURL = "http://127.0.0.1:8080/api/v1/lightning/gettransactions"
     private var transactionsLastTimeUpdated: Long = 0
     private val refreshValuesInterval: Long = 10000
     lateinit var h: Handler
+    private var prevTransactions = 0
+    private var skipTransactions = 0
+    private var updateConfirmations = arrayListOf<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,19 +44,190 @@ class TransactionHistoryActivity : AppCompatActivity() {
         //Initialize handlers
         val service = ServiceVolley()
         apiController = APIController(service)
-
-        val listsLayout = findViewById<LinearLayout>(R.id.paymentsList)
-        h.postDelayed(refreshValues,refreshValuesInterval)
+        h = Handler(Looper.getMainLooper())
+        val extras = intent.extras
+        if (extras != null) {
+            skipTransactions = extras.getInt("skip")
+        }
+        h.postDelayed(refreshValues,0)
     }
 
     private val refreshValues = object : Runnable {
         override fun run() {
             if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
-                getWalletTransactions()
+                getWalletTransactions(skipTransactions)
             }
         }
     }
 
+    fun clearLines(lineID: Int) {
+        val l = findViewById<ConstraintLayout>(lineID)
+        l?.setBackgroundColor(Color.WHITE)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun getWalletTransactions(skip: Int) {
+        val listsLayout = findViewById<LinearLayout>(R.id.paymentsList)
+        val simpleDate = SimpleDateFormat("yyyy-MM-dd HH:mm")
+        val params = JSONObject()
+        //Exclude mining transactions
+        params.put("coinbase", 1)
+        params.put("txnsSkip", skip)
+        params.put("txnsLimit", 50)
+        val textSize = 15.0f
+        apiController.post(apiController.getTransactionsURL, params) { response ->
+            if ((response != null) &&
+                !response.has("error") &&
+                response.has("transactions") &&
+                !response.isNull("transactions")) {
+                transactionsLastTimeUpdated = System.currentTimeMillis()
+                val transactions = response.getJSONArray("transactions")
+                if (transactions.length() == 0) return@post
+                if ((transactions.length() > prevTransactions) || updateConfirmations.contains(true)){
+                    updateConfirmations.clear()
+                    listsLayout.removeAllViews()
+                    //When we get one new transaction
+                    //and is a receiving one, push notification
+                    val lastAmount = transactions.getJSONObject(0).getString("amount").toLong()
+                    if (( prevTransactions+1 == transactions.length()) &&
+                        (lastAmount > 0)) {
+                        AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
+                    }
+                    for (i in 0 until transactions.length()) {
+                        val transaction = transactions.getJSONObject(i)
+                        //Add new line
+                        val line = ConstraintLayout(this)
+                        val numConfirmations = transaction.getInt("numConfirmations")
+                        val amount = transaction.getString("amount").toLong()
+                        val amountStr = AnodeUtil.satoshisToPKT(amount)
+                        val destAddress = transaction.getJSONArray("destAddresses").getString(0)
+                        line.setOnClickListener {
+                            val transactionDetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
+                            val bundle = Bundle()
+                            bundle.putString("txid", transaction.getString("txHash"))
+                            bundle.putString("amount", amountStr)
+                            bundle.putInt("blockheight", transaction.getInt("blockHeight"))
+                            bundle.putString("blockhash", transaction.getString("blockHash"))
+                            if (amount < 0) {
+                                bundle.putString("address", destAddress)
+                            }
+                            bundle.putInt("confirmations", numConfirmations)
+                            bundle.putInt("lineID", i)
+                            bundle.putBoolean("history", true)
+                            transactionDetailsFragment.arguments = bundle
+                            transactionDetailsFragment.show(supportFragmentManager, "")
+                            line.setBackgroundColor(Color.GRAY)
+                        }
+                        line.setBackgroundColor(Color.WHITE)
+                        line.id = i
+                        line.tag = "TxLine$i"
+                        //line.orientation = LinearLayout.HORIZONTAL
+                        val llParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+                        line.layoutParams = llParams
+                        line.setPadding(20, 20, 10, 20)
+                        //ADDRESS
+                        val textAddress = TextView(this)
+                        textAddress.id = View.generateViewId()
+                        textAddress.textSize = textSize
+                        //AMOUNT
+                        val textAmount = TextView(this)
+                        textAmount.id = View.generateViewId()
+                        textAmount.textSize = textSize
+                        if (amount < 0) {
+                            textAddress.text = "..." + destAddress.substring(destAddress.length - 4)
+                            textAmount.text = amountStr
+                            textAmount.setTextColor(Color.RED)
+                        } else {
+                            textAddress.text = "unknown"
+                            textAmount.text = "+$amountStr"
+                            textAmount.setTextColor(Color.BLACK)
+                        }
+                        //DATE
+                        val textDate = TextView(this)
+                        textDate.id = View.generateViewId()
+                        textDate.text = simpleDate.format(Date(transaction.getString("timeStamp").toLong() * 1000))
+                        textDate.textSize = textSize
+                        //Add columns
+                        //confirmations indicator
+                        val icon = ImageView(this)
+                        icon.id = View.generateViewId()
+                        if (numConfirmations == 0) {
+                            //TODO: update to hourglass or gears
+                            icon.setBackgroundResource(R.drawable.unconfirmed)
+                            updateConfirmations.add(true)
+                        }else if (numConfirmations == 1) {
+                            icon.setBackgroundResource(R.drawable.clock1)
+                            updateConfirmations.add(true)
+                        } else if (numConfirmations == 2) {
+                            icon.setBackgroundResource(R.drawable.clock2)
+                            updateConfirmations.add(true)
+                        } else if (numConfirmations == 3) {
+                            icon.setBackgroundResource(R.drawable.clock3)
+                            updateConfirmations.add(true)
+                        } else if (numConfirmations == 4) {
+                            icon.setBackgroundResource(R.drawable.clock4)
+                            updateConfirmations.add(true)
+                        } else if (numConfirmations == 5) {
+                            icon.setBackgroundResource(R.drawable.clock5)
+                            updateConfirmations.add(true)
+                        }else if (numConfirmations > 5) {
+                            icon.setBackgroundResource(R.drawable.confirmed)
+                            updateConfirmations.add(false)
+                        }
+                        line.addView(icon)
+                        //Date
+                        line.addView(textDate)
+                        //Amount
+                        line.addView(textAmount)
+                        //Last 4 digits of address
+                        line.addView(textAddress)
+                        val set = ConstraintSet()
+                        set.clear(icon.id)
+                        set.clear(textDate.id)
+                        set.clear(textAmount.id)
+                        set.clear(textAddress.id)
+                        //icon on start
+                        set.connect(icon.id, ConstraintSet.START, line.id, ConstraintSet.START, 20)
+                        //date with icon
+                        set.connect(textDate.id, ConstraintSet.START, icon.id, ConstraintSet.END, 20)
+//                        set.connect(icon.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
+                        //amount with date
+                        set.connect(textAmount.id, ConstraintSet.START, textDate.id, ConstraintSet.END, 0)
+//                        set.connect(textDate.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 0)
+                        //address with amount
+//                        set.connect(textAddress.id,ConstraintSet.START, textAmount.id,ConstraintSet.END, 0 )
+                        set.connect(textAmount.id, ConstraintSet.END, textAddress.id, ConstraintSet.START, 0)
+                        //address with end
+                        set.connect(textAddress.id, ConstraintSet.END, line.id, ConstraintSet.END, 20)
+                        val chainViews = intArrayOf( textDate.id, textAmount.id)
+                        val chainWeights = floatArrayOf(0f, 0f)
+                        set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
+                        set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainWidth(textDate.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(textDate.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainWidth(textAmount.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(textAmount.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainWidth(textAddress.id, ConstraintSet.WRAP_CONTENT)
+                        set.constrainHeight(textAddress.id, ConstraintSet.WRAP_CONTENT)
+                        set.applyTo(line)
+                        //Add lines
+                        listsLayout.addView(line)
+                    }
+                    //If more than 50 transactions show link to next page
+                    if (transactions.length() > 25) {
+                        findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
+                    }
+                    prevTransactions = transactions.length()
+                }
+            } else if ((response != null) &&
+                response.has("message") &&
+                !response.isNull("message")) {
+                Log.d(LOGTAG, response.getString("message"))
+            }
+        }
+    }
+    /*
     private fun getWalletTransactions() {
         val listsLayout = findViewById<LinearLayout>(R.id.paymentsList)
         val simpleDate = SimpleDateFormat("dd/MM/yyyy")
@@ -168,7 +345,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
                 }
             }
         }
-    }
+    }*/
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()

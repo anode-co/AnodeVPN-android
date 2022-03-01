@@ -106,8 +106,9 @@ class WalletFragmentMain : Fragment() {
         val history =v.findViewById<TextView>(R.id.texthistory)
         history.setOnClickListener {
             AnodeClient.eventLog(context, "Button: Older transactions clicked")
-            val transactionsActivity = Intent(context, TransactionHistoryActivity::class.java)
-            startActivityForResult(transactionsActivity, 0)
+            val transactionsHistoryActivity = Intent(context, TransactionHistoryActivity::class.java)
+            transactionsHistoryActivity.putExtra("skip", 25)
+            startActivityForResult(transactionsHistoryActivity, 0)
         }
 
         val sendPaymentButton = v.findViewById<Button>(R.id.button_sendPayment)
@@ -141,14 +142,14 @@ class WalletFragmentMain : Fragment() {
         } else if (chainHeight < chainTop) {
             statusIcon.setBackgroundResource(R.drawable.circle_orange)
             val statusLink: Spanned = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_syncing_headers)+
-                "<a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>"+" of $chainTop"
+                " <a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>"+" of $chainTop"
                 , HtmlCompat.FROM_HTML_MODE_LEGACY)
             statusBar.movementMethod = LinkMovementMethod.getInstance()
             statusBar.text = statusLink
         } else if (walletHeight < chainHeight){
             statusIcon.setBackgroundResource(R.drawable.circle_yellow)
-            val statusLink: Spanned = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_syncing_headers)+
-                    "<a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>"+" of $chainTop"
+            val statusLink: Spanned = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_syncing_transactions)+
+                    " <a href='https://explorer.pkt.cash/block/$bHash'>$walletHeight</a>"+" of $chainHeight"
                 , HtmlCompat.FROM_HTML_MODE_LEGACY)
             statusBar.movementMethod = LinkMovementMethod.getInstance()
             statusBar.text = statusLink
@@ -170,8 +171,8 @@ class WalletFragmentMain : Fragment() {
             } else {
                 timeAgoText = " - $diffSeconds seconds ago"
             }
-            statusLink = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_syncing_headers)+
-                    "<a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>" + timeAgoText
+            statusLink = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_synced)+
+                    " <a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>" + timeAgoText
                 , HtmlCompat.FROM_HTML_MODE_LEGACY)
             statusBar.movementMethod = LinkMovementMethod.getInstance()
             statusBar.text = statusLink
@@ -286,8 +287,7 @@ class WalletFragmentMain : Fragment() {
                     walletUnlocked = true
                     //Update screen
                     updateUiWalletUnlocket(v)
-                    //Wait a bit before making next call
-                    Thread.sleep(300)
+                    h.postDelayed(refreshValues,0)
                 }
             }
         }
@@ -416,8 +416,8 @@ class WalletFragmentMain : Fragment() {
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
+        params.put("txnsLimit", 26)
         val textSize = 15.0f
-
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
@@ -428,10 +428,6 @@ class WalletFragmentMain : Fragment() {
                 if (transactions.length() == 0) return@post
                 if ((transactions.length() > prevTransactions) || updateConfirmations.contains(true)){
                     updateConfirmations.clear()
-                    var tcount = transactions.length()
-                    if (tcount > 25) {
-                        tcount = 25
-                    }
                     listsLayout.removeAllViews()
                     //When we get one new transaction
                     //and is a receiving one, push notification
@@ -440,8 +436,12 @@ class WalletFragmentMain : Fragment() {
                         (lastAmount > 0)) {
                         AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
                     }
-
-                    for (i in 0 until tcount) {
+                    var txnsSize = transactions.length()
+                    if (txnsSize > 25) {
+                        txnsSize = 25
+                        v.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
+                    }
+                    for (i in 0 until txnsSize) {
                         val transaction = transactions.getJSONObject(i)
                         //Add new line
                         val line = ConstraintLayout(context)
@@ -461,10 +461,12 @@ class WalletFragmentMain : Fragment() {
                             }
                             bundle.putInt("confirmations", numConfirmations)
                             bundle.putInt("lineID", i)
+                            bundle.putBoolean("history", false)
                             transactionDetailsFragment.arguments = bundle
                             transactionDetailsFragment.show(requireActivity().supportFragmentManager, "")
                             line.setBackgroundColor(Color.GRAY)
                         }
+                        line.setBackgroundColor(Color.WHITE)
                         line.id = i
                         line.tag = "TxLine$i"
                         //line.orientation = LinearLayout.HORIZONTAL
@@ -560,10 +562,6 @@ class WalletFragmentMain : Fragment() {
                         //Add lines
                         listsLayout.addView(line)
                     }
-                    //If more than 25 transactions show link to older transactions activity
-                    if (transactions.length() > 25) {
-                        v.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
-                    }
                     prevTransactions = transactions.length()
                 }
             } else if ((response != null) &&
@@ -589,6 +587,7 @@ class WalletFragmentMain : Fragment() {
             }
         }
     }
+
     private val refreshValues = object : Runnable {
         lateinit var v: View
 

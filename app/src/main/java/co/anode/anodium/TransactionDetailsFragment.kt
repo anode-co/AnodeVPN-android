@@ -14,6 +14,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class TransactionDetailsFragment : BottomSheetDialogFragment(){
     var lineID = 0
+    var fromHistory = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -28,6 +30,7 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         if (!requireArguments().getString("address").isNullOrEmpty()) {
             destAddress = requireArguments().getString("address").toString()
         }
+        fromHistory = requireArguments().getBoolean("history")
         val address = v.findViewById<TextView>(R.id.trdetails_addr)
         val paidToLabel = v.findViewById<TextView>(R.id.trdetails_addr_label)
         if (destAddress.isNullOrEmpty()) {
@@ -64,7 +67,11 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
     }
 
     override fun onDismiss(dialog: DialogInterface) {
-        (activity as WalletActivity).transactionDetailsClosed(lineID)
+        if (fromHistory) {
+            (activity as TransactionHistoryActivity).clearLines(lineID)
+        } else {
+            (activity as WalletActivity).transactionDetailsClosed(lineID)
+        }
         super.onDismiss(dialog)
     }
 
