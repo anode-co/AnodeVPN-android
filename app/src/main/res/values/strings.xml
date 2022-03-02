@@ -11,6 +11,7 @@
     <string name="action_wallet">Wallet</string>
     <string name="action_wallet_debug">Wallet debug</string>
     <string name="action_wallet_stats">Wallet stats</string>
+    <string name="action_close_wallet">Close wallet</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
