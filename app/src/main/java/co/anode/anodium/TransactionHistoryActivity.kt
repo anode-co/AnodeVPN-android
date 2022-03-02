@@ -73,7 +73,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
         //Exclude mining transactions
         params.put("coinbase", 1)
         params.put("txnsSkip", skip)
-        params.put("txnsLimit", 50)
+        params.put("txnsLimit", 51)
         val textSize = 15.0f
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
@@ -93,7 +93,14 @@ class TransactionHistoryActivity : AppCompatActivity() {
                         (lastAmount > 0)) {
                         AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
                     }
-                    for (i in 0 until transactions.length()) {
+                    var txnsSize = transactions.length()
+                    if (txnsSize > 50) {
+                        txnsSize = 50
+                        findViewById<TextView>(R.id.button_next_page).visibility = View.VISIBLE
+                    } else {
+                        findViewById<TextView>(R.id.button_next_page).visibility = View.GONE
+                    }
+                    for (i in 0 until txnsSize) {
                         val transaction = transactions.getJSONObject(i)
                         //Add new line
                         val line = ConstraintLayout(this)
