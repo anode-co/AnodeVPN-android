@@ -1,7 +1,10 @@
 package co.anode.anodium
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 
@@ -45,6 +48,27 @@ class WalletActivity : AppCompatActivity() {
     fun transactionDetailsClosed(line: Int) {
         val mainFragment = (supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain) as WalletFragmentMain)
         mainFragment.clearLines(line)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_wallet, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean { // Handle action bar item clicks here. The action bar will
+        val id = item.itemId
+        if (id == R.id.action_wallet_stats) {
+            Log.i(LOGTAG, "Open wallet stats activity")
+            val walletStatsActivity = Intent(applicationContext, WalletStatsActivity::class.java)
+            startActivity(walletStatsActivity)
+            return true
+        } else if (id == R.id.action_close_wallet) {
+            finish()
+            return true
+        } else {
+            super.onOptionsItemSelected(item)
+            return false
+        }
     }
 
     fun switchToMain() {

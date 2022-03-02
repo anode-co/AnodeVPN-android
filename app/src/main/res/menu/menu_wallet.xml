@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="co.anode.anodium.WalletActivity">
+
+    <item
+        android:id="@+id/action_wallet_stats"
+        android:orderInCategory="100"
+        android:title="@string/action_wallet_stats"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_close_wallet"
+        android:orderInCategory="100"
+        android:title="@string/action_close_wallet"
+        app:showAsAction="never"/>
+</menu>
