@@ -44,6 +44,8 @@ class WalletFragmentMain : Fragment() {
     private var chainSyncLastShown: Long = 0
     private var passwordPromptActive = false
     private var updateConfirmations = arrayListOf<Boolean>()
+    private var neutrinoTop = 0
+    private val NumberOfTxnsToShow = 25
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //Initialize handlers
@@ -106,7 +108,8 @@ class WalletFragmentMain : Fragment() {
         history.setOnClickListener {
             AnodeClient.eventLog(context, "Button: Older transactions clicked")
             val transactionsHistoryActivity = Intent(context, TransactionHistoryActivity::class.java)
-            transactionsHistoryActivity.putExtra("skip", 25)
+            transactionsHistoryActivity.putExtra("skip", NumberOfTxnsToShow)
+            transactionsHistoryActivity.putExtra("neutrinotop", neutrinoTop)
             startActivityForResult(transactionsHistoryActivity, 0)
         }
 
@@ -186,7 +189,6 @@ class WalletFragmentMain : Fragment() {
     private fun getInfo() {
         apiController.get(apiController.getInfoURL) { response ->
             if (response != null) {
-                var chainTop = 0
                 var chainHeight = 0
                 var walletHeight = 0
                 var walletTop = 0
@@ -194,13 +196,7 @@ class WalletFragmentMain : Fragment() {
                 var neutrinoPeers = 0
                 var bTimestamp: Long = 0
                 //Check if wallet is unlocked
-                if (response.has("wallet") &&
-                    !response.isNull("wallet") &&
-                    response.getJSONObject("wallet").has("currentHeight")) {
-                    walletUnlocked = true
-                } else {
-                    walletUnlocked = false
-                }
+                walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
                 if (((System.currentTimeMillis() - refreshPldInterval) > chainSyncLastShown) &&
                     response.has("neutrino") &&
                     !response.isNull("neutrino") &&
@@ -212,7 +208,7 @@ class WalletFragmentMain : Fragment() {
                         neutrinoPeers = neutrino.length()
                         val peers = neutrino.getJSONArray("peers")
                         if (peers.length() > 0) {
-                            chainTop = peers.getJSONObject(0).getInt("lastBlock")
+                            neutrinoTop = peers.getJSONObject(0).getInt("lastBlock")
                             chainHeight = neutrino.getInt("height")
 
                             //If neutrino current height is close to last block then we can try to unlock
@@ -227,7 +223,7 @@ class WalletFragmentMain : Fragment() {
                     walletHeight = wallet.getInt("currentHeight")
                     walletTop = wallet.getJSONObject("walletStats").getInt("syncTo")
                 }
-                updateStatusBar(neutrinoPeers, chainTop, chainHeight, bHash, bTimestamp, walletTop, walletHeight)
+                updateStatusBar(neutrinoPeers, neutrinoTop, chainHeight, bHash, bTimestamp, walletTop, walletHeight)
                 //Keep getting updates
                 if (this::h.isInitialized) {
                     h.postDelayed(getPldInfo, refreshPldInterval)
@@ -415,7 +411,11 @@ class WalletFragmentMain : Fragment() {
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
-        params.put("txnsLimit", 26)
+        params.put("txnsLimit", NumberOfTxnsToShow+1)
+        if (neutrinoTop > 0) {
+            params.put("startHeight", neutrinoTop)
+            params.put("endHeight", 0)
+        }
         val textSize = 15.0f
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
