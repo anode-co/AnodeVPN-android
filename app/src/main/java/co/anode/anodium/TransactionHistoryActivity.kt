@@ -78,7 +78,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
         params.put("txnsLimit", 51)
         if (neutrinoTop > 0) {
             params.put("startHeight", neutrinoTop)
-            params.put("endHeight", 0)
+            params.put("endHeight", 1)
         }
         val textSize = 15.0f
         apiController.post(apiController.getTransactionsURL, params) { response ->
