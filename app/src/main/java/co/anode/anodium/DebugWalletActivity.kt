@@ -6,14 +6,12 @@ import android.util.Log
 import android.view.View
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.core.view.children
 import java.io.File
 
 class DebugWalletActivity : AppCompatActivity() {
     private var scrollposition = 0
     private var toBottom = false
     private var logfile = ""
-    private var autoscroll = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,20 +32,20 @@ class DebugWalletActivity : AppCompatActivity() {
             scroll.fullScroll(View.FOCUS_DOWN)
         }
 
-        scroll.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+        scroll.setOnScrollChangeListener { _, _, scrollY, _, _ ->
             scrollposition = scrollY
             val diff = scroll.getChildAt(0).bottom - (scrollY + scroll.height)
             toBottom = diff < 50
         }
 
-        Thread(Runnable {
+        Thread({
             Log.i(LOGTAG, "DebugActivity.RefreshValues startup")
             var sleep: Long = 500
             var oldlog = logfile
             while (true) {
-                this.runOnUiThread(Runnable {
+                this.runOnUiThread {
                     if (toBottom) {
-                        var newlog = File(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.PLD_LOG).readText()
+                        val newlog = File(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.PLD_LOG).readText()
                         if (newlog.length > oldlog.length) {
                             oldlog = newlog
                             logtext.text = newlog
@@ -63,7 +61,7 @@ class DebugWalletActivity : AppCompatActivity() {
                     } else {
                         sleep = 1000
                     }
-                })
+                }
                 Thread.sleep(sleep)
             }
         }, "DebugWalletActivity.RefreshValues").start()

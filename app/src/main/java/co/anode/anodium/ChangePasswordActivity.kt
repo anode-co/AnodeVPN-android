@@ -1,7 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.content.Context
-import android.content.res.Configuration
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -12,9 +13,9 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class ChangePasswordActivity : AppCompatActivity() {
-    private val API_VERSION = "0.3"
-    private var API_CHANGEPASSWORD_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<username>/changepassword/"
-    private var API_CHANGEPASSWORD_RESET_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<username>/password/change/"
+    private val apiVersion = "0.3"
+    private var apiChangePasswordUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<username>/changepassword/"
+    private var apiChangePasswordResetUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<username>/password/change/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,36 +30,35 @@ class ChangePasswordActivity : AppCompatActivity() {
         setResult(0)
         //Check if activity started from Forgot password flow, then hide "old password"
         val bForgotPassword = param?.getBoolean("ForgotPassword")!!
-        val buttonchangePassword = findViewById<Button>(R.id.buttonChangePassword)
-        val labelnewPassword = findViewById<TextView>(R.id.label_newpassword)
+        val buttonChangePassword = findViewById<Button>(R.id.buttonChangePassword)
+        val labelNewPassword = findViewById<TextView>(R.id.label_newpassword)
         val image = findViewById<ImageView>(R.id.imageViewPassword)
-        labelnewPassword.visibility = View.GONE
+        labelNewPassword.visibility = View.GONE
         image.visibility = View.GONE
+        val oldPassword = findViewById<EditText>(R.id.editTextOldPassword)
         if (bForgotPassword) {
-            val oldpassword = findViewById<EditText>(R.id.editTextOldPassword)
-            oldpassword.visibility = View.GONE
-            buttonchangePassword.text = getString(R.string.action_continue)
-            labelnewPassword.visibility = View.VISIBLE
+            oldPassword.visibility = View.GONE
+            buttonChangePassword.text = getString(R.string.action_continue)
+            labelNewPassword.visibility = View.VISIBLE
             image.visibility = View.VISIBLE
         }
 
-        buttonchangePassword.setOnClickListener() {
-            AnodeClient.eventLog(baseContext, "Button: Change password pressed")
-            val oldpassword = findViewById<EditText>(R.id.editTextOldPassword)
-            val newpassword = findViewById<EditText>(R.id.editTextnewPassword)
-            val confirmpassword = findViewById<EditText>(R.id.editTextconfirmPassword)
+        buttonChangePassword.setOnClickListener {
+            AnodeClient.eventLog("Button: Change password pressed")
+            val newPassword = findViewById<EditText>(R.id.editTextnewPassword)
+            val confirmPassword = findViewById<EditText>(R.id.editTextconfirmPassword)
 
-            if ( (!bForgotPassword && oldpassword.text.isNullOrEmpty()) || newpassword.text.isNullOrEmpty() || confirmpassword.text.isNullOrEmpty()) {
+            if ( (!bForgotPassword && oldPassword.text.isNullOrEmpty()) || newPassword.text.isNullOrEmpty() || confirmPassword.text.isNullOrEmpty()) {
                 Toast.makeText(baseContext, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-            } else if (newpassword.text.toString() != confirmpassword.text.toString()) {
+            } else if (newPassword.text.toString() != confirmPassword.text.toString()) {
                 Toast.makeText(baseContext, "New password and confirm password fields do not match", Toast.LENGTH_SHORT).show()
-                newpassword.text.clear()
-                confirmpassword.text.clear()
+                newPassword.text.clear()
+                confirmPassword.text.clear()
             }else {
-                changePassword().execute(bForgotPassword.toString(), oldpassword.text.toString(), newpassword.text.toString())
+                changePassword().execute(bForgotPassword.toString(), oldPassword.text.toString(), newPassword.text.toString())
             }
         }
-        AnodeClient.eventLog(baseContext, "Activity: Change password created")
+        AnodeClient.eventLog("Activity: Change password created")
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -66,20 +66,20 @@ class ChangePasswordActivity : AppCompatActivity() {
         return true
     }
 
-    inner class changePassword() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    inner class changePassword : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String {
             val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             val jsonObject = JSONObject()
-            var url = API_CHANGEPASSWORD_URL.replace("<username>", prefs.getString("username", "")!!, true)
+            var url = apiChangePasswordUrl.replace("<username>", prefs.getString("username", "")!!, true)
             if (params[0] == "false") {
                 jsonObject.accumulate("currentPassword", params[1])
             } else {
                 //jsonObject.accumulate("passwordRecoveryToken", prefs.getString("passwordResetToken",""))
                 jsonObject.accumulate("passwordResetToken", prefs.getString("passwordResetToken", ""))
-                url = API_CHANGEPASSWORD_RESET_URL.replace("<username>", prefs.getString("username", "")!!, true)
+                url = apiChangePasswordResetUrl.replace("<username>", prefs.getString("username", "")!!, true)
             }
             jsonObject.accumulate("newPassword", params[2])
-            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true, false)
+            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -97,7 +97,7 @@ class ChangePasswordActivity : AppCompatActivity() {
                     val jsonObj = JSONObject(result)
                     if (jsonObj.has("status") && jsonObj.getString("status") == "success") {
                         Toast.makeText(baseContext, "Password changed successfully", Toast.LENGTH_SHORT).show()
-                        thread.start();
+                        thread.start()
                     }
                 }catch (e: JSONException) {
                     Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()

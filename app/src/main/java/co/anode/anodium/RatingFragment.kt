@@ -12,10 +12,6 @@ import android.widget.ToggleButton
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class RatingFragment : BottomSheetDialogFragment() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_rating, container, false)
@@ -30,7 +26,7 @@ class RatingFragment : BottomSheetDialogFragment() {
         val buttonSubmitRating = v.findViewById<Button>(R.id.buttonSubmitRating)
         buttonSubmitRating.visibility = View.GONE
 
-        ratingBar.setOnRatingBarChangeListener { ratingBar, rating, _ ->
+        ratingBar.setOnRatingBarChangeListener { _, rating, _ ->
             showComments(v)
             buttonSubmitRating.visibility = View.VISIBLE
             if (rating in 0f..1f) {
@@ -101,7 +97,7 @@ class RatingFragment : BottomSheetDialogFragment() {
         }
 
         buttonSubmitRating.setOnClickListener{
-            this.context?.let { it1 -> AnodeClient.eventLog(it1, "Button RATING clicked") }
+            AnodeClient.eventLog("Button RATING clicked")
             var comment = ""
             if (tb1.isChecked) {
                 comment += tb1.textOn.toString() + ","

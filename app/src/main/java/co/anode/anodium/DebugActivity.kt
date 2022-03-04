@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.annotation.SuppressLint
@@ -39,7 +41,7 @@ class DebugActivity : AppCompatActivity() {
         val buttonDeleteAccount = findViewById<Button>(R.id.button_Deleteaccount)
         buttonDeleteAccount.setOnClickListener {
             Log.i(LOGTAG, "Delete account")
-            AnodeClient.eventLog(baseContext, "Delete account selected")
+            AnodeClient.eventLog("Delete account selected")
             AnodeClient.DeleteAccount().execute()
         }
         val text = findViewById<TextView>(R.id.text_errorfiles)
@@ -49,10 +51,10 @@ class DebugActivity : AppCompatActivity() {
         } else {
             text.text = files.size.toString()
         }
-        Thread(Runnable {
+        Thread({
             Log.i(LOGTAG, "DebugActivity.RefreshValues startup")
             while (true) {
-                this.runOnUiThread(Runnable {
+                this.runOnUiThread {
                     val appversion = findViewById<TextView>(R.id.text_AppVersion)
                     appversion.text = "App Version: " + BuildConfig.VERSION_NAME
                     val ipv4 = findViewById<TextView>(R.id.text_ipv4)
@@ -90,7 +92,7 @@ class DebugActivity : AppCompatActivity() {
                     val publicip = findViewById<TextView>(R.id.text_publicIP)
                     publicip.text = "updating ip..."
                     GetPublicIP().execute(publicip)
-                })
+                }
                 Thread.sleep(8000)
             }
         }, "DebugActivity.RefreshValues").start()
@@ -101,7 +103,7 @@ class DebugActivity : AppCompatActivity() {
         return true
     }
 
-    class GetPublicIP(): AsyncTask<TextView, Void, String>() {
+    class GetPublicIP : AsyncTask<TextView, Void, String>() {
         private var ipText:TextView? = null
 
         override fun doInBackground(vararg params: TextView?): String {
@@ -115,9 +117,7 @@ class DebugActivity : AppCompatActivity() {
         @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            ipText?.post(Runnable { ipText?.text = result })
+            ipText?.post { ipText?.text = result }
         }
     }
 }
-
-class DebugException(message: String): Exception(message)

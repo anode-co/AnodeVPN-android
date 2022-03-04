@@ -13,19 +13,13 @@ import androidx.core.text.HtmlCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class TransactionDetailsFragment : BottomSheetDialogFragment(){
-    var lineID = 0
-    var fromHistory = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private var lineID = 0
+    private var fromHistory = false
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_transactiondetails, container, false)
-//        val prefs = requireContext().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-//        var myaddress = prefs.getString("lndwalletaddress", "")
         var destAddress = ""
         if (!requireArguments().getString("address").isNullOrEmpty()) {
             destAddress = requireArguments().getString("address").toString()
@@ -33,7 +27,7 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         fromHistory = requireArguments().getBoolean("history")
         val address = v.findViewById<TextView>(R.id.trdetails_addr)
         val paidToLabel = v.findViewById<TextView>(R.id.trdetails_addr_label)
-        if (destAddress.isNullOrEmpty()) {
+        if (destAddress.isEmpty()) {
             paidToLabel.visibility = View.INVISIBLE
         } else {
             paidToLabel.visibility = View.VISIBLE
@@ -76,21 +70,10 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment RatingFragment.
-         */
         @JvmStatic
-        //fun newInstance(param1: String, param2: String) =
         fun newInstance() =
             TransactionDetailsFragment().apply {
                 arguments = Bundle().apply {
-                    //putString(ARG_PARAM1, param1)
-                    //putString(ARG_PARAM2, param2)
                 }
             }
     }

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.annotation.SuppressLint
@@ -31,8 +33,8 @@ import java.util.*
 
 class WalletFragmentMain : Fragment() {
     lateinit var statusBar: TextView
-    lateinit var statusIcon: ImageView
-    lateinit var apiController: APIController
+    private lateinit var statusIcon: ImageView
+    private lateinit var apiController: APIController
     private var walletUnlocked = false
     private var neutrinoSynced = false
     private var myPKTAddress = ""
@@ -45,7 +47,7 @@ class WalletFragmentMain : Fragment() {
     private var passwordPromptActive = false
     private var updateConfirmations = arrayListOf<Boolean>()
     private var neutrinoTop = 0
-    private val NumberOfTxnsToShow = 25
+    private val numberOfTxnsToShow = 25
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //Initialize handlers
@@ -84,7 +86,7 @@ class WalletFragmentMain : Fragment() {
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         super.onViewCreated(v, savedInstanceState)
         val context = requireContext()
-        AnodeClient.eventLog(context,"Activity: WalletFragmentMain created")
+        AnodeClient.eventLog("Activity: WalletFragmentMain created")
         refreshValues.init(v)
         getPldInfo.init(v)
         statusBar = v.findViewById(R.id.textview_status)
@@ -101,14 +103,14 @@ class WalletFragmentMain : Fragment() {
         val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
         walletAddress.text = myPKTAddress
         walletAddress.setOnClickListener {
-            AnodeClient.eventLog(context, "Button: Copy wallet address clicked")
+            AnodeClient.eventLog("Button: Copy wallet address clicked")
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG).show()
         }
         val history =v.findViewById<TextView>(R.id.texthistory)
         history.setOnClickListener {
-            AnodeClient.eventLog(context, "Button: Older transactions clicked")
+            AnodeClient.eventLog("Button: Older transactions clicked")
             val transactionsHistoryActivity = Intent(context, TransactionHistoryActivity::class.java)
-            transactionsHistoryActivity.putExtra("skip", NumberOfTxnsToShow)
+            transactionsHistoryActivity.putExtra("skip", numberOfTxnsToShow)
             transactionsHistoryActivity.putExtra("neutrinotop", neutrinoTop)
             startActivityForResult(transactionsHistoryActivity, 0)
         }
@@ -119,7 +121,7 @@ class WalletFragmentMain : Fragment() {
 
         val shareButton = v.findViewById<Button>(R.id.walletAddressSharebutton)
         shareButton.setOnClickListener {
-            AnodeClient.eventLog(context, "Button: Share wallet address clicked")
+            AnodeClient.eventLog("Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $myPKTAddress")
@@ -130,14 +132,14 @@ class WalletFragmentMain : Fragment() {
         }
 
         sendPaymentButton.setOnClickListener {
-            AnodeClient.eventLog(context, "Button: Send PKT clicked")
+            AnodeClient.eventLog("Button: Send PKT clicked")
             val sendPaymentActivity = Intent(context, SendPaymentActivity::class.java)
             startActivity(sendPaymentActivity)
         }
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateStatusBar(peers: Int, chainTop: Int, chainHeight: Int, bHash: String, bTimestamp: Long, walletTop: Int, walletHeight: Int) {
+    private fun updateStatusBar(peers: Int, chainTop: Int, chainHeight: Int, bHash: String, bTimestamp: Long, walletHeight: Int) {
         if (peers == 0) {
             statusBar.text = "0 - " + getString(R.string.wallet_status_disconnected)
             statusIcon.setBackgroundResource(R.drawable.circle_red)
@@ -159,19 +161,19 @@ class WalletFragmentMain : Fragment() {
             val statusLink: Spanned
             statusIcon.setBackgroundResource(R.drawable.circle_green)
             val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
-            var timeAgoText = ""
+            val timeAgoText: String
             if (diffSeconds > 60) {
                 val minutes = diffSeconds / 60
                 if (minutes == (1).toLong()) {
-                    timeAgoText = " - $minutes minute ago"
+                    timeAgoText = " - $minutes "+getString(R.string.minute_ago)
                 } else {
-                    timeAgoText = " - $minutes minutes ago"
+                    timeAgoText = " - $minutes "+getString(R.string.minutes_ago)
                 }
                 if (diffSeconds > 1140) {//19min
                     statusIcon.setBackgroundResource(R.drawable.warning)
                 }
             } else {
-                timeAgoText = " - $diffSeconds seconds ago"
+                timeAgoText = " - $diffSeconds "+getString(R.string.seconds_ago)
             }
             statusLink = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_synced)+
                     " <a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>" + timeAgoText
@@ -186,11 +188,11 @@ class WalletFragmentMain : Fragment() {
      * determines if wallet is unlocked
      * updates status bar with wallet and chain syncing info
      */
+    @SuppressLint("SimpleDateFormat")
     private fun getInfo() {
         apiController.get(apiController.getInfoURL) { response ->
             if (response != null) {
                 var chainHeight = 0
-                var walletHeight = 0
                 var walletTop = 0
                 var bHash = ""
                 var neutrinoPeers = 0
@@ -203,7 +205,10 @@ class WalletFragmentMain : Fragment() {
                     response.getJSONObject("neutrino").has("height")) {
                     val neutrino = response.getJSONObject("neutrino")
                     bHash = neutrino.getString("blockHash")
-                    bTimestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(neutrino.getString("blockTimestamp")).time
+                    val timestamp = neutrino.getString("blockTimestamp")
+                    if (!timestamp.isNullOrEmpty()) {
+                        bTimestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(timestamp).time
+                    }
                     if (neutrino.has("peers")) {
                         neutrinoPeers = neutrino.length()
                         val peers = neutrino.getJSONArray("peers")
@@ -219,10 +224,9 @@ class WalletFragmentMain : Fragment() {
                 if (response.has("wallet") &&
                         !response.isNull("wallet")) {
                     val wallet = response.getJSONObject("wallet")
-                    walletHeight = wallet.getInt("currentHeight")
                     walletTop = wallet.getJSONObject("walletStats").getInt("syncTo")
                 }
-                updateStatusBar(neutrinoPeers, neutrinoTop, chainHeight, bHash, bTimestamp, walletTop, walletHeight)
+                updateStatusBar(neutrinoPeers, neutrinoTop, chainHeight, bHash, bTimestamp, walletTop)
                 //Keep getting updates
                 if (this::h.isInitialized) {
                     h.postDelayed(getPldInfo, refreshPldInterval)
@@ -410,7 +414,7 @@ class WalletFragmentMain : Fragment() {
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
-        params.put("txnsLimit", NumberOfTxnsToShow+1)
+        params.put("txnsLimit", numberOfTxnsToShow+1)
         if (neutrinoTop > 0) {
             params.put("startHeight", neutrinoTop)
             params.put("endHeight", 1)

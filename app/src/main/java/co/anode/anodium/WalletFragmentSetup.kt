@@ -35,7 +35,7 @@ class WalletFragmentSetup : Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        AnodeClient.eventLog(requireContext(), "Activity: WalletFragmentCreate created")
+        AnodeClient.eventLog("Activity: WalletFragmentCreate created")
 
         val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
         closeButton.visibility = View.GONE
@@ -58,7 +58,7 @@ class WalletFragmentSetup : Fragment() {
         val apiController = APIController(service)
 
         createButton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(), "Button: Create PKT wallet clicked")
+            AnodeClient.eventLog( "Button: Create PKT wallet clicked")
             Log.i(LOGTAG, "WalletFragmentSetup creating wallet")
             //Remove old error message
             newPassLayout.error = null
@@ -103,7 +103,6 @@ class WalletFragmentSetup : Fragment() {
                         }
                         seedText.text = seedString
                         //Set background color to white
-                        val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                         activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
                         //Hide soft keyboard
                         val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

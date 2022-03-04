@@ -25,7 +25,6 @@ import java.util.*
 class TransactionHistoryActivity : AppCompatActivity() {
     lateinit var apiController: APIController
     private var transactionsLastTimeUpdated: Long = 0
-    private val refreshValuesInterval: Long = 10000
     lateinit var h: Handler
     private var prevTransactions = 0
     private var skipTransactions = 0
@@ -54,11 +53,9 @@ class TransactionHistoryActivity : AppCompatActivity() {
         h.postDelayed(refreshValues,0)
     }
 
-    private val refreshValues = object : Runnable {
-        override fun run() {
-            if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
-                getWalletTransactions(skipTransactions)
-            }
+    private val refreshValues = Runnable {
+        if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
+            getWalletTransactions(skipTransactions)
         }
     }
 

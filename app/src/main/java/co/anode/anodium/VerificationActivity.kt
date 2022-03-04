@@ -1,7 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
@@ -14,18 +15,17 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class VerificationActivity : AppCompatActivity() {
-    val h = Handler()
+    private val h = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_verification)
         Log.i(LOGTAG, "Started VerificationActivity")
         val msgText = findViewById<TextView>(R.id.textView)
-        msgText.text = "We 've sent a verification link to your email.\nPlease check your email."
+        msgText.text = getString(R.string.email_verification_message)
         setResult(0)
         val param = intent.extras
         val url = param?.getString("accountConfirmationStatusUrl")
-
         statuschecker.init(h, url!!, applicationContext, this)
         h.postDelayed(statuschecker, 1000)
     }
@@ -41,8 +41,8 @@ class checkstatusURL(context: Context?, handler: Handler?, activity: AppCompatAc
         a = activity
     }
 
-    override fun doInBackground(vararg params: String?): String? {
-        return AnodeClient.APIHttpReq(params[0]!!, "", "GET", true, false)
+    override fun doInBackground(vararg params: String?): String {
+        return AnodeClient.APIHttpReq(params[0]!!, "", "GET", needsAuth = true, isRetry = false)
     }
 
     override fun onPostExecute(result: String?) {
@@ -53,7 +53,7 @@ class checkstatusURL(context: Context?, handler: Handler?, activity: AppCompatAc
             return
         } else if (result == "202") {
             val signInActivity = Intent(c, SignInActivity::class.java)
-            signInActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+            signInActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             c?.startActivity(signInActivity)
             a?.finish()
         } else {
@@ -73,7 +73,7 @@ class checkstatusURL(context: Context?, handler: Handler?, activity: AppCompatAc
                             commit()
                         }
                         val signInActivity = Intent(c, SignInActivity::class.java)
-                        signInActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+                        signInActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         c?.startActivity(signInActivity)
                         a?.finish()
                     }

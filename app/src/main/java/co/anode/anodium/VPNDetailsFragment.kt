@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,9 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import java.util.*
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -20,8 +21,8 @@ private const val ARG_PARAM2 = "param2"
 class VPNDetailsFragment : BottomSheetDialogFragment() {
     private var param1: String? = null
     private var param2: String? = null
-    private val API_VERSION = "0.3"
-    private var API_FAVORITE_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/<server_public_key>/favorite/"
+    private val apiVersion = "0.3"
+    private var apiFavoriteUrl = "https://vpn.anode.co/api/$apiVersion/vpn/servers/<server_public_key>/favorite/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,7 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val currentView = inflater.inflate(R.layout.fragment_vpn_details, container, false)
@@ -43,8 +45,7 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         }
         val ratingbar = currentView.findViewById<RatingBar>(R.id.list_ratingbar)
         ratingbar.rating = arguments?.getFloat("averageRating")!!
-        val loadtext = currentView.findViewById<TextView>(R.id.text_load)
-        loadtext.text = context?.resources?.getString(R.string.text_load) + arguments?.getString("load") + "%"
+        currentView.findViewById<TextView>(R.id.text_load).text = context?.resources?.getString(R.string.text_load) + arguments?.getString("load") + "%"
 
         val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val favoriteButton = currentView.findViewById<Button>(R.id.button_favorite)
@@ -59,18 +60,18 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
 
         favoriteButton.setOnClickListener {
             if (!prefs?.getBoolean("favorite_" + arguments?.getString("name"), false)!!) {
-                AnodeClient.eventLog(requireContext(), "Button FAVORITE for " + arguments?.getString("name"))
+                AnodeClient.eventLog("Button FAVORITE for " + arguments?.getString("name"))
                 toggleFavorite().execute("ADD")
                 favoriteButton.setBackgroundResource(R.drawable.button_round_fav_small)
-                with(prefs?.edit()) {
+                with(prefs.edit()) {
                     this?.putBoolean("favorite_" + arguments?.getString("name"), true)
                     this?.commit()
                 }
             } else {
-                AnodeClient.eventLog(requireContext(), "Button UNFAVORITE for " + arguments?.getString("name"))
+                AnodeClient.eventLog("Button UNFAVORITE for " + arguments?.getString("name"))
                 toggleFavorite().execute("DELETE")
                 favoriteButton.setBackgroundResource(R.drawable.button_round_unfav_small)
-                with(prefs?.edit()) {
+                with(prefs.edit()) {
                     this?.putBoolean("favorite_" + arguments?.getString("name"), false)
                     this?.commit()
                 }
@@ -78,8 +79,8 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         }
         val connectButton = currentView.findViewById<Button>(R.id.button_smallconnectvpn)
         connectButton.setOnClickListener {
-            AnodeClient.eventLog(requireContext(), "Button CONNECT to " + arguments?.getString("name"))
-            val intent: Intent = Intent()
+            AnodeClient.eventLog("Button CONNECT to " + arguments?.getString("name"))
+            val intent = Intent()
             intent.putExtra("action", "connect")
             intent.putExtra("publickey", arguments?.getString("publicKey"))
             (context as Activity).setResult(Activity.RESULT_OK,intent)
@@ -93,20 +94,20 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         return currentView
     }
 
-    inner class toggleFavorite() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    inner class toggleFavorite : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String {
             val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-            val url = API_FAVORITE_URL.replace("<server_public_key>", prefs?.getString("ServerPublicKey", "")!!, true)
+            val url = apiFavoriteUrl.replace("<server_public_key>", prefs?.getString("ServerPublicKey", "")!!, true)
             return if (params[0]=="ADD") {
-                AnodeClient.APIHttpReq(url, "", "POST", true, false)
+                AnodeClient.APIHttpReq(url, "", "POST", needsAuth = true, isRetry = false)
             } else {
-                AnodeClient.APIHttpReq(url, "", "DELETE", true, false)
+                AnodeClient.APIHttpReq(url, "", "DELETE", needsAuth = true, isRetry = false)
             }
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG, "Received from $API_FAVORITE_URL: $result")
+            Log.i(LOGTAG, "Received from $apiFavoriteUrl: $result")
             if ((result.isNullOrBlank())) {
                 //
             } else {
@@ -117,16 +118,5 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
                 }
             }
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-                VPNDetailsFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(ARG_PARAM1, param1)
-                        putString(ARG_PARAM2, param2)
-                    }
-                }
     }
 }

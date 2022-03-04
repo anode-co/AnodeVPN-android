@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.annotation.SuppressLint
@@ -135,7 +137,7 @@ object AnodeClient {
         lastpostmessage = System.currentTimeMillis()
         Log.i(LOGTAG, "Posting error at $lastpostmessage")
         try {
-            val msg = messageJsonObj(mycontext, type, message).toString(1)
+            val msg = messageJsonObj(type, message).toString(1)
             val resp = APIHttpReq(API_ERROR_URL,msg, "POST", false, false)
 
             try {
@@ -234,7 +236,7 @@ object AnodeClient {
         //rename filename to anodium.log so it will be posted as current log file
         File(AnodeUtil.CJDNS_PATH+"/anodium.log").renameTo(File(AnodeUtil.CJDNS_PATH+"/tempanodium.log"))
         File(filename).renameTo(File(AnodeUtil.CJDNS_PATH+"/anodium.log"))
-        val err = errorJsonObj(ctx, type, e).toString(1)
+        val err = errorJsonObj(type, e).toString(1)
         //rename it back
         //anodium.log back to filename
         File(AnodeUtil.CJDNS_PATH+"/anodium.log").renameTo(File(filename))
@@ -245,7 +247,7 @@ object AnodeClient {
 
     fun storeError(ctx: Context, type: String, e: Throwable) {
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
-        val err = errorJsonObj(ctx, type, e).toString(1)
+        val err = errorJsonObj(type, e).toString(1)
         Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
         File(ctx.filesDir,fname).appendText(err)
     }
@@ -274,7 +276,7 @@ object AnodeClient {
     fun ignoreErr(l: ()->Unit) = try { l() } catch (t: Throwable) { }
 
     @Throws(JSONException::class)
-    private fun errorJsonObj(ctx: Context, type: String, err: Throwable): JSONObject {
+    private fun errorJsonObj(type: String, err: Throwable): JSONObject {
         val jsonObject = JSONObject()
         var pubkey = ""
         ignoreErr{ pubkey = AnodeUtil.getPubKey() }
@@ -334,7 +336,7 @@ object AnodeClient {
     }
 
     @Throws(JSONException::class)
-    private fun messageJsonObj(ctx: Context, type: String, message:String): JSONObject {
+    private fun messageJsonObj(type: String, message:String): JSONObject {
         val jsonObject = JSONObject()
         var pubkey = ""
         ignoreErr{ pubkey = AnodeUtil.getPubKey() }
@@ -413,8 +415,8 @@ object AnodeClient {
                     //Checking for update
                     //Get assets
                     val assets = response.getJSONArray("assets")
-                    var url = ""
-                    var filesize: Long = 0
+                    var url: String
+                    var filesize: Long
                     //Get apk from assets
                     for (i in 0 until assets.length()) {
                         if (assets.getJSONObject(i).getString("name").endsWith(".apk")) {
@@ -643,7 +645,7 @@ object AnodeClient {
         runnableConnection.init(h)
         CjdnsSocket.IpTunnel_removeAllConnections()
         //Connect to Internet
-        CjdnsSocket.IpTunnel_connectTo(node)
+        CjdnsSocket.ipTunnelConnectTo(node)
         var tries = 0
         //Check for ip address given by cjdns try for 20 times, 10secs
         Thread(Runnable {
@@ -908,7 +910,7 @@ object AnodeClient {
                 }
             } else if (result.isNullOrEmpty()) {
                 //TODO:???
-            }else if (result != null) {
+            }else {
                 showToast(result)
             }
         }
@@ -954,7 +956,7 @@ object AnodeClient {
         }
     }
 
-    fun eventLog(ctx:Context, message: String) {
+    fun eventLog(message: String) {
         val logFile = File(AnodeUtil.CJDNS_PATH+"/anodium-events.log")
         //Do not log if file is bigger than 1MB
         if (logFile.length() > 1000000) return

@@ -1,7 +1,7 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
-import android.app.Activity
-import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -13,8 +13,8 @@ import org.json.JSONArray
 class VpnListActivity : AppCompatActivity() {
     var dataList = ArrayList<HashMap<String, String>>()
     var adapter: VPNListAdapter? = null
-    private val API_VERSION = "0.3"
-    private val API_SERVERS_LIST = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
+    private val apiVersion = "0.3"
+    private val apiServersList = "https://vpn.anode.co/api/$apiVersion/vpn/servers/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +39,7 @@ class VpnListActivity : AppCompatActivity() {
                 return false
             }
         })
-        AnodeClient.eventLog(baseContext,"Activity: VPN List created")
+        AnodeClient.eventLog("Activity: VPN List created")
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -47,27 +47,20 @@ class VpnListActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            //TODO:???
-        }
-    }
-
-    inner class fetchVpnServers() : AsyncTask<String, Void, String>() {
+    inner class fetchVpnServers : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            try {
+            return try {
                 AnodeClient.statustv = findViewById(R.id.textview_status)
-                var url = API_SERVERS_LIST
+                var url = apiServersList
                 if (params.isNotEmpty()) url = params[0].toString()
                 //return URL(url).readText(Charsets.UTF_8)
-                return AnodeClient.APIHttpReq(url,"", "GET", true, false)
+                AnodeClient.APIHttpReq(url,"", "GET", needsAuth = true, isRetry = false)
             } catch (e: Exception) {
                 Log.e(LOGTAG, "Error: "+e.message)
                 runOnUiThread {
                     Toast.makeText(baseContext, "Error: "+e.message, Toast.LENGTH_LONG).show()
                 }
-                return null
+                null
             }
         }
 
@@ -98,7 +91,7 @@ class VpnListActivity : AppCompatActivity() {
                 dataList.add(map)
             }
             //Sort list by country
-            dataList.sortWith(compareBy {it.get("countryCode")})
+            dataList.sortWith(compareBy { it["countryCode"] })
             adapter = VPNListAdapter(this@VpnListActivity,supportFragmentManager, dataList)
             findViewById<ListView>(R.id.listview_servers).adapter = adapter
         }

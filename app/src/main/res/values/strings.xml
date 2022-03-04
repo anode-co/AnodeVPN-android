@@ -53,6 +53,7 @@
     <string name="label_passwordRecoveryMsg">"We've sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
     <string name="label_email_verification">"We 've sent a verification link to your email."</string>
     <string name="label_rating">"How is your VPN service?"</string>
+    <string name="email_verification_message">We 've sent a verification link to your email.\nPlease check your email.</string>
     <!-- CONTENT DESCIPTIONS -->
     <string name="contentdescription_password_image">Password image</string>
     <string name="contentdescription_login_image">Login image</string>
@@ -98,8 +99,8 @@
     <string name="send_pkt_title">Send Transaction</string>
     <string name="send_pkt_receivers_address">Receiver\'s PKT address</string>
     <string name="send_pkt_amount">PKT amount</string>
-    <string name="send_pkt_password">Account password</string>
-    <string name="send_pkt_send_payment">Send payment</string>
+    <string name="send_pkt_password">Wallet password</string>
+    <string name="send_pkt_send_payment">Send PKT</string>
     <!-- Status bar states-->
     <string name="status_connected">VPN connected</string>
     <string name="status_disconnected">VPN disconnected</string>
@@ -125,6 +126,9 @@
     <string name="wallet_status_syncing_headers">Syncing headers:</string>
     <string name="wallet_status_syncing_transactions"> Finding transactions:</string>
     <string name="wallet_status_synced">Block: </string>
-    <string name="wallet_status_unlocking">Unlocking wallet...</string>
+    <string name="wallet_status_unlocking">Unlocking wallet…</string>
     <string name="wallet_status_unlock">Wallet unlocked</string>
+    <string name="minutes_ago">minutes ago</string>
+    <string name="minute_ago">minute ago</string>
+    <string name="seconds_ago">seconds ago</string>
 </resources>

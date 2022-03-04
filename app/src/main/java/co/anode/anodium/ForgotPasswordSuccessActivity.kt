@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.annotation.SuppressLint
@@ -30,7 +32,7 @@ class ForgotPasswordSuccessActivity : AppCompatActivity() {
 
         val buttonGoToEmail = findViewById<Button>(R.id.buttonGoToEmail)
         buttonGoToEmail.setOnClickListener() {
-            AnodeClient.eventLog(baseContext,"Button: Go to email pressed")
+            AnodeClient.eventLog("Button: Go to email pressed")
             val emailClient = Intent(Intent.ACTION_MAIN)
             emailClient.addCategory(Intent.CATEGORY_APP_EMAIL)
             startActivity(emailClient)
@@ -38,14 +40,14 @@ class ForgotPasswordSuccessActivity : AppCompatActivity() {
 
         val buttonResendEmail = findViewById<Button>(R.id.buttonResendEmail)
         buttonResendEmail.setOnClickListener() {
-            AnodeClient.eventLog(baseContext,"Button: Resend email pressed")
+            AnodeClient.eventLog("Button: Resend email pressed")
             resendEmail().execute(url)
         }
-        AnodeClient.eventLog(baseContext,"Activity: Forgot password success created")
+        AnodeClient.eventLog("Activity: Forgot password success created")
     }
 
     inner class resendEmail() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+        override fun doInBackground(vararg params: String?): String {
             val url = params[0]
             val resp = AnodeClient.APIHttpReq(url!!, "", "POST", true, false)
             Log.i(LOGTAG, resp)
@@ -128,7 +130,7 @@ class passwordResetURL(context: Context?, handler: Handler?) : AsyncTask<String,
                         }
                         val changePasswordActivity = Intent(c, ChangePasswordActivity::class.java)
                         changePasswordActivity.putExtra("ForgotPassword", true)
-                        changePasswordActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+                        changePasswordActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         c?.startActivity(changePasswordActivity)
                     }
                 }

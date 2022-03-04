@@ -21,14 +21,14 @@ import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONObject
 
 class WalletStatsActivity : AppCompatActivity() {
-    var updating = true
-    lateinit var apiController: APIController
-    lateinit var h: Handler
+    private var updating = true
+    private lateinit var apiController: APIController
+    private lateinit var h: Handler
     private val refreshValuesInterval: Long = 10000
     private var walletUnlocked = false
     private var balanceLastTimeUpdated: Long = 0
     private var passwordPromptActive = false
-    lateinit var myBalance: TextView
+    private lateinit var myBalance: TextView
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +55,7 @@ class WalletStatsActivity : AppCompatActivity() {
 
         //Initializing UI components
         val myaddress = findViewById<TextView>(R.id.wstats_address)
-        myBalance = findViewById<TextView>(R.id.wstats_balance)
+        myBalance = findViewById(R.id.wstats_balance)
         val peersExpandbutton = findViewById<TextView>(R.id.peers_expand)
         val bannedExpandbutton = findViewById<TextView>(R.id.banned_expand)
         val queriesExpandbutton = findViewById<TextView>(R.id.queries_expand)
@@ -225,28 +225,28 @@ class WalletStatsActivity : AppCompatActivity() {
         )
         input.layoutParams = lp
         builder.setView(input)
-        input.transformationMethod = PasswordTransformationMethod.getInstance();
-        builder.setPositiveButton("Submit",
-            DialogInterface.OnClickListener { dialog, _ ->
-                password = input.text.toString()
-                dialog.dismiss()
-                if (password.isNotEmpty()) {
-                    passwordPromptActive = false
-                    //write password to encrypted shared preferences
-                    AnodeUtil.storePassword(password)
-                    //reset pkt wallet address
-                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                    prefs.edit().putString("lndwalletaddress", "").apply()
-                    //try unlocking the wallet with new password
-                    unlockWallet()
-                }
-            })
-
-        builder.setNegativeButton("Cancel",
-            DialogInterface.OnClickListener { dialog, _ ->
+        input.transformationMethod = PasswordTransformationMethod.getInstance()
+        builder.setPositiveButton("Submit"
+        ) { dialog, _ ->
+            password = input.text.toString()
+            dialog.dismiss()
+            if (password.isNotEmpty()) {
                 passwordPromptActive = false
-                dialog.dismiss()
-            })
+                //write password to encrypted shared preferences
+                AnodeUtil.storePassword(password)
+                //reset pkt wallet address
+                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                prefs.edit().putString("lndwalletaddress", "").apply()
+                //try unlocking the wallet with new password
+                unlockWallet()
+            }
+        }
+
+        builder.setNegativeButton("Cancel"
+        ) { dialog, _ ->
+            passwordPromptActive = false
+            dialog.dismiss()
+        }
         val alert: AlertDialog = builder.create()
         alert.show()
     }

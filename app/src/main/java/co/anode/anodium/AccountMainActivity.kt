@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.annotation.SuppressLint
@@ -45,8 +47,8 @@ class AccountMainActivity : AppCompatActivity() {
         signIn.text = link
 
         val skipButton: Button = findViewById(R.id.buttonSkip)
-        skipButton.setOnClickListener() {
-            AnodeClient.eventLog(baseContext, "Button: SKIP pressed")
+        skipButton.setOnClickListener {
+            AnodeClient.eventLog( "Button: SKIP pressed")
             setResult(0)
             finish()
         }
@@ -54,21 +56,21 @@ class AccountMainActivity : AppCompatActivity() {
         //val signInLink = findViewById<TextView>(R.id.textSignIn)
         signIn.movementMethod = object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
-                AnodeClient.eventLog(baseContext, "Button: Sing in Link pressed")
+                AnodeClient.eventLog( "Button: Sing in Link pressed")
                 val signInActivity = Intent(applicationContext, SignInActivity::class.java)
                 startActivityForResult(signInActivity, 0)
             }
         }
-        AnodeClient.eventLog(baseContext, "Activity: AcccountMain created")
+        AnodeClient.eventLog("Activity: AcccountMain created")
 
     }
 
     override fun onStart() {
         super.onStart()
         val createAccountButton: Button = findViewById(R.id.buttonCreateAccount)
-        createAccountButton.setOnClickListener() {
-            AnodeClient.eventLog(baseContext, "Button: CREATE ACCOUNT pressed")
-            val emailPattern: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        createAccountButton.setOnClickListener {
+            AnodeClient.eventLog("Button: CREATE ACCOUNT pressed")
+            val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
             val email = findViewById<EditText>(R.id.editTextTextEmailAddress)
             //val passwordPattern: String = "(?=.*\\d)(?=.*[A-Za-z]).{9,}"
             val password = findViewById<EditText>(R.id.editTextTextPassword)
@@ -106,7 +108,7 @@ class AccountMainActivity : AppCompatActivity() {
             val line = layout.getLineForVertical(y)
             val off = layout.getOffsetForHorizontal(line, x.toFloat())
             val link = buffer.getSpans(off, off, URLSpan::class.java)
-            if (link.size != 0) {
+            if (link.isNotEmpty()) {
                 onLinkClick(link[0].url)
             }
             return true
@@ -116,7 +118,7 @@ class AccountMainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        AnodeClient.eventLog(baseContext, "Button: Back pressed")
+        AnodeClient.eventLog("Button: Back pressed")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         with(prefs.edit()) {
             putBoolean("SingUp_BackPressed", true)
@@ -132,8 +134,8 @@ class AccountMainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    inner class fieldRegistration() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    inner class fieldRegistration : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String {
             val jsonObject = JSONObject()
             val username = params[2]
             var url = ""
@@ -155,7 +157,7 @@ class AccountMainActivity : AppCompatActivity() {
                 }
             }
             //val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
-            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", true, false)
+            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -173,7 +175,6 @@ class AccountMainActivity : AppCompatActivity() {
                     if (jsonObj.has("status")) {//initial password response
                         val msg = jsonObj.getString("message")
                         Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                    } else if (jsonObj.has("passwordRecoveryToken")) {
                     } else if (jsonObj.has("accountConfirmationStatusUrl")) { //initial email response
                         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                         with(prefs.edit()) {

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.Manifest
@@ -329,7 +331,7 @@ class MainActivity : AppCompatActivity() {
         val buttonconnectvpns = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         when(state) {
             buttonStateDisconnected -> {
-                AnodeClient.eventLog(baseContext, "Main button status DISCONNECTING")
+                AnodeClient.eventLog("Main button status DISCONNECTING")
                 h.removeCallbacks(VpnConnectionWaitingDialog)
                 //Status bar
                 status.text = ""
@@ -339,7 +341,7 @@ class MainActivity : AppCompatActivity() {
                 buttonconnectvpns.alpha = 1.0f
             }
             buttonStateConnecting -> {
-                AnodeClient.eventLog(baseContext, "Main button status for CONNECTING")
+                AnodeClient.eventLog("Main button status for CONNECTING")
                 //Start 30sec timer
                 h.postDelayed(VpnConnectionWaitingDialog, vpnConnectionWaitingInterval)
                 status.text = resources.getString(R.string.status_connecting)
@@ -347,7 +349,7 @@ class MainActivity : AppCompatActivity() {
                 buttonconnectvpns.alpha = 0.5f
             }
             buttonStateConnected -> {
-                AnodeClient.eventLog(baseContext, "Main button status for CONNECTED")
+                AnodeClient.eventLog("Main button status for CONNECTED")
                 h.removeCallbacks(VpnConnectionWaitingDialog)
                 status.text = ""
                 buttonconnectvpns.alpha = 1.0f
@@ -390,7 +392,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        AnodeClient.eventLog(baseContext, "Resume MainActivity")
+        AnodeClient.eventLog("Resume MainActivity")
         AnodeClient.statustv = findViewById(R.id.textview_status)
         uiInForeground = true
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
@@ -446,7 +448,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         uiInForeground = true
-        AnodeClient.eventLog(baseContext, "Application launched")
+        AnodeClient.eventLog("Application launched")
     }
 
     override fun onPause() {
@@ -492,7 +494,7 @@ class MainActivity : AppCompatActivity() {
             return true
         } else if (id == R.id.action_logout) {
             Log.i(LOGTAG, "Log out")
-            AnodeClient.eventLog(baseContext, "Menu: Log out selected")
+            AnodeClient.eventLog("Menu: Log out selected")
             AnodeClient.LogoutUser().execute()
             //On Log out start sign in activity
             //val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)

@@ -10,8 +10,6 @@ import android.widget.EditText
 import android.widget.Toast
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
-import com.google.gson.JsonArray
-import com.google.protobuf.ByteString
 import org.json.JSONArray
 import org.json.JSONObject
 

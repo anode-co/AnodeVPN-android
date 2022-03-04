@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.content.Context
@@ -45,7 +47,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         signIn.text = link
         signIn.movementMethod = object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
-                AnodeClient.eventLog(baseContext,"Button: Sing in link pressed")
+                AnodeClient.eventLog("Button: Sing in link pressed")
                 val signInActivity = Intent(applicationContext, SignInActivity::class.java)
                 startActivityForResult(signInActivity, 0)
             }
@@ -53,13 +55,13 @@ class AccountNicknameActivity : AppCompatActivity() {
 
         val generateUsername: Button = findViewById(R.id.button_generateusername)
         generateUsername.setOnClickListener {
-            AnodeClient.eventLog(baseContext,"Button: Generate username pressed")
+            AnodeClient.eventLog("Button: Generate username pressed")
             UsernameGenerate().execute()
         }
 
         val continueButton: Button = findViewById(R.id.button_continue)
         continueButton.setOnClickListener {
-            AnodeClient.eventLog(baseContext,"Button: Continue pressed")
+            AnodeClient.eventLog("Button: Continue pressed")
             username = usernameText?.text.toString()
             if (username.isEmpty()) {
                 Toast.makeText(baseContext, "Please enter or generate a username", Toast.LENGTH_SHORT).show()
@@ -67,7 +69,7 @@ class AccountNicknameActivity : AppCompatActivity() {
                 UsernameRegistration(this).execute(username)
             }
         }
-        AnodeClient.eventLog(baseContext,"Activity: Nickname created")
+        AnodeClient.eventLog("Activity: Nickname created")
     }
 
     override fun onStart() {
@@ -88,7 +90,7 @@ class AccountNicknameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        AnodeClient.eventLog(baseContext,"Button: Back pressed")
+        AnodeClient.eventLog("Button: Back pressed")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         with (prefs.edit()) {
             putBoolean("NicknameActivity_BackPressed",true)
@@ -129,7 +131,7 @@ class AccountNicknameActivity : AppCompatActivity() {
     private inner class UsernameGenerate : AsyncTask<String, Void, String>() {
 
         override fun doInBackground(vararg params: String?): String {
-            val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", true, false)
+            val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }
@@ -154,7 +156,7 @@ class AccountNicknameActivity : AppCompatActivity() {
             } else {
                 val jsonObj = JSONObject(result)
                 if (jsonObj.has("username")) {
-                    usernameText?.post(Runnable { usernameText?.setText(jsonObj.getString("username")) })
+                    usernameText?.post { usernameText?.setText(jsonObj.getString("username")) }
                 }
             }
         }
@@ -168,7 +170,7 @@ class AccountNicknameActivity : AppCompatActivity() {
             jsonObject.accumulate("username", params[0])
             val activity = activityReference.get()
             if (activity == null || activity.isFinishing) return ""
-            val resp = AnodeClient.APIHttpReq(activity.apiUsernameRegistrationURL, jsonObject.toString(), "POST", true, false)
+            val resp = AnodeClient.APIHttpReq(activity.apiUsernameRegistrationURL, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }

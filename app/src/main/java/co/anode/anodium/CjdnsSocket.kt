@@ -3,7 +3,6 @@ package co.anode.anodium
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
-import kotlinx.coroutines.delay
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.InetAddress
@@ -58,7 +57,7 @@ object CjdnsSocket {
         do {
             av = istr.available()
             Thread.sleep(50)
-            tries++;
+            tries++
         } while ((av < 1) && (tries < 100))
         val b = ByteArray(av)
         istr.read(b)
@@ -174,7 +173,6 @@ object CjdnsSocket {
     fun getIpTunnelConnectionIDs(): MutableList<Int> {
         var connection: Benc.Obj
         val out:MutableList<Int> = mutableListOf()
-        var i = 0
         val list= call("IpTunnel_listConnections", null)
         for (i in 0 until list["connections"].size()) {
             try {
@@ -192,7 +190,6 @@ object CjdnsSocket {
     fun IpTunnel_listConnections(): ArrayList<Benc.Bdict> {
         var connection: Benc.Obj
         val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
-        var i = 0
         val list= call("IpTunnel_listConnections", null)
         for (i in 0 until list["connections"].size()) {
             try {
@@ -209,17 +206,17 @@ object CjdnsSocket {
 
     fun getNumberofEstablishedPeers(): Int {
         val peers:ArrayList<Benc.Bdict> = InterfaceController_peerStats()
-        var totalestablishedpeers: Int = 0
+        var totalSstablishedPeers = 0
         for (i in 0 until peers.count()) {
             if (peers[i]["state"].toString() == "\"ESTABLISHED\"") {
-                totalestablishedpeers++
+                totalSstablishedPeers++
             }
         }
-        return totalestablishedpeers
+        return totalSstablishedPeers
     }
 
-    fun IpTunnel_connectTo(node: String) {
-        Log.i(LOGTAG,"IpTunnel_connectTo: $node")
+    fun ipTunnelConnectTo(node: String) {
+        Log.i(LOGTAG,"ipTunnelConnectTo: $node")
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
@@ -290,7 +287,7 @@ object CjdnsSocket {
 
     fun trimBitsforRoute(addr: String, prefix: Int): String {
         //Log.i(LOGTAG, "trimBitsforRoute $addr with $prefix")
-        var a = InetAddress.getByName(addr)
+        val a = InetAddress.getByName(addr)
         val bytes = a.address
         thread {
             if ((prefix shr 3) >= bytes.size) {
@@ -305,18 +302,9 @@ object CjdnsSocket {
         return InetAddress.getByAddress(bytes).hostAddress
     }
 
-    fun isCjdnsConnected(): Boolean {
-        val conn = getNumberofEstablishedPeers()
-        return conn > 0
-    }
-
     fun UDPInterface_beginConnection(publickey:String, ip:String, port:Int, password:String,login:String) {
-        var peerName = ""
         val address = "$ip:$port"
-        call("UDPInterface_beginConnection", Benc.dict("publicKey",publickey,"address", address,"peerName", peerName, "password",password,"login", login, "interfaceNumber",0))
-        //call("UDPInterface_beginConnection", Benc.dict("publicKey","9syly12vuwr1jh5qpktmjc817y38bc9ytsvs8d5qwcnvn6c2lwq0.k","address", "94.23.31.145:17102","peerName", peerName, "password","wwbn34yhxhtubtghq6y2pksyt7c9mm8","login", "cjd-snode", "interfaceNumber",0))
-        //call("UDPInterface_beginConnection", Benc.dict("publicKey","cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k","address", "198.167.222.70:54673","peerName", peerName, "password","use_more_bandwidth","login", "ipredator.se/cjdns_public_node", "interfaceNumber",0))
-        //call("UDPInterface_beginConnection", Benc.dict("publicKey","znrj10d4s005qyg2wg2sx54k4yrqjxyvkc1pz4vqfzxdv5sxvds0.k","address", "188.165.200.79:17102","peerName", peerName, "password","gxv7zc4nyrcqc10wn5yn8pzsl7cs413","login", "ratty.cjdns.fr", "interfaceNumber",0))
+        call("UDPInterface_beginConnection", Benc.dict("publicKey",publickey,"address", address,"peerName", "", "password",password,"login", login, "interfaceNumber",0))
     }
 
     fun SessionManager_sessionStatsByIP(address:String) {
@@ -329,7 +317,7 @@ object CjdnsSocket {
 
     fun SwitchPinger_ping(path:String) {
         Log.i(LOGTAG, "SwitchPinger_ping for path: "+path)
-        val result = call("SwitchPinger_ping", Benc.dict("path",path))
+        call("SwitchPinger_ping", Benc.dict("path",path))
     }
 }
 

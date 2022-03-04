@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.content.Context
@@ -13,8 +15,8 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class ForgotPasswordActivity : AppCompatActivity() {
-    private val API_VERSION = "0.3"
-    private var API_FORGOTPASSWORD_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<email_or_username>/password/"
+    private val apiVersion = "0.3"
+    private var apiForgotPasswordUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<email_or_username>/password/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,10 +27,10 @@ class ForgotPasswordActivity : AppCompatActivity() {
         actionbar!!.title = getString(R.string.title_forgotpassword)
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-        val emailPattern: String = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-        val buttonccontinue = findViewById<Button>(R.id.buttonForgotPasswordContinue)
-        buttonccontinue.setOnClickListener() {
-            AnodeClient.eventLog(baseContext,"Button: Continue pressed")
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        val buttonContinue = findViewById<Button>(R.id.buttonForgotPasswordContinue)
+        buttonContinue.setOnClickListener {
+            AnodeClient.eventLog("Button: Continue pressed")
             val email = findViewById<EditText>(R.id.editTextForgotPassEmailAddress)
             if (email.text.isNullOrEmpty()) {
                 Toast.makeText(baseContext, "Please fill in email field", Toast.LENGTH_SHORT).show()
@@ -38,8 +40,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 forgotPassword().execute(email.text.toString())
             }
         }
-
-        AnodeClient.eventLog(baseContext,"Activity: Forgot password created")
+        AnodeClient.eventLog("Activity: Forgot password created")
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -56,11 +57,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
         finish()
     }
 
-    inner class forgotPassword() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    inner class forgotPassword : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String {
             val email = params[0]
-            API_FORGOTPASSWORD_URL = email?.let { API_FORGOTPASSWORD_URL.replace("<email_or_username>", it,true) }.toString()
-            val resp = AnodeClient.APIHttpReq(API_FORGOTPASSWORD_URL, "", "POST", true, false)
+            apiForgotPasswordUrl = email?.let { apiForgotPasswordUrl.replace("<email_or_username>", it,true) }.toString()
+            val resp = AnodeClient.APIHttpReq(apiForgotPasswordUrl, "", "POST", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }

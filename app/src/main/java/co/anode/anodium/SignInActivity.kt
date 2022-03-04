@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package co.anode.anodium
 
 import android.content.Context
@@ -20,14 +22,13 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class SignInActivity : AppCompatActivity() {
-    private val API_VERSION = "0.3"
-    private var API_SIGNIN_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize/"
-    private var API_USERNAME_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/"
+    private val apiVersion = "0.3"
+    private var apiSignInUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/authorize/"
+    private var apiUsernameRegistrationUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
-
         //actionbar
         val actionbar = supportActionBar
         //set actionbar title
@@ -40,31 +41,30 @@ class SignInActivity : AppCompatActivity() {
         signup.movementMethod = LinkMovementMethod.getInstance()
         signup.text = singupspanlink
 
-        signup.setMovementMethod(object : TextViewLinkHandler() {
+        signup.movementMethod = object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
-                AnodeClient.eventLog(baseContext,"Button: Sign up pressed")
+                AnodeClient.eventLog("Button: Sign up pressed")
                 val nicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
                 startActivityForResult(nicknameActivity, 0)
             }
-        })
+        }
 
-        val forgotpassword: TextView = findViewById(R.id.textForgotPassword)
-        val forgotpasswordpanlink: Spanned = HtmlCompat.fromHtml("<a href='#'>forgot password?</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-        forgotpassword.movementMethod = LinkMovementMethod.getInstance()
-        forgotpassword.text = forgotpasswordpanlink
+        val forgotPassword: TextView = findViewById(R.id.textForgotPassword)
+        val forgotPasswordpanlink: Spanned = HtmlCompat.fromHtml("<a href='#'>forgot password?</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        forgotPassword.movementMethod = LinkMovementMethod.getInstance()
+        forgotPassword.text = forgotPasswordpanlink
 
-        forgotpassword.setMovementMethod(object : TextViewLinkHandler() {
+        forgotPassword.movementMethod = object : TextViewLinkHandler() {
             override fun onLinkClick(url: String?) {
-                AnodeClient.eventLog(baseContext,"Button: Forgot password pressed")
-                val forgotpasswordActivity = Intent(applicationContext, ForgotPasswordActivity::class.java)
-                //val forgotpasswordActivity = Intent(applicationContext, TestActivity2::class.java)
-                startActivityForResult(forgotpasswordActivity, 0)
+                AnodeClient.eventLog("Button: Forgot password pressed")
+                val forgotPasswordActivity = Intent(applicationContext, ForgotPasswordActivity::class.java)
+                startActivityForResult(forgotPasswordActivity, 0)
             }
-        })
+        }
 
         val buttonSignin = findViewById<Button>(R.id.buttonSingIn)
-        buttonSignin.setOnClickListener() {
-            AnodeClient.eventLog(baseContext,"Button: Sign in pressed")
+        buttonSignin.setOnClickListener {
+            AnodeClient.eventLog("Button: Sign in pressed")
             val email = findViewById<EditText>(R.id.editTextTextEmailAddress)
             val password = findViewById<EditText>(R.id.editTextTextPassword)
             if (email.text.isNullOrEmpty()) {
@@ -75,7 +75,7 @@ class SignInActivity : AppCompatActivity() {
                 signIn().execute(email.text.toString(), password.text.toString())
             }
         }
-        AnodeClient.eventLog(baseContext,"Activity: Sign in created")
+        AnodeClient.eventLog("Activity: Sign in created")
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -84,7 +84,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        AnodeClient.eventLog(baseContext,"Button: Back pressed")
+        AnodeClient.eventLog("Button: Back pressed")
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         with (prefs.edit()) {
             putBoolean("SignInActivity_BackPressed",true)
@@ -106,7 +106,7 @@ class SignInActivity : AppCompatActivity() {
             val line = layout.getLineForVertical(y)
             val off = layout.getOffsetForHorizontal(line, x.toFloat())
             val link = buffer.getSpans(off, off, URLSpan::class.java)
-            if (link.size != 0) {
+            if (link.isNotEmpty()) {
                 onLinkClick(link[0].url)
             }
             return true
@@ -128,18 +128,18 @@ class SignInActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    inner class isUserRegistered() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    inner class isUserRegistered : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String {
             val jsonObject = JSONObject()
             jsonObject.accumulate("username", params[0])
-            val resp = AnodeClient.APIHttpReq(API_USERNAME_REGISTRATION_URL, jsonObject.toString(), "POST", true, false)
+            val resp = AnodeClient.APIHttpReq(apiUsernameRegistrationUrl, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_USERNAME_REGISTRATION_URL: $result")
+            Log.i(LOGTAG,"Received from $apiUsernameRegistrationUrl: $result")
             if ((result.isNullOrBlank())) {
                 //Do nothing
             } else if (result.contains("ERROR: ")) {
@@ -167,8 +167,8 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    inner class signIn() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
+    inner class signIn : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String?): String {
             val jsonObject = JSONObject()
             jsonObject.accumulate("emailOrUsername", params[0])
             jsonObject.accumulate("password", params[1])
@@ -177,7 +177,7 @@ class SignInActivity : AppCompatActivity() {
                 putString("username", params[0])
                 commit()
             }
-            val resp = AnodeClient.APIHttpReq(API_SIGNIN_URL, jsonObject.toString(), "POST", true, false)
+            val resp = AnodeClient.APIHttpReq(apiSignInUrl, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
             Log.i(LOGTAG, resp)
             return resp
         }

@@ -4,17 +4,15 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.view.View
 import android.widget.TextView
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 
 class WalletInfoActivity : AppCompatActivity() {
-    lateinit var apiController: APIController
-    lateinit var h: Handler
+    private lateinit var apiController: APIController
+    private lateinit var h: Handler
     private val refreshValuesInterval: Long = 10000
-    lateinit var infotext:TextView
+    private lateinit var infotext:TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,11 +41,6 @@ class WalletInfoActivity : AppCompatActivity() {
     }
 
     private val getPldInfo = Runnable { getInfo() }
-
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onResume() {
         super.onResume()
         h.postDelayed(getPldInfo, 0)
