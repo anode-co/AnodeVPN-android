@@ -1,13 +1,12 @@
-@file:Suppress("DEPRECATION")
-
 package co.anode.anodium
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Spannable
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -22,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.concurrent.Executors
 
 
 class AccountMainActivity : AppCompatActivity() {
@@ -65,8 +65,8 @@ class AccountMainActivity : AppCompatActivity() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         val createAccountButton: Button = findViewById(R.id.buttonCreateAccount)
         createAccountButton.setOnClickListener {
             AnodeClient.eventLog("Button: CREATE ACCOUNT pressed")
@@ -81,11 +81,59 @@ class AccountMainActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, "Email is not valid", Toast.LENGTH_SHORT).show()
             }
             else {
+                val executor = Executors.newSingleThreadExecutor()
+                val handler = Handler(Looper.getMainLooper())
                 AnodeClient.mycontext = baseContext
                 val username = prefs!!.getString("username", "")
-                if (password.text.toString().isNotEmpty())
-                    fieldRegistration().execute("password", password.text.toString(), username)
-                fieldRegistration().execute("email", email.text.toString(), username)
+                var response = ""
+                if (password.text.toString().isNotEmpty()) {
+                    executor.execute {
+                        if (username != null) {
+                            response = registration(username,password.text.toString(),"")
+                        }
+                        handler.post {
+                            registrationHandler(response)
+                        }
+                    }
+                }
+                executor.execute {
+                    if (username != null) {
+                        response = registration(username,"",email.text.toString())
+                    }
+                    handler.post {
+                        registrationHandler(response)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registrationHandler(response: String) {
+        Log.i(LOGTAG, "Received: $response")
+        if ((response.isBlank())) {
+            finish()
+        } else if (response.contains("ERROR: ")) {
+            Toast.makeText(baseContext, "Error: $response", Toast.LENGTH_SHORT).show()
+        } else {
+            try {
+                val jsonObj = JSONObject(response)
+                if (jsonObj.has("status")) {//initial password response
+                    val msg = jsonObj.getString("message")
+                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                } else if (jsonObj.has("accountConfirmationStatusUrl")) { //initial email response
+                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                    with(prefs.edit()) {
+                        putBoolean("SignedIn", true)
+                        putBoolean("Registered", true)
+                        commit()
+                    }
+                    val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
+                    val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
+                    verificationActivity.putExtra("accountConfirmationStatusUrl", accountConfirmation)
+                    startActivityForResult(verificationActivity, 0)
+                }
+            }catch (e: JSONException) {
+                Toast.makeText(baseContext, response, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -134,63 +182,23 @@ class AccountMainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    inner class fieldRegistration : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String {
-            val jsonObject = JSONObject()
-            val username = params[2]
-            var url = ""
-            if (username.isNullOrEmpty()) {
-                Log.i(LOGTAG, "Error empty username")
-                return ""
-            }
-            when {
-                params[0] == "email" -> {
-                    url = apiEmailRegistrationUrl.replace("<username>", username, false)
-                    jsonObject.accumulate("email", params[1])
-                }
-                params[0] == "password" -> {
-                    url = apiPasswordRegistrationUrl.replace("<username>", username, false)
-                    jsonObject.accumulate("password", params[1])
-                }
-                else -> {
-                    Log.i(LOGTAG, "Error unknown field: ${params[0]}")
-                }
-            }
-            //val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
-            val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
-            Log.i(LOGTAG, resp)
-            return resp
+    private fun registration(username:String, password:String, email: String): String {
+        val jsonObject = JSONObject()
+        var url = ""
+        if (username.isEmpty()) {
+            Log.i(LOGTAG, "Error empty username")
+            return ""
         }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.i(LOGTAG, "Received: $result")
-            if ((result.isNullOrBlank())) {
-                finish()
-            } else if (result.contains("ERROR: ")) {
-                Toast.makeText(baseContext, "Error: $result", Toast.LENGTH_SHORT).show()
-            } else {
-                try {
-                    val jsonObj = JSONObject(result)
-                    if (jsonObj.has("status")) {//initial password response
-                        val msg = jsonObj.getString("message")
-                        Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                    } else if (jsonObj.has("accountConfirmationStatusUrl")) { //initial email response
-                        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                        with(prefs.edit()) {
-                            putBoolean("SignedIn", true)
-                            putBoolean("Registered", true)
-                            commit()
-                        }
-                        val accountConfirmation = jsonObj.getString("accountConfirmationStatusUrl")
-                        val verificationActivity = Intent(applicationContext, VerificationActivity::class.java)
-                        verificationActivity.putExtra("accountConfirmationStatusUrl", accountConfirmation)
-                        startActivityForResult(verificationActivity, 0)
-                    }
-                }catch (e: JSONException) {
-                    Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
-                }
-            }
+        if (email.isNotEmpty()) {
+            url = apiEmailRegistrationUrl.replace("<username>", username, false)
+            jsonObject.accumulate("email", email)
+        } else if (password.isNotEmpty()) {
+            url = apiPasswordRegistrationUrl.replace("<username>", username, false)
+            jsonObject.accumulate("password", password)
         }
+        //val resp = AnodeClient.httpAuthReq(url, jsonObject.toString(), "POST")
+        val resp = AnodeClient.APIHttpReq(url, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
+        Log.i(LOGTAG, resp)
+        return resp
     }
 }
