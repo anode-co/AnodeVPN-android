@@ -65,6 +65,14 @@ class WalletActivity : AppCompatActivity() {
         } else if (id == R.id.action_close_wallet) {
             finish()
             return true
+        } else if (id == R.id.action_wallet_info) {
+            val infoWalletActivity = Intent(this, WalletInfoActivity::class.java)
+            startActivity(infoWalletActivity)
+            return true
+        } else if (id == R.id.action_wallet_debug) {
+            val debugWalletActivity = Intent(this, DebugWalletActivity::class.java)
+            startActivity(debugWalletActivity)
+            return true
         } else {
             super.onOptionsItemSelected(item)
             return false
