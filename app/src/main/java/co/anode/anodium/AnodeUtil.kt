@@ -164,14 +164,16 @@ object AnodeUtil {
                 pld_pb.waitFor()
                 isPldRunning = false
                 //Get last 100 lines from log and post it
-                val pldLogFile = File(CJDNS_PATH+"/"+PLD_LOG)
-                var pldLines = pldLogFile.readLines()
-                if (pldLines.size > 100) {
-                    pldLines = pldLines.drop(pldLines.size - 100)
+                val pldLogFile = File(CJDNS_PATH + "/" + PLD_LOG)
+                if (pldLogFile.exists()) {
+                    var pldLines = pldLogFile.readLines()
+                    if (pldLines.size > 100) {
+                        pldLines = pldLines.drop(pldLines.size - 100)
+                    }
+                    AnodeClient.httpPostMessage("lnd", pldLines.toString())
+                    //Delete log file
+                    pldLogFile.delete()
                 }
-                AnodeClient.httpPostMessage("lnd", pldLines.toString())
-                //Delete log file
-                pldLogFile.delete()
                 //Wait before restarting pld
                 Thread.sleep(500)
                 launchPld()
