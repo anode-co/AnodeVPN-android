@@ -122,13 +122,13 @@
     <string name="title_activity_wallet_info">WalletInfoActivity</string>
 
     <!--Wallet Status messages-->
-    <string name="wallet_status_disconnected">Disconnected</string>
-    <string name="wallet_status_syncing_headers">Syncing headers:</string>
-    <string name="wallet_status_syncing_transactions"> Finding transactions:</string>
+    <string name="wallet_status_disconnected">Waiting for wallet startup</string>
+    <string name="wallet_status_syncing_headers">Downloading:</string>
+    <string name="wallet_status_syncing_transactions">Scanning:</string>
     <string name="wallet_status_synced">Block: </string>
     <string name="wallet_status_unlocking">Unlocking wallet…</string>
     <string name="wallet_status_unlock">Wallet unlocked</string>
-    <string name="minutes_ago">minutes ago</string>
-    <string name="minute_ago">minute ago</string>
-    <string name="seconds_ago">seconds ago</string>
+    <string name="minutes_ago">minutes old</string>
+    <string name="minute_ago">minute old</string>
+    <string name="seconds_ago">seconds old</string>
 </resources>

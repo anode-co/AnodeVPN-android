@@ -145,45 +145,32 @@ class WalletFragmentMain : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateStatusBar(peers: Int, chainTop: Int, chainHeight: Int, bHash: String, bTimestamp: Long, walletHeight: Int) {
         if (peers == 0) {
-            statusBar.text = "0 - " + getString(R.string.wallet_status_disconnected)
+            statusBar.text = getString(R.string.wallet_status_disconnected)
             statusIcon.setBackgroundResource(R.drawable.circle_red)
         } else if (chainHeight < chainTop) {
             statusIcon.setBackgroundResource(R.drawable.circle_orange)
-            val statusLink: Spanned = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_syncing_headers)+
-                " <a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>"+" of $chainTop"
-                , HtmlCompat.FROM_HTML_MODE_LEGACY)
-            statusBar.movementMethod = LinkMovementMethod.getInstance()
-            statusBar.text = statusLink
+            statusBar.text = "$peers Connections | "+getString(R.string.wallet_status_syncing_headers)+" $chainHeight/$chainTop"
         } else if (walletHeight < chainHeight){
             statusIcon.setBackgroundResource(R.drawable.circle_yellow)
-            val statusLink: Spanned = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_syncing_transactions)+
-                    " <a href='https://explorer.pkt.cash/block/$bHash'>$walletHeight</a>"+" of $chainHeight"
-                , HtmlCompat.FROM_HTML_MODE_LEGACY)
-            statusBar.movementMethod = LinkMovementMethod.getInstance()
-            statusBar.text = statusLink
+            statusBar.text = "$peers Connections | "+getString(R.string.wallet_status_syncing_transactions)+" $walletHeight/$chainHeight"
         } else if (walletHeight == chainHeight) {
-            val statusLink: Spanned
             statusIcon.setBackgroundResource(R.drawable.circle_green)
             val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
             val timeAgoText: String
             if (diffSeconds > 60) {
                 val minutes = diffSeconds / 60
                 if (minutes == (1).toLong()) {
-                    timeAgoText = " - $minutes "+getString(R.string.minute_ago)
+                    timeAgoText = "$minutes "+getString(R.string.minute_ago)
                 } else {
-                    timeAgoText = " - $minutes "+getString(R.string.minutes_ago)
+                    timeAgoText = "$minutes "+getString(R.string.minutes_ago)
                 }
                 if (diffSeconds > 1140) {//19min
                     statusIcon.setBackgroundResource(R.drawable.warning)
                 }
             } else {
-                timeAgoText = " - $diffSeconds "+getString(R.string.seconds_ago)
+                timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
             }
-            statusLink = HtmlCompat.fromHtml("$peers - " + getString(R.string.wallet_status_synced)+
-                    " <a href='https://explorer.pkt.cash/block/$bHash'>$chainHeight</a>" + timeAgoText
-                , HtmlCompat.FROM_HTML_MODE_LEGACY)
-            statusBar.movementMethod = LinkMovementMethod.getInstance()
-            statusBar.text = statusLink
+            statusBar.text = "$peers Connections | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
         }
     }
 

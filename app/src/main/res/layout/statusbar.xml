@@ -22,5 +22,6 @@
         app:layout_constraintStart_toEndOf="@+id/status_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="2dp"
         android:textColor="@color/colorPrimaryDarkText" />
 </androidx.constraintlayout.widget.ConstraintLayout>
