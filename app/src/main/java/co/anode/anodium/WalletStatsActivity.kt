@@ -26,10 +26,7 @@ class WalletStatsActivity : AppCompatActivity() {
     lateinit var h: Handler
     private val refreshValuesInterval: Long = 10000
     private var walletUnlocked = false
-    private var neutrinoSynced = false
-    private var myPKTAddress = ""
     private var balanceLastTimeUpdated: Long = 0
-    private var transactionsLastTimeUpdated: Long = 0
     private var passwordPromptActive = false
     lateinit var myBalance: TextView
 
@@ -48,18 +45,6 @@ class WalletStatsActivity : AppCompatActivity() {
         val service = ServiceVolley()
         apiController = APIController(service)
         h = Handler(Looper.getMainLooper())
-
-        val buttonWalletLog = findViewById<Button>(R.id.buttonViewWalletLog)
-        buttonWalletLog.setOnClickListener {
-            val debugWalletActivity = Intent(this, DebugWalletActivity::class.java)
-            startActivity(debugWalletActivity)
-        }
-
-        val buttonWalletInfo = findViewById<Button>(R.id.buttonViewWalletInfo)
-        buttonWalletInfo.setOnClickListener {
-            val infoWalletActivity = Intent(this, WalletInfoActivity::class.java)
-            startActivity(infoWalletActivity)
-        }
 
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         val walletfile = File("$filesDir/pkt/wallet.db")
@@ -180,14 +165,12 @@ class WalletStatsActivity : AppCompatActivity() {
         }
     }
 
-    private val getPldInfo = object : Runnable {
-        override fun run() {
-            getInfo()
-            if (!walletUnlocked) {
-                unlockWallet()
-            } else {
-                getBalance()
-            }
+    private val getPldInfo = Runnable {
+        getInfo()
+        if (!walletUnlocked) {
+            unlockWallet()
+        } else {
+            getBalance()
         }
     }
 
@@ -308,8 +291,5 @@ class WalletStatsActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
-
-
 }
