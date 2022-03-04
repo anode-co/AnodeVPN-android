@@ -208,11 +208,10 @@ class WalletFragmentMain : Fragment() {
                         neutrinoPeers = neutrino.length()
                         val peers = neutrino.getJSONArray("peers")
                         if (peers.length() > 0) {
-                            neutrinoTop = peers.getJSONObject(0).getInt("lastBlock")
+                            if (peers.getJSONObject(0).getInt("lastBlock") > 0) {
+                                neutrinoTop = peers.getJSONObject(0).getInt("lastBlock")
+                            }
                             chainHeight = neutrino.getInt("height")
-
-                            //If neutrino current height is close to last block then we can try to unlock
-                            //otherwise we will wait
                             chainSyncLastShown = System.currentTimeMillis()
                         }
                     }
@@ -430,7 +429,7 @@ class WalletFragmentMain : Fragment() {
                 val lastAmount = transactions.getJSONObject(0).getString("amount").toLong()
                 val timeDiff = (System.currentTimeMillis() / 1000) - transactions.getJSONObject(0).getString("timeStamp").toLong()
                 //If last transaction is in the last 2min and is incoming push notification
-                if ((lastAmount > 0) && timeDiff > 120) {
+                if ((lastAmount > 0) && timeDiff < 120) {
                     AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
                 }
 
