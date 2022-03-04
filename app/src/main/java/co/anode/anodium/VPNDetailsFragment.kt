@@ -13,6 +13,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.LOGTAG
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 private const val ARG_PARAM1 = "param1"

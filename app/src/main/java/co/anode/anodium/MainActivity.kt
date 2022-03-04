@@ -20,12 +20,15 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.CjdnsSocket
+import co.anode.anodium.wallet.WalletActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.*
 import kotlin.system.exitProcess
 
 
@@ -353,9 +356,6 @@ class MainActivity : AppCompatActivity() {
                 h.removeCallbacks(VpnConnectionWaitingDialog)
                 status.text = ""
                 buttonconnectvpns.alpha = 1.0f
-                /*val toast = Toast.makeText(applicationContext, getString(R.string.status_connected), Toast.LENGTH_LONG)
-                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 200)
-                toast.show()*/
                 AnodeClient.connectButton.isChecked = true
                 status.text = resources.getString(R.string.status_connected)
             }
@@ -369,23 +369,17 @@ class MainActivity : AppCompatActivity() {
         if (signedin) {
             val username = prefs.getString("username", "")
             topUsername.text = username
-            //Remove sign in and sign up from menu
             if (mainMenu != null) {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(false)
-                //mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
+                mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(true)
-                //mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(true)
             }
-            //Set username on title
-            //this.title = "Anodium - $username"
         } else {
             topUsername.text = ""
-            //Add sign in and sing up to menu
             if (mainMenu != null) {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(true)
-                //mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
+                mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(false)
-                //mainMenu!!.findItem(R.id.action_deleteaccount).setVisible(false)
             }
         }
     }
@@ -464,8 +458,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean { // Handle action bar item clicks here. The action bar will
-// automatically handle clicks on the Home/Up button, so long
-// as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
         if (id == R.id.action_account_settings) {
             Log.i(LOGTAG, "Start registration")
@@ -496,16 +488,8 @@ class MainActivity : AppCompatActivity() {
             Log.i(LOGTAG, "Log out")
             AnodeClient.eventLog("Menu: Log out selected")
             AnodeClient.LogoutUser().execute()
-            //On Log out start sign in activity
-            //val signinActivity = Intent(AnodeClient.mycontext, SignInActivity::class.java)
-            //startActivity(signinActivity)
             return true
-        } /*else if (id == R.id.action_deleteaccount) {
-            Log.i(LOGTAG, "Delete account")
-            AnodeClient.eventLog(baseContext, "Menu: Delete account selected")
-            AnodeClient.DeleteAccount().execute()
-            return true
-        }*/ else if (id == R.id.action_changepassword) {
+        }  else if (id == R.id.action_changepassword) {
             Log.i(LOGTAG, "Change password")
             val changePassActivity = Intent(applicationContext, ChangePasswordActivity::class.java)
             changePassActivity.putExtra("ForgotPassword", false)
@@ -561,7 +545,7 @@ class MainActivity : AppCompatActivity() {
             //Do nothing
         } else {
             // Permission is missing
-            Log.i(co.anode.anodium.LOGTAG, "Missing permission WRITE_EXTERNAL_STORAGE")
+            Log.i(co.anode.anodium.support.LOGTAG, "Missing permission WRITE_EXTERNAL_STORAGE")
             requestStoragePermission()
         }
     }

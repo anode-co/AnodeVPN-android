@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WalletActivity"
+    tools:context=".wallet.WalletActivity"
     android:id="@+id/activity_wallet">
 
     <fragment
         android:id="@+id/wallet_fragmentMain"
-        class="co.anode.anodium.WalletFragmentMain"
+        class="co.anode.anodium.wallet.WalletFragmentMain"
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
     <fragment
         android:id="@+id/wallet_fragmentCreate"
-        class="co.anode.anodium.WalletFragmentSetup"
+        class="co.anode.anodium.wallet.WalletFragmentSetup"
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

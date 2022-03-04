@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WalletInfoActivity">
+    tools:context=".wallet.WalletInfoActivity">
     <ScrollView
         android:id="@+id/wallet_info_scroll"
         android:layout_width="match_parent"

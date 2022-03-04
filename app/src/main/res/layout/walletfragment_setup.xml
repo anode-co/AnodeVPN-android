@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WalletFragmentSetup"
+    tools:context=".wallet.WalletFragmentSetup"
     android:id="@+id/wallet_fragmentCreate"
     android:background="@android:color/white">
     e<include layout="@layout/statusbar"/>

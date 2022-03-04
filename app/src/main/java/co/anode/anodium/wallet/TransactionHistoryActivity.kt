@@ -1,7 +1,6 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -14,10 +13,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.LOGTAG
+import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -94,7 +95,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
                     val lastAmount = transactions.getJSONObject(0).getString("amount").toLong()
                     if (( prevTransactions+1 == transactions.length()) &&
                         (lastAmount > 0)) {
-                        AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
+                        AnodeUtil.pushNotification("Got paid!", AnodeUtil.satoshisToPKT(lastAmount))
                     }
                     var txnsSize = transactions.length()
                     if (txnsSize > 50) {

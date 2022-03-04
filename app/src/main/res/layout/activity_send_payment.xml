@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true"
     android:id="@+id/activitysendPayment"
-    tools:context=".SendPaymentActivity">
+    tools:context=".wallet.SendPaymentActivity">
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

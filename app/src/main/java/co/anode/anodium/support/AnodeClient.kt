@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package co.anode.anodium
+package co.anode.anodium.support
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
@@ -21,7 +21,8 @@ import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
-import co.anode.anodium.CjdnsSocket.UDPInterface_beginConnection
+import co.anode.anodium.*
+import co.anode.anodium.support.CjdnsSocket.UDPInterface_beginConnection
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONArray
@@ -201,14 +202,14 @@ object AnodeClient {
     }
 
     fun httpPostRating(): String {
-        val ratings = File(AnodeUtil.CJDNS_PATH+"/anodium-rating.json").readText()
+        val ratings = File(AnodeUtil.CJDNS_PATH +"/anodium-rating.json").readText()
         val resp = APIHttpReq(API_RATINGS_URL, ratings, "POST", true, false)
         try {
             val json = JSONObject(resp)
             if (json.has("status") and (json.getString("status") == "success")) {
                 Log.e(LOGTAG, "Rating submitted successfully")
                 //Delete file
-                File(AnodeUtil.CJDNS_PATH+"/anodium-rating.json").delete()
+                File(AnodeUtil.CJDNS_PATH +"/anodium-rating.json").delete()
             } else {
                 Log.e(LOGTAG, "Error posting rating to server: $resp")
                 return "Error posting rating"
@@ -234,14 +235,14 @@ object AnodeClient {
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
         var e = Throwable()
         //rename filename to anodium.log so it will be posted as current log file
-        File(AnodeUtil.CJDNS_PATH+"/anodium.log").renameTo(File(AnodeUtil.CJDNS_PATH+"/tempanodium.log"))
-        File(filename).renameTo(File(AnodeUtil.CJDNS_PATH+"/anodium.log"))
+        File(AnodeUtil.CJDNS_PATH +"/anodium.log").renameTo(File(AnodeUtil.CJDNS_PATH +"/tempanodium.log"))
+        File(filename).renameTo(File(AnodeUtil.CJDNS_PATH +"/anodium.log"))
         val err = errorJsonObj(type, e).toString(1)
         //rename it back
         //anodium.log back to filename
-        File(AnodeUtil.CJDNS_PATH+"/anodium.log").renameTo(File(filename))
+        File(AnodeUtil.CJDNS_PATH +"/anodium.log").renameTo(File(filename))
         //tempanodium back to anodium.log
-        File(AnodeUtil.CJDNS_PATH+"/tempanodium.log").renameTo(File(AnodeUtil.CJDNS_PATH+"/anodium.log"))
+        File(AnodeUtil.CJDNS_PATH +"/tempanodium.log").renameTo(File(AnodeUtil.CJDNS_PATH +"/anodium.log"))
         File(ctx.filesDir,fname).appendText(err)
     }
 
@@ -255,9 +256,9 @@ object AnodeClient {
     fun storeRating(pubkey: String, rating: Float, comment: String) {
         var jsonRatings: JSONArray = JSONArray()
         if (pubkey.isEmpty()) { return }
-        if (File(AnodeUtil.CJDNS_PATH+"/anodium-rating.json").exists())
+        if (File(AnodeUtil.CJDNS_PATH +"/anodium-rating.json").exists())
         {
-            jsonRatings = JSONArray(File(AnodeUtil.CJDNS_PATH+"/anodium-rating.json").readText())
+            jsonRatings = JSONArray(File(AnodeUtil.CJDNS_PATH +"/anodium-rating.json").readText())
         }
         val jsonObject = JSONObject()
         jsonObject.accumulate("publicKey", pubkey)
@@ -265,7 +266,7 @@ object AnodeClient {
         jsonObject.accumulate("comment", comment)
         jsonObject.accumulate("created_at", System.currentTimeMillis())
         jsonRatings.put(jsonObject)
-        val ratingfile = File(AnodeUtil.CJDNS_PATH+"/anodium-rating.json")
+        val ratingfile = File(AnodeUtil.CJDNS_PATH +"/anodium-rating.json")
         ratingfile.writeText(jsonRatings.toString())
     }
 
@@ -302,9 +303,9 @@ object AnodeClient {
         } else {
             jsonObject.accumulate("message", "")
         }
-        val cjdroutelogfile = File(AnodeUtil.CJDNS_PATH+"/"+ AnodeUtil.CJDROUTE_LOG)
-        val lastlogfile = File(AnodeUtil.CJDNS_PATH+"/last_anodium.log")
-        val currlogfile = File(AnodeUtil.CJDNS_PATH+"/anodium.log")
+        val cjdroutelogfile = File(AnodeUtil.CJDNS_PATH +"/"+ AnodeUtil.CJDROUTE_LOG)
+        val lastlogfile = File(AnodeUtil.CJDNS_PATH +"/last_anodium.log")
+        val currlogfile = File(AnodeUtil.CJDNS_PATH +"/anodium.log")
         var debugmsg = "";
         ignoreErr {
             debugmsg += "Error stack: " + stackString(err) + "\n";
@@ -379,7 +380,7 @@ object AnodeClient {
         ignoreErr { jsonObject.accumulate("username", username) }
         jsonObject.accumulate("message", "Events log")
 
-        val eventlogfile = File(AnodeUtil.CJDNS_PATH+"/anodium-events.log")
+        val eventlogfile = File(AnodeUtil.CJDNS_PATH +"/anodium-events.log")
         jsonObject.accumulate("debuggingMessages", eventlogfile.readText(Charsets.UTF_8))
         return jsonObject
     }
@@ -957,7 +958,7 @@ object AnodeClient {
     }
 
     fun eventLog(message: String) {
-        val logFile = File(AnodeUtil.CJDNS_PATH+"/anodium-events.log")
+        val logFile = File(AnodeUtil.CJDNS_PATH +"/anodium-events.log")
         //Do not log if file is bigger than 1MB
         if (logFile.length() > 1000000) return
 

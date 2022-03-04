@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.LOGTAG
 import org.json.JSONException
 import org.json.JSONObject
 

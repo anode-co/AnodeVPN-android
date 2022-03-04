@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import co.anode.anodium.support.*
 import java.net.URL
 
 class DebugActivity : AppCompatActivity() {

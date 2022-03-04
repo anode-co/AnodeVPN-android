@@ -1,4 +1,4 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +8,8 @@ import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONArray

@@ -1,4 +1,4 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import co.anode.anodium.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class TransactionDetailsFragment : BottomSheetDialogFragment(){

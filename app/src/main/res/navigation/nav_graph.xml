@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="co.anode.anodium.WalletFragmentSetup"
+        android:name="co.anode.anodium.wallet.WalletFragmentSetup"
         android:label="@string/first_fragment_label"
         tools:layout="@layout/walletfragment_setup">
 
@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="co.anode.anodium.WalletFragmentMain"
+        android:name="co.anode.anodium.wallet.WalletFragmentMain"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/walletfragment_main">
 

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import co.anode.anodium.support.CjdnsSocket
+import co.anode.anodium.support.LOGTAG
 import java.io.FileDescriptor
 import java.lang.Exception
 

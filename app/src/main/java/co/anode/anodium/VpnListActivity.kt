@@ -5,6 +5,7 @@ package co.anode.anodium
 import android.os.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import co.anode.anodium.support.AnodeClient
 import org.json.JSONArray
 import java.util.concurrent.Executors
 

@@ -1,9 +1,7 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -16,6 +14,9 @@ import androidx.appcompat.app.AlertDialog
 import java.io.File
 import java.util.*
 import android.widget.ArrayAdapter
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.LOGTAG
+import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONObject

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.RatingBar
 import android.widget.ToggleButton
+import co.anode.anodium.support.AnodeClient
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class RatingFragment : BottomSheetDialogFragment() {

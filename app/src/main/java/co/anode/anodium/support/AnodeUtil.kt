@@ -1,6 +1,5 @@
-package co.anode.anodium
+package co.anode.anodium.support
 
-import android.R.attr.process
 import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
@@ -12,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import co.anode.anodium.R
 import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
@@ -131,7 +131,8 @@ object AnodeUtil {
 
     private fun launchCJDNS() {
         try {
-            Log.e(LOGTAG, "Launching cjdroute (file size: " +
+            Log.e(
+                LOGTAG, "Launching cjdroute (file size: " +
                     File("$CJDNS_PATH/$CJDROUTE_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
             //Run cjdroute with existing conf file
@@ -150,7 +151,8 @@ object AnodeUtil {
 
     private fun launchPld() {
         try {
-            Log.e(LOGTAG, "Launching pld (file size: " +
+            Log.e(
+                LOGTAG, "Launching pld (file size: " +
                     File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
             val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")

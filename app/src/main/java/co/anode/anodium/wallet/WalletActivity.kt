@@ -1,4 +1,4 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,9 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.LOGTAG
+import co.anode.anodium.R
 import java.io.File
 
 class WalletActivity : AppCompatActivity() {

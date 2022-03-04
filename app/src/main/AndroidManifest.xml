@@ -23,15 +23,15 @@
         tools:targetApi="q"
         android:name=".volley.BackendVolley">
 
-        <activity android:name=".WalletInfoActivity" />
-        <activity android:name=".WalletStatsActivity" />
-        <activity android:name=".TransactionHistoryActivity" />
+        <activity android:name=".wallet.WalletInfoActivity" />
+        <activity android:name=".wallet.WalletStatsActivity" />
+        <activity android:name=".wallet.TransactionHistoryActivity" />
         <activity
-            android:name=".SendPaymentActivity"
+            android:name=".wallet.SendPaymentActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".DebugWalletActivity" />
+        <activity android:name=".wallet.DebugWalletActivity" />
         <activity
-            android:name=".WalletActivity"
+            android:name=".wallet.WalletActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ForgotPasswordSuccessActivity" />
         <activity

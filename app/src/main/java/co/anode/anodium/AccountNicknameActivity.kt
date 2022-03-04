@@ -1,11 +1,10 @@
-@file:Suppress("DEPRECATION")
-
 package co.anode.anodium
 
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Spannable
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -18,17 +17,19 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.LOGTAG
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.ref.WeakReference
+import java.util.concurrent.Executors
 
 
 class AccountNicknameActivity : AppCompatActivity() {
     private val apiVersion = "0.3"
     private var apiUsernameRegistrationURL = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/"
     private var apiUsernameGenerate = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/username/"
-    var username = ""
-    var usernameText: EditText? = null
+    private var username = ""
+    private var usernameText: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +40,6 @@ class AccountNicknameActivity : AppCompatActivity() {
         actionbar!!.title = "Sign up"
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-
 
         val signIn: TextView = findViewById(R.id.textSignIn)
         val link: Spanned = HtmlCompat.fromHtml("already have an account? <a href='#'>Sign in</a>", HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -56,7 +56,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         val generateUsername: Button = findViewById(R.id.button_generateusername)
         generateUsername.setOnClickListener {
             AnodeClient.eventLog("Button: Generate username pressed")
-            UsernameGenerate().execute()
+            getUsername()
         }
 
         val continueButton: Button = findViewById(R.id.button_continue)
@@ -66,7 +66,15 @@ class AccountNicknameActivity : AppCompatActivity() {
             if (username.isEmpty()) {
                 Toast.makeText(baseContext, "Please enter or generate a username", Toast.LENGTH_SHORT).show()
             } else {
-                UsernameRegistration(this).execute(username)
+                val executor = Executors.newSingleThreadExecutor()
+                val handler = Handler(Looper.getMainLooper())
+                var registrationResponse: String
+                executor.execute {
+                    registrationResponse = usernameRegistration(username)
+                    handler.post {
+                        usernameRegistrationHandler(registrationResponse)
+                    }
+                }
             }
         }
         AnodeClient.eventLog("Activity: Nickname created")
@@ -78,7 +86,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         val prefsUsername = prefs.getString("username","")
         usernameText = findViewById(R.id.editTextNickname)
         if (prefsUsername!!.isEmpty()) {
-            UsernameGenerate().execute()
+            getUsername()
         } else {
             usernameText?.setText(prefsUsername)
         }
@@ -128,86 +136,84 @@ class AccountNicknameActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    private inner class UsernameGenerate : AsyncTask<String, Void, String>() {
+    private fun generateUsername():String {
+        val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
+        Log.i(LOGTAG, resp)
+        return resp
+    }
 
-        override fun doInBackground(vararg params: String?): String {
-            val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
-            Log.i(LOGTAG, resp)
-            return resp
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $apiUsernameGenerate: $result")
-            if ((result.isNullOrBlank())) {
-                return
-            } else if (result.contains("400") || result.contains("401")) {
-                val json = result.split("-")[1]
-                var msg = result
-                try {
-                    val jsonObj = JSONObject(json)
-                    msg = jsonObj.getString("username")
-                } catch (e: JSONException) {
-                    msg += " Invalid JSON"
-                }
-                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-            } else if (result.contains("ERROR: ")) {
-                Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
-            } else {
-                val jsonObj = JSONObject(result)
-                if (jsonObj.has("username")) {
-                    usernameText?.post { usernameText?.setText(jsonObj.getString("username")) }
-                }
+    private fun generateUsernameHandler(result: String) {
+        Log.i(LOGTAG,"Received from $apiUsernameGenerate: $result")
+        if ((result.isBlank())) {
+            return
+        } else if (result.contains("400") || result.contains("401")) {
+            val json = result.split("-")[1]
+            var msg = result
+            try {
+                val jsonObj = JSONObject(json)
+                msg = jsonObj.getString("username")
+            } catch (e: JSONException) {
+                msg += " Invalid JSON"
+            }
+            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        } else if (result.contains("ERROR: ")) {
+            Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
+        } else {
+            val jsonObj = JSONObject(result)
+            if (jsonObj.has("username")) {
+                usernameText?.post { usernameText?.setText(jsonObj.getString("username")) }
             }
         }
     }
 
-    private class UsernameRegistration(context: AccountNicknameActivity): AsyncTask<String, Void, String>() {
-        private val activityReference: WeakReference<AccountNicknameActivity> = WeakReference(context)
+    private fun usernameRegistration(username: String):String {
+        val jsonObject = JSONObject()
+        jsonObject.accumulate("username", username)
+        val resp = AnodeClient.APIHttpReq(apiUsernameRegistrationURL, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
+        Log.i(LOGTAG, resp)
+        return resp
+    }
 
-        override fun doInBackground(vararg params: String?): String {
-            val jsonObject = JSONObject()
-            jsonObject.accumulate("username", params[0])
-            val activity = activityReference.get()
-            if (activity == null || activity.isFinishing) return ""
-            val resp = AnodeClient.APIHttpReq(activity.apiUsernameRegistrationURL, jsonObject.toString(), "POST", needsAuth = true, isRetry = false)
-            Log.i(LOGTAG, resp)
-            return resp
+    private fun usernameRegistrationHandler(result: String) {
+        Log.i(LOGTAG,"Received from $apiUsernameRegistrationURL: $result")
+        if ((result.isBlank())) {
+            finish()
+        } else if (result.contains("ERROR: ") ) {
+            val json = result.split("-")[1]
+            var msg = result
+            try {
+                val jsonObj = JSONObject(json)
+                msg = jsonObj.getString("username")
+            }catch (e: JSONException) {
+                msg += " Invalid JSON"
+            }
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        } else {
+            val jsonObj = JSONObject(result)
+            val passwordRecoveryToken = jsonObj.getString("passwordRecoveryToken")
+            //Save username
+            val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            with (prefs.edit()) {
+                putString("username", username)
+                putBoolean("SignedIn", true)
+                putBoolean("Registered", false)
+                putString("passwordRecoveryToken", passwordRecoveryToken)
+                commit()
+            }
+            //Start activity
+            val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
+            startActivityForResult(accountMainActivity, 0)
         }
+    }
 
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            val activity = activityReference.get()
-            if (activity == null || activity.isFinishing) return
-            val apiUsernameRegistrationURL = activity.apiUsernameRegistrationURL
-            Log.i(LOGTAG,"Received from $apiUsernameRegistrationURL: $result")
-            if ((result.isNullOrBlank())) {
-                activity.finish()
-            } else if (result.contains("ERROR: ") ) {
-                val json = result.split("-")[1]
-                var msg = result
-                try {
-                    val jsonObj = JSONObject(json)
-                    msg = jsonObj.getString("username")
-                }catch (e: JSONException) {
-                    msg += " Invalid JSON"
-                }
-                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
-            } else {
-                val jsonObj = JSONObject(result)
-                val passwordRecoveryToken = jsonObj.getString("passwordRecoveryToken")
-                //Save username
-                val prefs = activity.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                with (prefs.edit()) {
-                    putString("username",activity.username)
-                    putBoolean("SignedIn",true)
-                    putBoolean("Registered",false)
-                    putString("passwordRecoveryToken",passwordRecoveryToken)
-                    commit()
-                }
-                //Start activity
-                val accountMainActivity = Intent(activity, AccountMainActivity::class.java)
-                activity.startActivityForResult(accountMainActivity, 0)
+    private fun getUsername() {
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        var usernameResponse: String
+        executor.execute {
+            usernameResponse = generateUsername()
+            handler.post {
+                generateUsernameHandler(usernameResponse)
             }
         }
     }

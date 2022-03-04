@@ -1,4 +1,4 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,6 +6,9 @@ import android.util.Log
 import android.view.View
 import android.widget.ScrollView
 import android.widget.TextView
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.LOGTAG
+import co.anode.anodium.R
 import java.io.File
 
 class DebugWalletActivity : AppCompatActivity() {
@@ -25,7 +28,7 @@ class DebugWalletActivity : AppCompatActivity() {
         //Open pld log file and display it
         val logtext = findViewById<TextView>(R.id.debugwalletlogtext)
 
-        logfile = File(AnodeUtil.CJDNS_PATH+"/"+AnodeUtil.PLD_LOG).readText()
+        logfile = File(AnodeUtil.CJDNS_PATH +"/"+ AnodeUtil.PLD_LOG).readText()
         logtext.text = logfile
         val scroll = findViewById<ScrollView>(R.id.wallet_debug_scroll)
         scroll.post {

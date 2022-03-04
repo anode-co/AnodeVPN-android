@@ -1,4 +1,4 @@
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -15,6 +15,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.LOGTAG
+import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.textfield.TextInputLayout
@@ -58,7 +62,7 @@ class WalletFragmentSetup : Fragment() {
         val apiController = APIController(service)
 
         createButton.setOnClickListener {
-            AnodeClient.eventLog( "Button: Create PKT wallet clicked")
+            AnodeClient.eventLog("Button: Create PKT wallet clicked")
             Log.i(LOGTAG, "WalletFragmentSetup creating wallet")
             //Remove old error message
             newPassLayout.error = null

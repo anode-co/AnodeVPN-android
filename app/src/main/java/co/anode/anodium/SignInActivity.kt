@@ -18,6 +18,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.LOGTAG
 import org.json.JSONException
 import org.json.JSONObject
 

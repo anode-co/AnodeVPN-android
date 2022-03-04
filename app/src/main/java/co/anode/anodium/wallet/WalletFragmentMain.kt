@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package co.anode.anodium
+package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -23,6 +23,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import co.anode.anodium.*
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -434,7 +438,7 @@ class WalletFragmentMain : Fragment() {
                 val timeDiff = (System.currentTimeMillis() / 1000) - transactions.getJSONObject(0).getString("timeStamp").toLong()
                 //If last transaction is in the last 2min and is incoming push notification
                 if ((lastAmount > 0) && timeDiff < 120) {
-                    AnodeUtil.pushNotification("Got paid!",  AnodeUtil.satoshisToPKT(lastAmount))
+                    AnodeUtil.pushNotification("Got paid!", AnodeUtil.satoshisToPKT(lastAmount))
                 }
 
                 var txnsSize = transactions.length()
