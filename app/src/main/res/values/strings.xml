@@ -9,8 +9,9 @@
     <string name="action_login">Login</string>
     <string name="action_skip">Skip</string>
     <string name="action_wallet">Wallet</string>
-    <string name="action_wallet_debug">Wallet debug</string>
-    <string name="action_wallet_stats">Wallet stats</string>
+    <string name="action_wallet_debug">Debug</string>
+    <string name="action_wallet_stats">Stats</string>
+    <string name="action_wallet_info">Info</string>
     <string name="action_close_wallet">Close wallet</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
