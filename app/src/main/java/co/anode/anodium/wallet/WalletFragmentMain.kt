@@ -197,7 +197,7 @@ class WalletFragmentMain : Fragment() {
         apiController.get(apiController.getInfoURL) { response ->
             if (response != null) {
                 var chainHeight = 0
-                var walletTop = 0
+                var walletHeight = 0
                 var bHash = ""
                 var neutrinoPeers = 0
                 var bTimestamp: Long = 0
@@ -228,9 +228,9 @@ class WalletFragmentMain : Fragment() {
                 if (response.has("wallet") &&
                         !response.isNull("wallet")) {
                     val wallet = response.getJSONObject("wallet")
-                    walletTop = wallet.getJSONObject("walletStats").getInt("syncTo")
+                    walletHeight = wallet.getInt("currentHeight")
                 }
-                updateStatusBar(neutrinoPeers, neutrinoTop, chainHeight, bHash, bTimestamp, walletTop)
+                updateStatusBar(neutrinoPeers, neutrinoTop, chainHeight, bHash, bTimestamp, walletHeight)
                 //Keep getting updates
                 if (this::h.isInitialized) {
                     h.postDelayed(getPldInfo, refreshPldInterval)
