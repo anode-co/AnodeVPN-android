@@ -50,10 +50,10 @@
     <string name="label_newpassword">"Enter a new password"</string>
     <string name="action_continue">Continue</string>
     <string name="action_next">Next</string>
-    <string name="label_passwordRecoveryMsg">"We've sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
-    <string name="label_email_verification">"We 've sent a verification link to your email."</string>
+    <string name="label_passwordRecoveryMsg">"We have sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
+    <string name="label_email_verification">"We have sent a verification link to your email."</string>
     <string name="label_rating">"How is your VPN service?"</string>
-    <string name="email_verification_message">We 've sent a verification link to your email.\nPlease check your email.</string>
+    <string name="email_verification_message">"We have sent a verification link to your email.\nPlease check your email."</string>
     <!-- CONTENT DESCIPTIONS -->
     <string name="contentdescription_password_image">Password image</string>
     <string name="contentdescription_login_image">Login image</string>
