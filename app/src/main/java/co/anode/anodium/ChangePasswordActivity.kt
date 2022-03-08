@@ -1,8 +1,9 @@
 package co.anode.anodium
 
 import android.content.Context
-import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -11,6 +12,7 @@ import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.LOGTAG
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.concurrent.Executors
 
 class ChangePasswordActivity : AppCompatActivity() {
     private val apiVersion = "0.3"
@@ -55,7 +57,15 @@ class ChangePasswordActivity : AppCompatActivity() {
                 newPassword.text.clear()
                 confirmPassword.text.clear()
             }else {
-                changePassword(oldPassword.text.toString(), newPassword.text.toString(), bForgotPassword)
+                val executor = Executors.newSingleThreadExecutor()
+                val handler = Handler(Looper.getMainLooper())
+                var response: String
+                executor.execute {
+                    response = changePassword(oldPassword.text.toString(), newPassword.text.toString(), bForgotPassword)
+                    handler.post {
+                        changePasswordHandler(response)
+                    }
+                }
             }
         }
         AnodeClient.eventLog("Activity: Change password created")
