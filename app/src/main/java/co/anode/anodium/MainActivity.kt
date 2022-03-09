@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package co.anode.anodium
 
 import android.Manifest
@@ -29,6 +27,7 @@ import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
 
@@ -251,9 +250,16 @@ class MainActivity : AppCompatActivity() {
         } else {
             onActivityResult(0, RESULT_OK, null)
             //Get list of peering lines and add them as peers
-            AnodeClient.GetPeeringLines().execute()
+            val executor = Executors.newSingleThreadExecutor()
+            val handler = Handler(Looper.getMainLooper())
+            var response: String
+            executor.execute {
+                response = AnodeClient.getPeeringLines()
+                handler.post {
+                    AnodeClient.getPeeringLinesHandler(response)
+                }
+            }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -487,7 +493,15 @@ class MainActivity : AppCompatActivity() {
         } else if (id == R.id.action_logout) {
             Log.i(LOGTAG, "Log out")
             AnodeClient.eventLog("Menu: Log out selected")
-            AnodeClient.LogoutUser().execute()
+            val executor = Executors.newSingleThreadExecutor()
+            val handler = Handler(Looper.getMainLooper())
+            var response: String
+            executor.execute {
+                response = AnodeClient.logoutUser()
+                handler.post {
+                    AnodeClient.logoutUserHandler(response)
+                }
+            }
             return true
         }  else if (id == R.id.action_changepassword) {
             Log.i(LOGTAG, "Change password")
@@ -502,6 +516,9 @@ class MainActivity : AppCompatActivity() {
             return true
         } else if (id == R.id.action_closeapp) {
             closeApp()
+            return true
+        } else if (id == R.id.action_about) {
+            AboutDialog.show(this)
             return true
         } else {
             super.onOptionsItemSelected(item)
@@ -534,6 +551,13 @@ class MainActivity : AppCompatActivity() {
         } else if (!prefs.getBoolean("SignedIn", false)) {
             val signInActivity = Intent(applicationContext, SignInActivity::class.java)
             startActivity(signInActivity)
+        }
+        if (prefs.getBoolean("FirstRun", true)) {
+            AboutDialog.show(this)
+            with(prefs.edit()) {
+                putBoolean("FirstRun", false)
+                commit()
+            }
         }
     }
 

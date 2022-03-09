@@ -97,6 +97,10 @@ object AnodeClient {
     }
 
     fun httpPostError(dir: File): String {
+        //Do not post without consent
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
+
         try {
             if (!dir.exists()) { return "No log files to be submitted" }
             val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
@@ -131,6 +135,10 @@ object AnodeClient {
     }
 
     fun httpPostMessage(type:String, message: String): String {
+        //Do not post without consent
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
+
         //Allow a single post message every minute
         if (((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) || (message.contains("io.grpc.StatusRuntimeException: UNAVAILABLE"))) {
             return ""
@@ -165,6 +173,9 @@ object AnodeClient {
     }
 
     fun httpPostEvent(dir: File): String {
+        //Do not post without consent
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
         try {
             if (!dir.exists()) { return "No event log files to be submitted" }
             val files = dir.listFiles { file -> file.name.startsWith("anodium-events") }
@@ -172,7 +183,7 @@ object AnodeClient {
             val file = files.random()
             val eventLog = eventJsonObj().toString(1)
             val resp = APIHttpReq(API_ERROR_URL,eventLog, "POST", false, false)
-            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+
             try {
                 val json = JSONObject(resp)
                 if (json.has("status") and (json.getString("status") == "success")) {
@@ -845,75 +856,70 @@ object AnodeClient {
         return networkList.contains("tun0")
     }
 
-    class LogoutUser() : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
-            val resp = APIHttpReq( API_LOGOUT_URL, "","DELETE", true , false)
-            Log.i(LOGTAG, resp)
-            return resp
-        }
+    fun logoutUser():String{
+        val resp = APIHttpReq( API_LOGOUT_URL, "","DELETE", true , false)
+        Log.i(LOGTAG, resp)
+        return resp
+    }
 
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
-            if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
-                try {
-                    val jsonObj = JSONObject(result)
-                    if (jsonObj.has("status")) {
-                        if (jsonObj.getString("status") == "success") {
-                            showToast("User logged out")
-                            //Sign user out
-                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                            with(prefs.edit()) {
-                                putBoolean("SignedIn", false)
-                                putBoolean("Registered", false)
-                                commit()
-                            }
-                            //On Log out start sign in activity
-                            val signinActivity = Intent(mycontext, SignInActivity::class.java)
-                            mainActivity.startActivity(signinActivity)
+    fun logoutUserHandler(result:String){
+        Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
+        if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
+            try {
+                val jsonObj = JSONObject(result)
+                if (jsonObj.has("status")) {
+                    if (jsonObj.getString("status") == "success") {
+                        showToast("User logged out")
+                        //Sign user out
+                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                        with(prefs.edit()) {
+                            putBoolean("SignedIn", false)
+                            putBoolean("Registered", false)
+                            commit()
                         }
+                        //On Log out start sign in activity
+                        val signinActivity = Intent(mycontext, SignInActivity::class.java)
+                        mainActivity.startActivity(signinActivity)
                     }
-                } catch (e: JSONException) {
-                    showToast(result)
                 }
-            } else if (result != null) {
-               showToast(result)
+            } catch (e: JSONException) {
+                showToast(result)
             }
+        } else {
+            showToast(result)
         }
     }
 
-    class GetPeeringLines : AsyncTask<String, Void, String>() {
-        override fun doInBackground(vararg params: String?): String? {
-            val url = API_PEERING_LINES
-            if (checkNetworkConnection()) {
-                val resp = APIHttpReq(url, "", "GET", false, false)
-                Log.i(LOGTAG, resp)
-                return resp
-            } else {
-                //No internet
-                return ""
-            }
+    fun getPeeringLines(): String {
+        val url = API_PEERING_LINES
+        if (checkNetworkConnection()) {
+            val resp = APIHttpReq(url, "", "GET", false, false)
+            Log.i(LOGTAG, resp)
+            return resp
+        } else {
+            //No internet
+            return ""
         }
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.i(LOGTAG,"Received from $API_PEERING_LINES: $result")
-            if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
-                try {
-                    val peers = JSONArray(result)
-                    for (i in 0 until peers.length()) {
-                        val peer = peers.getJSONObject(i)
-                        UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
-                    }
-                } catch (e: JSONException) {
-                    showToast("Error, invalid JSON")
-                } catch (e: java.lang.Exception) {
-                    showToast("Error: "+e.message)
+    }
+
+    fun getPeeringLinesHandler(result: String){
+        Log.i(LOGTAG,"Received from $API_PEERING_LINES: $result")
+        if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
+            try {
+                val peers = JSONArray(result)
+                for (i in 0 until peers.length()) {
+                    val peer = peers.getJSONObject(i)
+                    UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
                 }
-            } else if (result.isNullOrEmpty()) {
-                //TODO:???
-            }else {
-                showToast(result)
+            } catch (e: JSONException) {
+                showToast("Error, invalid JSON")
+            } catch (e: java.lang.Exception) {
+                showToast("Error: "+e.message)
             }
+        } else if (result.isNullOrEmpty()) {
+            //TODO:???
+        }else {
+            showToast(result)
         }
     }
 

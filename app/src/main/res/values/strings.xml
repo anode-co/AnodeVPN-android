@@ -6,6 +6,7 @@
     <string name="action_debug">Debug screen</string>
     <string name="action_logout">Log out</string>
     <string name="action_closeapp">Close app</string>
+    <string name="action_aboutapp">About</string>
     <string name="action_login">Login</string>
     <string name="action_skip">Skip</string>
     <string name="action_wallet">Wallet</string>
@@ -30,6 +31,7 @@
     <string name="button_goto_email">Go to Email</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_close">Close</string>
+    <string name="button_wallet_recover_from_seed">Recover from seed</string>
     <!-- Strings used for fragments for navigation -->
     <string name="downloading_update">Downloading new version…</string>
     <string name="title_activity_vpn_servers_list">VPN Servers</string>
@@ -131,4 +133,9 @@
     <string name="minutes_ago">minutes old</string>
     <string name="minute_ago">minute old</string>
     <string name="seconds_ago">seconds old</string>
+
+    <!-- About dialog box -->
+    <string name="about_description">AnodiumVPN is an application that provides VPN connections using CJDNS while also using PKT to pay for faster VPN connection speed.</string>
+    <string name="about_data">Anode is collecting a set of data regarding the operation of the application. In case of abnormal operation they can help us identify problems and improve the experience. We would like to ask for your consent in order to collect these data.</string>
+    <string name="about_consent">I agree</string>
 </resources>

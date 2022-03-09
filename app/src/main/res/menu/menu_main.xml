@@ -45,6 +45,11 @@
         android:title="@string/action_delete_account"
         app:showAsAction="never"/>-->
     <item
+        android:id="@+id/action_about"
+        android:orderInCategory="100"
+        android:title="@string/action_aboutapp"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_closeapp"
         android:orderInCategory="100"
         android:title="@string/action_closeapp"
