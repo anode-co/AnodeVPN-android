@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".wallet.WalletFragmentSetup"
     android:id="@+id/wallet_fragmentCreate"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    tools:ignore="ExtraText">
     e<include layout="@layout/statusbar"/>
     <TextView
         android:id="@+id/text_walletcreate_label"
@@ -18,8 +19,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:textSize="12pt"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="20dp"/>
+        app:layout_constraintTop_toTopOf="parent" />
     <LinearLayout
         android:id="@+id/create_wallet_password_layout"
         android:layout_width="match_parent"
@@ -30,7 +30,6 @@
             android:id="@+id/newwalletpasswordLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_marginStart="@dimen/editfield_margin"
             android:layout_marginEnd="@dimen/editfield_margin"
             app:passwordToggleEnabled="true"
@@ -48,7 +47,6 @@
             android:id="@+id/confirmwalletpasswordLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_marginStart="@dimen/editfield_margin"
             android:layout_marginEnd="@dimen/editfield_margin"
             app:passwordToggleEnabled="true"
@@ -104,14 +102,64 @@
                 android:text=""/>
         </LinearLayout>
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/recover_seed_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/create_wallet_password_layout"
+        android:orientation="vertical"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wallet_write_seed_label" />
+        <EditText
+            android:id="@+id/input_seed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lines="3"
+            android:maxLines="3"
+            android:inputType="textMultiLine" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/walletaezeedpassLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/editfield_margin"
+            android:layout_marginEnd="@dimen/editfield_margin"
+            app:passwordToggleEnabled="true"
+            tools:layout_editor_absoluteX="0dp"
+            app:errorEnabled="true">
+            <EditText
+                android:id="@+id/editTextWalletAezeedPass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/prompt_password"
+                android:inputType="textPassword"
+                android:autofillHints="test" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
     <Button
         android:id="@+id/button_wallet_create"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/wallet_create"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_wallet_recover_from_seed"
         app:layout_constraintStart_toStartOf="parent"
+        android:textSize="16sp"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape"/>
+    <Button
+        android:id="@+id/button_wallet_recover_from_seed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_wallet_recover_from_seed"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_wallet_create"
         android:textSize="16sp"
         android:layout_marginBottom="@dimen/bottom_button_margin"
         android:textColor="#C9DDE9"
