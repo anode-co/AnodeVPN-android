@@ -23,6 +23,7 @@ import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.wallet.WalletActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
@@ -372,19 +373,18 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         val signedin = prefs.getBoolean("SignedIn", false)
         val topUsername: TextView = findViewById(R.id.top_username)
+        val username = prefs.getString("username", "")
+        topUsername.text = username
         if (signedin) {
-            val username = prefs.getString("username", "")
-            topUsername.text = username
             if (mainMenu != null) {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(false)
-                mainMenu!!.findItem(R.id.action_account_settings).setVisible(false)
+                mainMenu!!.findItem(R.id.action_settings_signup).setVisible(false)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(true)
             }
         } else {
-            topUsername.text = ""
             if (mainMenu != null) {
                 mainMenu!!.findItem(R.id.action_signin).setVisible(true)
-                mainMenu!!.findItem(R.id.action_account_settings).setVisible(true)
+                mainMenu!!.findItem(R.id.action_settings_signup).setVisible(true)
                 mainMenu!!.findItem(R.id.action_logout).setVisible(false)
             }
         }
@@ -408,34 +408,35 @@ class MainActivity : AppCompatActivity() {
             }
             // User may have pressed back without signing in.
             // Notify user that they need to sign in or exit the app
-            if (prefs.getString("username", "").isNullOrEmpty()) {
-                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-                val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-                builder.setTitle("Sign in")
-                builder.setMessage("Please sign in to use the application")
-                builder.setPositiveButton("OK") { dialog, _ ->
-                    startActivity(accountNicknameActivity)
-                    dialog.dismiss()
-                }
-                builder.setNegativeButton("Exit") { dialog, _ ->
-                    dialog.dismiss()
-                    //Close app
-                    finishAffinity()
-                    exitProcess(0)
-                }
-                val alert: AlertDialog = builder.create()
-                alert.show()
-            } else {
-                //Close app
-                finishAffinity()
-                exitProcess(0)
-            }
+//            if (prefs.getString("username", "").isNullOrEmpty()) {
+//                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+//                val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+//                builder.setTitle("Sign in")
+//                builder.setMessage("Please sign in to use the application")
+//                builder.setPositiveButton("OK") { dialog, _ ->
+//                    startActivity(accountNicknameActivity)
+//                    dialog.dismiss()
+//                }
+//                builder.setNegativeButton("Exit") { dialog, _ ->
+//                    dialog.dismiss()
+//                    //Close app
+//                    finishAffinity()
+//                    exitProcess(0)
+//                }
+//                val alert: AlertDialog = builder.create()
+//                alert.show()
+//            }
+//            } else {
+//                //Close app
+//                finishAffinity()
+//                exitProcess(0)
+//            }
         }
         setUsernameTopBar()
 
         if (mainMenu != null) {
             //Show/Hide Registration on menu
-            mainMenu!!.findItem(R.id.action_account_settings).isVisible = !prefs.getBoolean("Registered", false)
+            mainMenu!!.findItem(R.id.action_settings_signup).isVisible = !prefs.getBoolean("Registered", false)
         }
         //Set button to correct status
         val status = findViewById<TextView>(R.id.textview_status)
@@ -465,16 +466,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean { // Handle action bar item clicks here. The action bar will
         val id = item.itemId
-        if (id == R.id.action_account_settings) {
+        if (id == R.id.action_settings_signup) {
             Log.i(LOGTAG, "Start registration")
-            val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-            if (prefs.getString("username", "").isNullOrEmpty()) {
-                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-                startActivity(accountNicknameActivity)
-            } else {
-                val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
-                startActivityForResult(accountMainActivity, 0)
-            }
+            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+            startActivity(accountNicknameActivity)
+//            val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
+//            if (prefs.getString("username", "").isNullOrEmpty()) {
+//                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+//                startActivity(accountNicknameActivity)
+//            } else {
+//                val signUpActivity = Intent(applicationContext, SignUpActivity::class.java)
+//                startActivityForResult(signUpActivity, 0)
+//            }
             return true
         } else if (id == R.id.action_signin) {
             Log.i(LOGTAG, "Start sign in activity")
@@ -546,17 +549,61 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
-            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-            startActivity(accountNicknameActivity)
-        } else if (!prefs.getBoolean("SignedIn", false)) {
-            val signInActivity = Intent(applicationContext, SignInActivity::class.java)
-            startActivity(signInActivity)
+            //Generate a username
+            val executor = Executors.newSingleThreadExecutor()
+            val handler = Handler(Looper.getMainLooper())
+            var usernameResponse: String
+            executor.execute {
+                usernameResponse = AnodeClient.generateUsername()
+                handler.post {
+                    generateUsernameHandler(usernameResponse)
+                }
+            }
+            //Start nickname acount -> Create account
+//            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
+//            startActivity(accountNicknameActivity)
+//        } else if (!prefs.getBoolean("SignedIn", false)) {
+//            val signInActivity = Intent(applicationContext, SignInActivity::class.java)
+//            startActivity(signInActivity)
+        } else {
+            setUsernameTopBar()
         }
         if (prefs.getBoolean("FirstRun", true)) {
             AboutDialog.show(this)
             with(prefs.edit()) {
                 putBoolean("FirstRun", false)
                 commit()
+            }
+        }
+    }
+
+    private fun generateUsernameHandler(result: String) {
+        Log.i(co.anode.anodium.support.LOGTAG,"Received from API: $result")
+        if ((result.isBlank())) {
+            return
+        } else if (result.contains("400") || result.contains("401")) {
+            val json = result.split("-")[1]
+            var msg = result
+            try {
+                val jsonObj = JSONObject(json)
+                msg = jsonObj.getString("username")
+            } catch (e: JSONException) {
+                msg += " Invalid JSON"
+            }
+            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        } else if (result.contains("ERROR: ")) {
+            Toast.makeText(baseContext, result, Toast.LENGTH_SHORT).show()
+        } else {
+            val jsonObj = JSONObject(result)
+            if (jsonObj.has("username")) {
+                val topUsername: TextView = findViewById(R.id.top_username)
+                topUsername.text = jsonObj.getString("username")
+                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                with (prefs.edit()) {
+                    putString("username", jsonObj.getString("username"))
+                    putBoolean("SignedIn", false)
+                    commit()
+                }
             }
         }
     }

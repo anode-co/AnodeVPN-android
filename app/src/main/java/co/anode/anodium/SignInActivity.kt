@@ -85,15 +85,15 @@ class SignInActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onBackPressed() {
-        AnodeClient.eventLog("Button: Back pressed")
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        with (prefs.edit()) {
-            putBoolean("SignInActivity_BackPressed",true)
-            commit()
-        }
-        finish()
-    }
+//    override fun onBackPressed() {
+//        AnodeClient.eventLog("Button: Back pressed")
+//        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+//        with (prefs.edit()) {
+//            putBoolean("SignInActivity_BackPressed",true)
+//            commit()
+//        }
+//        finish()
+//    }
 
     abstract class TextViewLinkHandler : LinkMovementMethod() {
         override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {

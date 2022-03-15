@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">Anodium</string>
     <!-- Menu items-->
-    <string name="action_account_settings">Sign Up</string>
+    <string name="action_account_settings">Sign up</string>
     <string name="action_check_update">Check for update</string>
     <string name="action_debug">Debug screen</string>
     <string name="action_logout">Log out</string>
     <string name="action_closeapp">Close app</string>
     <string name="action_aboutapp">About</string>
-    <string name="action_login">Login</string>
+    <string name="action_login">Sign in</string>
     <string name="action_skip">Skip</string>
     <string name="action_wallet">Wallet</string>
     <string name="action_wallet_debug">Debug logs</string>
@@ -46,7 +46,7 @@
     <string name="prompt_confirmpassword">confirm password</string>
     <string name="link_forgotpassword">forgot password?</string>
     <string name="title_forgotpassword">Forgot password?</string>
-    <string name="action_sign_in">Login</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="label_already_have_account">already have an account? Sign in</string>
     <string name="action_sign_up">Sign up</string>
     <string name="action_changepassword">Change password</string>

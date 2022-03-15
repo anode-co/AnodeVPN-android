@@ -26,7 +26,7 @@ import org.json.JSONObject
 import java.util.concurrent.Executors
 
 
-class AccountMainActivity : AppCompatActivity() {
+class SignUpActivity : AppCompatActivity() {
     private val apiVersion = "0.3"
     private var apiEmailRegistrationUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<username>/initialemail/"
     private var apiPasswordRegistrationUrl = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<username>/initialpassword/"
@@ -35,7 +35,7 @@ class AccountMainActivity : AppCompatActivity() {
     @SuppressLint("WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_account_main)
+        setContentView(R.layout.activity_sign_up)
         //actionbar
         val actionbar = supportActionBar
         //set actionbar title
@@ -167,22 +167,22 @@ class AccountMainActivity : AppCompatActivity() {
         abstract fun onLinkClick(url: String?)
     }
 
-    override fun onBackPressed() {
-        AnodeClient.eventLog("Button: Back pressed")
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        with(prefs.edit()) {
-            putBoolean("SingUp_BackPressed", true)
-            commit()
-        }
-        finish()
-    }
+//    override fun onBackPressed() {
+//        AnodeClient.eventLog("Button: Back pressed")
+//        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+//        with(prefs.edit()) {
+//            putBoolean("SingUp_BackPressed", true)
+//            commit()
+//        }
+//        finish()
+//    }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 0) {
-            this.finish()
-        }
-        super.onActivityResult(requestCode, resultCode, data)
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        if (requestCode == 0) {
+//            this.finish()
+//        }
+//        super.onActivityResult(requestCode, resultCode, data)
+//    }
 
     private fun registration(username:String, password:String, email: String): String {
         val jsonObject = JSONObject()

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimarybackground"
     android:orientation="vertical"
-    tools:context="co.anode.anodium.AccountMainActivity">
+    tools:context="co.anode.anodium.SignUpActivity">
     <include layout="@layout/statusbar"/>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

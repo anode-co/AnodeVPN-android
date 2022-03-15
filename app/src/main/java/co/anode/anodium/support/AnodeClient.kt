@@ -48,20 +48,20 @@ object AnodeClient {
     lateinit var mainActivity: AppCompatActivity
     lateinit var apiController: APIController
     var vpnConnected: Boolean = false
-    private const val API_VERSION = "0.3"
+    private const val apiVersion = "0.3"
     private const val FILE_BASE_PATH = "file://"
     private const val PROVIDER_PATH = ".provider"
-    private const val API_ERROR_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/events/"
-    private const val API_REGISTRATION_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/client/accounts/"
-    private const val API_LOGOUT_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/authorize/"
-    private const val API_UPDATE_APK = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/versions/android/"
-    private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$API_VERSION/vpn/clients/publickeys/"
-    private const val API_DELETE_ACCOUNT = "https://vpn.anode.co/api/$API_VERSION/vpn/accounts/<email_or_username>/delete/"
-    private const val API_PEERING_LINES = "https://vpn.anode.co/api/$API_VERSION/vpn/cjdns/peeringlines/"
-    private const val API_AUTH_VPN = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/"
-    private const val API_RATINGS_URL = "https://vpn.anode.co/api/$API_VERSION/vpn/servers/ratings/"
+    private const val API_ERROR_URL = "https://vpn.anode.co/api/$apiVersion/vpn/clients/events/"
+    private const val API_REGISTRATION_URL = "https://vpn.anode.co/api/$apiVersion/vpn/client/accounts/"
+    private const val API_LOGOUT_URL = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/authorize/"
+    private const val API_PUBLICKEY_REGISTRATION = "https://vpn.anode.co/api/$apiVersion/vpn/clients/publickeys/"
+    private const val API_DELETE_ACCOUNT = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/<email_or_username>/delete/"
+    private const val API_PEERING_LINES = "https://vpn.anode.co/api/$apiVersion/vpn/cjdns/peeringlines/"
+    private const val API_AUTH_VPN = "https://vpn.anode.co/api/$apiVersion/vpn/servers/"
+    private const val API_RATINGS_URL = "https://vpn.anode.co/api/$apiVersion/vpn/servers/ratings/"
     private const val API_GET_LATEST_RELEASE = "https://api.github.com/repos/anode-co/AnodeVPN-android/releases/latest"
     private const val API_DOWNLOAD_URL = "https://github.com/anode-co/AnodeVPN-android/releases/download/"
+    private var apiUsernameGenerate = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/username/"
     private const val buttonStateConnected = 0
     private const val buttonStateConnecting = 1
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
@@ -961,6 +961,12 @@ object AnodeClient {
                 showToast(result)
             }
         }
+    }
+
+    fun generateUsername():String {
+        val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
+        Log.i(LOGTAG, resp)
+        return resp
     }
 
     fun eventLog(message: String) {

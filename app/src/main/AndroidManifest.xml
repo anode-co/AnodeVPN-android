@@ -48,7 +48,7 @@
             android:name=".SignInActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".AccountMainActivity"
+            android:name=".SignUpActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".AccountNicknameActivity"

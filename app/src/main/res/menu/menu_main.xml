@@ -4,7 +4,7 @@
     tools:context="co.anode.anodium.MainActivity">
 
     <item
-        android:id="@+id/action_account_settings"
+        android:id="@+id/action_settings_signup"
         android:orderInCategory="100"
         android:title="@string/action_account_settings"
         app:showAsAction="never" />

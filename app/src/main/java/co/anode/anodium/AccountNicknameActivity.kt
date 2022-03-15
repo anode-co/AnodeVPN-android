@@ -97,15 +97,15 @@ class AccountNicknameActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onBackPressed() {
-        AnodeClient.eventLog("Button: Back pressed")
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        with (prefs.edit()) {
-            putBoolean("NicknameActivity_BackPressed",true)
-            commit()
-        }
-        finish()
-    }
+//    override fun onBackPressed() {
+//        AnodeClient.eventLog("Button: Back pressed")
+//        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+//        with (prefs.edit()) {
+//            putBoolean("NicknameActivity_BackPressed",true)
+//            commit()
+//        }
+//        finish()
+//    }
 
     abstract class TextViewLinkHandler : LinkMovementMethod() {
         override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
@@ -134,12 +134,6 @@ class AccountNicknameActivity : AppCompatActivity() {
             this.finish()
         }
         super.onActivityResult(requestCode, resultCode, data)
-    }
-
-    private fun generateUsername():String {
-        val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
-        Log.i(LOGTAG, resp)
-        return resp
     }
 
     private fun generateUsernameHandler(result: String) {
@@ -201,8 +195,8 @@ class AccountNicknameActivity : AppCompatActivity() {
                 commit()
             }
             //Start activity
-            val accountMainActivity = Intent(applicationContext, AccountMainActivity::class.java)
-            startActivityForResult(accountMainActivity, 0)
+            val signUpActivity = Intent(applicationContext, SignUpActivity::class.java)
+            startActivityForResult(signUpActivity, 0)
         }
     }
 
@@ -211,7 +205,7 @@ class AccountNicknameActivity : AppCompatActivity() {
         val handler = Handler(Looper.getMainLooper())
         var usernameResponse: String
         executor.execute {
-            usernameResponse = generateUsername()
+            usernameResponse = AnodeClient.generateUsername()
             handler.post {
                 generateUsernameHandler(usernameResponse)
             }
