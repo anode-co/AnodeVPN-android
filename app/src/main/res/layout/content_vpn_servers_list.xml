@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".VpnListActivity"
-    tools:showIn="@layout/activity_vpn_servers_list"-->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ServerListLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="60dp">
+    android:layout_height="match_parent">
     <include layout="@layout/statusbar"/>
     <SearchView
         android:layout_width="match_parent"
@@ -25,6 +21,5 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
         android:layout_below="@id/searchText"
-        android:layout_alignStart="@id/searchText"
-        />
+        android:layout_alignStart="@id/searchText" />
 </RelativeLayout>

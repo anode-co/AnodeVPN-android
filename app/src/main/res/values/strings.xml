@@ -36,7 +36,7 @@
     <string name="button_wallet_recover_wallet">Recover wallet</string>
     <!-- Strings used for fragments for navigation -->
     <string name="downloading_update">Downloading new version…</string>
-    <string name="title_activity_vpn_servers_list">VPN Servers</string>
+    <string name="title_activity_vpn_servers_list">AnodeVPN Servers</string>
     <!-- Strings used for fragments for navigation -->
     <string name="prompt_email">enter email</string>
     <string name="hint_enter_username">enter username</string>

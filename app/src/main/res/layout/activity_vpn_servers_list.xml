@@ -7,19 +7,6 @@
     android:fitsSystemWindows="true"
     android:background="@color/colorPrimarybackground"
     tools:context="co.anode.anodium.VpnListActivity">
-    
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/vpnlist_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_collapseMode="pin"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-    </com.google.android.material.appbar.AppBarLayout>
+
     <include layout="@layout/content_vpn_servers_list" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

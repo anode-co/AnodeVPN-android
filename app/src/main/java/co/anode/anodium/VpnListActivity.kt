@@ -19,12 +19,12 @@ class VpnListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vpn_servers_list)
-        val vpnListToolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.vpnlist_toolbar)
-        setSupportActionBar(vpnListToolbar)
         //actionbar
         val actionbar = supportActionBar
+        //set actionbar title
+        actionbar!!.title = getString(R.string.title_activity_vpn_servers_list)
         //set back button
-        actionbar?.setDisplayHomeAsUpEnabled(true)
+        actionbar.setDisplayHomeAsUpEnabled(true)
 
         AnodeClient.eventLog("Activity: VPN List created")
     }
@@ -34,13 +34,19 @@ class VpnListActivity : AppCompatActivity() {
         //Retrieve Servers list
         val executor = Executors.newSingleThreadExecutor()
         val handler = Handler(Looper.getMainLooper())
+        val statusBar = findViewById<TextView>(R.id.textview_status)
         executor.execute {
+            runOnUiThread {
+                statusBar.text = "Retrieving VPN Servers..."
+            }
+
             val result = AnodeClient.APIHttpReq(apiServersList,"", "GET", needsAuth = true, isRetry = false)
             handler.post {
                 if (result.isBlank()) {
                     if (dataList.isNotEmpty()) findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, supportFragmentManager, dataList)
                     return@post
                 }
+                statusBar.text = ""
                 val serversArr = JSONArray(result)
                 for (i in 0 until serversArr.length()) {
                     val serverDetails = serversArr.getJSONObject(i)

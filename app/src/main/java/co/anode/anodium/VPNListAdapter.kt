@@ -54,7 +54,19 @@ class VPNListAdapter(private val context: Context, private val fragmentManager: 
             3 -> imageSignal.setBackgroundResource(R.drawable.ic_3_signals)
         }
 
-
+        holder.countryImageView.setOnClickListener {
+            AnodeClient.eventLog("Show VPN Server details " + dataitem["name"])
+            //VPN Details
+            val vpndetailsFragment: BottomSheetDialogFragment = VPNDetailsFragment()
+            val args = Bundle()
+            args.putString("name", dataitem["name"])
+            args.putString("countryCode", dataitem["countryCode"]?.lowercase(Locale.ROOT))
+            args.putString("publicKey", dataitem["publicKey"])
+            args.putString("load", dataitem["load"])
+            args.putFloat("averageRating", dataitem["averageRating"]!!.toFloat())
+            vpndetailsFragment.arguments = args
+            vpndetailsFragment.show(fragmentManager, "")
+        }
         holder.infobox.setOnClickListener {
             AnodeClient.eventLog("Show VPN Server details " + dataitem["name"])
             //VPN Details
