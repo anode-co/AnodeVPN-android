@@ -25,18 +25,7 @@ class VpnListActivity : AppCompatActivity() {
         val actionbar = supportActionBar
         //set back button
         actionbar?.setDisplayHomeAsUpEnabled(true)
-        val searchView = findViewById<SearchView>(R.id.searchText)
 
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                adapter!!.setFilter(newText)
-                return false
-            }
-        })
         AnodeClient.eventLog("Activity: VPN List created")
     }
 
@@ -75,6 +64,18 @@ class VpnListActivity : AppCompatActivity() {
                 findViewById<ListView>(R.id.listview_servers).adapter = adapter
             }
         }
+
+        val searchView = findViewById<SearchView>(R.id.searchText)
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter?.setFilter(newText)
+                return false
+            }
+        })
     }
 
     override fun onSupportNavigateUp(): Boolean {
