@@ -10,9 +10,10 @@
     <string name="action_login">Login</string>
     <string name="action_skip">Skip</string>
     <string name="action_wallet">Wallet</string>
-    <string name="action_wallet_debug">Debug</string>
+    <string name="action_wallet_debug">Debug logs</string>
+    <string name="action_wallet_delete_db">Delete DB</string>
     <string name="action_wallet_stats">Stats</string>
-    <string name="action_wallet_info">Info</string>
+    <string name="action_wallet_info">Details</string>
     <string name="action_close_wallet">Close wallet</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
@@ -52,6 +53,7 @@
     <string name="label_forgotpassword">"To recover your password\nenter your email"</string>
     <string name="label_newpassword">"Enter a new password"</string>
     <string name="action_continue">Continue</string>
+    <string name="action_share_log">Share log</string>
     <string name="action_next">Next</string>
     <string name="label_passwordRecoveryMsg">"We have sent a recovery link to\nyour email.Please check it and\nfollow the link"</string>
     <string name="label_email_verification">"We have sent a verification link to your email."</string>
@@ -92,6 +94,7 @@
     <string name="action_view_wallet_log">Logs</string>
     <string name="action_view_wallet_info">Info</string>
     <string name="action_view_wallet_delete_db">Delete DB</string>
+    <string name="action_reload">Reload</string>
     <!-- Wallet Setup fragment -->
     <string name="wallet_create">Create PKT wallet</string>
     <string name="wallet_import">Import PKT wallet</string>
