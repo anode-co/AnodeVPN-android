@@ -2,12 +2,15 @@ package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -91,15 +94,36 @@ class WalletStatsActivity : AppCompatActivity() {
             }
         }
         myaddress.text = prefs.getString("lndwalletaddress", "")
-
-        val deleteButton = findViewById<Button>(R.id.buttonDeleteNeutrino)
-        deleteButton.setOnClickListener {
-            AnodeUtil.deleteNeutrino()
-            AnodeUtil.stopPld()//will restart
-        }
         //Handle peer list click
         peersListView.setOnItemClickListener { _, _, position, _ ->
             showPeerDetails(peersListDetails[position])
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_wallet_stats, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean { // Handle action bar item clicks here. The action bar will
+        val id = item.itemId
+        if (id == R.id.action_wallet_info) {
+            Log.i(LOGTAG, "Open wallet info activity")
+            val walletInfo = Intent(applicationContext, WalletInfoActivity::class.java)
+            startActivity(walletInfo)
+            return true
+        } else if (id == R.id.action_wallet_debug) {
+            Log.i(LOGTAG, "Open wallet debug logs activity")
+            val debugWalletActivity = Intent(this, DebugWalletActivity::class.java)
+            startActivity(debugWalletActivity)
+            return true
+        } else if (id == R.id.action_wallet_delete_db) {
+            AnodeUtil.deleteNeutrino()
+            AnodeUtil.stopPld()//will restart
+            return true
+        }else {
+            super.onOptionsItemSelected(item)
+            return false
         }
     }
 
