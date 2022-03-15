@@ -115,7 +115,7 @@
     <string name="status_canceled">VPN connection canceled</string>
     <string name="status_error">VPN connection error</string>
     <string name="status_request_authorization">VPN request authorization</string>
-    <string name="status_authorized">VPN authorized</string>
+    <string name="status_authorized">VPN authorizing…</string>
     <string name="status_authorization_failed">VPN authorization failed</string>
     <string name="title_activity_wallet">MainActivity</string>
     <!-- Strings used for fragments for navigation -->
