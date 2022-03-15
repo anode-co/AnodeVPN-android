@@ -27,7 +27,7 @@ object AnodeUtil {
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
     val CJDROUTE_LOG = "cjdroute.log"
-    val PLD_LOG = "pld.log"
+    val PLD_LOG = "pldlog.txt"
     val PLD_BINFILE = "pld"
     var isPldRunning = false
     lateinit var pld_pb: Process
@@ -151,9 +151,11 @@ object AnodeUtil {
 
     private fun launchPld() {
         try {
-            Log.e(
-                LOGTAG, "Launching pld (file size: " +
-                    File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
+            Log.e(LOGTAG, "Launching pld (file size: " + File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
+            val pldLogFile = File(CJDNS_PATH + "/" + PLD_LOG)
+            if (pldLogFile.exists()) {
+                pldLogFile.delete()
+            }
             val processBuilder = ProcessBuilder()
             val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
                     .redirectOutput(File(CJDNS_PATH, PLD_LOG))
@@ -166,7 +168,6 @@ object AnodeUtil {
                 pld_pb.waitFor()
                 isPldRunning = false
                 //Get last 100 lines from log and post it
-                val pldLogFile = File(CJDNS_PATH + "/" + PLD_LOG)
                 if (pldLogFile.exists()) {
                     var pldLines = pldLogFile.readLines()
                     if (pldLines.size > 100) {
