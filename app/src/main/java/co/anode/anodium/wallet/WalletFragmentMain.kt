@@ -242,7 +242,7 @@ class WalletFragmentMain : Fragment() {
         statusBar.text = getString(R.string.wallet_status_unlocking)
         statusIcon.setBackgroundResource(0)
         //Get encrypted password
-        val walletPassword = AnodeUtil.getPasswordFromEncSharedPreferences()
+        val walletPassword = AnodeUtil.getKeyFromEncSharedPreferences("wallet_password")
         //If password is empty prompt user to enter new password
         if (walletPassword.isEmpty()) {
             if (!passwordPromptActive) {

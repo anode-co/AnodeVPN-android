@@ -299,7 +299,7 @@ class WalletStatsActivity : AppCompatActivity() {
     private fun unlockWallet() {
         Log.i(LOGTAG, "Trying to unlock wallet")
         //Get encrypted password
-        val walletPassword = AnodeUtil.getPasswordFromEncSharedPreferences()
+        val walletPassword = AnodeUtil.getKeyFromEncSharedPreferences("wallet_password")
         //If password is empty prompt user to enter new password
         if (walletPassword.isEmpty()) {
             if (!passwordPromptActive) {
