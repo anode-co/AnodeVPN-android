@@ -11,12 +11,18 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import co.anode.anodium.MainActivity
 import co.anode.anodium.R
 import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.security.KeyStore
 import java.util.concurrent.TimeUnit
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
 
 
 object AnodeUtil {
@@ -328,13 +334,8 @@ object AnodeUtil {
             }
         }
     }
-    /**
-     * Stores a password to
-     * ecnrypted shared preferences
-     *
-     * @param password: String
-     */
-    fun storePassword(password: String) {
+
+    fun getMasterKey(): MasterKey {
         val spec = KeyGenParameterSpec.Builder(
             MasterKey.DEFAULT_MASTER_KEY_ALIAS,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
@@ -344,10 +345,19 @@ object AnodeUtil {
             .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
             .build()
 
-        val masterKey = MasterKey.Builder(context!!)
+        return MasterKey.Builder(context!!)
             .setKeyGenParameterSpec(spec)
             .build()
+    }
 
+    /**
+     * Stores a password to
+     * ecnrypted shared preferences
+     *
+     * @param password: String
+     */
+    fun storePassword(password: String) {
+        val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
                 context!!,
@@ -360,24 +370,13 @@ object AnodeUtil {
     }
 
     /**
-     * Get the stored password from
+     * Get the stored vale for a key from
      * ecnrypted shared preferences
-     *
-     * @return password: String
+     * @param key:String
+     * @return password:String
      */
-    fun getPasswordFromEncSharedPreferences(): String {
-        val spec = KeyGenParameterSpec.Builder(
-            MasterKey.DEFAULT_MASTER_KEY_ALIAS,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-        )
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
-            .build()
-
-        val masterKey = MasterKey.Builder(context!!)
-            .setKeyGenParameterSpec(spec)
-            .build()
+    fun getKeyFromEncSharedPreferences(key:String): String {
+        val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
                 context!!,
@@ -386,12 +385,60 @@ object AnodeUtil {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        val password : String? = encSharedPreferences.getString("wallet_password", "")
-        if (password.isNullOrEmpty()) {
+        val value : String? = encSharedPreferences.getString(key, "")
+        if (value.isNullOrEmpty()) {
             return ""
         } else {
-            return password
+            return value
         }
+    }
+
+    /**
+     * Get key from AndroidKeyStore with alias=AnodeVPN
+     *
+     * @return SecretKey
+     */
+    fun getKey(): SecretKey {
+        val keyAlias = "AnodeVPNKey8"
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+        if (!keyStore.containsAlias(keyAlias)) {
+            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+            keyGenerator.init(
+                KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                    .setRandomizedEncryptionRequired(false)
+                    .build()
+            )
+            return keyGenerator.generateKey()
+        } else {
+            val keyEntry = keyStore.getEntry(keyAlias, null) as KeyStore.SecretKeyEntry
+            return keyEntry.secretKey
+        }
+    }
+
+    /**
+     * Will generate a password encrypted using a safe key
+     *
+     * @param pin:String
+     * @return password:String
+     */
+    fun getTrustedPassword(pin:String): String {
+        val key = getKey()
+        //get PIN
+        val pinBytes:ByteArray = pin.toByteArray(Charsets.UTF_8)
+        //encrypt iv+PIN using key
+        val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+        val iv = byteArrayOf(85, 125, 30, 127, -79, 106, -90, 99, 19, -17, -49, 30, -99, 94, -123, -42)
+        cipher.init(Cipher.ENCRYPT_MODE, key, IvParameterSpec(iv))
+        val cipherText = cipher.doFinal(iv+pinBytes)
+        //get password
+        var cipherString = ""
+        for (b in cipherText) {
+            cipherString += String.format("%02X", b)
+        }
+        return cipherString
     }
 }
 
