@@ -143,4 +143,10 @@
     <string name="about_description">AnodiumVPN is an application that provides VPN connections using CJDNS while also using PKT to pay for faster VPN connection speed.</string>
     <string name="about_data">Anode is collecting a set of data regarding the operation of the application. In case of abnormal operation they can help us identify problems and improve the experience. We would like to ask for your consent in order to collect these data.</string>
     <string name="about_consent">I agree</string>
+
+    <string name="msg_vpn_connecting">VPN Connecting</string>
+    <string name="msg_vpn_timeout">Taking a long time to connect, VPN server may not be working.</string>
+    <string name="button_keep_waiting">Keep waiting</string>
+    <string name="button_vpn_disconnect">Disconnect</string>
+    <string name="msg_checking_version">"Checking for newer Anodium version..."</string>
 </resources>

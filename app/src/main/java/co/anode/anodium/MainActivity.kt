@@ -10,11 +10,15 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
 import android.os.*
+import android.provider.Settings.Global.getString
 import android.text.Html
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.*
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -485,7 +489,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(signInActivity)
             return true
         } else if (id == R.id.action_checkupdates) {
-            Toast.makeText(baseContext, "Checking for newer Anodium version...", Toast.LENGTH_LONG).show()
+            Toast.makeText(baseContext, getString(R.string.msg_checking_version), Toast.LENGTH_LONG).show()
             AnodeClient.checkNewVersion(true)
             return true
         } else if (id == R.id.action_debug) {
@@ -716,7 +720,6 @@ class MainActivity : AppCompatActivity() {
         exitProcess(0)
     }
 
-
     object VpnConnectionWaitingDialog: Runnable {
         private lateinit var h: Handler
         private var c: Context? = null
@@ -731,12 +734,12 @@ class MainActivity : AppCompatActivity() {
             if (!AnodeClient.vpnConnected) {
                 if (c!=null) {
                     val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
-                    builder.setTitle("VPN Connecting")
-                    builder.setMessage("Taking a long time to connect, VPN server may not be working.")
-                    builder.setPositiveButton("Keep waiting") { dialog, _ ->
+                    builder.setTitle(c?.getString(R.string.toast_no_internet))
+                    builder.setMessage(c?.getString(R.string.msg_vpn_timeout))
+                    builder.setPositiveButton(c?.getString(R.string.button_keep_waiting)) { dialog, _ ->
                         dialog.dismiss()
                     }
-                    builder.setNegativeButton("Disconnect") { dialog, _ ->
+                    builder.setNegativeButton(c?.getString(R.string.button_vpn_disconnect)) { dialog, _ ->
                         AnodeClient.AuthorizeVPN().cancel(true)
                         AnodeClient.stopThreads()
                         CjdnsSocket.IpTunnel_removeAllConnections()
