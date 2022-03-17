@@ -12,6 +12,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.util.Log
@@ -38,7 +39,6 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
-import kotlin.collections.ArrayList
 
 
 object AnodeClient {
@@ -97,18 +97,18 @@ object AnodeClient {
     }
 
     fun httpPostError(dir: File): String {
+        //Do not post when in x86 or x86_64 (emulator) for development use
+        val arch = System.getProperty("os.arch")
+        if (arch.contains("x86") || arch.contains("i686")) { return ""}
         //Do not post without consent
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
-
         try {
             if (!dir.exists()) { return "No log files to be submitted" }
             val files = dir.listFiles { file -> file.name.startsWith("error-uploadme-") }
             if ((files != null) && (files.isEmpty())) { return "No log files to be submitted" }
             val file = files.random()
-
             val resp = APIHttpReq(API_ERROR_URL,file.readText(), "POST", false, false)
-
             try {
                 val json = JSONObject(resp)
                 if (json.has("status") and (json.getString("status") == "success")) {
@@ -135,6 +135,9 @@ object AnodeClient {
     }
 
     fun httpPostMessage(type:String, message: String): String {
+        //Do not post when on x86 or x86_64 (emulator) for development use only
+        val arch = System.getProperty("os.arch")
+        if (arch.contains("x86") || arch.contains("i686")) { return ""}
         //Do not post without consent
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
