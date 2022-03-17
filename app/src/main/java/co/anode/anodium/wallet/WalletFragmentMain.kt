@@ -102,7 +102,8 @@ class WalletFragmentMain : Fragment() {
         }
         //set PKT address from shared preferences
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
-
+        val loading = v.findViewById<ProgressBar>(R.id.loadingAnimation)
+        loading.visibility = View.VISIBLE
         //Init UI elements
         val walletAddress = v.findViewById<TextView>(R.id.walletAddress)
         walletAddress.text = myPKTAddress
@@ -354,6 +355,8 @@ class WalletFragmentMain : Fragment() {
         statusIcon.setBackgroundResource(0)
         val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
         activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+        val loading = v.findViewById<ProgressBar>(R.id.loadingAnimation)
+        loading.visibility = View.GONE
         v.findViewById<Button>(R.id.button_sendPayment).isEnabled = true
     }
 
@@ -365,8 +368,6 @@ class WalletFragmentMain : Fragment() {
      * @param v View
      */
     private fun getBalance(v: View) {
-//        statusBar.text = "Retrieving wallet balance..."
-        //Get Balance
         apiController.get(apiController.getBalanceURL) { response ->
             if (response != null) {
                 val json = JSONObject(response.toString())

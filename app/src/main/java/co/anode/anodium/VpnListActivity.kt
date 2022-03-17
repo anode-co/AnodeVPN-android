@@ -3,6 +3,7 @@
 package co.anode.anodium
 
 import android.os.*
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import co.anode.anodium.support.AnodeClient
@@ -27,10 +28,14 @@ class VpnListActivity : AppCompatActivity() {
         actionbar.setDisplayHomeAsUpEnabled(true)
 
         AnodeClient.eventLog("Activity: VPN List created")
+        val loading = findViewById<ProgressBar>(R.id.loadingAnimation)
+        loading.visibility = View.VISIBLE
     }
 
     override fun onResume() {
         super.onResume()
+        val loading = findViewById<ProgressBar>(R.id.loadingAnimation)
+        loading.visibility = View.VISIBLE
         //Retrieve Servers list
         val executor = Executors.newSingleThreadExecutor()
         val handler = Handler(Looper.getMainLooper())
@@ -42,11 +47,12 @@ class VpnListActivity : AppCompatActivity() {
 
             val result = AnodeClient.APIHttpReq(apiServersList,"", "GET", needsAuth = true, isRetry = false)
             handler.post {
+                loading.visibility = View.GONE
+                statusBar.text = ""
                 if (result.isBlank()) {
                     if (dataList.isNotEmpty()) findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, supportFragmentManager, dataList)
                     return@post
                 }
-                statusBar.text = ""
                 val serversArr = JSONArray(result)
                 for (i in 0 until serversArr.length()) {
                     val serverDetails = serversArr.getJSONObject(i)

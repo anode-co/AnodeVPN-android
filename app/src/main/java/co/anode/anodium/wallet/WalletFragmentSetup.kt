@@ -58,15 +58,18 @@ class WalletFragmentSetup : Fragment() {
         val newPassLayout = view.findViewById<TextInputLayout>(R.id.newwalletpasswordLayout)
         val confirmPassLayout = view.findViewById<TextInputLayout>(R.id.confirmwalletpasswordLayout)
         val recoverWalletLayout = view.findViewById<LinearLayout>(R.id.recover_seed_layout)
-        val createWalletLayout = view.findViewById<LinearLayout>(R.id.create_wallet_password_layout)
+
         recoverWalletLayout.visibility = View.GONE
         //Initialize Volley Service
         val service = ServiceVolley()
         val apiController = APIController(service)
 
+        val loading = view.findViewById<ProgressBar>(R.id.loadingAnimation)
+
         createButton.setOnClickListener {
             AnodeClient.eventLog("Button: Create PKT wallet clicked")
             Log.i(LOGTAG, "WalletFragmentSetup creating wallet")
+
             //Remove old error message
             newPassLayout.error = null
             confirmPassLayout.error = null
@@ -83,10 +86,11 @@ class WalletFragmentSetup : Fragment() {
 
             if ((isAdded) && (password.isNotEmpty())) {
                 statusbar.text = "Creating wallet please wait..."
+                loading.visibility = View.VISIBLE
                 val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                 activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
                 createButton.isEnabled = false
-
+                recoverButton.isEnabled = false
                 //B64encode password
                 var b64Password = Base64.encodeToString(password.toByteArray(), Base64.DEFAULT)
                 b64Password = b64Password.replace("\n", "")
@@ -97,6 +101,7 @@ class WalletFragmentSetup : Fragment() {
                 apiController.post("http://localhost:8080/api/v1/wallet/create", jsonData)
                 //Handle response from createwallet REST request
                 { response ->
+                    loading.visibility = View.GONE
                     if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
                         //Wallet created successfully
                         Log.i(LOGTAG, "PKT create wallet success")
@@ -184,6 +189,7 @@ class WalletFragmentSetup : Fragment() {
                 }
                 if ((isAdded) && (password.isNotEmpty())) {
                     statusbar.text = "Recovering wallet please wait..."
+                    loading.visibility = View.VISIBLE
                     val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                     activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
                     createButton.isEnabled = false
@@ -205,6 +211,7 @@ class WalletFragmentSetup : Fragment() {
                     apiController.post("http://localhost:8080/api/v1/wallet/create", jsonData)
                     //Handle response from createwallet REST request
                     { response ->
+                        loading.visibility = View.GONE
                         if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
                             //Wallet created successfully
                             Log.i(LOGTAG, "PKT recovery wallet success")
