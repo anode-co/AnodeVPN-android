@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package co.anode.anodium.support
 
 import android.annotation.SuppressLint
@@ -82,7 +80,7 @@ object AnodeClient {
     }
 
     fun showToast(message: String) {
-        Log.e(LOGTAG, message)
+        Log.i(LOGTAG, message)
         if (mainActivity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             mainActivity.runOnUiThread {
                 Toast.makeText(mycontext, message, Toast.LENGTH_LONG).show()
