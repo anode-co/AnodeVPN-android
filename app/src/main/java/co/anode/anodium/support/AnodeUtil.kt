@@ -137,7 +137,7 @@ object AnodeUtil {
 
     private fun launchCJDNS() {
         try {
-            Log.e(
+            Log.i(
                 LOGTAG, "Launching cjdroute (file size: " +
                     File("$CJDNS_PATH/$CJDROUTE_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
@@ -157,7 +157,7 @@ object AnodeUtil {
 
     private fun launchPld() {
         try {
-            Log.e(LOGTAG, "Launching pld (file size: " + File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
+            Log.i(LOGTAG, "Launching pld (file size: " + File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
             val pldLogFile = File(CJDNS_PATH + "/" + PLD_LOG)
             if (pldLogFile.exists()) {
                 pldLogFile.delete()
