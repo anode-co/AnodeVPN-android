@@ -40,8 +40,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="@string/prompt_newpassword"
-                android:inputType="textPassword"
+                android:hint="@string/prompt_newpin"
+                android:inputType="numberPassword"
+                android:maxLength="4"
                 android:autofillHints="test" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
@@ -58,8 +59,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="@string/prompt_confirmpassword"
-                android:inputType="textPassword"
+                android:hint="@string/prompt_confirmpin"
+                android:inputType="numberPassword"
+                android:maxLength="4"
                 android:autofillHints="test" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
@@ -126,8 +128,6 @@
             android:id="@+id/walletaezeedpassLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/editfield_margin"
-            android:layout_marginEnd="@dimen/editfield_margin"
             app:passwordToggleEnabled="true"
             tools:layout_editor_absoluteX="0dp"
             app:errorEnabled="true">
@@ -136,7 +136,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:hint="@string/prompt_password"
+                android:hint="@string/prompt_seed_password"
                 android:inputType="textPassword"
                 android:autofillHints="test" />
         </com.google.android.material.textfield.TextInputLayout>
