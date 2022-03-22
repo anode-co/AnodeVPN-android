@@ -1,9 +1,7 @@
 package co.anode.anodium.wallet
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +20,6 @@ import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
 
-
 class WalletFragmentSetup : Fragment() {
     lateinit var statusbar: TextView
 
@@ -34,11 +31,9 @@ class WalletFragmentSetup : Fragment() {
         return inflater.inflate(R.layout.walletfragment_setup, container, false)
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         AnodeClient.eventLog("Activity: WalletFragmentCreate created")
-
         val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
         closeButton.visibility = View.GONE
         val instructionsTextview = view.findViewById<TextView>(R.id.text_walletcreate_seed_instructions)
@@ -52,9 +47,9 @@ class WalletFragmentSetup : Fragment() {
         val createButton = view.findViewById<Button>(R.id.button_wallet_create)
         val recoverButton = view.findViewById<Button>(R.id.button_wallet_recover_from_seed)
 
-        statusbar = view.findViewById<TextView>(R.id.textview_status)
-        val passwordText = view.findViewById<TextView>(R.id.editTextWalletPassword)
-        val confirmPasswordText = view.findViewById<TextView>(R.id.editTextconfirmWalletPassword)
+        statusbar = view.findViewById(R.id.textview_status)
+        val pinText = view.findViewById<TextView>(R.id.editTextWalletPassword)
+        val confirmPinText = view.findViewById<TextView>(R.id.editTextconfirmWalletPassword)
         val newPassLayout = view.findViewById<TextInputLayout>(R.id.newwalletpasswordLayout)
         val confirmPassLayout = view.findViewById<TextInputLayout>(R.id.confirmwalletpasswordLayout)
         val recoverWalletLayout = view.findViewById<LinearLayout>(R.id.recover_seed_layout)
@@ -69,85 +64,53 @@ class WalletFragmentSetup : Fragment() {
         createButton.setOnClickListener {
             AnodeClient.eventLog("Button: Create PKT wallet clicked")
             Log.i(LOGTAG, "WalletFragmentSetup creating wallet")
-
             //Remove old error message
             newPassLayout.error = null
             confirmPassLayout.error = null
-            //Check that passwords are valid (at least 8 characters and same)
-            var password = passwordText.text.toString()
-            val confirmPassword = confirmPasswordText.text.toString()
-            if (password.length < 8) {
-                newPassLayout.error = "Password must be at least 8 characters."
-                password = ""
-            } else if (password != confirmPassword) {
-                confirmPassLayout.error = "Passwords do not match. Please try again."
-                password = ""
+            //Generate password using pin
+            var pin = pinText.text.toString()
+            val confirmpin = confirmPinText.text.toString()
+            var password = ""
+            if (pin != confirmpin) {
+                confirmPassLayout.error = getString(R.string.pins_not_match)
+                pin = ""
+            } else {
+                password = AnodeUtil.getTrustedPassword(pin)
             }
 
             if ((isAdded) && (password.isNotEmpty())) {
-                statusbar.text = "Creating wallet please wait..."
+                statusbar.text = getString(R.string.creating_wallet)
                 loading.visibility = View.VISIBLE
                 val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                 activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
-                createButton.isEnabled = false
-                recoverButton.isEnabled = false
-                //B64encode password
-                var b64Password = Base64.encodeToString(password.toByteArray(), Base64.DEFAULT)
-                b64Password = b64Password.replace("\n", "")
-
+                createButton.visibility = View.GONE
+                recoverButton.visibility = View.GONE
+                //Hide soft keyboard
+                val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                keyboard.hideSoftInputFromWindow(view.windowToken, 0)
                 val jsonData = JSONObject()
-                jsonData.put("wallet_password", b64Password)
-                Log.i(LOGTAG, "creating PKT wallet...")
-                apiController.post("http://localhost:8080/api/v1/wallet/create", jsonData)
-                //Handle response from createwallet REST request
+                jsonData.put("seed_passphrase", password)
+                Log.i(LOGTAG, "generating wallet seed...")
+                apiController.post(apiController.createSeedURL, jsonData)
                 { response ->
-                    loading.visibility = View.GONE
                     if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
-                        //Wallet created successfully
-                        Log.i(LOGTAG, "PKT create wallet success")
+                        Log.i(LOGTAG, "wallet seed created")
                         instructionsTextview.visibility = View.VISIBLE
                         //Get seed
                         val seedText = view.findViewById<TextView>(R.id.seed_column)
                         val seedArray = response.getJSONArray("seed")
                         var seedString = ""
-                        for (i in 0 until seedArray.length() - 1) {
+                        for (i in 0 until seedArray.length()) {
                             seedString += seedArray.getString(i) + " "
                         }
                         seedText.text = seedString
-                        //Set background color to white
-                        activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
-                        //Hide soft keyboard
-                        val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        keyboard.hideSoftInputFromWindow(view.windowToken, 0)
-                        //Show Seed and hide passwords
-                        passwordsLayout.visibility = View.GONE
-                        seedLayout.visibility = View.VISIBLE
-                        //Hide create button and show Close one
-                        createButton.visibility = View.GONE
-                        recoverButton.visibility = View.GONE
-                        closeButton.visibility = View.VISIBLE
-                        //Store password to encrypted shared preferences
-                        AnodeUtil.storePassword(password)
-                        statusbar.text = ""
-                        //Update header text
-                        val label = view.findViewById<TextView>(R.id.text_walletcreate_label)
-                        label.text = context?.resources?.getString(R.string.wallet_create_seed_label)
+                        //Create wallet
+                        createWallet(view, apiController, password, seedArray)
                     } else {
-                        Log.i(LOGTAG, "PKT create wallet failed")
-                        //Wallet creation failed, parse error, log and notify user
-                        var errorString = response?.getString("error")
-                        if (errorString != null) {
-                            Log.e(LOGTAG, errorString)
-                            //Get user friendly message
-                            errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
-                            activity?.runOnUiThread {
-                                Toast.makeText(requireContext(), "Error: $errorString", Toast.LENGTH_LONG).show()
-                            }
-                        } else {
-                            activity?.runOnUiThread {
-                                Toast.makeText(requireContext(), "Failed to create wallet with unknown error.", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                        Log.e(LOGTAG, "Error in generating wallet seed")
+                        loading.visibility = View.GONE
+                        Toast.makeText(requireContext(), "Failed to generate wallet seed.", Toast.LENGTH_LONG).show()
+                        resetLayout(view)
                     }
                 }
             }
@@ -168,78 +131,155 @@ class WalletFragmentSetup : Fragment() {
                 //change button text
                 recoverButton.text = getString(R.string.button_wallet_recover_wallet)
             } else {
-                //Recover
-                var password = passwordText.text.toString()
-                val aezeedText = view.findViewById<EditText>(R.id.editTextWalletAezeedPass)
-                val aezeedPass = aezeedText.text.toString()
-                val seedInputText = view.findViewById<EditText>(R.id.input_seed)
-                val confirmPassword = confirmPasswordText.text.toString()
-                if (password.length < 8) {
-                    newPassLayout.error = "Password must be at least 8 characters."
-                    password = ""
-                } else if (password != confirmPassword) {
-                    confirmPassLayout.error = "Passwords do not match. Please try again."
-                    password = ""
+                var pin = pinText.text.toString()
+                val confirmpin = confirmPinText.text.toString()
+                var password = ""
+                if (pin != confirmpin) {
+                    confirmPassLayout.error = getString(R.string.pins_not_match)
+                    pin = ""
+                } else {
+                    password = AnodeUtil.getTrustedPassword(pin)
                 }
+
+                //Hide soft keyboard
+                val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                keyboard.hideSoftInputFromWindow(view.windowToken, 0)
+                val seedInputText = view.findViewById<EditText>(R.id.input_seed)
                 //Check for seed length
                 val seedWords = seedInputText.text.split(" ")
                 if (seedWords.size != 15) {
-                    seedInputText.error = "Seed must be 15 words."
-                    password = ""
+                    seedInputText.error = getString(R.string.wallet_seed_length_msg)
+                    pin = ""
                 }
-                if ((isAdded) && (password.isNotEmpty())) {
-                    statusbar.text = "Recovering wallet please wait..."
+                val seedArray = JSONArray()
+                for (i in seedWords.indices) {
+                    seedArray.put(seedWords[i])
+                }
+                if ((isAdded) && (pin.isNotEmpty())) {
                     loading.visibility = View.VISIBLE
                     val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
                     activity?.getColor(android.R.color.darker_gray)?.let { layout.setBackgroundColor(it) }
-                    createButton.isEnabled = false
+                    createButton.visibility = View.GONE
+                    recoverButton.visibility = View.GONE
+                    //Hide soft keyboard
+                    val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    keyboard.hideSoftInputFromWindow(view.windowToken, 0)
 
-                    //B64encode password
-                    var b64Password = Base64.encodeToString(password.toByteArray(), Base64.DEFAULT)
-                    b64Password = b64Password.replace("\n", "")
-                    var b64AezeedPass = Base64.encodeToString(aezeedPass.toByteArray(), Base64.DEFAULT)
-                    b64AezeedPass = b64AezeedPass.replace("\n", "")
-                    val jsonData = JSONObject()
-                    jsonData.put("wallet_password", b64Password)
-                    jsonData.put("aezeed_pass",b64AezeedPass)
-                    val seedArray = JSONArray()
-                    for (i in seedWords.indices) {
-                        seedArray.put(seedWords[i])
-                    }
-                    jsonData.put("cipher_seed_mnemonic",seedArray)
-                    Log.i(LOGTAG, "recovering PKT wallet from seed...")
-                    apiController.post("http://localhost:8080/api/v1/wallet/create", jsonData)
-                    //Handle response from createwallet REST request
-                    { response ->
-                        loading.visibility = View.GONE
-                        if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
-                            //Wallet created successfully
-                            Log.i(LOGTAG, "PKT recovery wallet success")
-                            val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                            keyboard.hideSoftInputFromWindow(view.windowToken, 0)
-                            //Recovery success go straight to wallet main
-                            val walletActivity = activity as WalletActivity
-                            walletActivity.switchToMain()
-                        } else {
-                            Log.i(LOGTAG, "PKT create wallet failed")
-                            //Wallet creation failed, parse error, log and notify user
-                            var errorString = response?.getString("error")
-                            if (errorString != null) {
-                                Log.e(LOGTAG, errorString!!)
-                                //Get user friendly message
-                                errorString = errorString!!.substring(errorString!!.indexOf(" "), errorString!!.indexOf("\n\n"))
-                                activity?.runOnUiThread {
-                                    Toast.makeText(requireContext(), "Error: $errorString", Toast.LENGTH_LONG).show()
-                                }
-                            } else {
-                                activity?.runOnUiThread {
-                                    Toast.makeText(requireContext(), "Failed to create wallet with unknown error.", Toast.LENGTH_LONG).show()
-                                }
-                            }
-                        }
-                    }
+                    val seedPassText = view.findViewById<EditText>(R.id.editTextWalletAezeedPass)
+                    recoverWallet(view, apiController, password, seedPassText.text.toString(), seedArray)
                 }
             }
         }
+    }
+
+    private fun recoverWallet(view: View, apiController: APIController, password: String, seedPass:String, seedArray: JSONArray) {
+        Log.i(LOGTAG, "recovering PKT wallet...")
+        //store password
+        AnodeUtil.storePassword(password)
+        statusbar.text = getString(R.string.recovering_wallet)
+        val jsonData = JSONObject()
+        if (seedPass.isNotEmpty()) {
+            jsonData.put("seed_passphrase", seedPass)
+        }
+        jsonData.put("wallet_passphrase", password)
+        jsonData.put("wallet_seed", seedArray)
+        initWallet(view, apiController, jsonData, true)
+    }
+
+    private fun createWallet(view: View, apiController: APIController, password: String, seedArray: JSONArray) {
+        Log.i(LOGTAG, "creating PKT wallet...")
+        //store password
+        AnodeUtil.storePassword(password)
+        statusbar.text = getString(R.string.creating_wallet)
+        val jsonData = JSONObject()
+        jsonData.put("wallet_passphrase", password)
+        jsonData.put("wallet_seed", seedArray)
+        initWallet(view, apiController, jsonData, false)
+    }
+
+    private fun initWallet(view: View, apiController: APIController, jsonData: JSONObject, isRecovery:Boolean) {
+        apiController.post(apiController.walletCreateURL, jsonData)
+        { response ->
+            val loading = view.findViewById<ProgressBar>(R.id.loadingAnimation)
+            if ((response != null) &&
+                (!response.has("message")) &&
+                (!response.has("error"))) {
+                //Hide loading animation
+                loading.visibility = View.GONE
+                //Set background color to white
+                val layout = view.findViewById<ConstraintLayout>(R.id.wallet_fragmentCreate)
+                activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+                val passwordsLayout = view.findViewById<LinearLayout>(R.id.create_wallet_password_layout)
+                passwordsLayout.visibility = View.GONE
+
+                //Hide create button and show Close one
+                val createButton = view.findViewById<Button>(R.id.button_wallet_create)
+                val recoverButton = view.findViewById<Button>(R.id.button_wallet_recover_from_seed)
+                val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
+                createButton.visibility = View.GONE
+                recoverButton.visibility = View.GONE
+                closeButton.visibility = View.VISIBLE
+                statusbar.text = ""
+                val label = view.findViewById<TextView>(R.id.text_walletcreate_label)
+                //Show Seed if not from recovery mode
+                if (!isRecovery) {
+                    val seedLayout = view.findViewById<LinearLayout>(R.id.create_wallet_show_seed)
+                    seedLayout.visibility = View.VISIBLE
+                    label.text = getString(R.string.wallet_create_seed_label)
+                } else {
+                    val recoverWalletLayout = view.findViewById<LinearLayout>(R.id.recover_seed_layout)
+                    recoverWalletLayout.visibility = View.GONE
+                    label.text = getString(R.string.wallet_recovery_success)
+                }
+            } else {
+                loading.visibility = View.GONE
+                Log.i(LOGTAG, "PKT create wallet failed")
+                //Wallet creation failed, parse error, log and notify user
+                var errorString = response?.getString("error")
+                if (errorString != null) {
+                    Log.e(LOGTAG, errorString)
+                    //Get user friendly message
+                    errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
+                    Toast.makeText(requireContext(), "Error: $errorString", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to create wallet with unknown error.", Toast.LENGTH_LONG).show()
+                }
+                resetLayout(view)
+            }
+        }
+    }
+    /**
+     * Will reset the layout to initial state
+     */
+    private fun resetLayout(view: View) {
+        val closeButton = view.findViewById<Button>(R.id.button_wallet_close)
+        val instructionsTextview = view.findViewById<TextView>(R.id.text_walletcreate_seed_instructions)
+        val seedLayout = view.findViewById<LinearLayout>(R.id.create_wallet_show_seed)
+        val passwordsLayout = view.findViewById<LinearLayout>(R.id.create_wallet_password_layout)
+        val createButton = view.findViewById<Button>(R.id.button_wallet_create)
+        val recoverButton = view.findViewById<Button>(R.id.button_wallet_recover_from_seed)
+        statusbar = view.findViewById(R.id.textview_status)
+        val pinText = view.findViewById<TextView>(R.id.editTextWalletPassword)
+        val confirmPinText = view.findViewById<TextView>(R.id.editTextconfirmWalletPassword)
+        val newPassLayout = view.findViewById<TextInputLayout>(R.id.newwalletpasswordLayout)
+        val confirmPassLayout = view.findViewById<TextInputLayout>(R.id.confirmwalletpasswordLayout)
+        val recoverWalletLayout = view.findViewById<LinearLayout>(R.id.recover_seed_layout)
+        val loading = view.findViewById<ProgressBar>(R.id.loadingAnimation)
+        //Hide
+        seedLayout.visibility = View.GONE
+        closeButton.visibility = View.GONE
+        instructionsTextview.visibility = View.GONE
+        newPassLayout.visibility = View.GONE
+        recoverWalletLayout.visibility = View.GONE
+        loading.visibility = View.GONE
+        //Show
+        passwordsLayout.visibility = View.VISIBLE
+        createButton.visibility = View.VISIBLE
+        recoverButton.visibility = View.VISIBLE
+        confirmPassLayout.visibility = View.VISIBLE
+        //Clear
+        statusbar.text = ""
+        pinText.text = ""
+        confirmPinText.text = ""
     }
 }
