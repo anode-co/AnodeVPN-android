@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import co.anode.anodium.MainActivity
 import co.anode.anodium.R
 import org.json.JSONObject
 import java.io.*
@@ -23,19 +22,19 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
+import kotlin.concurrent.thread
 
 
 object AnodeUtil {
     private val LOGTAG = "co.anode.anodium"
     var context: Context? = null
-    var CJDNS_PATH = ""
+    var filesDirectory = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
     val CJDROUTE_CONFFILE = "cjdroute.conf"
     val CJDROUTE_LOG = "cjdroute.log"
     val PLD_LOG = "pldlog.txt"
     val PLD_BINFILE = "pld"
-    var isPldRunning = false
     lateinit var pld_pb: Process
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
@@ -44,7 +43,7 @@ object AnodeUtil {
     fun init(c: Context) {
         context = c
         if (context != null)
-            CJDNS_PATH = context!!.filesDir.toString()
+            filesDirectory = context!!.filesDir.toString()
     }
 
     fun initializeApp() {
@@ -66,20 +65,20 @@ object AnodeUtil {
         newPath = "$filesdir/pld"
         Os.symlink(oldPath,newPath)
         //Create needed directories
-        val pktwalletdir = File("$CJDNS_PATH/.pktwallet")
+        val pktwalletdir = File("$filesDirectory/.pktwallet")
         if (!pktwalletdir.exists()) {
             pktwalletdir.mkdir()
         }
-        val pktdir = File("$CJDNS_PATH/.pktwallet/pkt")
+        val pktdir = File("$filesDirectory/.pktwallet/pkt")
         if (!pktdir.exists()) {
             pktdir.mkdir()
         }
-        val mainnetdir = File("$CJDNS_PATH/.pktwallet/pkt/mainnet")
+        val mainnetdir = File("$filesDirectory/.pktwallet/pkt/mainnet")
         if (!mainnetdir.exists()) {
             mainnetdir.mkdir()
         }
         //Create lnd directory
-        val lnddir = File("$CJDNS_PATH/.pktwallet/lnd")
+        val lnddir = File("$filesDirectory/.pktwallet/lnd")
         if (!lnddir.exists()) {
             lnddir.mkdir()
         }
@@ -88,7 +87,7 @@ object AnodeUtil {
 
     fun launch() {
         launchPld()
-        val confFile = File("$CJDNS_PATH/$CJDROUTE_CONFFILE")
+        val confFile = File("$filesDirectory/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
             initializeCjdrouteConfFile()
         }
@@ -115,16 +114,16 @@ object AnodeUtil {
         Log.i(LOGTAG, "Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
-            processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--genconf")
-                    .redirectOutput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
+            processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf")
+                    .redirectOutput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
                     .start()
                     .waitFor(2, TimeUnit.SECONDS)
 
             //Clean conf
             Log.i(LOGTAG, "Clean conf file with cjdroute")
-            processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE", "--cleanconf")
-                    .redirectInput(File(CJDNS_PATH, CJDROUTE_TEMPCONFFILE))
-                    .redirectOutput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
+            processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--cleanconf")
+                    .redirectInput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
+                    .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor(2, TimeUnit.SECONDS)
         } catch (e: Exception) {
@@ -132,21 +131,21 @@ object AnodeUtil {
         }
         //Delete temp file
         Log.i(LOGTAG, "Delete temp conf file")
-        Files.delete(Paths.get("$CJDNS_PATH/$CJDROUTE_TEMPCONFFILE"))
+        Files.delete(Paths.get("$filesDirectory/$CJDROUTE_TEMPCONFFILE"))
     }
 
     private fun launchCJDNS() {
         try {
             Log.i(
                 LOGTAG, "Launching cjdroute (file size: " +
-                    File("$CJDNS_PATH/$CJDROUTE_BINFILE").length() + ")")
+                    File("$filesDirectory/$CJDROUTE_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder()
             //Run cjdroute with existing conf file
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$CJDROUTE_BINFILE")
-                    .redirectInput(File(CJDNS_PATH, CJDROUTE_CONFFILE))
-                    .redirectOutput(File(CJDNS_PATH, CJDROUTE_LOG))
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE")
+                    .redirectInput(File(filesDirectory, CJDROUTE_CONFFILE))
+                    .redirectOutput(File(filesDirectory, CJDROUTE_LOG))
                     .redirectErrorStream(true)
-            pb.environment()["TMPDIR"] = CJDNS_PATH
+            pb.environment()["TMPDIR"] = filesDirectory
             cjdns_pb = processBuilder.start()
             cjdns_pb.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + cjdns_pb.exitValue())
@@ -155,27 +154,30 @@ object AnodeUtil {
         }
     }
 
-    private fun launchPld() {
+    fun launchPld() {
         try {
-            Log.i(LOGTAG, "Launching pld (file size: " + File("$CJDNS_PATH/$PLD_BINFILE").length() + ")")
-            val pldLogFile = File(CJDNS_PATH + "/" + PLD_LOG)
+            if (this::pld_pb.isInitialized && pld_pb.isAlive) return
+            Log.i(LOGTAG, "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
+            val pldLogFile = File(filesDirectory + "/" + PLD_LOG)
             if (pldLogFile.exists()) {
                 pldLogFile.delete()
             }
             val processBuilder = ProcessBuilder()
-            val pb: ProcessBuilder = processBuilder.command("$CJDNS_PATH/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
-                    .redirectOutput(File(CJDNS_PATH, PLD_LOG))
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
+                    .redirectOutput(File(filesDirectory, PLD_LOG))
                     .redirectErrorStream(true)
-            pb.environment()["TMPDIR"] = CJDNS_PATH
+            pb.environment()["TMPDIR"] = filesDirectory
             pld_pb = processBuilder.start()
-            isPldRunning = true
             Thread( Runnable {
                 //If pld fails, send error msg and relaunch it
                 pld_pb.waitFor()
-                isPldRunning = false
                 //Get last 100 lines from log and post it
                 if (pldLogFile.exists()) {
                     var pldLines = pldLogFile.readLines()
+                    //Check if pld is already running
+                    if (pldLines.contains("127.0.0.1:8080: bind: address already in use")) {
+                       return@Runnable
+                    }
                     if (pldLines.size > 100) {
                         pldLines = pldLines.drop(pldLines.size - 100)
                     }
@@ -192,6 +194,9 @@ object AnodeUtil {
         }
     }
 
+    /**
+     *
+     */
     @Throws(IOException::class)
     fun readJSONFile(filename: String): String {
         Log.i(LOGTAG, "reading $filename")
@@ -208,7 +213,7 @@ object AnodeUtil {
     private fun modifyJSONConfFile() {
         Log.i(LOGTAG, "modifying conf file")
         try {
-            val filecontent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
+            val filecontent = readJSONFile("$filesDirectory/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
             //Add tunfd and tunnel socket
             val router = json.getJSONObject("router")
@@ -218,7 +223,7 @@ object AnodeUtil {
             if (security.getJSONObject(3).has("noforks"))
                 security.getJSONObject(3).put("noforks", 0)
             //Save file
-            val writer = BufferedWriter(FileWriter("$CJDNS_PATH/$CJDROUTE_CONFFILE"))
+            val writer = BufferedWriter(FileWriter("$filesDirectory/$CJDROUTE_CONFFILE"))
             val out = json.toString().replace("\\/", "/")
             writer.write(out)
             writer.close()
@@ -229,16 +234,16 @@ object AnodeUtil {
 
     fun getPubKey(): String {
         val pubkey: String
-        val fileContent = readJSONFile("$CJDNS_PATH/$CJDROUTE_CONFFILE")
+        val fileContent = readJSONFile("$filesDirectory/$CJDROUTE_CONFFILE")
         val json = JSONObject(fileContent)
         pubkey = json.getString("publicKey")
         return pubkey
     }
 
     fun logFile() {
-        val filename: String = "$CJDNS_PATH/anodium.log"
-        if (File("$CJDNS_PATH/last_anodium.log").exists())  Files.delete(Paths.get("$CJDNS_PATH/last_anodium.log"))
-        if (File(filename).exists()) Files.move(Paths.get(filename), Paths.get("$CJDNS_PATH/last_anodium.log"))
+        val filename: String = "$filesDirectory/anodium.log"
+        if (File("$filesDirectory/last_anodium.log").exists())  Files.delete(Paths.get("$filesDirectory/last_anodium.log"))
+        if (File(filename).exists()) Files.move(Paths.get(filename), Paths.get("$filesDirectory/last_anodium.log"))
         val command = "logcat -f $filename -v time co.anode.anodium:V"
         try {
             Runtime.getRuntime().exec(command)
@@ -255,7 +260,7 @@ object AnodeUtil {
     }
 
     fun eventLog(message: String) {
-        val logFile = File("$CJDNS_PATH/anodium-events.log")
+        val logFile = File("$filesDirectory/anodium-events.log")
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile()
@@ -399,7 +404,7 @@ object AnodeUtil {
      * @return SecretKey
      */
     fun getKey(): SecretKey {
-        val keyAlias = "AnodeVPNKey8"
+        val keyAlias = "AnodeVPNKey"
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         if (!keyStore.containsAlias(keyAlias)) {
