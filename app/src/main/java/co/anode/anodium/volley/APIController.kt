@@ -4,12 +4,17 @@ import org.json.JSONObject
 
 class APIController constructor(serviceInjection: ServiceInterface): ServiceInterface {
     private val baseRestAPIURL = "http://localhost:8080/api/v1"
+    //Create seed
+    val createSeedURL = "$baseRestAPIURL/util/seed/create"
+    //Wallet endpoints
     val unlockWalletURL = "$baseRestAPIURL/wallet/unlock"
+    val walletCreateURL = "$baseRestAPIURL/wallet/create"
+    val getBalanceURL = "http://127.0.0.1:8080/api/v1/wallet/balance"
+    val getNewAddressURL = "$baseRestAPIURL/wallet/address/create"
+    val getTransactionsURL = "http://127.0.0.1:8080/api/v1/wallet/transaction/query"
+    val sendFromURL = "$baseRestAPIURL/wallet/transaction/sendfrom"
+    //GetInfo
     val getInfoURL = "$baseRestAPIURL/meta/getinfo"
-    val getBalanceURL = "http://127.0.0.1:8080/api/v1/lightning/walletbalance"
-    val getNewAddressURL = "$baseRestAPIURL/lightning/getnewaddress"
-    val getTransactionsURL = "http://127.0.0.1:8080/api/v1/lightning/gettransactions"
-    val sendFromURL = "$baseRestAPIURL/lightning/sendfrom"
 
     private val service: ServiceInterface = serviceInjection
     override fun get(url: String, completionHandler: (response: JSONObject?) -> Unit) {
