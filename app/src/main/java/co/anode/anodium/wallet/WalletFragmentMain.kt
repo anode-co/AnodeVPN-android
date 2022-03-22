@@ -52,6 +52,8 @@ class WalletFragmentMain : Fragment() {
     private var updateConfirmations = arrayListOf<Boolean>()
     private var neutrinoTop = 0
     private val numberOfTxnsToShow = 25
+    //DEBUG
+    private val logTxns = true
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //Initialize handlers
@@ -150,10 +152,10 @@ class WalletFragmentMain : Fragment() {
             statusIcon.setBackgroundResource(R.drawable.circle_red)
         } else if (chainHeight < chainTop) {
             statusIcon.setBackgroundResource(R.drawable.circle_orange)
-            statusBar.text = "$peers Connections | "+getString(R.string.wallet_status_syncing_headers)+" $chainHeight/$chainTop"
+            statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_syncing_headers)+" $chainHeight/$chainTop"
         } else if (walletHeight < chainHeight){
             statusIcon.setBackgroundResource(R.drawable.circle_yellow)
-            statusBar.text = "$peers Connections | "+getString(R.string.wallet_status_syncing_transactions)+" $walletHeight/$chainHeight"
+            statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_syncing_transactions)+" $walletHeight/$chainHeight"
         } else if (walletHeight == chainHeight) {
             statusIcon.setBackgroundResource(R.drawable.circle_green)
             val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
@@ -171,7 +173,7 @@ class WalletFragmentMain : Fragment() {
             } else {
                 timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
             }
-            statusBar.text = "$peers Connections | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
+            statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
         }
     }
 
@@ -181,7 +183,7 @@ class WalletFragmentMain : Fragment() {
      * updates status bar with wallet and chain syncing info
      */
     @SuppressLint("SimpleDateFormat")
-    private fun getInfo() {
+    private fun getInfo(v: View) {
         apiController.get(apiController.getInfoURL) { response ->
             if (response != null) {
                 var chainHeight = 0
@@ -191,6 +193,10 @@ class WalletFragmentMain : Fragment() {
                 var bTimestamp: Long = 0
                 //Check if wallet is unlocked
                 walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
+                if (walletUnlocked) {
+                    val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
+                    activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+                }
                 if (((System.currentTimeMillis() - refreshPldInterval) > chainSyncLastShown) &&
                     response.has("neutrino") &&
                     !response.isNull("neutrino") &&
@@ -206,7 +212,10 @@ class WalletFragmentMain : Fragment() {
                         val peers = neutrino.getJSONArray("peers")
                         if (peers.length() > 0) {
                             if (peers.getJSONObject(0).getInt("lastBlock") > 0) {
-                                neutrinoTop = peers.getJSONObject(0).getInt("lastBlock")
+                                val tempTop = peers.getJSONObject(0).getInt("lastBlock")
+                                if (tempTop > neutrinoTop) {
+                                    neutrinoTop = tempTop
+                                }
                             }
                             chainHeight = neutrino.getInt("height")
                             chainSyncLastShown = System.currentTimeMillis()
@@ -228,7 +237,6 @@ class WalletFragmentMain : Fragment() {
                 walletUnlocked = false
                 neutrinoSynced = false
             }
-
         }
     }
     /**
@@ -246,15 +254,11 @@ class WalletFragmentMain : Fragment() {
         val walletPassword = AnodeUtil.getKeyFromEncSharedPreferences("wallet_password")
         //If password is empty prompt user to enter new password
         if (walletPassword.isEmpty()) {
-            if (!passwordPromptActive) {
-                passwordPromptActive = true
-                promptUserPassword(v)
-            }
+            //We should not be having a wallet without a password stored!!!
+            //TODO: perhaps we should prompt the user to do a wallet recovery?
         } else {
             val jsonRequest = JSONObject()
-            var b64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
-            b64Password = b64Password.replace("\n","")
-            jsonRequest.put("wallet_password", b64Password)
+            jsonRequest.put("wallet_passphrase", walletPassword)
             apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
                 if (response == null) {
                     //unknown, throw error
@@ -264,12 +268,13 @@ class WalletFragmentMain : Fragment() {
                 } else if ((response.has("message")) &&
                     response.getString("message").contains("ErrWrongPassphrase")) {
                     Log.d(LOGTAG, "Error unlocking wallet, wrong password")
+                    //We can't do anything in this case...
                     //Wrong Password
-                    AnodeUtil.storePassword("")
-                    if (!passwordPromptActive) {
-                        passwordPromptActive = true
-                        promptUserPassword(v)
-                    }
+//                    AnodeUtil.storePassword("")
+//                    if (!passwordPromptActive) {
+//                        passwordPromptActive = true
+//                        promptUserPassword(v)
+//                    }
                     walletUnlocked = false
                 } else if (response.length() == 0) {
                     //empty response is success
@@ -294,54 +299,6 @@ class WalletFragmentMain : Fragment() {
                     v.findViewById<TextView>(R.id.walletAddress).text = myPKTAddress
                 }
             }
-        }
-    }
-
-    /**
-     * Create alert dialog that prompts user to enter wallet password
-     * and save it in encrypted shared preferences
-     *
-     * @param v View
-     */
-    private fun promptUserPassword(v: View) {
-        var password: String
-        val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
-        if (builder != null) {
-            builder.setTitle("PKT Wallet")
-            builder.setMessage("Please type your PKT Wallet password")
-        }
-        val input = EditText(activity)
-        val lp = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        input.layoutParams = lp
-        if (builder != null) {
-            builder.setView(input)
-            input.transformationMethod = PasswordTransformationMethod.getInstance()
-            builder.setPositiveButton("Submit",
-                DialogInterface.OnClickListener { dialog, _ ->
-                    password = input.text.toString()
-                    dialog.dismiss()
-                    if (password.isNotEmpty()) {
-                        passwordPromptActive = false
-                        //write password to encrypted shared preferences
-                        AnodeUtil.storePassword(password)
-                        //reset pkt wallet address
-                        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                        prefs.edit().putString("lndwalletaddress", "").apply()
-                        //try unlocking the wallet with new password
-                        unlockWallet(v)
-                    }
-                })
-
-            builder.setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { dialog, _ ->
-                    passwordPromptActive = false
-                    dialog.dismiss()
-                })
-            val alert: AlertDialog = builder.create()
-            alert.show()
         }
     }
 
@@ -377,13 +334,20 @@ class WalletFragmentMain : Fragment() {
                     balanceLastTimeUpdated = System.currentTimeMillis()
                 } else if (response.has("message") &&
                         !response.isNull("message")) {
-                    statusBar.text = response.getString("message")
+                    statusBar.text = handlePldError(response.getString("message"))
                     statusIcon.setBackgroundResource(0)
                 }
             } else {
 //                statusBar.text = ""
             }
         }
+    }
+
+    private fun handlePldError(error: String): String {
+        if (error.contains("[LightningServer] is not yet ready")) {
+            return "Waiting for wallet server..."
+        }
+        return error
     }
 
     /**
@@ -412,16 +376,23 @@ class WalletFragmentMain : Fragment() {
             params.put("endHeight", 1)
         }
         val textSize = 15.0f
+
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
                 response.has("transactions") &&
                 !response.isNull("transactions")) {
                 transactionsLastTimeUpdated = System.currentTimeMillis()
+
                 val transactions = response.getJSONArray("transactions")
                 if (transactions.length() == 0) return@post
+                if (logTxns) {
+                    val txnsLogfile = File(requireActivity().filesDir.toString()+"/txnslog.txt")
+                    val time = Calendar.getInstance().time
+                    txnsLogfile.appendText("$time REQUEST: $params")
+                    txnsLogfile.appendText("$time RESPONSE: $transactions")
+                }
                 listsLayout.removeAllViews()
-
                 val lastAmount = transactions.getJSONObject(0).getString("amount").toLong()
                 val timeDiff = (System.currentTimeMillis() / 1000) - transactions.getJSONObject(0).getString("timeStamp").toLong()
                 //If last transaction is in the last 2min and is incoming push notification
@@ -558,6 +529,7 @@ class WalletFragmentMain : Fragment() {
             } else if ((response != null) &&
                     response.has("message") &&
                     !response.isNull("message")) {
+                statusBar.text = handlePldError(response.getString("message"))
                 Log.d(LOGTAG, response.getString("message"))
             }
         }
@@ -570,7 +542,7 @@ class WalletFragmentMain : Fragment() {
         }
 
         override fun run() {
-            getInfo()
+            getInfo(v)
             if (walletUnlocked) {
                 h.postDelayed(refreshValues, refreshValuesInterval)
             } else {
