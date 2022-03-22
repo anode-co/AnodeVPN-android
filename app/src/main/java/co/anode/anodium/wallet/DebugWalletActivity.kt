@@ -28,7 +28,7 @@ class DebugWalletActivity : AppCompatActivity() {
         //Open pld log file and display it
         val logtext = findViewById<TextView>(R.id.debugwalletlogtext)
 
-        val logFile = File(AnodeUtil.CJDNS_PATH +"/"+ AnodeUtil.PLD_LOG)
+        val logFile = File(AnodeUtil.filesDirectory +"/"+ AnodeUtil.PLD_LOG)
         val maxLength = 500*1024
         if (logFile.length() > maxLength) {
             logtext.text = logFile.readText().drop(logFile.length().toInt()-maxLength)
@@ -51,7 +51,7 @@ class DebugWalletActivity : AppCompatActivity() {
             while (true) {
                 this.runOnUiThread {
                     if (toBottom) {
-                        val newlog = File(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.PLD_LOG).readText()
+                        val newlog = File(AnodeUtil.filesDirectory + "/" + AnodeUtil.PLD_LOG).readText()
                         if (newlog.length > oldLog.length) {
                             oldLog = newlog
                             if (newlog.length > maxLength) {
@@ -77,7 +77,7 @@ class DebugWalletActivity : AppCompatActivity() {
         shareButton.setOnClickListener {
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, File(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.PLD_LOG).readText())
+                putExtra(Intent.EXTRA_TEXT, File(AnodeUtil.filesDirectory + "/" + AnodeUtil.PLD_LOG).readText())
                 type = "text/plain"
             }
             val shareIntent = Intent.createChooser(sendIntent, null)
