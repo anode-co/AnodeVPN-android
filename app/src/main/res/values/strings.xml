@@ -34,6 +34,7 @@
     <string name="button_close">Close</string>
     <string name="button_wallet_recover_from_seed">Recover from seed</string>
     <string name="button_wallet_recover_wallet">Recover wallet</string>
+    <string name="button_wallet_change_password">Change password</string>
     <!-- Strings used for fragments for navigation -->
     <string name="downloading_update">Downloading new version…</string>
     <string name="title_activity_vpn_servers_list">AnodeVPN Servers</string>
