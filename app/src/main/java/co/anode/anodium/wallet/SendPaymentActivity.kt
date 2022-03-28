@@ -12,6 +12,7 @@ import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -38,26 +39,35 @@ class SendPaymentActivity : AppCompatActivity() {
         //Get our PKT wallet address
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
+        var prevLength = 0
+        val addressLayout = findViewById<TextInputLayout>(R.id.pktaddressLayout)
         //automatically trim pasted addresses
         address.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                prevLength = s!!.length
                 if (ignoreTextChanged) {
                     ignoreTextChanged = false
                     return
                 }
+                if (s!!.length < prevLength) {
+                    return
+                }
                 val longRegex = "(pkt1)([a-zA-Z0-9]{59})".toRegex()
                 val shortRegex = "(pkt1)([a-zA-Z0-9]{39})".toRegex()
-                var trimmedAddress = longRegex.find(s.toString(),0)
-                if ((trimmedAddress == null) || (trimmedAddress.value.isEmpty()) ){
-                    trimmedAddress = shortRegex.find(s.toString(),0)
-                    if ((trimmedAddress != null) && (trimmedAddress.value.isEmpty())) {
-                        Toast.makeText(applicationContext, "PKT address is invalid", Toast.LENGTH_SHORT).show()
+                var trimmedAddress = longRegex.find(s.toString(),0)?.value
+                if (trimmedAddress.isNullOrEmpty()){
+                    trimmedAddress = shortRegex.find(s.toString(),0)?.value
+                    if (trimmedAddress.isNullOrEmpty()) {
+                        addressLayout.error = "Invalid PKT address"
                     } else {
                         ignoreTextChanged = true
+                        address.setText(trimmedAddress)
+                        addressLayout.error = null
                     }
                 } else {
                     ignoreTextChanged = true
-                    address.setText(trimmedAddress.value)
+                    address.setText(trimmedAddress)
+                    addressLayout.error = null
                 }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
