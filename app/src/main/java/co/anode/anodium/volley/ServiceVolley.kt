@@ -27,8 +27,8 @@ class ServiceVolley : ServiceInterface {
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
                     //pls is not running try to launch it
-                    AnodeUtil.launchPld()
-                    jsonError.put("error", "pld not running")
+                    //AnodeUtil.launchPld()
+                    jsonError.put("error", "pld not responding")
                     completionHandler(jsonError)
                 } else {
                     jsonError.put("error", "unknown")
@@ -54,8 +54,8 @@ class ServiceVolley : ServiceInterface {
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
                     //pls is not running try to launch it
-                    AnodeUtil.launchPld()
-                    jsonError.put("error", "pld not running")
+                    //AnodeUtil.launchPld()
+                    jsonError.put("error", "pld not responding")
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("End of input at character 0"))) {
                     //handle empty response indicating recovery worked
