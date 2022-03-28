@@ -337,7 +337,7 @@ class MainActivity : AppCompatActivity() {
         VpnConnectionWaitingDialog.init(h, this@MainActivity)
     }
 
-    private fun bigbuttonState(state: Int) {
+    fun bigbuttonState(state: Int) {
         val status = findViewById<TextView>(R.id.textview_status)
         val buttonconnectvpns = findViewById<ToggleButton>(R.id.buttonconnectvpns)
         when(state) {

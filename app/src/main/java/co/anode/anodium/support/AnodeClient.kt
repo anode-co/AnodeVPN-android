@@ -994,16 +994,20 @@ object AnodeClient {
     fun mainButtonState(state: Int) {
         when(state) {
             buttonStateConnected -> {
-                //Status bar
-                statustv.text = ""
-                //Button
-                connectButton.alpha = 1.0f
-                connectButton.isChecked = false
+                mainActivity.runOnUiThread{
+                    //Status bar
+                    statustv.text = ""
+                    //Button
+                    connectButton.alpha = 1.0f
+                    connectButton.isChecked = false
+                }
             }
             buttonStateConnecting -> {
-                statustv.text = mycontext.resources.getString(R.string.status_connecting)
-                connectButton.textOn = "Cancel"
-                connectButton.alpha = 0.5f
+                mainActivity.runOnUiThread {
+                    statustv.text = mycontext.resources.getString(R.string.status_connecting)
+                    connectButton.textOn = "Cancel"
+                    connectButton.alpha = 0.5f
+                }
             }
         }
     }
