@@ -159,9 +159,6 @@ object AnodeUtil {
             if (this::pld_pb.isInitialized && pld_pb.isAlive) return
             Log.i(LOGTAG, "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
             val pldLogFile = File(filesDirectory + "/" + PLD_LOG)
-            if (pldLogFile.exists()) {
-                pldLogFile.delete()
-            }
             val processBuilder = ProcessBuilder()
             val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
                     .redirectOutput(File(filesDirectory, PLD_LOG))
