@@ -66,7 +66,7 @@ class WalletFragmentMain : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (this::h.isInitialized && !this.isHidden) {
+        if (isAdded && this::h.isInitialized && !this.isHidden) {
             h.postDelayed(getPldInfo,500)
         }
     }
@@ -87,6 +87,7 @@ class WalletFragmentMain : Fragment() {
             h.removeCallbacks(getPldInfo)
         }
     }
+
 
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
@@ -316,13 +317,15 @@ class WalletFragmentMain : Fragment() {
      * @param v View
      */
     private fun updateUiWalletUnlocket(v: View) {
-        statusBar.text = getString(R.string.wallet_status_unlock)
-        statusIcon.setBackgroundResource(0)
-        val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
-        activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
-        val loading = v.findViewById<ProgressBar>(R.id.loadingAnimation)
-        loading.visibility = View.GONE
-        v.findViewById<Button>(R.id.button_sendPayment).isEnabled = true
+        if (isAdded) {
+            statusBar.text = getString(R.string.wallet_status_unlock)
+            statusIcon.setBackgroundResource(0)
+            val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
+            activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+            val loading = v.findViewById<ProgressBar>(R.id.loadingAnimation)
+            loading.visibility = View.GONE
+            v.findViewById<Button>(R.id.button_sendPayment).isEnabled = true
+        }
     }
 
     /**
