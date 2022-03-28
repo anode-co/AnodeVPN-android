@@ -185,7 +185,7 @@ class WalletFragmentMain : Fragment() {
     @SuppressLint("SimpleDateFormat")
     private fun getInfo(v: View) {
         apiController.get(apiController.getInfoURL) { response ->
-            if (response != null) {
+            if ((response != null) && (!response.has("error"))) {
                 var chainHeight = 0
                 var walletHeight = 0
                 var bHash = ""
@@ -193,10 +193,17 @@ class WalletFragmentMain : Fragment() {
                 var bTimestamp: Long = 0
                 //Check if wallet is unlocked
                 walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
-                if (walletUnlocked) {
-                    val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
-                    activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+                //Keep getting updates
+                if (this::h.isInitialized) {
+                    h.postDelayed(getPldInfo, refreshPldInterval)
                 }
+                if (!walletUnlocked) {
+                   return@get
+                }
+                val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
+                activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
+                v.findViewById<Button>(R.id.button_sendPayment).isEnabled = true
+
                 if (((System.currentTimeMillis() - refreshPldInterval) > chainSyncLastShown) &&
                     response.has("neutrino") &&
                     !response.isNull("neutrino") &&
@@ -228,10 +235,8 @@ class WalletFragmentMain : Fragment() {
                     walletHeight = wallet.getInt("currentHeight")
                 }
                 updateStatusBar(neutrinoPeers, neutrinoTop, chainHeight, bHash, bTimestamp, walletHeight)
-                //Keep getting updates
-                if (this::h.isInitialized) {
-                    h.postDelayed(getPldInfo, refreshPldInterval)
-                }
+            } else if ( response?.has("error") == true ) {
+                statusBar.text = response.getString("error").toString()
             } else {
                 //TODO: post error
                 walletUnlocked = false
@@ -275,6 +280,9 @@ class WalletFragmentMain : Fragment() {
 //                        passwordPromptActive = true
 //                        promptUserPassword(v)
 //                    }
+                    walletUnlocked = false
+                } else if (response.has("error")) {
+                    Log.d(LOGTAG, "Error: "+response.getString("error").toString())
                     walletUnlocked = false
                 } else if (response.length() == 0) {
                     //empty response is success
