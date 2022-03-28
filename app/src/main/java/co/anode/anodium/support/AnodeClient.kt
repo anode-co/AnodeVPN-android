@@ -36,6 +36,7 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLProtocolException
 
 
 object AnodeClient {
@@ -742,6 +743,9 @@ object AnodeClient {
             return ""
         } catch (e: Exception) {
             Log.w(LOGTAG,"Exception: "+ e.printStackTrace())
+            return ""
+        } catch (e: SSLProtocolException) {
+            Log.w(LOGTAG,"SSLProtocolException: "+ e.printStackTrace())
             return ""
         }
         //Send body
