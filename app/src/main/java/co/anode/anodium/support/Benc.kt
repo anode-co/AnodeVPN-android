@@ -17,11 +17,11 @@ class Benc(private val str: String) {
     }
 
     abstract class Obj {
-        open fun str(): String = throw Error("Not a string")
-        open fun num(): Long = throw Error("Not a number")
-        open operator fun get(field: String): Obj = throw Error("Not an object")
-        open operator fun get(field: Int): Obj = throw Error("Not a list")
-        open fun size(): Int = throw Error("Not a list")
+        open fun str(): String = throw Error("Not a string, bytes:"+ this.bytes().toString())
+        open fun num(): Long = throw Error("Not a number, bytes:"+ this.bytes().toString())
+        open operator fun get(field: String): Obj = throw Error("Not an object, bytes:"+ this.bytes().toString())
+        open operator fun get(field: Int): Obj = throw Error("Not a list, bytes:"+ this.bytes().toString())
+        open fun size(): Int = throw Error("Not a list, bytes:"+ this.bytes().toString())
         abstract fun bytes(): ByteArray
     }
 
