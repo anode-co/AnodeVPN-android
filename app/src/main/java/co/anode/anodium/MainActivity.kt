@@ -10,7 +10,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
 import android.os.*
-import android.provider.Settings.Global.getString
 import android.text.Html
 import android.util.Log
 import android.view.Menu
@@ -53,9 +52,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startBackgroundThreads() {
-        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-        prefs.edit().putBoolean("lndwalletopened", false).apply()
-
         //Check internet connectivity & public IP
         Thread({
             while (true) {
@@ -113,6 +109,7 @@ class MainActivity : AppCompatActivity() {
 
         //Check for event log files daily
         Thread({
+            val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
             Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
             val filesDir = this.filesDir.toString()
             while (true) {
@@ -162,7 +159,8 @@ class MainActivity : AppCompatActivity() {
         //Check for uploading Errors
         Thread({
             Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
-            while (true) {
+            val arch = System.getProperty("os.arch")
+            while (!(arch.contains("x86") || arch.contains("i686"))) {
                 AnodeClient.ignoreErr {
                     val erCount = AnodeClient.errorCount(this)
                     if (erCount == 0) {
@@ -179,8 +177,8 @@ class MainActivity : AppCompatActivity() {
                             // There was an error posting, lets wait 1 minute so as not to generate
                             // tons of crap
                             Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")
-                            Thread.sleep(60000)
                         }
+                        Thread.sleep(60000)
                     }
                 }
             }
@@ -275,7 +273,6 @@ class MainActivity : AppCompatActivity() {
         //Disable night mode (dark mode)
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-        prefs.edit().putBoolean("lndwalletopened", false).apply()
         AnodeUtil.init(applicationContext)
         AnodeClient.mycontext = applicationContext
         //Error Handling
@@ -546,7 +543,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 //Initialize CJDNS socket
-                CjdnsSocket.init(AnodeUtil.CJDNS_PATH + "/" + AnodeUtil.CJDROUTE_SOCK)
+                CjdnsSocket.init(AnodeUtil.filesDirectory + "/" + AnodeUtil.CJDROUTE_SOCK)
             }
         }
         //On first run show nickname activity
