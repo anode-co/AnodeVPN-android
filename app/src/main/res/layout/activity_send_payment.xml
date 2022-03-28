@@ -28,23 +28,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_above="@+id/editTextReceiverAddress"
+                android:layout_above="@+id/pktaddressLayout"
                 android:layout_centerHorizontal="true"
                 android:textSize="24sp"
                 android:text="@string/send_pkt_title"
                 android:layout_marginBottom="30dp"/>
-            <EditText
-                android:id="@+id/editTextReceiverAddress"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/pktaddressLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/editTextPKTAmount"
                 android:layout_marginStart="@dimen/editfield_margin"
                 android:layout_marginEnd="@dimen/editfield_margin"
-                android:layout_marginBottom="20dp"
-                android:autofillHints=""
-                android:ems="10"
-                android:hint="@string/send_pkt_receivers_address"
-                android:inputType="text" />
+                tools:layout_editor_absoluteX="0dp"
+                app:errorEnabled="true">
+                <EditText
+                    android:id="@+id/editTextReceiverAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:autofillHints=""
+                    android:ems="10"
+                    android:hint="@string/send_pkt_receivers_address"
+                    android:inputType="textNoSuggestions" />
+            </com.google.android.material.textfield.TextInputLayout>
             <EditText
                 android:id="@+id/editTextPKTAmount"
                 android:layout_width="match_parent"
