@@ -155,6 +155,18 @@
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape"/>
     <Button
+        android:id="@+id/button_wallet_change_passphrase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_wallet_change_password"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="16sp"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape"/>
+    <Button
         android:id="@+id/button_wallet_recover_from_seed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

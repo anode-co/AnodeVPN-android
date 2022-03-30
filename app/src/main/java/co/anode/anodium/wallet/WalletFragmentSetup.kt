@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import co.anode.anodium.support.AnodeClient
@@ -19,6 +20,7 @@ import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
 class WalletFragmentSetup : Fragment() {
     lateinit var statusbar: TextView
@@ -46,6 +48,8 @@ class WalletFragmentSetup : Fragment() {
         passwordsLayout.visibility = View.VISIBLE
         val createButton = view.findViewById<Button>(R.id.button_wallet_create)
         val recoverButton = view.findViewById<Button>(R.id.button_wallet_recover_from_seed)
+        val changePassphraseButton = view.findViewById<Button>(R.id.button_wallet_change_passphrase)
+        changePassphraseButton.visibility = View.GONE
 
         statusbar = view.findViewById(R.id.textview_status)
         val pinText = view.findViewById<TextView>(R.id.editTextWalletPassword)
@@ -60,6 +64,64 @@ class WalletFragmentSetup : Fragment() {
         val apiController = APIController(service)
 
         val loading = view.findViewById<ProgressBar>(R.id.loadingAnimation)
+        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val walletFile = File(requireActivity().filesDir.toString() + "/pkt/wallet.db")
+        if (walletFile.exists() && !prefs.getBoolean("PINGeneratedPassphrase",false)) {
+            //wallet exists but not created using pin generated password
+            createButton.visibility = View.GONE
+            recoverButton.visibility = View.GONE
+            changePassphraseButton.visibility = View.VISIBLE
+            val label = view.findViewById<TextView>(R.id.text_walletcreate_label)
+            label.text = getString(R.string.label_wallet_change_password_msg)
+        }
+
+        changePassphraseButton.setOnClickListener {
+            AnodeClient.eventLog("Button: Change Password clicked")
+            Log.i(LOGTAG, "WalletFragmentSetup changing password")
+            //Remove old error message
+            newPassLayout.error = null
+            confirmPassLayout.error = null
+            //Generate password using pin
+            var pin = pinText.text.toString()
+            val confirmpin = confirmPinText.text.toString()
+            var password = ""
+            if (pin != confirmpin) {
+                confirmPassLayout.error = getString(R.string.pins_not_match)
+                pin = ""
+            } else {
+                password = AnodeUtil.getTrustedPassword(pin)
+            }
+            loading.visibility = View.VISIBLE
+            if ((isAdded) && (password.isNotEmpty())) {
+                statusbar.text = "changing wallet password..."
+                //Hide soft keyboard
+                val keyboard = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                keyboard.hideSoftInputFromWindow(view.windowToken, 0)
+                val jsonData = JSONObject()
+                val currentPassword = AnodeUtil.getKeyFromEncSharedPreferences("wallet_password")
+                var b64currentPass = android.util.Base64.encodeToString(currentPassword.toByteArray(), android.util.Base64.DEFAULT)
+                b64currentPass = b64currentPass.replace("\n","")
+                jsonData.put("current_password_bin", b64currentPass)
+                jsonData.put("new_passphrase", password)
+                apiController.post(apiController.changePassphraseURL, jsonData)
+                { response ->
+                    if ((response != null) && (!response.has("error"))){
+                        //Empty response is success
+                        //Update flag
+                        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                        prefs.edit().putBoolean("PINGeneratedPassphrase", true).apply()
+                        //Close fragment switch to wallet
+                        val walletActivity = activity as WalletActivity
+                        walletActivity.switchToMain()
+                    } else {
+                        //Failed to change password
+                        Log.e(LOGTAG, "Error in changing pkt wallet password: "+response.toString())
+                        loading.visibility = View.GONE
+                        Toast.makeText(requireContext(), "An error occured while trying to change the wallet password.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
 
         createButton.setOnClickListener {
             AnodeClient.eventLog("Button: Create PKT wallet clicked")
@@ -231,18 +293,20 @@ class WalletFragmentSetup : Fragment() {
                     recoverWalletLayout.visibility = View.GONE
                     label.text = getString(R.string.wallet_recovery_success)
                 }
+                val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                prefs.edit().putBoolean("PINGeneratedPassphrase", true).apply()
             } else {
                 loading.visibility = View.GONE
                 Log.i(LOGTAG, "PKT create wallet failed")
                 //Wallet creation failed, parse error, log and notify user
                 var errorString = response?.getString("error")
-                if (errorString != null) {
+                if ((isRecovery) && (errorString!!.contains("The birthday of this seed appears to be"))) {
+                    Toast.makeText(requireContext(), "Wrong seed password.", Toast.LENGTH_LONG).show()
+                } else  if (errorString != null) {
                     Log.e(LOGTAG, errorString)
                     //Get user friendly message
                     errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
                     Toast.makeText(requireContext(), "Error: $errorString", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to create wallet with unknown error.", Toast.LENGTH_LONG).show()
                 }
                 resetLayout(view)
             }
