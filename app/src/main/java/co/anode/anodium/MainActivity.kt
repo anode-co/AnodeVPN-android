@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity() {
             if (SystemClock.elapsedRealtime() - mLastClickTime > minClickInterval) {
                 mLastClickTime = SystemClock.elapsedRealtime()
                 if (!buttonConnectVPNs.isChecked) {
-                    disconnectVPN(true)
+                    disconnectVPN(false)
                 } else {
                     AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "hsrk7rrwssgpzv7jqxv95wmnx9c435s8jtf0k0w7v4rupymdj9k0.k"))
                     bigbuttonState(buttonStateConnecting)
