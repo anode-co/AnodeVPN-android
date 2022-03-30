@@ -108,6 +108,7 @@ class WalletFragmentSetup : Fragment() {
                     if ((response != null) && (!response.has("error"))){
                         //Empty response is success
                         //Update flag
+                        AnodeUtil.storePassword(password)
                         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
                         prefs.edit().putBoolean("PINGeneratedPassphrase", true).apply()
                         //Close fragment switch to wallet
