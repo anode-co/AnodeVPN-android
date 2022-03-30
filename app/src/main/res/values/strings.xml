@@ -14,7 +14,7 @@
     <string name="action_wallet_delete_db">Delete DB</string>
     <string name="action_wallet_stats">Stats</string>
     <string name="action_wallet_info">Details</string>
-    <string name="action_close_wallet">Close wallet</string>
+    <string name="action_send_txns">Send transactions log</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
@@ -144,7 +144,7 @@
     <string name="minute_ago">minute old</string>
     <string name="seconds_ago">seconds old</string>
     <string name="creating_wallet">Creating wallet please wait…</string>
-    <string name="recovering_wallet">Recovering wallet please wait...</string>
+    <string name="recovering_wallet">Recovering wallet please wait…</string>
     <string name="pins_not_match">Pins do not match. Please try again.</string>
     <string name="wallet_seed_length_msg">Seed must be 15 words.</string>
     <!-- About dialog box -->
@@ -156,5 +156,6 @@
     <string name="msg_vpn_timeout">Taking a long time to connect, VPN server may not be working.</string>
     <string name="button_keep_waiting">Keep waiting</string>
     <string name="button_vpn_disconnect">Disconnect</string>
-    <string name="msg_checking_version">"Checking for newer Anodium version..."</string>
+    <string name="msg_checking_version">"Checking for newer Anodium version…"</string>
+    <string name="label_wallet_change_password_msg">Password change.</string>
 </resources>
