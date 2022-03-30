@@ -131,16 +131,16 @@ object AnodeClient {
         }
     }
 
-    fun httpPostMessage(type:String, message: String): String {
+    fun httpPostMessage(type:String, message: String, force: Boolean): String {
         //Do not post when on x86 or x86_64 (emulator) for development use only
         val arch = System.getProperty("os.arch")
         if (arch.contains("x86") || arch.contains("i686")) { return ""}
         //Do not post without consent
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
+        if (!force && !prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
 
         //Allow a single post message every minute
-        if (((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) || (message.contains("io.grpc.StatusRuntimeException: UNAVAILABLE"))) {
+        if (!force && (((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) || (message.contains("io.grpc.StatusRuntimeException: UNAVAILABLE")))) {
             return ""
         }
         lastpostmessage = System.currentTimeMillis()
