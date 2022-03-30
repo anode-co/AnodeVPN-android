@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.LOGTAG
@@ -72,13 +73,15 @@ class WalletActivity : AppCompatActivity() {
             val txnsLogfile = File("$filesDir/txnslog.txt")
             if (txnsLogfile.exists()) {
                 var pldLines = txnsLogfile.readLines()
-                if (pldLines.size > 200) {
-                    pldLines = pldLines.drop(pldLines.size - 200)
+                if (pldLines.size > 100) {
+                    pldLines = pldLines.drop(pldLines.size - 100)
                 }
                 //Send it
-                AnodeClient.httpPostMessage("lnd", pldLines.toString())
+                AnodeClient.httpPostMessage("other", pldLines.toString(), true)
                 //Delete file
                 txnsLogfile.delete()
+            } else {
+                Toast.makeText(baseContext, "No log file found.", Toast.LENGTH_SHORT).show()
             }
             return true
         } else {
