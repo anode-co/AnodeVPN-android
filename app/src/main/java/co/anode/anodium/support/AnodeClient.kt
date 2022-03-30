@@ -63,7 +63,6 @@ object AnodeClient {
     private const val buttonStateConnected = 0
     private const val buttonStateConnecting = 1
     private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
-    private var notifyUser = false
     var downloadFails = 0
     var downloadingUpdate = false
     private const val PostMessageInterval = 60000
@@ -409,7 +408,7 @@ object AnodeClient {
         }
     }
 
-    fun getLatestRelease() {
+    fun getLatestRelease(userInitiated: Boolean) {
         apiController.get(API_GET_LATEST_RELEASE) {
             response ->
             if ((response != null) && response.has("name") && !response.isNull("name")) {
@@ -440,7 +439,9 @@ object AnodeClient {
                         }
                     }
                 } else {
-                    showToast("Application already at latest version")
+                    if (userInitiated) {
+                        showToast("Application already at latest version")
+                    }
                     return@get
                 }
             }
@@ -448,10 +449,9 @@ object AnodeClient {
     }
 
     fun checkNewVersion(notify: Boolean): Boolean {
-        notifyUser = notify
         Log.i(LOGTAG, "Checking for latest APK")
         downloadingUpdate = true
-        getLatestRelease()
+        getLatestRelease(notify)
         return false
     }
 
