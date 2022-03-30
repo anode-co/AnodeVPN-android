@@ -178,7 +178,7 @@ object AnodeUtil {
                     if (pldLines.size > 100) {
                         pldLines = pldLines.drop(pldLines.size - 100)
                     }
-                    AnodeClient.httpPostMessage("lnd", pldLines.toString())
+                    AnodeClient.httpPostMessage("lnd", pldLines.toString(), false)
                     //Delete log file
                     pldLogFile.delete()
                 }
