@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.text.HtmlCompat
@@ -42,7 +43,6 @@ class WalletFragmentMain : Fragment() {
     private var walletUnlocked = false
     private var neutrinoSynced = false
     private var myPKTAddress = ""
-    private val refreshValuesInterval: Long = 10000
     private val refreshPldInterval: Long = 10000
     lateinit var h: Handler
     private var balanceLastTimeUpdated: Long = 0
@@ -52,6 +52,7 @@ class WalletFragmentMain : Fragment() {
     private var updateConfirmations = arrayListOf<Boolean>()
     private var neutrinoTop = 0
     private val numberOfTxnsToShow = 25
+    var noWalletUnlock = false
     //DEBUG
     private val logTxns = true
 
@@ -199,7 +200,10 @@ class WalletFragmentMain : Fragment() {
                     h.postDelayed(getPldInfo, refreshPldInterval)
                 }
                 if (!walletUnlocked) {
-                   return@get
+                    unlockWallet(v)
+                    return@get
+                } else {
+                    h.postDelayed(refreshValues, 200)
                 }
                 val layout = v.findViewById<ConstraintLayout>(R.id.wallet_fragmentMain)
                 activity?.getColor(android.R.color.white)?.let { layout.setBackgroundColor(it) }
@@ -239,7 +243,6 @@ class WalletFragmentMain : Fragment() {
             } else if ( response?.has("error") == true ) {
                 statusBar.text = response.getString("error").toString()
             } else {
-                //TODO: post error
                 walletUnlocked = false
                 neutrinoSynced = false
             }
@@ -291,7 +294,6 @@ class WalletFragmentMain : Fragment() {
                     walletUnlocked = true
                     //Update screen
                     updateUiWalletUnlocket(v)
-                    h.postDelayed(refreshValues,0)
                 }
             }
         }
@@ -400,8 +402,8 @@ class WalletFragmentMain : Fragment() {
                 if (logTxns) {
                     val txnsLogfile = File(requireActivity().filesDir.toString()+"/txnslog.txt")
                     val time = Calendar.getInstance().time
-                    txnsLogfile.appendText("$time REQUEST: $params")
-                    txnsLogfile.appendText("$time RESPONSE: $transactions")
+                    txnsLogfile.appendText("$time REQUEST: $params\n")
+                    txnsLogfile.appendText("$time RESPONSE: $transactions\n")
                 }
                 listsLayout.removeAllViews()
                 val lastAmount = transactions.getJSONObject(0).getString("amount").toLong()
@@ -475,7 +477,6 @@ class WalletFragmentMain : Fragment() {
                     val icon = ImageView(context)
                     icon.id = View.generateViewId()
                     if (numConfirmations == 0) {
-                        //TODO: update to hourglass or gears
                         icon.setBackgroundResource(R.drawable.unconfirmed)
                         updateConfirmations.add(true)
                     }else if (numConfirmations == 1) {
@@ -554,11 +555,7 @@ class WalletFragmentMain : Fragment() {
 
         override fun run() {
             getInfo(v)
-            if (walletUnlocked) {
-                h.postDelayed(refreshValues, refreshValuesInterval)
-            } else {
-                unlockWallet(v)
-            }
+
         }
     }
 

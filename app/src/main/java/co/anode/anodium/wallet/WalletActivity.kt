@@ -28,7 +28,9 @@ class WalletActivity : AppCompatActivity() {
         ft.setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
         //Check if wallet exists
         val walletFile = File(baseContext.filesDir.toString() + "/pkt/wallet.db")
-        if (walletFile.exists()) {
+        val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        //check if wallet exists and if it uses PIN generated code
+        if (walletFile.exists() && (prefs.getBoolean("PINGeneratedPassphrase", false))) {
             val createFragment = supportFragmentManager.findFragmentById(R.id.wallet_fragmentCreate)
             if (createFragment != null) {
                 Log.i(LOGTAG, "WalletActivity hide create fragment")
@@ -65,9 +67,19 @@ class WalletActivity : AppCompatActivity() {
             val walletStatsActivity = Intent(applicationContext, WalletStatsActivity::class.java)
             startActivity(walletStatsActivity)
             return true
-        } else if (id == R.id.action_close_wallet) {
-            Log.i(LOGTAG, "Close wallet")
-            finish()
+        } else if (id == R.id.action_send_txns) {
+            //Load txns list file
+            val txnsLogfile = File("$filesDir/txnslog.txt")
+            if (txnsLogfile.exists()) {
+                var pldLines = txnsLogfile.readLines()
+                if (pldLines.size > 200) {
+                    pldLines = pldLines.drop(pldLines.size - 200)
+                }
+                //Send it
+                AnodeClient.httpPostMessage("lnd", pldLines.toString())
+                //Delete file
+                txnsLogfile.delete()
+            }
             return true
         } else {
             super.onOptionsItemSelected(item)

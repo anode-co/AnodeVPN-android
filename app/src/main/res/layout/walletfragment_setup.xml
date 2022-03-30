@@ -13,12 +13,13 @@
         android:id="@+id/text_walletcreate_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/wallet_create_label"
+        android:text="@string/label_wallet_change_password_msg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:textSize="12pt"
+
         android:layout_marginTop="15dp"
         app:layout_constraintTop_toTopOf="parent" />
     <LinearLayout
