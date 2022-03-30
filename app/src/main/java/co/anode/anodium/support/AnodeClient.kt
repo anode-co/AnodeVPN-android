@@ -131,16 +131,17 @@ object AnodeClient {
         }
     }
 
-    fun httpPostMessage(type:String, message: String, force: Boolean): String {
+    fun httpPostMessage(type:String, message: String, force: String): String {
         //Do not post when on x86 or x86_64 (emulator) for development use only
         val arch = System.getProperty("os.arch")
         if (arch.contains("x86") || arch.contains("i686")) { return ""}
         //Do not post without consent
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        if (!force && !prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
+        val bforce = force.toBoolean()
+        if (!bforce && !prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
 
         //Allow a single post message every minute
-        if (!force && (((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) || (message.contains("io.grpc.StatusRuntimeException: UNAVAILABLE")))) {
+        if (!bforce && (((System.currentTimeMillis() - lastpostmessage) < PostMessageInterval) || (message!!.contains("io.grpc.StatusRuntimeException: UNAVAILABLE")))) {
             return ""
         }
         lastpostmessage = System.currentTimeMillis()
@@ -355,7 +356,7 @@ object AnodeClient {
         if (pubkey == "") pubkey = "unknown"
         jsonObject.accumulate("publicKey", pubkey)
         jsonObject.accumulate("error", type)
-        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_CODE)
+        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_NAME)
         jsonObject.accumulate("clientOs", "Android")
         jsonObject.accumulate("clientOsVersion", android.os.Build.VERSION.RELEASE)
         ignoreErr{ jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now())) }
@@ -366,6 +367,7 @@ object AnodeClient {
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
+        jsonObject.accumulate("message", "postmessage")
         jsonObject.accumulate("debuggingMessages", message)
         return jsonObject
     }
@@ -702,7 +704,7 @@ object AnodeClient {
         url = URL(address)
         //url = URL("https://vpn.anode.co/api/0.3/tests/500error/")
         //if connection failed and we are connected to cjdns try with ipv6 address
-        if(isRetry and isVpnActive()) {
+        if(isRetry && isVpnActive()) {
             var cjdnsurl = address.replace("vpn.anode.co",cjdnsServerAddress)
             cjdnsurl = cjdnsurl.replace("https:","http:")
             useHttps = false
@@ -836,6 +838,21 @@ object AnodeClient {
         override fun doInBackground(objects: Array<Any?>): String? {
             if (checkNetworkConnection())
                 return httpPostError( mycontext.filesDir)
+            return "no connection"
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            if (result != null) {
+                showToast(result)
+            }
+        }
+    }
+
+    class PostMessage() : AsyncTask<String, Void, String>() {
+        override fun doInBackground(vararg params: String): String? {
+            if (checkNetworkConnection())
+                return httpPostMessage(params[0], params[1], params[2])
             return "no connection"
         }
 

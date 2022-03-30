@@ -77,7 +77,7 @@ class WalletActivity : AppCompatActivity() {
                     pldLines = pldLines.drop(pldLines.size - 100)
                 }
                 //Send it
-                AnodeClient.httpPostMessage("other", pldLines.toString(), true)
+                AnodeClient.PostMessage().execute("other", pldLines.toString(), "true")
                 //Delete file
                 txnsLogfile.delete()
             } else {
