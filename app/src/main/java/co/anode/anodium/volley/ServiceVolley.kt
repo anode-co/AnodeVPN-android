@@ -72,8 +72,8 @@ class ServiceVolley : ServiceInterface {
                 return headers
             }
         }
-        //Increase timeout when we are creating a wallet
-        if (url.contains("wallet/create"))  {
+        //Increase timeout for certain REST API calls that take pld more time
+        if (url.contains("wallet/create") || url.contains("wallet/changepassphrase"))  {
             jsonObjReq.retryPolicy = DefaultRetryPolicy(60000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         } else if ((url.contains("sendfrom")) || (url.contains("seed/create"))) {
             jsonObjReq.retryPolicy = DefaultRetryPolicy(40000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
