@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/buttonRefresh">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -100,21 +100,11 @@
                 app:layout_constraintStart_toEndOf="@+id/wstats_connectedservers_label"
                 app:layout_constraintBottom_toBottomOf="@+id/wstats_connectedservers_label"
                 android:layout_marginStart="20dp"/>
-            <TextView
-                android:id="@+id/peers_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="click to expand"
-                android:clickable="true"
-                android:textSize="5pt"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/wstats_connectedservers"
-                android:layout_marginStart="10dp" />
             <ListView
                 android:id="@+id/peers_list"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:nestedScrollingEnabled="true"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
                 app:layout_constraintTop_toBottomOf="@+id/wstats_connectedservers">
             </ListView>
             <TextView
@@ -134,21 +124,11 @@
                 app:layout_constraintStart_toEndOf="@+id/wstats_bannedservers_label"
                 app:layout_constraintBottom_toBottomOf="@+id/wstats_bannedservers_label"
                 android:layout_marginStart="20dp"/>
-            <TextView
-                android:id="@+id/banned_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="click to expand"
-                android:clickable="true"
-                android:textSize="5pt"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/wstats_bannedservers"
-                android:layout_marginStart="10dp" />
             <ListView
                 android:id="@+id/banned_list"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:nestedScrollingEnabled="true"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
                 app:layout_constraintTop_toBottomOf="@+id/wstats_bannedservers">
             </ListView>
             <TextView
@@ -168,23 +148,25 @@
                 app:layout_constraintStart_toEndOf="@+id/wstats_queries_label"
                 app:layout_constraintBottom_toBottomOf="@+id/wstats_queries_label"
                 android:layout_marginStart="20dp"/>
-            <TextView
-                android:id="@+id/queries_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="click to expand"
-                android:clickable="true"
-                android:textSize="5pt"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/wstats_queries"
-                android:layout_marginStart="10dp" />
             <ListView
                 android:id="@+id/queries_list"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:nestedScrollingEnabled="true"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
                 app:layout_constraintTop_toBottomOf="@+id/wstats_queries_label">
             </ListView>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
+    <Button
+        android:id="@+id/buttonRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_reload"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="10dp"
+        android:textSize="16sp"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
