@@ -98,7 +98,7 @@
     <string name="action_view_wallet_log">Logs</string>
     <string name="action_view_wallet_info">Info</string>
     <string name="action_view_wallet_delete_db">Delete DB</string>
-    <string name="action_reload">Reload</string>
+    <string name="action_reload">Refresh</string>
     <!-- Wallet Setup fragment -->
     <string name="wallet_create">Create PKT wallet</string>
     <string name="wallet_import">Import PKT wallet</string>
