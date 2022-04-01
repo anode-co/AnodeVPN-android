@@ -275,7 +275,7 @@ class WalletFragmentMain : Fragment() {
                     //Store and push error
                     //TODO: push error
                 } else if ((response.has("error")) &&
-                    response.getJSONObject("error").getString("message").contains("ErrWrongPassphrase")) {
+                    response.getString("error").contains("ErrWrongPassphrase")) {
                     Log.d(LOGTAG, "Error unlocking wallet, wrong password")
                     //We can't do anything in this case...
                     //Wrong Password
