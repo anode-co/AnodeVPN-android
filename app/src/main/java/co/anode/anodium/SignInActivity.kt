@@ -207,7 +207,7 @@ class SignInActivity : AppCompatActivity() {
                             commit()
                         }
                         isUserRegistered().execute(jsonObj.getString("username"))
-                        thread.start()
+                        if (thread.isAlive) {thread.start()}
                     }
                 } catch (e: JSONException) {
 
