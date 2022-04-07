@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
+import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.WalletActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONException
@@ -514,9 +515,13 @@ class MainActivity : AppCompatActivity() {
             startActivity(changePassActivity)
             return true
         } else if (id == R.id.action_wallet) {
-            Log.i(LOGTAG, "Open wallet activity")
-            val walletActivity = Intent(applicationContext, WalletActivity::class.java)
-            startActivity(walletActivity)
+            if (AnodeUtil.walletExists()) {
+                Log.i(LOGTAG, "Open wallet activity, wallet file exists")
+                startActivity(Intent(applicationContext, WalletActivity::class.java))
+            } else {
+                Log.i(LOGTAG, "Open password prompt activity, wallet file does not exist yet")
+                startActivity(Intent(applicationContext, PasswordPrompt::class.java))
+            }
             return true
         } else if (id == R.id.action_closeapp) {
             closeApp()
