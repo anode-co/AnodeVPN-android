@@ -3,6 +3,8 @@ package co.anode.anodium.wallet
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -24,11 +26,14 @@ import java.util.*
 class WalletStatsActivity : AppCompatActivity() {
     private var updating = true
     private lateinit var apiController: APIController
+    private lateinit var pinPasswordAlert: AlertDialog
+    @Volatile
     private var walletUnlocked = false
     private var balanceLastTimeUpdated: Long = 0
     private var passwordPromptActive = false
     private lateinit var myBalance: TextView
     val peersListDetails = mutableListOf<String>()
+    private var wrongPinAttempts= 0
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +73,7 @@ class WalletStatsActivity : AppCompatActivity() {
         refreshButton.setOnClickListener {
             getInfo()
             if (!walletUnlocked) {
-                unlockWallet()
+                pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
             } else {
                 getBalance()
             }
@@ -135,6 +140,7 @@ class WalletStatsActivity : AppCompatActivity() {
                     val walletInfo = response.getJSONObject("wallet")
                     val localDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(walletInfo.getString("currentBlockTimestamp"))
                     walletSync.text = walletInfo.getInt("currentHeight").toString() + " | " +SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(localDateTime)
+                    walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
                 }
                 if (response.has("neutrino") && !response.isNull("neutrino")) {
                     peersListDetails.clear()
@@ -236,33 +242,93 @@ class WalletStatsActivity : AppCompatActivity() {
         getBalance()
     }
 
-
-    private fun unlockWallet() {
-        Log.i(LOGTAG, "Trying to unlock wallet")
-        //Get encrypted password
-        val walletPassword = AnodeUtil.getKeyFromEncSharedPreferences("wallet_password")
-        //If password is empty prompt user to enter new password
-        if (walletPassword.isEmpty()) {
-            //We should not be having a wallet without a password stored!!!
+    private fun pinOrPasswordPrompt(wrongPass: Boolean, forcePassword:Boolean) {
+        if (this::pinPasswordAlert.isInitialized && pinPasswordAlert.isShowing) { return }
+        val storedPin = AnodeUtil.getWalletPin()
+        var isPin = false
+        val builder = AlertDialog.Builder(this)
+        if (wrongPass) {
+            builder.setTitle("Wrong password")
         } else {
-            val jsonRequest = JSONObject()
-            jsonRequest.put("wallet_passphrase", walletPassword)
-            apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
-                if (response == null) {
-                    //unknown, throw error
-                    Log.i(LOGTAG, "unknown status for wallet")
-                } else if ((response.has("error")) &&
-                    response.getString("error").contains("ErrWrongPassphrase")) {
-                    Log.d(LOGTAG, "Error unlocking wallet, wrong password")
-                    walletUnlocked = false
-                } else if (response.has("error")) {
-                    Log.d(LOGTAG, "Error: "+response.getString("error").toString())
-                    walletUnlocked = false
-                } else if (response.length() == 0) {
-                    //empty response is success
-                    Log.i(LOGTAG, "Wallet unlocked")
-                    walletUnlocked = true
+            builder.setTitle("")
+        }
+        val input = EditText(this)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        input.layoutParams = lp
+        builder.setView(input)
+        if (wrongPinAttempts > 3) {
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            builder.setTitle("Too many failed PIN attempts.")
+            builder.setMessage("Please enter your password")
+        } else if (storedPin.isNotEmpty() && !forcePassword) {
+            input.inputType = InputType.TYPE_CLASS_NUMBER
+            builder.setMessage("Please enter your PIN")
+            isPin = true
+        } else {
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            builder.setMessage("Please enter your password")
+        }
+        input.transformationMethod = PasswordTransformationMethod.getInstance()
+        builder.setPositiveButton("OK"
+        ) { dialog, _ ->
+            val inputPassword = input.text.toString()
+            var password = ""
+            dialog.dismiss()
+            if (isPin) {
+                if (inputPassword != storedPin) {
+                    wrongPinAttempts++
+                } else if (inputPassword == storedPin){
+                    wrongPinAttempts = 0
+                    val encryptedPassword = AnodeUtil.getWalletPassword()
+                    password = AnodeUtil.decrypt(encryptedPassword, inputPassword)
                 }
+            } else {
+                wrongPinAttempts = 0
+                password = inputPassword
+            }
+            //try unlocking the wallet with new password
+            unlockWallet(password)
+        }
+
+        builder.setNegativeButton("Cancel"
+        ) { dialog, _ ->
+            dialog.dismiss()
+        }
+        if (storedPin.isNotEmpty() && wrongPinAttempts<=3) {
+            builder.setNeutralButton("Password") { dialog, _ ->
+                dialog.dismiss()
+                pinOrPasswordPrompt(wrongPass = false, forcePassword = true)
+            }
+        }
+        pinPasswordAlert = builder.create()
+        pinPasswordAlert.show()
+    }
+    /**
+     * Will unlock PKT Wallet using the password saved in
+     * encrypted shared preferences
+     * if wrongPassword is returned the saved password will be reset and user
+     * prompted to enter new password
+     * then will call getNewAddress, getBalance and getTransactions
+     */
+    private fun unlockWallet(password: String) {
+        Log.i(LOGTAG, "Trying to unlock wallet")
+        val jsonRequest = JSONObject()
+        jsonRequest.put("wallet_passphrase", password)
+        apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
+            if (response == null) {
+                Log.i(LOGTAG, "unknown status for wallet")
+            } else if ((response.has("error")) &&
+                response.getString("error").contains("ErrWrongPassphrase")) {
+                Log.d(LOGTAG, "Error unlocking wallet, wrong password")
+                pinOrPasswordPrompt(wrongPass = true, forcePassword = false)
+                walletUnlocked = false
+            } else if (response.has("error")) {
+                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+                walletUnlocked = false
+            } else if (response.length() == 0) {
+                //empty response is success
+                Log.i(LOGTAG, "Wallet unlocked")
+                walletUnlocked = true
             }
         }
     }
