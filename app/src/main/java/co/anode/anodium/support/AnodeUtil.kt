@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.system.Os
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import androidx.core.app.NotificationCompat
@@ -17,12 +18,14 @@ import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.KeyStore
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
-import kotlin.concurrent.thread
+import javax.crypto.spec.SecretKeySpec
 
 
 object AnodeUtil {
@@ -358,7 +361,7 @@ object AnodeUtil {
      *
      * @param password: String
      */
-    fun storePassword(password: String) {
+    fun storeWalletPassword(password: String) {
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -368,16 +371,36 @@ object AnodeUtil {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        encSharedPreferences.edit().putString("wallet_password", password).apply()
+        encSharedPreferences.edit().putString("encrypted_wallet_password", password).apply()
     }
 
+    fun storeWalletPin(pin: String) {
+        val masterKey = getMasterKey()
+        val encSharedPreferences: SharedPreferences =
+            EncryptedSharedPreferences.create(
+                context!!,
+                "co.anode.anodium-encrypted-sharedPreferences",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        encSharedPreferences.edit().putString("wallet_pin", pin).apply()
+    }
+
+    fun getWalletPin():String {
+        return getValueFromEncSharedPreferences("wallet_pin")
+    }
+
+    fun getWalletPassword():String {
+        return getValueFromEncSharedPreferences("encrypted_wallet_password")
+    }
     /**
      * Get the stored vale for a key from
      * ecnrypted shared preferences
      * @param key:String
      * @return password:String
      */
-    fun getKeyFromEncSharedPreferences(key:String): String {
+    private fun getValueFromEncSharedPreferences(key:String): String {
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -407,7 +430,7 @@ object AnodeUtil {
         if (!keyStore.containsAlias(keyAlias)) {
             val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
             keyGenerator.init(
-                KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT)
+                KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
                     .setRandomizedEncryptionRequired(false)
@@ -420,27 +443,54 @@ object AnodeUtil {
         }
     }
 
-    /**
-     * Will generate a password encrypted using a safe key
-     *
-     * @param pin:String
-     * @return password:String
-     */
-    fun getTrustedPassword(pin:String): String {
-        val key = getKey()
-        //get PIN
-        val pinBytes:ByteArray = pin.toByteArray(Charsets.UTF_8)
-        //encrypt iv+PIN using key
-        val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
-        val iv = byteArrayOf(85, 125, 30, 127, -79, 106, -90, 99, 19, -17, -49, 30, -99, 94, -123, -42)
-        cipher.init(Cipher.ENCRYPT_MODE, key, IvParameterSpec(iv))
-        val cipherText = cipher.doFinal(iv+pinBytes)
-        //get password
-        var cipherString = ""
-        for (b in cipherText) {
-            cipherString += String.format("%02X", b)
+    fun md5(s: String): String? {
+        val MD5 = "MD5"
+        try {
+            // Create MD5 Hash
+            val digest: MessageDigest = MessageDigest
+                .getInstance(MD5)
+            digest.update(s.toByteArray())
+            val messageDigest: ByteArray = digest.digest()
+
+            // Create Hex String
+            val hexString = StringBuilder()
+            for (aMessageDigest in messageDigest) {
+                var h = Integer.toHexString(0xFF and aMessageDigest.toInt())
+                while (h.length < 2) h = "0$h"
+                hexString.append(h)
+            }
+            return hexString.toString()
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
         }
-        return cipherString
+        return ""
+    }
+
+    fun generateKey(pin:String): SecretKey {
+        val md5Pin = md5(pin)
+        val key = SecretKeySpec(md5Pin?.toByteArray(Charsets.UTF_8),"AES")
+        return key
+    }
+
+    fun encrypt(value:String, pin: String): String {
+        val key = generateKey(pin)
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val encryptedBytes = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
+        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT).replace("\n","")
+    }
+
+    fun decrypt(value:String, pin:String): String {
+        val key = generateKey(pin)
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.DECRYPT_MODE, key)
+        val decryptedBytes = cipher.doFinal(Base64.decode(value, Base64.DEFAULT))
+        return String(decryptedBytes, Charsets.UTF_8)
+    }
+
+    fun walletExists(): Boolean {
+        val walletFile = File(filesDirectory + "/pkt/wallet.db")
+        return walletFile.exists()
     }
 }
 
