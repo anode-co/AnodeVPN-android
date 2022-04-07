@@ -4,12 +4,18 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
+import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.R
+import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.textfield.TextInputLayout
@@ -19,6 +25,7 @@ import org.json.JSONObject
 class SendPaymentActivity : AppCompatActivity() {
     lateinit var apiController: APIController
     private var myPKTAddress = ""
+    private var canSendCoins = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,51 +81,91 @@ class SendPaymentActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
+        //TODO: set edittext to pin or password
+        val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
+        val storedPin = AnodeUtil.getWalletPin()
+        if (storedPin.isNotEmpty()) {
+            passwordField.inputType = InputType.TYPE_CLASS_NUMBER
+            passwordField.hint = getString(R.string.prompt_newpin)
+        } else {
+            passwordField.inputType = InputType.TYPE_CLASS_TEXT
+            passwordField.hint = getString(R.string.send_pkt_password)
+        }
+
+
         sendButton.setOnClickListener {
-            var sendcoins = true
-            val walletPassword = AnodeUtil.getKeyFromEncSharedPreferences("wallet_password")
-            val storedb64Password = android.util.Base64.encodeToString(walletPassword.toByteArray(), android.util.Base64.DEFAULT)
-            val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
-            val b64Password = android.util.Base64.encodeToString(passwordField.text.toString().toByteArray(), android.util.Base64.DEFAULT)
+            val amount = findViewById<EditText>(R.id.editTextPKTAmount)
             //Check fields
             if (address.text.toString().isEmpty()) {
                 Toast.makeText(applicationContext, "Please fill in the receiver's address", Toast.LENGTH_SHORT).show()
-                sendcoins = false
+                canSendCoins = false
+                return@setOnClickListener
             }
-            val amount = findViewById<EditText>(R.id.editTextPKTAmount)
             if (amount.text.toString().isEmpty()) {
                 Toast.makeText(applicationContext, "Please fill in the PKT amount", Toast.LENGTH_SHORT).show()
-                sendcoins = false
+                canSendCoins = false
+                return@setOnClickListener
             }
-            if (passwordField.text.toString().isEmpty()) {
-                Toast.makeText(applicationContext, "Please fill in the password", Toast.LENGTH_SHORT).show()
-                sendcoins = false
-            } else if (b64Password != storedb64Password) {
-                Toast.makeText(applicationContext, "Wrong password", Toast.LENGTH_SHORT).show()
-                sendcoins = false
+            var password = ""
+            if (storedPin.isNotEmpty()) {
+                val encryptedPassword = AnodeUtil.getWalletPassword()
+                password = AnodeUtil.decrypt(encryptedPassword, passwordField.text.toString())
+            } else {
+                password = passwordField.text.toString()
             }
-            //Send coins
-            if (sendcoins) {
-                //val result = LndRPCController.sendCoins(address.text.toString(), amount.text.toString().toLong())
-                val params = JSONObject()
-                //Exclude mining transactions
-                params.put("to_address", address.text.toString())
-                params.put("amount", amount.text.toString().toFloat())
-                val fromAddresses = JSONArray()
-                fromAddresses.put(myPKTAddress)
-                params.put("from_address", fromAddresses)
-                apiController.post(apiController.sendFromURL, params) { response ->
-                    if ((response != null) && response.has("txHash") && !response.isNull("txHash")) {
-                        Toast.makeText(applicationContext, "Payment of ${amount.text}PKT send", Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else if (response.toString().contains("InsufficientFundsError",true)){
-                        Toast.makeText(applicationContext, "Wallet does not have enough balance", Toast.LENGTH_SHORT).show()
-                    } else if (response.toString().contains("custom checksum failed", true)) {
-                        Toast.makeText(applicationContext, "Invalid address.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(applicationContext, "Unknown error when trying to send", Toast.LENGTH_SHORT).show()
-                    }
-                }
+            validateWalletPassphraseAndSendCoins(password, address.text.toString(), amount.text.toString().toFloat())
+        }
+    }
+
+    private fun sendCoins(address:String, amount: Float) {
+        val params = JSONObject()
+        params.put("to_address", address)
+        params.put("amount", amount)
+        val fromAddresses = JSONArray()
+        fromAddresses.put(myPKTAddress)
+        params.put("from_address", fromAddresses)
+        apiController.post(apiController.sendFromURL, params) { response ->
+            if ((response != null) && response.has("txHash") && !response.isNull("txHash")) {
+                Toast.makeText(applicationContext, "Payment of $amount PKT send", Toast.LENGTH_SHORT).show()
+                finish()
+            } else if (response.toString().contains("InsufficientFundsError",true)){
+                Toast.makeText(applicationContext, "Wallet does not have enough balance", Toast.LENGTH_SHORT).show()
+            } else if (response.toString().contains("custom checksum failed", true)) {
+                Toast.makeText(applicationContext, "Invalid address.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(applicationContext, "Unknown error when trying to send", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun validateWalletPassphraseAndSendCoins(password: String, address: String, amount: Float) {
+        val loading = findViewById<ProgressBar>(R.id.loadingAnimation)
+        loading.visibility = View.VISIBLE
+        val layout = findViewById<ConstraintLayout>(R.id.activitysendPayment)
+        layout.setBackgroundColor(getColor(android.R.color.darker_gray))
+        Toast.makeText(this,"Validating your password.", Toast.LENGTH_SHORT).show()
+        val sendButton = findViewById<Button>(R.id.button_sendPKTPayment)
+        sendButton.isEnabled = false
+        val jsonRequest = JSONObject()
+        jsonRequest.put("wallet_passphrase", password)
+        apiController.post(apiController.checkPassphraseURL,jsonRequest) { response ->
+            //Reset UI elements
+            loading.visibility = View.GONE
+            val layout = findViewById<ConstraintLayout>(R.id.activitysendPayment)
+            layout.setBackgroundColor(getColor(android.R.color.white))
+            sendButton.isEnabled = true
+            if (response == null) {
+                Log.i(LOGTAG, "unknown status for wallet/checkpassphrase")
+            } else if ((response.has("error")) &&
+                response.getString("error").contains("ErrWrongPassphrase")) {
+                Log.d(LOGTAG, "Validating password, wrong password")
+                canSendCoins = false
+            } else if (response.has("error")) {
+                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+                canSendCoins = false
+            } else if (response.length() == 0) {
+                //empty response is success
+                sendCoins(address, amount)
             }
         }
     }
