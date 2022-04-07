@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".volley.BackendVolley"
         android:allowBackup="false"
         android:extractNativeLibs="true"
         android:icon="@mipmap/ic_logo_foreground"
@@ -20,9 +21,19 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:targetApi="q"
-        android:name=".volley.BackendVolley">
-
+        tools:targetApi="q">
+        <activity
+            android:name=".wallet.RecoverySeed"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+        <activity
+            android:name=".wallet.PinPrompt"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+        <activity
+            android:name=".wallet.PasswordPrompt"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
         <activity android:name=".wallet.WalletInfoActivity" />
         <activity android:name=".wallet.WalletStatsActivity" />
         <activity android:name=".wallet.TransactionHistoryActivity" />
@@ -58,10 +69,10 @@
             android:label="@string/title_activity_vpn_servers_list" />
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
