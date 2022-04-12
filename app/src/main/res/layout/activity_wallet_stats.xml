@@ -155,15 +155,47 @@
                 android:nestedScrollingEnabled="false"
                 app:layout_constraintTop_toBottomOf="@+id/wstats_queries_label">
             </ListView>
+            <TextView
+                android:id="@+id/wstats_generatedpassword_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Generated Password"
+                android:textStyle="bold"
+                android:textSize="8pt"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/queries_list"
+                app:layout_constraintStart_toStartOf="@+id/wstats_queries_label"/>
+            <TextView
+                android:id="@+id/wstats_generatedpassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:visibility="gone"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toStartOf="@+id/wstats_generatedpassword_label"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_generatedpassword_label"
+                android:textIsSelectable="true" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
+    <Button
+        android:id="@+id/buttonGeneratePassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_generate_wallet_password"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttonRefresh"
+        android:layout_marginBottom="10dp"
+        android:textSize="16sp"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape"/>
     <Button
         android:id="@+id/buttonRefresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/action_reload"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/buttonGeneratePassword"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="10dp"
         android:textSize="16sp"

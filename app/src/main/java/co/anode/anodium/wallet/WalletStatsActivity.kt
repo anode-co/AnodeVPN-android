@@ -78,6 +78,10 @@ class WalletStatsActivity : AppCompatActivity() {
                 getBalance()
             }
         }
+        val generateButton = findViewById<Button>(R.id.buttonGeneratePassword)
+        generateButton.setOnClickListener {
+            pinPrompt()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -280,7 +284,7 @@ class WalletStatsActivity : AppCompatActivity() {
                 } else if (inputPassword == storedPin){
                     wrongPinAttempts = 0
                     val encryptedPassword = AnodeUtil.getWalletPassword()
-                    password = AnodeUtil.decrypt(encryptedPassword, inputPassword)
+                    password = AnodeUtil.decrypt(encryptedPassword, inputPassword).toString()
                 }
             } else {
                 wrongPinAttempts = 0
@@ -331,5 +335,33 @@ class WalletStatsActivity : AppCompatActivity() {
                 walletUnlocked = true
             }
         }
+    }
+
+    private fun pinPrompt() {
+        if (this::pinPasswordAlert.isInitialized && pinPasswordAlert.isShowing) { return }
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Enter your PIN")
+        val input = EditText(this)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        input.layoutParams = lp
+        builder.setView(input)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        builder.setMessage("For generating wallet password, for recovering wallet from app versions 0.2.102-0.2.104")
+        input.transformationMethod = PasswordTransformationMethod.getInstance()
+        builder.setPositiveButton("OK"
+        ) { dialog, _ ->
+            val generatedPassword = AnodeUtil.getTrustedPassword(input.text.toString())
+            findViewById<TextView>(R.id.wstats_generatedpassword_label).visibility = View.VISIBLE
+            val genPassField = findViewById<TextView>(R.id.wstats_generatedpassword)
+            genPassField.text = generatedPassword
+            genPassField.visibility = View.VISIBLE
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Cancel"
+        ) { dialog, _ ->
+            dialog.dismiss()
+        }
+        pinPasswordAlert = builder.create()
+        pinPasswordAlert.show()
     }
 }
