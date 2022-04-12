@@ -269,12 +269,12 @@ class WalletActivity : AppCompatActivity() {
             h.postDelayed(getPldInfo, 0)
             dialog.dismiss()
         }
-        if (!forcePassword && storedPin.isNotEmpty() && wrongPinAttempts<=3) {
+        if (isPin) {
             builder.setNeutralButton("Password") { dialog, _ ->
                 dialog.dismiss()
                 pinOrPasswordPrompt(wrongPass = false, forcePassword = true)
             }
-        } else {
+        } else if (storedPin.isNotEmpty() && wrongPinAttempts<=3){
             builder.setNeutralButton("PIN") { dialog, _ ->
                 dialog.dismiss()
                 pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
