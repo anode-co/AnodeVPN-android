@@ -40,7 +40,6 @@
                 android:ems="10"
                 android:hint="@string/prompt_newpin"
                 android:inputType="numberPassword"
-                android:maxLength="4"
                 android:autofillHints="test" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
@@ -59,7 +58,6 @@
                 android:ems="10"
                 android:hint="@string/prompt_confirmpin"
                 android:inputType="numberPassword"
-                android:maxLength="4"
                 android:autofillHints="test" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
