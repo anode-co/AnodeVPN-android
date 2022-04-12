@@ -121,7 +121,7 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     override fun run() {
         try {
             main()
-            //TODO: DEBUG for testing notifications
+            //DEBUG: for testing notifications
             /*
             var time = System.currentTimeMillis()
             val interval: Long = 10 * 60 * 1000 //10min

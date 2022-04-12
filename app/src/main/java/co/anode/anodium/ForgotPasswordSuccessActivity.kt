@@ -68,7 +68,7 @@ class ForgotPasswordSuccessActivity : AppCompatActivity() {
                 try {
                     val jsonObj = JSONObject(result)
                     if (jsonObj.has("passwordResetStatusUrl")) {
-                        //TODO: go to change password with forgot password true?
+                        //go to change password with forgot password true?
                     } else if (jsonObj.has("status")) {
                         Toast.makeText(baseContext, jsonObj.getString("status") + ": " + jsonObj.getString("message"), Toast.LENGTH_SHORT).show()
                     }
