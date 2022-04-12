@@ -20,29 +20,42 @@ import org.json.JSONObject
 class PinPrompt : AppCompatActivity() {
     private lateinit var apiController: APIController
     private var currentPasswordValidated = true
+    private var validPassword: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pin_prompt)
         val actionbar = supportActionBar
-        actionbar!!.title = getString(R.string.pin_prompt_title)
-        actionbar.setDisplayHomeAsUpEnabled(true)
+        actionbar!!.setDisplayHomeAsUpEnabled(true)
         AnodeClient.eventLog("Activity: PinPrompt created")
         val param = intent.extras
-        val passwordString = param?.get("password").toString()
+        //Getting password from password prompt
+        val passwordString = param?.getString("password")
+        if (!passwordString.isNullOrEmpty()) {
+            //This is for when entering the activity from the wallet menu
+            //in which case we ask the user to enter their password for validation
+            validPassword = passwordString
+        }
         val changePassphrase = param?.get("changepassphrase").toString().toBoolean()
-
+        val noNext = param?.get("noNext").toString().toBoolean()
         val confirmPinLayout = findViewById<TextInputLayout>(R.id.confirmwalletpinLayout)
         val service = ServiceVolley()
         apiController = APIController(service)
         if (changePassphrase) {
             currentPasswordValidated = false
             checkCurrentPassphrase(false)
+            actionbar.title = getString(R.string.pin_prompt_title)
         } else {
             currentPasswordValidated = true
+            actionbar.title = getString(R.string.wallet_create_title)
+        }
+        val nextButton = findViewById<Button>(R.id.button_pinprompt_next)
+        if (noNext && changePassphrase) {
+            nextButton.text = getString(R.string.button_wallet_update_pin)
+        } else {
+            nextButton.text = getString(R.string.action_next)
         }
 
-        val nextButton = findViewById<Button>(R.id.button_pinprompt_next)
         nextButton.setOnClickListener {
             if (!currentPasswordValidated) {
                 Toast.makeText(this,"Please validate password first.", Toast.LENGTH_SHORT).show()
@@ -51,16 +64,28 @@ class PinPrompt : AppCompatActivity() {
             }
             if (pinsMatch()) {
                 confirmPinLayout.error = null
+
                 val pin = findViewById<TextView>(R.id.editTextWalletPin).text.toString()
-                //Encrypt password using PIN and save it in encrypted shared preferences
-                val encryptedPassword = AnodeUtil.encrypt(passwordString,pin)
-                AnodeUtil.storeWalletPassword(encryptedPassword)
-                //Store PIN in encrypted shared preferences
-                AnodeUtil.storeWalletPin(pin)
-                //Go to seed activity, where wallet is actually created
-                val recoveryActivity = Intent(applicationContext, RecoverySeed::class.java)
-                recoveryActivity.putExtra("password", passwordString)
-                startActivity(recoveryActivity)
+                if (validPassword != null) {
+                    //Encrypt password using PIN and save it in encrypted shared preferences
+                    val encryptedPassword = AnodeUtil.encrypt(validPassword!!, pin)
+                    AnodeUtil.storeWalletPassword(encryptedPassword)
+                    //Store PIN in encrypted shared preferences
+                    AnodeUtil.storeWalletPin(pin)
+                    if (noNext) {
+                        //coming from passwordchange or pin reset
+                        finish()
+                    } else {
+                        //Go to seed activity, where wallet is actually created
+                        val recoveryActivity = Intent(applicationContext, RecoverySeed::class.java)
+                        recoveryActivity.putExtra("password", passwordString)
+                        startActivity(recoveryActivity)
+                    }
+                } else {
+                    //Password is null, prompt user to enter it for validation
+                    Toast.makeText(this, "No password to encrypt.", Toast.LENGTH_LONG).show()
+                    checkCurrentPassphrase(false)
+                }
             } else {
                 confirmPinLayout.error = getString(R.string.passwords_not_match)
             }
@@ -117,13 +142,26 @@ class PinPrompt : AppCompatActivity() {
                 response.getString("error").contains("ErrWrongPassphrase")) {
                 Log.d(LOGTAG, "Validating password, wrong password")
                 currentPasswordValidated = false
-                checkCurrentPassphrase(true)
             } else if (response.has("error")) {
                 Log.d(LOGTAG, "Error: "+response.getString("error").toString())
                 currentPasswordValidated = false
-            } else if (response.length() == 0) {
-                //empty response is success
-                currentPasswordValidated = true
+            } else if (response.has("validPassphrase")) {
+                currentPasswordValidated = response.getBoolean("validPassphrase")
+                if (currentPasswordValidated) {
+                    validPassword = password
+                } else {
+                    validPassword = null
+                }
+                Log.i(LOGTAG, "validPassphrase: $currentPasswordValidated")
+            } else {
+                Log.e(LOGTAG, "UNEXPECTED response: $response")
+                //Something unexpected has happened, close activity
+                finish()
+            }
+            if (!currentPasswordValidated) {
+                checkCurrentPassphrase(true)
+            } else {
+                Toast.makeText(this, "Current password validated!", Toast.LENGTH_LONG).show()
             }
         }
     }
