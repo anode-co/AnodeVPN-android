@@ -161,24 +161,24 @@ class WalletStatsActivity : AppCompatActivity() {
                     bannedServers.text = neutrino.getJSONArray("bans").length().toString()
                     numQueries.text = neutrino.getJSONArray("queries").length().toString()
                     val neutrinoPeers = neutrino.getJSONArray("peers")
+                    val addressRegex = "([0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3})|(\\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3}))|:)))(%.+)?)".toRegex()
                     for (i in 0 until neutrinoPeers.length()) {
                         val peerDesc = neutrinoPeers.getJSONObject(i)
-                        peersList.add("Address: " + peerDesc.getString("addr").split(":")[0]+" Sync: " + peerDesc.getString("lastBlock").toString())
+                        val addr = peerDesc.getString("addr")
+                        peersList.add(addressRegex.find(addr,0).toString()+" Sync: " + peerDesc.getString("lastBlock").toString())
                         peersListDetails.add(peerDesc.toString(i))
-//                        peersList.add("Version: " + peerDesc.getString("userAgent"))
-//                        peersList.add("Sync: " + peerDesc.getString("lastBlock").toString())
                     }
-//                    peersList.sort()
-//                    peersListDetails.sort()
                     for (i in 0 until neutrino.getJSONArray("bans").length()) {
                         val ban = neutrino.getJSONArray("bans").getJSONObject(i)
-                        bansList.add("Address: " + ban.getString("addr"))
+                        val banAddr = ban.getString("addr")
+                        bansList.add(addressRegex.find(banAddr,0).toString())
                         bansList.add("Reason: " + ban.getString("reason"))
                         bansList.add("Endtime: " + ban.getString("endTime"))
                     }
                     for (i in 0 until neutrino.getJSONArray("queries").length()) {
                         val query = neutrino.getJSONArray("queries").getJSONObject(i)
-                        queriesList.add("Server: " + query.getString("peer").split(":")[0]+" | "+ query.getString("command"))
+                        val peerAddr = query.getString("peer")
+                        queriesList.add(addressRegex.find(peerAddr,0).toString()+" | "+ query.getString("command"))
                         if (query.getLong("lastResponseTime") > 0) {
                             val datetime = Date(query.getLong("lastResponseTime"))
                             queriesList.add("Waiting since: $datetime")
