@@ -16,6 +16,7 @@ import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -203,19 +204,21 @@ class RecoverySeed : AppCompatActivity() {
                 statusbar.text = ""
                 confirmWalletLayout(isRecovery)
             } else {
-                //TODO: if it fails we should reset stored encypted password and pin?
                 Log.i(LOGTAG, "PKT create wallet failed")
+                statusbar.text = "Error in creating wallet..."
                 //Wallet creation failed, parse error, log and notify user
                 var errorString = response?.getString("error")
                 if ((isRecovery) && (errorString!!.contains("The birthday of this seed appears to be"))) {
-                    Toast.makeText(this, "Wrong seed password.", Toast.LENGTH_LONG).show()
+                    val seedPassLayout = findViewById<TextInputLayout>(R.id.walletseedpassLayout)
+                    seedPassLayout.error = getString(R.string.seed_wrong_password)
                 } else  if (errorString != null) {
                     Log.e(LOGTAG, errorString)
                     //Get user friendly message
                     errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
                     Toast.makeText(this, "Error: $errorString", Toast.LENGTH_LONG).show()
                 }
-                //TODO: update ui and what to do next?
+                //Reset UI
+                initLayout(isRecovery)
             }
         }
     }
