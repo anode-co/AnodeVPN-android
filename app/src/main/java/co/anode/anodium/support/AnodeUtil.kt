@@ -466,6 +466,29 @@ object AnodeUtil {
         return ""
     }
 
+    /**
+     * Will generate a password encrypted using a safe key
+     *
+     * @param pin:String
+     * @return password:String
+     */
+    fun getTrustedPassword(pin:String): String {
+        val key = getKey()
+        //get PIN
+        val pinBytes: ByteArray = pin.toByteArray(Charsets.UTF_8)
+        //encrypt iv+PIN using key
+        val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+        val iv = byteArrayOf(85, 125, 30, 127, -79, 106, -90, 99, 19, -17, -49, 30, -99, 94, -123, -42)
+        cipher.init(Cipher.ENCRYPT_MODE, key, IvParameterSpec(iv))
+        val cipherText = cipher.doFinal(iv + pinBytes)
+        //get password
+        var cipherString = ""
+        for (b in cipherText) {
+            cipherString += String.format("%02X", b)
+        }
+        return cipherString
+    }
+
     fun generateKey(pin:String): SecretKey {
         val md5Pin = md5(pin)
         val key = SecretKeySpec(md5Pin?.toByteArray(Charsets.UTF_8),"AES")
@@ -480,12 +503,18 @@ object AnodeUtil {
         return Base64.encodeToString(encryptedBytes, Base64.DEFAULT).replace("\n","")
     }
 
-    fun decrypt(value:String, pin:String): String {
-        val key = generateKey(pin)
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.DECRYPT_MODE, key)
-        val decryptedBytes = cipher.doFinal(Base64.decode(value, Base64.DEFAULT))
-        return String(decryptedBytes, Charsets.UTF_8)
+    fun decrypt(value:String, pin:String): String? {
+        try {
+            val key = generateKey(pin)
+            val cipher = Cipher.getInstance("AES")
+            cipher.init(Cipher.DECRYPT_MODE, key)
+            var decodedValue = Base64.decode(value, Base64.DEFAULT)
+            val decryptedBytes = cipher.doFinal(decodedValue)
+            return String(decryptedBytes, Charsets.UTF_8)
+        } catch (e: Exception) {
+            //Can not decrypt password, we will deal by switching from PIN to password
+            return null
+        }
     }
 
     fun walletExists(): Boolean {
