@@ -8,7 +8,7 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeUtil
-import java.io.File
+import java.io.*
 
 class DebugWalletActivity : AppCompatActivity() {
     private var toBottom = false
@@ -44,9 +44,21 @@ class DebugWalletActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun loadLogFile() {
-        val inStr = resources.openRawResource(R.raw.ansiup)
-        val b = ByteArray(inStr.available())
-        val ansiupjs = String(b)
+        val `is` = resources.openRawResource(R.raw.ansiup)
+        val writer: Writer = StringWriter()
+        val buffer = CharArray(1024)
+        try {
+            val reader: Reader = BufferedReader(InputStreamReader(`is`, "UTF-8"))
+            var n: Int
+            while (reader.read(buffer).also { n = it } != -1) {
+                writer.write(buffer, 0, n)
+            }
+        } catch (e: java.lang.Exception) {
+
+        } finally {
+            `is`.close()
+        }
+        val ansiupjs = "<script type=\"text/javascript\">$writer</script>"
         val logFile = File(AnodeUtil.filesDirectory +"/"+ AnodeUtil.PLD_LOG)
         val logLines = logFile.readLines()
 
