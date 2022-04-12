@@ -134,11 +134,6 @@ class WalletActivity : AppCompatActivity() {
         }
     }
 
-    fun transactionDetailsClosed(line: Int) {
-        val mainFragment = (supportFragmentManager.findFragmentById(R.id.wallet_fragmentMain) as WalletFragmentMain)
-        mainFragment.clearLines(line)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_wallet, menu)
         return true
@@ -158,6 +153,11 @@ class WalletActivity : AppCompatActivity() {
             startActivity(promptPasswordActivity)
             return true
         } else if (id == R.id.action_wallet_pin) {
+            Log.i(LOGTAG, "Open PasswordPin activity for resetting PIN")
+            val promptPinActivity = Intent(applicationContext, PinPrompt::class.java)
+            promptPinActivity.putExtra("changepassphrase", true)
+            promptPinActivity.putExtra("noNext", true)
+            startActivity(promptPinActivity)
             return true
         } else if (id == R.id.action_send_txns) {
             //Load txns list file
@@ -257,7 +257,11 @@ class WalletActivity : AppCompatActivity() {
                 walletPasswordQuickRetry = inputPassword
             }
             //try unlocking the wallet with new password
-            walletPasswordQuickRetry?.let { unlockWallet(it) }
+            if (walletPasswordQuickRetry != null ) {
+                unlockWallet(walletPasswordQuickRetry!!)
+            } else {
+                pinOrPasswordPrompt(wrongPass = false, forcePassword = true)
+            }
         }
 
         builder.setNegativeButton("Cancel"
@@ -265,12 +269,18 @@ class WalletActivity : AppCompatActivity() {
             h.postDelayed(getPldInfo, 0)
             dialog.dismiss()
         }
-        if (storedPin.isNotEmpty() && wrongPinAttempts<=3) {
+        if (!forcePassword && storedPin.isNotEmpty() && wrongPinAttempts<=3) {
             builder.setNeutralButton("Password") { dialog, _ ->
                 dialog.dismiss()
                 pinOrPasswordPrompt(wrongPass = false, forcePassword = true)
             }
+        } else {
+            builder.setNeutralButton("PIN") { dialog, _ ->
+                dialog.dismiss()
+                pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+            }
         }
+
         pinPasswordAlert = builder.create()
         pinPasswordAlert.show()
     }
@@ -368,6 +378,7 @@ class WalletActivity : AppCompatActivity() {
             } else if ((response.has("error")) &&
                 response.getString("error").contains("ErrWrongPassphrase")) {
                 Log.d(LOGTAG, "Error unlocking wallet, wrong password")
+                walletPasswordQuickRetry = null //to stop retrying to unlock wallet
                 pinOrPasswordPrompt(wrongPass = true, forcePassword = false)
                 walletUnlocked = false
             } else if (response.has("error")) {

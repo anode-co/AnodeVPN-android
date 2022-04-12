@@ -137,7 +137,7 @@ class RecoverySeed : AppCompatActivity() {
 
     private fun generateSeed() {
         AnodeClient.eventLog("Button: Create PKT wallet clicked")
-        Log.i(LOGTAG, "WalletFragmentSetup creating wallet")
+        Log.i(LOGTAG, "RecoverySeed Activity creating wallet")
         //Set up UI
         statusbar.text = getString(R.string.generating_wallet_seed)
         showLoading()
