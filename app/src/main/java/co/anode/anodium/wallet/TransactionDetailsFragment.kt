@@ -65,7 +65,7 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         if (fromHistory) {
             (activity as TransactionHistoryActivity).clearLines(lineID)
         } else {
-            (activity as WalletActivity).transactionDetailsClosed(lineID)
+            (activity as WalletActivity).clearLines(lineID)
         }
         super.onDismiss(dialog)
     }
