@@ -146,28 +146,39 @@
     <string name="button_wallet_create">Create wallet</string>
     <string name="button_wallet_recover_wallet">Recover wallet</string>
     <string name="button_wallet_change_password">Change password</string>
+    <string name="button_wallet_update_pin">Update PIN</string>
     <string name="button_keep_waiting">Keep waiting</string>
     <string name="button_vpn_disconnect">Disconnect</string>
+    <string name="button_generate_wallet_password">Generate Password</string>
     <!-- Wallet menu-->
     <string name="action_wallet_stats">Stats</string>
     <string name="action_wallet_pin">Set PIN</string>
     <string name="action_wallet_change_passphrase">Change password</string>
     <!-- Wallet password prompt-->
-    <string name="password_prompt_title">Create PKT Wallet</string>
+    <string name="password_prompt_title">Set wallet password</string>
     <string name="password_prompt_label_password">Enter your wallet password</string>
     <string name="passwords_not_match">Passwords do not match. Please try again.</string>
     <!-- Wallet PIN prompt-->
-    <string name="pin_prompt_title">Create PKT Wallet</string>
+    <string name="pin_prompt_title">Set wallet PIN</string>
     <string name="prompt_label_pin">Use a PIN\nfor easier access</string>
     <string name="prompt_newpin">new pin</string>
     <string name="prompt_confirmpin">confirm pin</string>
     <string name="pins_not_match">Pins do not match. Please try again.</string>
+    <!-- Send PKT -->
+    <string name="wallet_password_validating">Validating your password.</string>
+    <string name="wallet_sending_coins">Sending PKT cash…</string>
+    <string name="wallet_not_enough_balance">Wallet does not have enough balance</string>
+    <string name="wallet_invalid_address">Invalid address.</string>
+    <string name="wallet_unknown_error_sending_pkt">Unknown error when trying to send PKT</string>
+    <string name="wallet_wrong_password">Wrong password</string>
     <!-- Wallet seed/recovery prompt-->
     <string name="seed_prompt_title">Create PKT Wallet</string>
+    <string name="wallet_create_title">Create PKT Wallet</string>
     <string name="wallet_create_seed_label">This is your backup seed phrase</string>
     <string name="wallet_recover_seed_label">Write your seed phrase</string>
     <string name="wallet_recovery_success">Wallet recovery success!</string>
     <string name="wallet_creation_success">Wallet creation success!</string>
+    <string name="seed_wrong_password">Wrong seed password</string>
     <string name="wallet_create_seed_instructions">You must write down these words and keep them in a safe place. You will need these words if you ever need to recover your wallet.\nYou will only see these words once.</string>
     <string name="wallet_write_seed_label">Enter the 15 word seed phrase separated by spaces below and the seed password if the seed is encrypted.</string>
 </resources>
