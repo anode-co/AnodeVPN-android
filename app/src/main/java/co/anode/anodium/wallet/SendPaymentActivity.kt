@@ -6,12 +6,10 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.R
@@ -26,6 +24,8 @@ class SendPaymentActivity : AppCompatActivity() {
     lateinit var apiController: APIController
     private var myPKTAddress = ""
     private var canSendCoins = false
+    lateinit var statusBar: TextView
+    private var forcePassword = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +43,7 @@ class SendPaymentActivity : AppCompatActivity() {
         val service = ServiceVolley()
         apiController = APIController(service)
 
+        statusBar = findViewById(R.id.textview_status)
         //Get our PKT wallet address
         val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
@@ -56,7 +57,7 @@ class SendPaymentActivity : AppCompatActivity() {
                     ignoreTextChanged = false
                     return
                 }
-                if (s!!.length < prevLength) {
+                if (s.length < prevLength) {
                     return
                 }
                 val longRegex = "(pkt1)([a-zA-Z0-9]{59})".toRegex()
@@ -81,7 +82,6 @@ class SendPaymentActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        //TODO: set edittext to pin or password
         val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
         val storedPin = AnodeUtil.getWalletPin()
         if (storedPin.isNotEmpty()) {
@@ -91,7 +91,7 @@ class SendPaymentActivity : AppCompatActivity() {
             passwordField.inputType = InputType.TYPE_CLASS_TEXT
             passwordField.hint = getString(R.string.send_pkt_password)
         }
-
+        passwordField.transformationMethod = PasswordTransformationMethod.getInstance()
 
         sendButton.setOnClickListener {
             val amount = findViewById<EditText>(R.id.editTextPKTAmount)
@@ -107,9 +107,9 @@ class SendPaymentActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             var password = ""
-            if (storedPin.isNotEmpty()) {
+            if (storedPin.isNotEmpty() && !forcePassword) {
                 val encryptedPassword = AnodeUtil.getWalletPassword()
-                password = AnodeUtil.decrypt(encryptedPassword, passwordField.text.toString())
+                password = AnodeUtil.decrypt(encryptedPassword, passwordField.text.toString()).toString()
             } else {
                 password = passwordField.text.toString()
             }
@@ -118,6 +118,7 @@ class SendPaymentActivity : AppCompatActivity() {
     }
 
     private fun sendCoins(address:String, amount: Float) {
+        statusBar.text = getString(R.string.wallet_sending_coins)
         val params = JSONObject()
         params.put("to_address", address)
         params.put("amount", amount)
@@ -126,24 +127,24 @@ class SendPaymentActivity : AppCompatActivity() {
         params.put("from_address", fromAddresses)
         apiController.post(apiController.sendFromURL, params) { response ->
             if ((response != null) && response.has("txHash") && !response.isNull("txHash")) {
-                Toast.makeText(applicationContext, "Payment of $amount PKT send", Toast.LENGTH_SHORT).show()
+                statusBar.text = "Payment of $amount PKT send"
                 finish()
             } else if (response.toString().contains("InsufficientFundsError",true)){
-                Toast.makeText(applicationContext, "Wallet does not have enough balance", Toast.LENGTH_SHORT).show()
+                statusBar.text = getString(R.string.wallet_not_enough_balance)
             } else if (response.toString().contains("custom checksum failed", true)) {
-                Toast.makeText(applicationContext, "Invalid address.", Toast.LENGTH_SHORT).show()
+                statusBar.text = getString(R.string.wallet_invalid_address)
             } else {
-                Toast.makeText(applicationContext, "Unknown error when trying to send", Toast.LENGTH_SHORT).show()
+                statusBar.text = getString(R.string.wallet_unknown_error_sending_pkt)
             }
         }
     }
 
     private fun validateWalletPassphraseAndSendCoins(password: String, address: String, amount: Float) {
-        val loading = findViewById<ProgressBar>(R.id.loadingAnimation)
-        loading.visibility = View.VISIBLE
         val layout = findViewById<ConstraintLayout>(R.id.activitysendPayment)
         layout.setBackgroundColor(getColor(android.R.color.darker_gray))
-        Toast.makeText(this,"Validating your password.", Toast.LENGTH_SHORT).show()
+        statusBar.text = getString(R.string.wallet_password_validating)
+        val loading = findViewById<ProgressBar>(R.id.loadingAnimation)
+        loading.visibility = View.VISIBLE
         val sendButton = findViewById<Button>(R.id.button_sendPKTPayment)
         sendButton.isEnabled = false
         val jsonRequest = JSONObject()
@@ -151,21 +152,30 @@ class SendPaymentActivity : AppCompatActivity() {
         apiController.post(apiController.checkPassphraseURL,jsonRequest) { response ->
             //Reset UI elements
             loading.visibility = View.GONE
+            statusBar.text = ""
             val layout = findViewById<ConstraintLayout>(R.id.activitysendPayment)
             layout.setBackgroundColor(getColor(android.R.color.white))
             sendButton.isEnabled = true
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet/checkpassphrase")
-            } else if ((response.has("error")) &&
-                response.getString("error").contains("ErrWrongPassphrase")) {
-                Log.d(LOGTAG, "Validating password, wrong password")
-                canSendCoins = false
             } else if (response.has("error")) {
-                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+                Log.e(LOGTAG, "Error: "+response.getString("error").toString())
                 canSendCoins = false
-            } else if (response.length() == 0) {
-                //empty response is success
-                sendCoins(address, amount)
+            } else if (response.has("validPassphrase")) {
+                if (response.getBoolean("validPassphrase")) {
+                    sendCoins(address, amount)
+                } else {
+                    Log.d(LOGTAG, "Validating password, wrong password")
+                    statusBar.text = getString(R.string.wallet_wrong_password)
+                    val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
+                    passwordField.text.clear()
+                    passwordField.error = getString(R.string.wallet_wrong_password)
+                    //switch to using password
+                    forcePassword = true
+                    passwordField.inputType = InputType.TYPE_CLASS_TEXT
+                    passwordField.hint = getString(R.string.send_pkt_password)
+                    passwordField.transformationMethod = PasswordTransformationMethod.getInstance()
+                }
             }
         }
     }
