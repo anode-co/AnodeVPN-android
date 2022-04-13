@@ -164,20 +164,20 @@ class WalletStatsActivity : AppCompatActivity() {
                     for (i in 0 until neutrinoPeers.length()) {
                         val peerDesc = neutrinoPeers.getJSONObject(i)
                         val addr = peerDesc.getString("addr")
-                        peersList.add(addressRegex.find(addr,0).toString()+" Sync: " + peerDesc.getString("lastBlock").toString())
+                        peersList.add(addressRegex.find(addr,0)?.value+" Sync: " + peerDesc.getString("lastBlock").toString())
                         peersListDetails.add(peerDesc.toString(i))
                     }
                     for (i in 0 until neutrino.getJSONArray("bans").length()) {
                         val ban = neutrino.getJSONArray("bans").getJSONObject(i)
                         val banAddr = ban.getString("addr")
-                        bansList.add(addressRegex.find(banAddr,0).toString())
+                        bansList.add(addressRegex.find(banAddr,0)?.value.toString())
                         bansList.add("Reason: " + ban.getString("reason"))
                         bansList.add("Endtime: " + ban.getString("endTime"))
                     }
                     for (i in 0 until neutrino.getJSONArray("queries").length()) {
                         val query = neutrino.getJSONArray("queries").getJSONObject(i)
                         val peerAddr = query.getString("peer")
-                        queriesList.add(addressRegex.find(peerAddr,0).toString()+" | "+ query.getString("command"))
+                        queriesList.add(addressRegex.find(peerAddr,0)?.value+" | "+ query.getString("command"))
                         if (query.getLong("lastResponseTime") > 0) {
                             val datetime = Date(query.getLong("lastResponseTime"))
                             queriesList.add("Waiting since: $datetime")
