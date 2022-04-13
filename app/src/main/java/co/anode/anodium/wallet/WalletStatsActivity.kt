@@ -58,12 +58,9 @@ class WalletStatsActivity : AppCompatActivity() {
         }
 
         //Initializing UI components
-        val myaddress = findViewById<TextView>(R.id.wstats_address)
         myBalance = findViewById(R.id.wstats_balance)
-
         val peersListView = findViewById<ListView>(R.id.peers_list)
 
-        myaddress.text = prefs.getString("lndwalletaddress", "")
         //Handle peer list click
         peersListView.setOnItemClickListener { _, _, position, _ ->
             showPeerDetails(peersListDetails[position])
@@ -74,6 +71,8 @@ class WalletStatsActivity : AppCompatActivity() {
             getInfo()
             if (!walletUnlocked) {
                 pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+            } else if (findViewById<TextView>(R.id.wstats_address).text.toString().isEmpty()) {
+                getCurrentPKTAddress()
             } else {
                 getBalance()
             }
@@ -363,5 +362,55 @@ class WalletStatsActivity : AppCompatActivity() {
         }
         pinPasswordAlert = builder.create()
         pinPasswordAlert.show()
+    }
+
+    private fun getCurrentPKTAddress() {
+        val jsonData = JSONObject()
+        jsonData.put("showzerobalance", true)
+        apiController.post(apiController.getAddressBalancesURL, jsonData) {
+                response ->
+            if (response == null) {
+                Log.e(LOGTAG, "unexpected null response from wallet/address/balances")
+                return@post
+            }
+            if (response.has("addrs")) {
+                var myPKTAddress = ""
+                //Parse response
+                val addresses = response.getJSONArray("addrs")
+                if (addresses.length() == 1) {
+                    myPKTAddress = addresses.getJSONObject(0).getString("address")
+                    return@post
+                } else if (addresses.length() == 0) {
+                    getNewPKTAddress(1)
+                    return@post
+                } else {
+                    var biggestBalance = 0.0f
+                    //Default with the 1st address
+                    myPKTAddress = addresses.getJSONObject(0).getString("address")
+                    //Find address with the biggest balance
+                    for (i in 0 until addresses.length()) {
+                        val balance = addresses.getJSONObject(i).getString("total").toFloat()
+                        if (balance > biggestBalance) {
+                            biggestBalance = balance
+                            myPKTAddress = addresses.getJSONObject(i).getString("address")
+                        }
+                    }
+                }
+                findViewById<TextView>(R.id.wstats_address).text = myPKTAddress
+            } else if (response.has("error")) {
+                //Parse error
+                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+            }
+        }
+    }
+
+    private fun getNewPKTAddress(numberOfAddresses: Int) {
+        for (i in 0 until numberOfAddresses) {
+            apiController.post(apiController.getNewAddressURL, JSONObject("{}")) { response ->
+                if ((response != null) && (response.has("address"))) {
+                    i.inc()
+                }
+            }
+        }
     }
 }

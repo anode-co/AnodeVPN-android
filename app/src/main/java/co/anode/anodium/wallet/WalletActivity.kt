@@ -73,12 +73,9 @@ class WalletActivity : AppCompatActivity() {
         if (!walletFile.exists()) {
             return
         }
-        //set PKT address from shared preferences
-        myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
 
         //Init UI elements
         val walletAddress = findViewById<TextView>(R.id.walletAddress)
-        walletAddress.text = myPKTAddress
         walletAddress.setOnClickListener {
             AnodeClient.eventLog("Button: Copy wallet address clicked")
             Toast.makeText(this, "address has been copied", Toast.LENGTH_LONG).show()
@@ -110,7 +107,13 @@ class WalletActivity : AppCompatActivity() {
 
         sendPaymentButton.setOnClickListener {
             AnodeClient.eventLog("Button: Send PKT clicked")
+            if (myPKTAddress.isNullOrEmpty()) {
+                Log.d(LOGTAG, "Can not start sendPaymentActivity because myPKTAddress is empty.")
+                Toast.makeText(this, "Can not send money from empty address.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             val sendPaymentActivity = Intent(this, SendPaymentActivity::class.java)
+            sendPaymentActivity.putExtra("walletAddress", myPKTAddress)
             startActivity(sendPaymentActivity)
         }
     }
@@ -395,16 +398,52 @@ class WalletActivity : AppCompatActivity() {
         }
     }
 
-    private fun getNewPKTAddress() {
-        //Check if we already have a stored address
-        if (myPKTAddress == "") {
+    private fun getNewPKTAddress(numberOfAddresses: Int) {
+        for (i in 0 until numberOfAddresses) {
             apiController.post(apiController.getNewAddressURL, JSONObject("{}")) { response ->
                 if ((response != null) && (response.has("address"))) {
-                    myPKTAddress = response.getString("address")
-                    val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                    prefs.edit().putString("lndwalletaddress", myPKTAddress).apply()
-                    findViewById<TextView>(R.id.walletAddress).text = myPKTAddress
+                    i.inc()
                 }
+            }
+        }
+    }
+
+    private fun getCurrentPKTAddress() {
+        val jsonData = JSONObject()
+        jsonData.put("showzerobalance", true)
+        apiController.post(apiController.getAddressBalancesURL, jsonData) {
+            response ->
+            if (response == null) {
+                Log.e(LOGTAG, "unexpected null response from wallet/address/balances")
+                return@post
+            }
+            if (response.has("addrs")) {
+                //Parse response
+                val addresses = response.getJSONArray("addrs")
+                if (addresses.length() == 1) {
+                    myPKTAddress = addresses.getJSONObject(0).getString("address")
+                    return@post
+                } else if (addresses.length() == 0) {
+                    getNewPKTAddress(5)
+                    return@post
+                } else {
+                    var biggestBalance = 0.0f
+                    //Default with the 1st address
+                    myPKTAddress = addresses.getJSONObject(0).getString("address")
+                    //Find address with the biggest balance
+                    for (i in 0 until addresses.length()) {
+                        val balance = addresses.getJSONObject(i).getString("total").toFloat()
+                        if (balance > biggestBalance) {
+                            biggestBalance = balance
+                            myPKTAddress = addresses.getJSONObject(i).getString("address")
+                        }
+                    }
+                }
+                val walletAddress = findViewById<TextView>(R.id.walletAddress)
+                walletAddress.text = myPKTAddress
+            } else if (response.has("error")) {
+                //Parse error
+                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
             }
         }
     }
@@ -644,7 +683,7 @@ class WalletActivity : AppCompatActivity() {
     private val refreshValues = Runnable {
         if (walletUnlocked) {
             if (myPKTAddress == "") {
-                getNewPKTAddress()
+                getCurrentPKTAddress()
             }
             if ((System.currentTimeMillis()-5000) > balanceLastTimeUpdated) {
                 getBalance()
