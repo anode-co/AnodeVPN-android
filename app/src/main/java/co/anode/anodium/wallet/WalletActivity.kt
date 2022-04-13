@@ -420,12 +420,11 @@ class WalletActivity : AppCompatActivity() {
             if (response.has("addrs")) {
                 //Parse response
                 val addresses = response.getJSONArray("addrs")
-                if (addresses.length() == 1) {
-                    myPKTAddress = addresses.getJSONObject(0).getString("address")
-                    return@post
-                } else if (addresses.length() == 0) {
+                if (addresses.length() == 0) {
                     getNewPKTAddress(5)
                     return@post
+                } else if (addresses.length() == 1) {
+                    myPKTAddress = addresses.getJSONObject(0).getString("address")
                 } else {
                     var biggestBalance = 0.0f
                     //Default with the 1st address
