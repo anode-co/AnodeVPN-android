@@ -281,17 +281,6 @@ class MainActivity : AppCompatActivity() {
             exception(paramThrowable)
         }
 
-        /*
-        with (prefs.edit()) {
-            putString("walletpassword", "pktwallet")
-            putString("lndwalletaddress", "")
-            putString("username","")
-            putBoolean("Registered",false)
-            putBoolean("SignedIn",false)
-            commit()
-        }
-       */
-
         //Start the log file
         AnodeUtil.logFile()
         //Initialize App
@@ -408,31 +397,6 @@ class MainActivity : AppCompatActivity() {
                 putBoolean("SignInActivity_BackPressed", false)
                 commit()
             }
-            // User may have pressed back without signing in.
-            // Notify user that they need to sign in or exit the app
-//            if (prefs.getString("username", "").isNullOrEmpty()) {
-//                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-//                val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-//                builder.setTitle("Sign in")
-//                builder.setMessage("Please sign in to use the application")
-//                builder.setPositiveButton("OK") { dialog, _ ->
-//                    startActivity(accountNicknameActivity)
-//                    dialog.dismiss()
-//                }
-//                builder.setNegativeButton("Exit") { dialog, _ ->
-//                    dialog.dismiss()
-//                    //Close app
-//                    finishAffinity()
-//                    exitProcess(0)
-//                }
-//                val alert: AlertDialog = builder.create()
-//                alert.show()
-//            }
-//            } else {
-//                //Close app
-//                finishAffinity()
-//                exitProcess(0)
-//            }
         }
         setUsernameTopBar()
 
@@ -472,14 +436,6 @@ class MainActivity : AppCompatActivity() {
             Log.i(LOGTAG, "Start registration")
             val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
             startActivity(accountNicknameActivity)
-//            val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-//            if (prefs.getString("username", "").isNullOrEmpty()) {
-//                val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-//                startActivity(accountNicknameActivity)
-//            } else {
-//                val signUpActivity = Intent(applicationContext, SignUpActivity::class.java)
-//                startActivityForResult(signUpActivity, 0)
-//            }
             return true
         } else if (id == R.id.action_signin) {
             Log.i(LOGTAG, "Start sign in activity")
@@ -565,12 +521,6 @@ class MainActivity : AppCompatActivity() {
                     generateUsernameHandler(usernameResponse)
                 }
             }
-            //Start nickname acount -> Create account
-//            val accountNicknameActivity = Intent(applicationContext, AccountNicknameActivity::class.java)
-//            startActivity(accountNicknameActivity)
-//        } else if (!prefs.getBoolean("SignedIn", false)) {
-//            val signInActivity = Intent(applicationContext, SignInActivity::class.java)
-//            startActivity(signInActivity)
         } else {
             setUsernameTopBar()
         }
