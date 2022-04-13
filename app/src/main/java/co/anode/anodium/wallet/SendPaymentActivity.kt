@@ -45,8 +45,9 @@ class SendPaymentActivity : AppCompatActivity() {
 
         statusBar = findViewById(R.id.textview_status)
         //Get our PKT wallet address
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        myPKTAddress = prefs.getString("lndwalletaddress", "").toString()
+        val param = intent.extras
+        myPKTAddress = param?.getString("walletAddress").toString()
+
         var prevLength = 0
         val addressLayout = findViewById<TextInputLayout>(R.id.pktaddressLayout)
         //automatically trim pasted addresses
