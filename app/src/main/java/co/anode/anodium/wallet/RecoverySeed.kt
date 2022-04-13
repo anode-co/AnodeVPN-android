@@ -190,9 +190,6 @@ class RecoverySeed : AppCompatActivity() {
     }
 
     private fun initWallet( jsonData: JSONObject, isRecovery:Boolean) {
-        //Reset any previously daved address
-        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
-        prefs.edit().remove("lndwalletaddress").apply()
         showLoading()
         apiController.post(apiController.walletCreateURL, jsonData)
         { response ->
