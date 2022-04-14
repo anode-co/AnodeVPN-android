@@ -68,19 +68,23 @@ class WalletStatsActivity : AppCompatActivity() {
 
         val refreshButton = findViewById<Button>(R.id.buttonRefresh)
         refreshButton.setOnClickListener {
-            getInfo()
-            if (!walletUnlocked) {
-                pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
-            } else if (findViewById<TextView>(R.id.wstats_address).text.toString().isEmpty()) {
-                getCurrentPKTAddress()
-            } else {
-                getBalance()
-            }
+            loadWalletStats()
         }
         val generateButton = findViewById<Button>(R.id.buttonGeneratePassword)
         generateButton.setOnClickListener {
             pinPrompt()
         }
+    }
+
+    private fun loadWalletStats() {
+        getInfo()
+        if (!walletUnlocked) {
+            pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+        }
+        if (findViewById<TextView>(R.id.wstats_address).text.toString().isEmpty()) {
+            getCurrentPKTAddress()
+        }
+        getBalance()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -234,15 +238,12 @@ class WalletStatsActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         updating = false
-        getInfo()
-        getBalance()
     }
 
     override fun onResume() {
         super.onResume()
         updating = true
-        getInfo()
-        getBalance()
+        loadWalletStats()
     }
 
     private fun pinOrPasswordPrompt(wrongPass: Boolean, forcePassword:Boolean) {
