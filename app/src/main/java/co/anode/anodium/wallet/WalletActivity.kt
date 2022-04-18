@@ -1,6 +1,8 @@
 package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -77,6 +79,7 @@ class WalletActivity : AppCompatActivity() {
         //Init UI elements
         val walletAddress = findViewById<TextView>(R.id.walletAddress)
         walletAddress.setOnClickListener {
+            copyToClipboard(walletAddress.text.toString())
             AnodeClient.eventLog("Button: Copy wallet address clicked")
             Toast.makeText(this, "address has been copied", Toast.LENGTH_LONG).show()
         }
@@ -117,6 +120,12 @@ class WalletActivity : AppCompatActivity() {
             startActivity(sendPaymentActivity)
         }
     }
+
+    private fun copyToClipboard(text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText("label", text))
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
@@ -147,6 +156,7 @@ class WalletActivity : AppCompatActivity() {
         if (id == R.id.action_wallet_stats) {
             Log.i(LOGTAG, "Open wallet stats activity")
             val walletStatsActivity = Intent(applicationContext, WalletStatsActivity::class.java)
+            walletStatsActivity.putExtra("password", walletPasswordQuickRetry)
             startActivity(walletStatsActivity)
             return true
         } else if (id == R.id.action_wallet_change_passphrase) {
