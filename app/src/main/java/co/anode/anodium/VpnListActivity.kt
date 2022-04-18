@@ -53,27 +53,31 @@ class VpnListActivity : AppCompatActivity() {
                     if (dataList.isNotEmpty()) findViewById<ListView>(R.id.listview_servers).adapter = VPNListAdapter(this@VpnListActivity, supportFragmentManager, dataList)
                     return@post
                 }
-                val serversArr = JSONArray(result)
-                for (i in 0 until serversArr.length()) {
-                    val serverDetails = serversArr.getJSONObject(i)
-                    val map = HashMap<String, String>()
-                    map["publicKey"] = serverDetails.getString("publicKey")
-                    map["name"] = serverDetails.getString("name")
-                    map["countryCode"] = serverDetails.getString("countryCode")
-                    map["averageRating"] = serverDetails.getString("averageRating")
-                    map["cost"] = serverDetails.getString("cost")
-                    map["load"] = serverDetails.getInt("load").toString()
-                    map["quality"] = serverDetails.getInt("quality").toString()
-                    map["isFavorite"] = serverDetails.getString("isFavorite")
-                    map["onlineSinceDatetime"] = serverDetails.getString("onlineSinceDatetime")
-                    map["lastSeenDatetime"] = serverDetails.getString("lastSeenDatetime")
-                    map["numRatings"] = serverDetails.getInt("numRatings").toString()
-                    dataList.add(map)
+                try {
+                    val serversArr = JSONArray(result)
+                    for (i in 0 until serversArr.length()) {
+                        val serverDetails = serversArr.getJSONObject(i)
+                        val map = HashMap<String, String>()
+                        map["publicKey"] = serverDetails.getString("publicKey")
+                        map["name"] = serverDetails.getString("name")
+                        map["countryCode"] = serverDetails.getString("countryCode")
+                        map["averageRating"] = serverDetails.getString("averageRating")
+                        map["cost"] = serverDetails.getString("cost")
+                        map["load"] = serverDetails.getInt("load").toString()
+                        map["quality"] = serverDetails.getInt("quality").toString()
+                        map["isFavorite"] = serverDetails.getString("isFavorite")
+                        map["onlineSinceDatetime"] = serverDetails.getString("onlineSinceDatetime")
+                        map["lastSeenDatetime"] = serverDetails.getString("lastSeenDatetime")
+                        map["numRatings"] = serverDetails.getInt("numRatings").toString()
+                        dataList.add(map)
+                    }
+                    //Sort list by country
+                    dataList.sortWith(compareBy { it["countryCode"] })
+                    adapter = VPNListAdapter(this@VpnListActivity, supportFragmentManager, dataList)
+                    findViewById<ListView>(R.id.listview_servers).adapter = adapter
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error in getting VPN list servers", Toast.LENGTH_LONG).show()
                 }
-                //Sort list by country
-                dataList.sortWith(compareBy { it["countryCode"] })
-                adapter = VPNListAdapter(this@VpnListActivity,supportFragmentManager, dataList)
-                findViewById<ListView>(R.id.listview_servers).adapter = adapter
             }
         }
 
