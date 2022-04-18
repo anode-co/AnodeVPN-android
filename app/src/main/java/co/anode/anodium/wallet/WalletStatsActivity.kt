@@ -34,6 +34,7 @@ class WalletStatsActivity : AppCompatActivity() {
     private lateinit var myBalance: TextView
     val peersListDetails = mutableListOf<String>()
     private var wrongPinAttempts= 0
+    private var walletPasswordQuickRetry: String? = null
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,12 +51,15 @@ class WalletStatsActivity : AppCompatActivity() {
         val service = ServiceVolley()
         apiController = APIController(service)
 
-        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
+
         val walletfile = File("$filesDir/pkt/wallet.db")
         if (!walletfile.exists()) {
             Toast.makeText(baseContext, "PKT wallet does not exist.", Toast.LENGTH_LONG).show()
             return
         }
+        val param = intent.extras
+        //Getting password from password prompt
+        walletPasswordQuickRetry = param?.getString("password")
 
         //Initializing UI components
         myBalance = findViewById(R.id.wstats_balance)
@@ -79,7 +83,11 @@ class WalletStatsActivity : AppCompatActivity() {
     private fun loadWalletStats() {
         getInfo()
         if (!walletUnlocked) {
-            pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+            if (walletPasswordQuickRetry.isNullOrEmpty()) {
+                pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+            } else {
+                unlockWallet(walletPasswordQuickRetry!!)
+            }
         }
         if (findViewById<TextView>(R.id.wstats_address).text.toString().isEmpty()) {
             getCurrentPKTAddress()
