@@ -28,7 +28,7 @@ class RecoverySeed : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recovery_seed)
         val actionbar = supportActionBar
-        actionbar!!.title = getString(R.string.pin_prompt_title)
+        actionbar!!.title = getString(R.string.wallet_create_title)
         actionbar.setDisplayHomeAsUpEnabled(true)
         AnodeClient.eventLog("Activity: PinPrompt created")
         val param = intent.extras
@@ -72,10 +72,9 @@ class RecoverySeed : AppCompatActivity() {
         }
         val closeButton = findViewById<Button>(R.id.button_wallet_close)
         closeButton.setOnClickListener {
-            //TODO: close pinprompt and passwordprompt activities
-
             //Launch wallet activity
-            startActivity(Intent(applicationContext, WalletActivity::class.java))
+            //TODO: return to main activity on wallet fragment
+            //startActivity(Intent(applicationContext, WalletActivity::class.java))
             finish()
         }
     }
