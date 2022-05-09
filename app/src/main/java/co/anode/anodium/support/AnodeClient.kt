@@ -18,6 +18,7 @@ import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import co.anode.anodium.*
 import co.anode.anodium.support.CjdnsSocket.UDPInterface_beginConnection
@@ -44,6 +45,7 @@ object AnodeClient {
     lateinit var statustv: TextView
     lateinit var connectButton: ToggleButton
     lateinit var mainActivity: AppCompatActivity
+    lateinit var vpnFragment: Fragment
     lateinit var apiController: APIController
     var vpnConnected: Boolean = false
     private const val apiVersion = "0.3"
@@ -69,10 +71,8 @@ object AnodeClient {
     var lastpostmessage: Long = 0
     val h = Handler()
 
-    fun init(context: Context, mainActivity_textview: TextView, button: ToggleButton, activity: AppCompatActivity)  {
+    fun init(context: Context, activity: AppCompatActivity)  {
         mycontext = context
-        statustv = mainActivity_textview
-        connectButton = button
         mainActivity = activity
         val service = ServiceVolley()
         apiController = APIController(service)
@@ -1015,7 +1015,7 @@ object AnodeClient {
     fun mainButtonState(state: Int) {
         when(state) {
             buttonStateConnected -> {
-                mainActivity.runOnUiThread{
+                vpnFragment.requireActivity().runOnUiThread{
                     //Status bar
                     statustv.text = ""
                     //Button
@@ -1024,7 +1024,7 @@ object AnodeClient {
                 }
             }
             buttonStateConnecting -> {
-                mainActivity.runOnUiThread {
+                vpnFragment.requireActivity().runOnUiThread {
                     statustv.text = mycontext.resources.getString(R.string.status_connecting)
                     connectButton.textOn = "Cancel"
                     connectButton.alpha = 0.5f
