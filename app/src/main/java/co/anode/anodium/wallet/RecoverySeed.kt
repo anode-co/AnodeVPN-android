@@ -2,17 +2,17 @@ package co.anode.anodium.wallet
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import co.anode.anodium.MainActivity
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
@@ -72,10 +72,12 @@ class RecoverySeed : AppCompatActivity() {
         }
         val closeButton = findViewById<Button>(R.id.button_wallet_close)
         closeButton.setOnClickListener {
-            //Launch wallet activity
-            //TODO: return to main activity on wallet fragment
-            //startActivity(Intent(applicationContext, WalletActivity::class.java))
+            //Close this activity
             finish()
+            //Close all activities
+            val intent = Intent(applicationContext, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
         }
     }
 
