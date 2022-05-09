@@ -30,7 +30,6 @@ class TransactionHistoryActivity : AppCompatActivity() {
     private var prevTransactions = 0
     private var skipTransactions = 0
     private var updateConfirmations = arrayListOf<Boolean>()
-    private var neutrinoTop = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +48,6 @@ class TransactionHistoryActivity : AppCompatActivity() {
         val extras = intent.extras
         if (extras != null) {
             skipTransactions = extras.getInt("skip")
-            neutrinoTop = extras.getInt("neutrinotop")
         }
         h.postDelayed(refreshValues,0)
     }
@@ -74,10 +72,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
         params.put("coinbase", 1)
         params.put("txnsSkip", skip)
         params.put("txnsLimit", 51)
-        if (neutrinoTop > 0) {
-            params.put("startHeight", neutrinoTop)
-            params.put("endHeight", 1)
-        }
+        params.put("reversed", true)
         val textSize = 15.0f
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
