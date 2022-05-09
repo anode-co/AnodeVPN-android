@@ -45,7 +45,7 @@ class VpnListActivity : AppCompatActivity() {
                 statusBar.text = "Retrieving VPN Servers..."
             }
 
-            val result = AnodeClient.APIHttpReq(apiServersList,"", "GET", needsAuth = true, isRetry = false)
+            val result = AnodeClient.APIHttpReq(apiServersList,"", "GET", needsAuth = false, isRetry = false)
             handler.post {
                 loading.visibility = View.GONE
                 statusBar.text = ""
