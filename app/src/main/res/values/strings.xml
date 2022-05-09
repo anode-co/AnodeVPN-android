@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Anodium</string>
+    <!-- Bottom Navigation Main-->
+    <string name="navigation_vpn">VPN</string>
+    <string name="navigation_wallet">PKT Wallet</string>
+    <string name="navigation_profile">Profile</string>
     <!-- Menu items-->
     <string name="action_account_settings">Sign up</string>
     <string name="action_check_update">Check for update</string>
@@ -13,7 +17,7 @@
     <string name="action_wallet_debug">Debug logs</string>
     <string name="action_wallet_delete_db">Delete DB</string>
     <string name="action_wallet_info">Details</string>
-    <string name="action_send_txns">Send transactions log</string>
+    <string name="action_settings">Settings</string>
     <!-- Toasts -->
     <string name="toast_no_internet">You lost your internet connection</string>
     <!--Main Activity-->
@@ -150,6 +154,10 @@
     <string name="button_keep_waiting">Keep waiting</string>
     <string name="button_vpn_disconnect">Disconnect</string>
     <string name="button_generate_wallet_password">Generate Password</string>
+    <string name="button_show_seed">Show seed</string>
+    <string name="button_cjdns_stats">Cjdns stats</string>
+    <string name="button_wallet_stats">Wallet stats</string>
+    <string name="button_set_pin">Set PIN</string>
     <!-- Wallet menu-->
     <string name="action_wallet_stats">Stats</string>
     <string name="action_wallet_pin">Set PIN</string>
@@ -181,4 +189,8 @@
     <string name="seed_wrong_password">Wrong seed password</string>
     <string name="wallet_create_seed_instructions">You must write down these words and keep them in a safe place. You will need these words if you ever need to recover your wallet.\nYou will only see these words once.</string>
     <string name="wallet_write_seed_label">Enter the 15 word seed phrase separated by spaces below and the seed password if the seed is encrypted.</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>
