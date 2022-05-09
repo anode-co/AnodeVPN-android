@@ -103,7 +103,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="@dimen/bottom_button_navigation_margin"
+        android:layout_marginBottom="@dimen/bottom_button_margin"
         android:background="@drawable/button_round_send"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
