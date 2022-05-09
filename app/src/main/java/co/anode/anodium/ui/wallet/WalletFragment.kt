@@ -100,7 +100,6 @@ class WalletFragment : Fragment() {
             AnodeClient.eventLog("Button: Older transactions clicked")
             val transactionsHistoryActivity = Intent(context, TransactionHistoryActivity::class.java)
             transactionsHistoryActivity.putExtra("skip", numberOfTxnsToShow)
-            transactionsHistoryActivity.putExtra("neutrinotop", neutrinoTop)
             startActivityForResult(transactionsHistoryActivity, 0)
         }
 
@@ -402,11 +401,8 @@ class WalletFragment : Fragment() {
         val params = JSONObject()
         //Exclude mining transactions
         params.put("coinbase", 1)
+        params.put("reversed", true)
         params.put("txnsLimit", numberOfTxnsToShow+1)
-        if (neutrinoTop > 0) {
-            params.put("startHeight", neutrinoTop)
-            params.put("endHeight", 1)
-        }
         val textSize = 15.0f
 
         apiController.post(apiController.getTransactionsURL, params) { response ->
