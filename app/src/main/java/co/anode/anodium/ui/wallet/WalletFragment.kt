@@ -26,11 +26,13 @@ import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.SendPaymentActivity
 import co.anode.anodium.wallet.TransactionDetailsFragment
 import co.anode.anodium.wallet.TransactionHistoryActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -84,10 +86,16 @@ class WalletFragment : Fragment() {
         statusBar = root.findViewById(R.id.textview_status)
         AnodeClient.statustv = statusBar
         statusIcon = root.findViewById(R.id.status_icon)
-//        val walletFile = File("$filesDir/pkt/wallet.db")
-//        if (!walletFile.exists()) {
-//            return
-//        }
+        val fileDir = mycontext.filesDir
+        val walletFile = File("$fileDir/pkt/wallet.db")
+        if (!walletFile.exists()) {
+            Log.i(LOGTAG, "Open password prompt activity, wallet file does not exist yet")
+            val passwordActivity = Intent(context, PasswordPrompt::class.java)
+            passwordActivity.putExtra("noWallet", true)
+            startActivity(passwordActivity)
+        } else {
+            Log.i(LOGTAG, "Wallet file found.")
+        }
 
         //Init UI elements
         val walletAddress = root.findViewById<TextView>(R.id.walletAddress)
@@ -140,7 +148,9 @@ class WalletFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if(isAdded) {
+        val fileDir = mycontext.filesDir
+        val walletFile = File("$fileDir/pkt/wallet.db")
+        if(isAdded && walletFile.exists()) {
             h.postDelayed(getPldInfo, 500)
         }
     }
@@ -358,7 +368,9 @@ class WalletFragment : Fragment() {
 
         builder.setNegativeButton("Cancel"
         ) { dialog, _ ->
-            h.postDelayed(getPldInfo, 0)
+            if (isAdded) {
+                h.postDelayed(getPldInfo, 0)
+            }
             dialog.dismiss()
         }
         if (isPin) {

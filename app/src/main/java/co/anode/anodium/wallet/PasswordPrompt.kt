@@ -33,6 +33,7 @@ class PasswordPrompt : AppCompatActivity() {
         AnodeClient.eventLog("Activity: PasswordPrompt created")
         val param = intent.extras
         val changePassphrase = param?.get("changepassphrase").toString().toBoolean()
+        val noWallet = param?.get("noWallet").toString().toBoolean()
         val service = ServiceVolley()
         apiController = APIController(service)
         val nextButton = findViewById<Button>(R.id.button_passwordprompt_next)
@@ -46,6 +47,13 @@ class PasswordPrompt : AppCompatActivity() {
             nextButton.text = getString(R.string.action_next)
             actionbar.title = getString(R.string.wallet_create_title)
         }
+
+        if(noWallet) {
+            findViewById<TextView>(R.id.create_wallet_description).visibility = View.VISIBLE
+        } else {
+            findViewById<TextView>(R.id.create_wallet_description).visibility = View.GONE
+        }
+
         val confirmPassLayout = findViewById<TextInputLayout>(R.id.confirmwalletpasswordLayout)
 
         nextButton.setOnClickListener {
