@@ -17,12 +17,12 @@ import androidx.core.text.HtmlCompat
 import co.anode.anodium.support.*
 import java.net.URL
 
-class DebugActivity : AppCompatActivity() {
+class CjdnsStatsActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_debug)
+        setContentView(R.layout.activity_cjdnsstats)
         //actionbar
         val actionbar = supportActionBar
         //set actionbar title
