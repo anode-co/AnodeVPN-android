@@ -1,18 +1,30 @@
 package co.anode.anodium.support
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.SharedPreferences
+import android.os.Build
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.system.Os
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import co.anode.anodium.R
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
 import java.nio.file.Files
@@ -20,12 +32,14 @@ import java.nio.file.Paths
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import kotlin.system.exitProcess
 
 
 object AnodeUtil {
@@ -68,33 +82,64 @@ object AnodeUtil {
         newPath = "$filesdir/pld"
         Os.symlink(oldPath,newPath)
         //Create needed directories
-        val pktwalletdir = File("$filesDirectory/.pktwallet")
+        val pktwalletdir = File("$filesDirectory/pkt")
         if (!pktwalletdir.exists()) {
             pktwalletdir.mkdir()
         }
-        val pktdir = File("$filesDirectory/.pktwallet/pkt")
-        if (!pktdir.exists()) {
-            pktdir.mkdir()
-        }
-        val mainnetdir = File("$filesDirectory/.pktwallet/pkt/mainnet")
-        if (!mainnetdir.exists()) {
-            mainnetdir.mkdir()
-        }
         //Create lnd directory
-        val lnddir = File("$filesDirectory/.pktwallet/lnd")
+        val lnddir = File("$filesDirectory/pkt/lnd")
         if (!lnddir.exists()) {
             lnddir.mkdir()
         }
     }
 
-
-    fun launch() {
-        launchPld()
-        val confFile = File("$filesDirectory/$CJDROUTE_CONFFILE")
-        if (!confFile.exists()) {
-            initializeCjdrouteConfFile()
+    fun generateUsername(textview:TextView) {
+        val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        //If there is no username stored
+        if (prefs?.getString("username", "").isNullOrEmpty()) {
+            //Generate a username
+            val executor = Executors.newSingleThreadExecutor()
+            val handler = Handler(Looper.getMainLooper())
+            var usernameResponse: String
+            executor.execute {
+                usernameResponse = AnodeClient.generateUsername()
+                handler.post {
+                    generateUsernameHandler(usernameResponse,textview)
+                }
+            }
         }
-        launchCJDNS()
+    }
+
+    private fun generateUsernameHandler(result: String, textview:TextView) {
+        Log.i(co.anode.anodium.support.LOGTAG,"Received from API: $result")
+        if ((result.isBlank())) {
+            return
+        } else if (result.contains("400") || result.contains("401")) {
+            val json = result.split("-")[1]
+            var msg = result
+            try {
+                val jsonObj = JSONObject(json)
+                msg = jsonObj.getString("username")
+            } catch (e: JSONException) {
+                msg += " Invalid JSON"
+            }
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        } else if (result.contains("ERROR: ")) {
+            Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+        } else {
+            val jsonObj = JSONObject(result)
+            if (jsonObj.has("username")) {
+                textview.text = jsonObj.getString("username")
+                val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                if (prefs != null) {
+                    with (prefs.edit()) {
+                        putString("username", jsonObj.getString("username"))
+                        putBoolean("SignedIn", false)
+                        commit()
+                    }
+                }
+            }
+        }
     }
 
     fun stopPld() {
@@ -137,7 +182,11 @@ object AnodeUtil {
         Files.delete(Paths.get("$filesDirectory/$CJDROUTE_TEMPCONFFILE"))
     }
 
-    private fun launchCJDNS() {
+    fun launchCJDNS() {
+        val confFile = File("$filesDirectory/$CJDROUTE_CONFFILE")
+        if (!confFile.exists()) {
+            initializeCjdrouteConfFile()
+        }
         try {
             Log.i(
                 LOGTAG, "Launching cjdroute (file size: " +
@@ -517,9 +566,143 @@ object AnodeUtil {
         }
     }
 
-    fun walletExists(): Boolean {
-        val walletFile = File(filesDirectory + "/pkt/wallet.db")
-        return walletFile.exists()
+    fun serviceThreads() {
+        //Check for event log files daily
+        Thread({
+            val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+            Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
+            while (true) {
+                AnodeClient.ignoreErr {
+                    //Check if 24 hours have passed since last log file submitted
+                    if ((System.currentTimeMillis() - prefs!!.getLong("LastEventLogFileSubmitted", 0) > 86400000) or
+                        (System.currentTimeMillis() - prefs.getLong("LastRatingSubmitted", 0) > 86400000)
+                    ) {
+                        val bEvents = File ("$filesDirectory/anodium-events.log").exists()
+                        val bRatings = File("$filesDirectory/anodium-rating.json").exists()
+                        var timetosleep: Long = 60000
+                        if ((!bEvents) or (!bRatings)) {
+                            Log.d(LOGTAG, "No events or ratings to report, sleeping")
+                            Thread.sleep((60 * 60000).toLong())
+                        } else if (!AnodeClient.checkNetworkConnection()) {
+                            // try again in 10 seconds, waiting for internet
+                            Log.i(LOGTAG, "Waiting for internet connection to report events")
+                            Thread.sleep(10000)
+                        } else {
+                            if (bEvents) {
+                                Log.i(LOGTAG, "Reporting an events log file")
+                                if (AnodeClient.httpPostEvent(File(filesDirectory)).contains("Error")) {
+                                    timetosleep = 60000
+                                } else {
+                                    //Log posted, sleep for a day
+                                    timetosleep = (60000 * 60 * 24).toLong()
+                                }
+                            }
+                            if (bRatings) {
+                                Log.i(LOGTAG, "Reporting ratings")
+                                if (AnodeClient.httpPostRating().contains("Error")) {
+                                    timetosleep = 60000
+                                } else {
+                                    with(prefs.edit()) {
+                                        putLong("LastRatingSubmitted", java.lang.System.currentTimeMillis())
+                                        commit()
+                                    }
+                                    timetosleep = (60000 * 60 * 24).toLong()
+                                }
+                            }
+                            Thread.sleep(timetosleep)
+                        }
+                    }
+                    Thread.sleep((60 * 60000).toLong())
+                }
+            }
+        }, "MainActivity.UploadEventsThread").start()
+        //Check for uploading Errors
+        Thread({
+            Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
+            val arch = System.getProperty("os.arch")
+            while (!(arch.contains("x86") || arch.contains("i686"))) {
+                AnodeClient.ignoreErr {
+                    val erCount = context?.let { AnodeClient.errorCount(it) }
+                    if (erCount == 0) {
+                        // Wait for errors for 30 seconds
+                        Log.d(LOGTAG, "No errors to report, sleeping")
+                        Thread.sleep(30000)
+                    } else if (!AnodeClient.checkNetworkConnection()) {
+                        // try again in a second, waiting for internet
+                        Log.i(LOGTAG, "Waiting for internet connection to report $erCount errors")
+                        Thread.sleep(1000)
+                    } else {
+                        Log.i(LOGTAG, "Reporting a random error out of $erCount")
+                        if (AnodeClient.httpPostError(File(filesDirectory)).contains("Error")) {
+                            // There was an error posting, lets wait 1 minute so as not to generate
+                            // tons of crap
+                            Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")
+                        }
+                        Thread.sleep(60000)
+                    }
+                }
+            }
+        }, "MainActivity.UploadErrorsThread").start()
+        //Check for updates every 5min
+        Thread({
+            Log.i(LOGTAG, "MainActivity.CheckUpdates")
+            while (true) {
+                AnodeClient.checkNewVersion(false)
+                if (AnodeClient.downloadFails > 1) {
+                    //In case of >1 failure delete old apk files and retry after 20min
+                    AnodeClient.deleteFiles(context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(), ".apk")
+                    Thread.sleep((20 * 60000).toLong())
+                } else if (AnodeClient.downloadingUpdate) {
+                    Thread.sleep((20 * 60000).toLong())
+                } else {
+                    //check for new version every 5min
+                    Thread.sleep((5 * 60000).toLong())
+                }
+            }
+        }, "MainActivity.CheckUpdates").start()
+    }
+
+    fun exception(paramThrowable: Throwable) {
+        //Toast message before exiting app
+        var type = "other"
+        if (paramThrowable.toString().contains("CjdnsException") ) type = "cjdnsSocket"
+        else if (paramThrowable.toString().contains("AnodeUtilException") ) type = "cjdroute"
+        else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
+        else if (paramThrowable.toString().contains("LndRPCException") ) {
+            type = "lnd"
+            AnodeClient.storeFileAsError(context!!, type, "data/data/co.anode.anodium/files/pld.log")
+        }
+        // we'll post the error on next startup
+        AnodeClient.storeError(context!!, type, paramThrowable)
+
+        object : Thread() {
+            override fun run() {
+                Looper.prepare()
+                Toast.makeText(context!!, "ERROR: " + paramThrowable.message, Toast.LENGTH_LONG).show()
+                AnodeClient.mycontext = context!!
+                Looper.loop()
+            }
+        }.start()
+        try {
+            // Let the Toast display and give some time to post to server before app will get shutdown
+            Thread.sleep(10000)
+        } catch (e: InterruptedException) {}
+        exitProcess(1)
+    }
+
+    fun getWalletFiles():ArrayList<String> {
+        val files = File("$filesDirectory/pkt").listFiles()
+        var result = ArrayList<String>()
+        for (file in files!!) {
+            if (file.extension.equals("db") && !file.name.equals("neutrino.db")) {
+                result.add(file.nameWithoutExtension)
+            }
+        }
+        return result
+    }
+
+    fun walletExists():Boolean {
+        return getWalletFiles().size > 0
     }
 }
 
