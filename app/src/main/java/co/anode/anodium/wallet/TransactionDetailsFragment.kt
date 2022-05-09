@@ -10,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.navigation.fragment.NavHostFragment
 import co.anode.anodium.R
+import co.anode.anodium.ui.wallet.WalletFragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class TransactionDetailsFragment : BottomSheetDialogFragment(){
@@ -64,10 +66,11 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
     override fun onDismiss(dialog: DialogInterface) {
         if (fromHistory) {
             (activity as TransactionHistoryActivity).clearLines(lineID)
-        } else {
-            (activity as WalletActivity).clearLines(lineID)
         }
         super.onDismiss(dialog)
+        if (parentFragment is NavHostFragment) {
+            (parentFragmentManager.primaryNavigationFragment as WalletFragment).clearLines(lineID)
+        }
     }
 
     companion object {
