@@ -13,9 +13,9 @@ import java.lang.Exception
 class AnodeVpnService : VpnService() {
     var mInterface: ParcelFileDescriptor? = null
     var mThread: Thread? = null
-    private val actionConnect = "co.anode.anodium.START"
-    private val actionDisconnect = "co.anode.anodium.DISCONNECT"
-    private val actionStop = "co.anode.anodium.STOP"
+    val actionConnect = "co.anode.anodium.START"
+    val actionDisconnect = "co.anode.anodium.DISCONNECT"
+    val actionStop = "co.anode.anodium.STOP"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent != null) {
