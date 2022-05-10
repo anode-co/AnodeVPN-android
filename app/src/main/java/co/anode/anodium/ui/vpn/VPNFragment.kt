@@ -1,5 +1,6 @@
 package co.anode.anodium.ui.vpn
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -61,11 +62,11 @@ class VPNFragment : Fragment() {
         _binding = FragmentVpnBinding.inflate(inflater, container, false)
         root = binding.root
         mycontext = requireContext()
-        AnodeClient.statustv = root.findViewById<TextView>(R.id.textview_status)
+        AnodeClient.statustv = root.findViewById(R.id.textview_status)
         AnodeClient.vpnFragment = this
         val buttonConnectVPNs = root.findViewById<ToggleButton>(R.id.buttonconnectvpns)
         AnodeClient.connectButton = buttonConnectVPNs
-        AnodeUtil.launchCJDNS()
+
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
         val minClickInterval: Long = 1000
         var mLastClickTime: Long = 0
@@ -88,10 +89,11 @@ class VPNFragment : Fragment() {
             startActivityForResult(vpnListActivity, 0)
         }
 
-        //Starting VPN Service
-        startVPNService()
         //Start background threads for checking public IP, new version, uploading errors etc
         startBackgroundThreads()
+        AnodeUtil.launchCJDNS()
+        //Starting VPN Service
+        startVPNService()
         //Initialize VPN connecting waiting dialog
         VpnConnectionWaitingDialog.init(h, mycontext)
         return root
@@ -275,6 +277,7 @@ class VPNFragment : Fragment() {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     object VpnConnectionWaitingDialog: Runnable {
         private lateinit var h: Handler
         private var c: Context? = null

@@ -236,8 +236,10 @@ class WalletFragment : Fragment() {
     private fun unlockWallet(password:String) {
         Log.i(LOGTAG, "Trying to unlock wallet")
         h.removeCallbacks(getPldInfo)
-        statusBar.text = getString(R.string.wallet_status_unlocking)
-        statusIcon.setBackgroundResource(0)
+        if (isAdded) {
+            statusBar.text = getString(R.string.wallet_status_unlocking)
+            statusIcon.setBackgroundResource(0)
+        }
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
         showLoading()
@@ -649,15 +651,19 @@ class WalletFragment : Fragment() {
     }
 
     private fun showLoading() {
-        makeBackgroundGrey()
-        val loading = root.findViewById<ProgressBar>(R.id.loadingAnimation)
-        loading.visibility = View.VISIBLE
+        if (isAdded) {
+            makeBackgroundGrey()
+            val loading = root.findViewById<ProgressBar>(R.id.loadingAnimation)
+            loading.visibility = View.VISIBLE
+        }
     }
 
     private fun hideLoading() {
-        makeBackgroundWhite()
-        val loading = root.findViewById<ProgressBar>(R.id.loadingAnimation)
-        loading.visibility = View.GONE
+        if (isAdded) {
+            makeBackgroundWhite()
+            val loading = root.findViewById<ProgressBar>(R.id.loadingAnimation)
+            loading.visibility = View.GONE
+        }
     }
 
     private fun handlePldError(error: String): String {
