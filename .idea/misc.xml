@@ -33,7 +33,7 @@
         <entry key="app/src/main/res/layout/activity_debug_wallet.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/activity_forgot_password.xml" value="0.1405312767780634" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.18704710144927536" />
-        <entry key="app/src/main/res/layout/activity_password_prompt.xml" value="0.15964912280701754" />
+        <entry key="app/src/main/res/layout/activity_password_prompt.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_pin_prompt.xml" value="0.22719298245614036" />
         <entry key="app/src/main/res/layout/activity_profile.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_recovery_seed.xml" value="0.22719298245614036" />
