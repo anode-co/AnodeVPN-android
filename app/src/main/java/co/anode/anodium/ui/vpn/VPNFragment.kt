@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.text.Html
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -35,6 +36,7 @@ import java.net.URL
 import java.util.concurrent.Executors
 
 class VPNFragment : Fragment() {
+    private val LOGTAG = "co.anode.anodium"
     private val buttonStateDisconnected = 0
     private val buttonStateConnecting = 1
     private val buttonStateConnected = 2
@@ -78,7 +80,7 @@ class VPNFragment : Fragment() {
                 if (!buttonConnectVPNs.isChecked) {
                     disconnectVPN(false)
                 } else {
-                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "hsrk7rrwssgpzv7jqxv95wmnx9c435s8jtf0k0w7v4rupymdj9k0.k"))
+                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "1y7k7zb64f242hvv8mht54ssvgcqdfzbxrng5uz7qpgu7fkjudd0.k"))
                     bigbuttonState(buttonStateConnecting)
                 }
             }
@@ -97,6 +99,24 @@ class VPNFragment : Fragment() {
         //Initialize VPN connecting waiting dialog
         VpnConnectionWaitingDialog.init(h, mycontext)
         return root
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == AppCompatActivity.RESULT_OK) {
+            Log.i(LOGTAG, "onActivityResult")
+            if(data != null ) {
+                //Connecting to VPN Server
+                if (data.getStringExtra("action") == "connect") {
+                    Log.i(LOGTAG, "Connecting to " + data.getStringExtra("publickey"))
+                    AnodeClient.AuthorizeVPN().execute(data.getStringExtra("publickey"))
+                    bigbuttonState(buttonStateConnecting)
+                }
+            } else {
+                //Initialize CJDNS socket
+                CjdnsSocket.init(AnodeUtil.filesDirectory + "/" + AnodeUtil.CJDROUTE_SOCK)
+            }
+        }
     }
 
     private fun startBackgroundThreads() {
