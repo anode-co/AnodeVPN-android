@@ -63,6 +63,11 @@ object AnodeUtil {
             filesDirectory = context!!.filesDir.toString()
     }
 
+    fun isCjdnsAlive(): Boolean {
+        if (this::cjdns_pb.isInitialized && cjdns_pb.isAlive) return true
+        else return false
+    }
+
     fun initializeApp() {
         //Create files folder
         Log.i(LOGTAG, "Creating files directory")
