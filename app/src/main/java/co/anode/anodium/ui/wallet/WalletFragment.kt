@@ -15,15 +15,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import co.anode.anodium.AboutDialog
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import co.anode.anodium.wallet.PasswordPrompt
@@ -37,6 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class WalletFragment : Fragment() {
+    private val LOGTAG = "co.anode.anodium"
     private var _binding: FragmentWalletBinding? = null
     lateinit var statusBar: TextView
     private lateinit var statusIcon: ImageView
@@ -137,6 +139,16 @@ class WalletFragment : Fragment() {
             val sendPaymentActivity = Intent(context, SendPaymentActivity::class.java)
             sendPaymentActivity.putExtra("walletAddress", myPKTAddress)
             startActivity(sendPaymentActivity)
+        }
+
+        //On first run show data consent
+        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        if (prefs.getBoolean("FirstRun", true)) {
+            AboutDialog.show(requireActivity())
+            with(prefs.edit()) {
+                putBoolean("FirstRun", false)
+                commit()
+            }
         }
         return root
     }
