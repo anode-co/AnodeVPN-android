@@ -7,22 +7,60 @@
     tools:context=".ui.profile.ProfileFragment"
     android:background="@color/colorPrimarybackground">
         <include layout="@layout/statusbar"/>
-        <Spinner
-            android:id="@+id/wallet_selector"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/label_wallets"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:spinnerMode="dropdown"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:textSize="10pt"
+            android:layout_marginTop="20dp"
+            android:text="Wallets"/>
+        <LinearLayout
+            android:id="@+id/layout_wallets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_wallets"
+            app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginEnd="20dp"
+            android:orientation="horizontal"
+            android:gravity="end">
+                <Spinner
+                    android:id="@+id/wallet_selector"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="20dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+                <ImageButton
+                    android:id="@+id/button_edit_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_baseline_edit_24"
+                    android:background="@color/colorPrimarybackground"
+                    app:tint="@color/colorPrimary"
+                    android:contentDescription="Edit wallet" />
+                <ImageButton
+                    android:id="@+id/button_add_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_badd_circle_48"
+                    android:background="@color/colorPrimarybackground"
+                    app:tint="@color/colorPrimary"
+                    android:contentDescription="Add wallet" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/user_id_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ID:"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/wallet_selector"
+            app:layout_constraintTop_toBottomOf="@id/layout_wallets"
             android:textSize="10pt"
             android:layout_marginTop="20dp"
             android:layout_marginStart="20dp"/>
@@ -41,7 +79,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/user_id_label"
-            android:text="Version: 0.2.110"
+            android:text="Version: "
             android:textSize="10pt"
             android:layout_marginTop="20dp"
             android:layout_marginStart="20dp"/>
@@ -98,6 +136,18 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text="@string/button_set_pin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_wallet_stats"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:textSize="8pt"
+            android:textColor="#C9DDE9"
+            android:background="@drawable/thin_button"/>
+        <Button
+            android:id="@+id/button_check_update"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="@string/action_check_update"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button_wallet_stats"
             android:layout_marginStart="20dp"

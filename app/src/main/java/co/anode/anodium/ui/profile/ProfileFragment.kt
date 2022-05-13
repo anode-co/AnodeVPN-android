@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ import co.anode.anodium.BuildConfig
 import co.anode.anodium.CjdnsStatsActivity
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentProfileBinding
+import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
@@ -86,6 +88,19 @@ class ProfileFragment : Fragment() {
             promptPinActivity.putExtra("noNext", true)
             startActivity(promptPinActivity)
         }
+        val checkUpdateButton = root.findViewById<Button>(R.id.button_check_update)
+        checkUpdateButton.setOnClickListener {
+            AnodeClient.checkNewVersion(true)
+        }
+        val addWalletButton = root.findViewById<ImageButton>(R.id.button_add_wallet)
+        addWalletButton.setOnClickListener {
+            //Dialog for wallet name
+
+        }
+        val editWalletButton = root.findViewById<ImageButton>(R.id.button_edit_wallet)
+        editWalletButton.setOnClickListener {
+
+        }
         return root
     }
 
@@ -131,6 +146,27 @@ class ProfileFragment : Fragment() {
             dialog.dismiss()
         }
         builder.setPositiveButton("Close") { dialog, _ ->
+            dialog.dismiss()
+        }
+        val alert: AlertDialog = builder.create()
+        alert.show()
+    }
+
+    private fun walletNameDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Wallet name")
+        builder.setMessage("")
+        val input = EditText(requireContext())
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        input.layoutParams = lp
+        builder.setView(input)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.setPositiveButton("Next") { dialog, _ ->
+            val walletName = input.text.toString()
+
             dialog.dismiss()
         }
         val alert: AlertDialog = builder.create()
