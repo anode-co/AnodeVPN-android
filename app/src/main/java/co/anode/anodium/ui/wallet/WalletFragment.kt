@@ -32,6 +32,7 @@ import co.anode.anodium.wallet.SendPaymentActivity
 import co.anode.anodium.wallet.TransactionDetailsFragment
 import co.anode.anodium.wallet.TransactionHistoryActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -163,7 +164,9 @@ class WalletFragment : Fragment() {
         val fileDir = mycontext.filesDir
         val walletFile = File("$fileDir/pkt/wallet.db")
         if(isAdded && walletFile.exists()) {
-            h.postDelayed(getPldInfo, 500)
+            //Show cached info
+            showCachedData()
+            h.postDelayed(getPldInfo, 0)
         }
     }
     private val getPldInfo = Runnable { getInfo() }
@@ -193,7 +196,7 @@ class WalletFragment : Fragment() {
                     return@get
                 } else {
                     h.postDelayed(getPldInfo, refreshPldInterval)
-                    h.postDelayed(refreshValues, 200)
+                    h.postDelayed(refreshValues, 50)
                 }
                 val layout = root.findViewById<ConstraintLayout>(R.id.fragment_wallet)
                 activity?.let { layout.setBackgroundColor(it.getColor(android.R.color.white)) }
@@ -322,6 +325,7 @@ class WalletFragment : Fragment() {
                 }
                 val walletAddress = root.findViewById<TextView>(R.id.walletAddress)
                 walletAddress.text = myPKTAddress
+                AnodeUtil.setCacheWalletAddress(myPKTAddress)
             } else if (response.has("error")) {
                 //Parse error
                 Log.d(LOGTAG, "Error: "+response.getString("error").toString())
@@ -417,6 +421,144 @@ class WalletFragment : Fragment() {
         }
     }
 
+    private fun makeListofTxns(transactions: JSONArray, length: Int) {
+        val listsLayout = root.findViewById<LinearLayout>(R.id.paymentsList)
+        val simpleDate = SimpleDateFormat("yyyy-MM-dd HH:mm")
+        val textSize = 15.0f
+        for (i in 0 until length) {
+            val transaction = transactions.getJSONObject(i)
+            //Add new line
+            val line = ConstraintLayout(mycontext)
+            val numConfirmations = transaction.getInt("numConfirmations")
+            val amount = transaction.getString("amount").toLong()
+            val amountStr = AnodeUtil.satoshisToPKT(amount)
+            val destAddress = transaction.getJSONArray("destAddresses").getString(0)
+            line.setOnClickListener {
+                val transactionDetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
+                val bundle = Bundle()
+                bundle.putString("txid", transaction.getString("txHash"))
+                bundle.putString("amount", amountStr)
+                bundle.putInt("blockheight", transaction.getInt("blockHeight"))
+                bundle.putString("blockhash", transaction.getString("blockHash"))
+                if (amount < 0) {
+                    bundle.putString("address", destAddress)
+                }
+                bundle.putInt("confirmations", numConfirmations)
+                txnDetailsNum = i
+                bundle.putInt("lineID", txnDetailsNum)
+                bundle.putBoolean("history", false)
+                transactionDetailsFragment.arguments = bundle
+                transactionDetailsFragment.show(parentFragmentManager, "")
+                line.setBackgroundColor(Color.GRAY)
+            }
+            line.setBackgroundColor(Color.WHITE)
+            line.id = i
+            line.tag = "TxLine$i"
+            //line.orientation = LinearLayout.HORIZONTAL
+            val llParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+            line.layoutParams = llParams
+            line.setPadding(20, 20, 10, 20)
+            //ADDRESS
+            val textAddress = TextView(mycontext)
+            textAddress.id = View.generateViewId()
+            textAddress.textSize = textSize
+            //AMOUNT
+            val textAmount = TextView(mycontext)
+            textAmount.id = View.generateViewId()
+            textAmount.textSize = textSize
+            if (amount < 0) {
+                textAddress.text = "..." + destAddress.substring(destAddress.length - 4)
+                textAmount.text = amountStr
+                textAmount.setTextColor(Color.RED)
+            } else {
+                textAddress.text = "unknown"
+                textAmount.text = "+$amountStr"
+                textAmount.setTextColor(Color.BLACK)
+            }
+            //DATE
+            val textDate = TextView(mycontext)
+            textDate.id = View.generateViewId()
+            textDate.text = simpleDate.format(Date(transaction.getString("timeStamp").toLong() * 1000))
+            textDate.textSize = textSize
+            //Add columns
+            //confirmations indicator
+            val icon = ImageView(mycontext)
+            icon.id = View.generateViewId()
+            if (numConfirmations == 0) {
+                icon.setBackgroundResource(R.drawable.unconfirmed)
+                updateConfirmations.add(true)
+            }else if (numConfirmations == 1) {
+                icon.setBackgroundResource(R.drawable.clock1)
+                updateConfirmations.add(true)
+            } else if (numConfirmations == 2) {
+                icon.setBackgroundResource(R.drawable.clock2)
+                updateConfirmations.add(true)
+            } else if (numConfirmations == 3) {
+                icon.setBackgroundResource(R.drawable.clock3)
+                updateConfirmations.add(true)
+            } else if (numConfirmations == 4) {
+                icon.setBackgroundResource(R.drawable.clock4)
+                updateConfirmations.add(true)
+            } else if (numConfirmations == 5) {
+                icon.setBackgroundResource(R.drawable.clock5)
+                updateConfirmations.add(true)
+            }else if (numConfirmations > 5) {
+                icon.setBackgroundResource(R.drawable.confirmed)
+                updateConfirmations.add(false)
+            }
+            line.addView(icon)
+            //Date
+            line.addView(textDate)
+            //Amount
+            line.addView(textAmount)
+            //Last 4 digits of address
+            line.addView(textAddress)
+            val set = ConstraintSet()
+            set.clear(icon.id)
+            set.clear(textDate.id)
+            set.clear(textAmount.id)
+            set.clear(textAddress.id)
+            //icon on start
+            set.connect(icon.id, ConstraintSet.START, line.id, ConstraintSet.START, 20)
+            //date with icon
+            set.connect(textDate.id, ConstraintSet.START, icon.id, ConstraintSet.END, 20)
+//                        set.connect(icon.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
+            //amount with date
+            set.connect(textAmount.id, ConstraintSet.START, textDate.id, ConstraintSet.END, 0)
+//                        set.connect(textDate.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 0)
+            //address with amount
+//                        set.connect(textAddress.id,ConstraintSet.START, textAmount.id,ConstraintSet.END, 0 )
+            set.connect(textAmount.id, ConstraintSet.END, textAddress.id, ConstraintSet.START, 0)
+            //address with end
+            set.connect(textAddress.id, ConstraintSet.END, line.id, ConstraintSet.END, 20)
+            val chainViews = intArrayOf( textDate.id, textAmount.id)
+            val chainWeights = floatArrayOf(0f, 0f)
+            set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
+            set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainWidth(textDate.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainHeight(textDate.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainWidth(textAmount.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainHeight(textAmount.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainWidth(textAddress.id, ConstraintSet.WRAP_CONTENT)
+            set.constrainHeight(textAddress.id, ConstraintSet.WRAP_CONTENT)
+            set.applyTo(line)
+            //Add lines
+            listsLayout.addView(line)
+        }
+    }
+
+
+    private fun showCachedData() {
+        //Balance
+        root.findViewById<TextView>(R.id.walletBalanceNumber).text = AnodeUtil.getCachedWalletBalance()
+        //Address
+        root.findViewById<TextView>(R.id.walletAddress).text = AnodeUtil.getCachedWalletAddress()
+        //Transactions
+        val transactions = AnodeUtil.getCachedWalletTxns()
+        makeListofTxns(transactions, transactions.length())
+    }
+
     /**
      * get Transactions
      */
@@ -430,7 +572,6 @@ class WalletFragment : Fragment() {
         params.put("reversed", true)
         params.put("txnsLimit", numberOfTxnsToShow+1)
         val textSize = 15.0f
-
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
@@ -454,127 +595,8 @@ class WalletFragment : Fragment() {
                     txnsSize = 25
                     root.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
                 }
-                for (i in 0 until txnsSize) {
-                    val transaction = transactions.getJSONObject(i)
-                    //Add new line
-                    val line = ConstraintLayout(mycontext)
-                    val numConfirmations = transaction.getInt("numConfirmations")
-                    val amount = transaction.getString("amount").toLong()
-                    val amountStr = AnodeUtil.satoshisToPKT(amount)
-                    val destAddress = transaction.getJSONArray("destAddresses").getString(0)
-                    line.setOnClickListener {
-                        val transactionDetailsFragment: BottomSheetDialogFragment = TransactionDetailsFragment()
-                        val bundle = Bundle()
-                        bundle.putString("txid", transaction.getString("txHash"))
-                        bundle.putString("amount", amountStr)
-                        bundle.putInt("blockheight", transaction.getInt("blockHeight"))
-                        bundle.putString("blockhash", transaction.getString("blockHash"))
-                        if (amount < 0) {
-                            bundle.putString("address", destAddress)
-                        }
-                        bundle.putInt("confirmations", numConfirmations)
-                        txnDetailsNum = i
-                        bundle.putInt("lineID", txnDetailsNum)
-                        bundle.putBoolean("history", false)
-                        transactionDetailsFragment.arguments = bundle
-                        transactionDetailsFragment.show(parentFragmentManager, "")
-                        line.setBackgroundColor(Color.GRAY)
-                    }
-                    line.setBackgroundColor(Color.WHITE)
-                    line.id = i
-                    line.tag = "TxLine$i"
-                    //line.orientation = LinearLayout.HORIZONTAL
-                    val llParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                    line.layoutParams = llParams
-                    line.setPadding(20, 20, 10, 20)
-                    //ADDRESS
-                    val textAddress = TextView(mycontext)
-                    textAddress.id = View.generateViewId()
-                    textAddress.textSize = textSize
-                    //AMOUNT
-                    val textAmount = TextView(mycontext)
-                    textAmount.id = View.generateViewId()
-                    textAmount.textSize = textSize
-                    if (amount < 0) {
-                        textAddress.text = "..." + destAddress.substring(destAddress.length - 4)
-                        textAmount.text = amountStr
-                        textAmount.setTextColor(Color.RED)
-                    } else {
-                        textAddress.text = "unknown"
-                        textAmount.text = "+$amountStr"
-                        textAmount.setTextColor(Color.BLACK)
-                    }
-                    //DATE
-                    val textDate = TextView(mycontext)
-                    textDate.id = View.generateViewId()
-                    textDate.text = simpleDate.format(Date(transaction.getString("timeStamp").toLong() * 1000))
-                    textDate.textSize = textSize
-                    //Add columns
-                    //confirmations indicator
-                    val icon = ImageView(mycontext)
-                    icon.id = View.generateViewId()
-                    if (numConfirmations == 0) {
-                        icon.setBackgroundResource(R.drawable.unconfirmed)
-                        updateConfirmations.add(true)
-                    }else if (numConfirmations == 1) {
-                        icon.setBackgroundResource(R.drawable.clock1)
-                        updateConfirmations.add(true)
-                    } else if (numConfirmations == 2) {
-                        icon.setBackgroundResource(R.drawable.clock2)
-                        updateConfirmations.add(true)
-                    } else if (numConfirmations == 3) {
-                        icon.setBackgroundResource(R.drawable.clock3)
-                        updateConfirmations.add(true)
-                    } else if (numConfirmations == 4) {
-                        icon.setBackgroundResource(R.drawable.clock4)
-                        updateConfirmations.add(true)
-                    } else if (numConfirmations == 5) {
-                        icon.setBackgroundResource(R.drawable.clock5)
-                        updateConfirmations.add(true)
-                    }else if (numConfirmations > 5) {
-                        icon.setBackgroundResource(R.drawable.confirmed)
-                        updateConfirmations.add(false)
-                    }
-                    line.addView(icon)
-                    //Date
-                    line.addView(textDate)
-                    //Amount
-                    line.addView(textAmount)
-                    //Last 4 digits of address
-                    line.addView(textAddress)
-                    val set = ConstraintSet()
-                    set.clear(icon.id)
-                    set.clear(textDate.id)
-                    set.clear(textAmount.id)
-                    set.clear(textAddress.id)
-                    //icon on start
-                    set.connect(icon.id, ConstraintSet.START, line.id, ConstraintSet.START, 20)
-                    //date with icon
-                    set.connect(textDate.id, ConstraintSet.START, icon.id, ConstraintSet.END, 20)
-//                        set.connect(icon.id, ConstraintSet.END, textDate.id, ConstraintSet.START, 0)
-                    //amount with date
-                    set.connect(textAmount.id, ConstraintSet.START, textDate.id, ConstraintSet.END, 0)
-//                        set.connect(textDate.id, ConstraintSet.END, textAmount.id, ConstraintSet.START, 0)
-                    //address with amount
-//                        set.connect(textAddress.id,ConstraintSet.START, textAmount.id,ConstraintSet.END, 0 )
-                    set.connect(textAmount.id, ConstraintSet.END, textAddress.id, ConstraintSet.START, 0)
-                    //address with end
-                    set.connect(textAddress.id, ConstraintSet.END, line.id, ConstraintSet.END, 20)
-                    val chainViews = intArrayOf( textDate.id, textAmount.id)
-                    val chainWeights = floatArrayOf(0f, 0f)
-                    set.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT, chainViews, chainWeights, ConstraintSet.CHAIN_SPREAD)
-                    set.constrainWidth(icon.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainHeight(icon.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainWidth(textDate.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainHeight(textDate.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainWidth(textAmount.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainHeight(textAmount.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainWidth(textAddress.id, ConstraintSet.WRAP_CONTENT)
-                    set.constrainHeight(textAddress.id, ConstraintSet.WRAP_CONTENT)
-                    set.applyTo(line)
-                    //Add lines
-                    listsLayout.addView(line)
-                }
+                AnodeUtil.setCacheWalletTxns(transactions)
+                makeListofTxns(transactions, txnsSize)
             } else if ((response != null) &&
                 response.has("message") &&
                 !response.isNull("message")) {
@@ -596,7 +618,9 @@ class WalletFragment : Fragment() {
                 val json = JSONObject(response.toString())
                 val walletBalance = root.findViewById<TextView>(R.id.walletBalanceNumber)
                 if (json.has("totalBalance")) {
-                    walletBalance.text = AnodeUtil.satoshisToPKT(json.getString("totalBalance").toLong())
+                    val balance = AnodeUtil.satoshisToPKT(json.getString("totalBalance").toLong())
+                    walletBalance.text = balance
+                    AnodeUtil.setCacheWalletBalance(balance)
                     balanceLastTimeUpdated = System.currentTimeMillis()
                 } else if (response.has("message") &&
                     !response.isNull("message")) {

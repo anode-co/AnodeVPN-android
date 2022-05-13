@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import co.anode.anodium.R
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
@@ -56,6 +57,9 @@ object AnodeUtil {
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
     private val clickInterval = 1000L
+    private var walletBalance = ""
+    private var walletTransactions: JSONArray = JSONArray()
+    private var walletAddress = ""
 
     fun init(c: Context) {
         context = c
@@ -708,6 +712,30 @@ object AnodeUtil {
 
     fun walletExists():Boolean {
         return getWalletFiles().size > 0
+    }
+
+    fun setCacheWalletTxns(txns: JSONArray) {
+        walletTransactions = txns
+    }
+
+    fun getCachedWalletTxns(): JSONArray {
+        return walletTransactions
+    }
+
+    fun setCacheWalletAddress(address: String) {
+        walletAddress = address
+    }
+
+    fun getCachedWalletAddress(): String {
+        return walletAddress
+    }
+
+    fun getCachedWalletBalance(): String {
+        return walletBalance
+    }
+
+    fun setCacheWalletBalance(balance: String) {
+        walletBalance = balance
     }
 }
 
