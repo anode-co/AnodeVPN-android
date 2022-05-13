@@ -93,7 +93,7 @@ class VPNFragment : Fragment() {
 
         //Start background threads for checking public IP, new version, uploading errors etc
         startBackgroundThreads()
-        AnodeUtil.launchCJDNS()
+
         //Starting VPN Service
         startVPNService()
         //Initialize VPN connecting waiting dialog
