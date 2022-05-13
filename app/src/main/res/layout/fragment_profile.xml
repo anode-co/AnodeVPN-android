@@ -68,7 +68,6 @@
             android:layout_marginTop="20dp"
             android:textSize="8pt"
             android:textColor="#C9DDE9"
-            android:visibility="gone"
             android:background="@drawable/thin_button"/>
         <Button
             android:id="@+id/button_cjdns_stats"

@@ -13,6 +13,7 @@ class APIController constructor(serviceInjection: ServiceInterface): ServiceInte
     val getAddressBalancesURL = "$baseRestAPIURL/wallet/address/balances"
     val getNewAddressURL = "$baseRestAPIURL/wallet/address/create"
     val getTransactionsURL = "http://127.0.0.1:8080/api/v1/wallet/transaction/query"
+    val getSeedURL = "$baseRestAPIURL/wallet/seed"
     val sendFromURL = "$baseRestAPIURL/wallet/transaction/sendfrom"
     val changePassphraseURL = "$baseRestAPIURL/wallet/changepassphrase"
     val checkPassphraseURL = "$baseRestAPIURL/wallet/checkpassphrase"
