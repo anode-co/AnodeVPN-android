@@ -68,7 +68,7 @@ object AnodeUtil {
     }
 
     fun isCjdnsAlive(): Boolean {
-        if (this::cjdns_pb.isInitialized && cjdns_pb.isAlive) return true
+        if (this::cjdns_pb.isInitialized) return true
         else return false
     }
 
