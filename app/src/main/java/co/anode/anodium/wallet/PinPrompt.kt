@@ -31,6 +31,9 @@ class PinPrompt : AppCompatActivity() {
         val param = intent.extras
         //Getting password from password prompt
         val passwordString = param?.getString("password")
+        var walletName = ""
+        if (param?.get("walletName").toString() != "null")
+            walletName = param?.get("walletName").toString()
         if (!passwordString.isNullOrEmpty()) {
             //This is for when entering the activity from the wallet menu
             //in which case we ask the user to enter their password for validation
@@ -69,9 +72,9 @@ class PinPrompt : AppCompatActivity() {
                 if (validPassword != null) {
                     //Encrypt password using PIN and save it in encrypted shared preferences
                     val encryptedPassword = AnodeUtil.encrypt(validPassword!!, pin)
-                    AnodeUtil.storeWalletPassword(encryptedPassword)
+                    AnodeUtil.storeWalletPassword(encryptedPassword,walletName)
                     //Store PIN in encrypted shared preferences
-                    AnodeUtil.storeWalletPin(pin)
+                    AnodeUtil.storeWalletPin(pin,walletName)
                     if (noNext) {
                         //coming from passwordchange or pin reset
                         finish()
@@ -79,6 +82,7 @@ class PinPrompt : AppCompatActivity() {
                         //Go to seed activity, where wallet is actually created
                         val recoveryActivity = Intent(applicationContext, RecoverySeed::class.java)
                         recoveryActivity.putExtra("password", passwordString)
+                        recoveryActivity.putExtra("walletName", walletName)
                         startActivity(recoveryActivity)
                     }
                 } else {

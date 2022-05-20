@@ -33,7 +33,11 @@ class RecoverySeed : AppCompatActivity() {
         AnodeClient.eventLog("Activity: PinPrompt created")
         val param = intent.extras
         val passwordString = param?.get("password").toString()
-
+        var walletName = "wallet"
+        if (param?.get("walletName").toString() != "null")
+            walletName = param?.get("walletName").toString()
+        if (walletName.isEmpty())
+            walletName = "wallet"
         statusbar = findViewById(R.id.textview_status)
 
         //Initialize Volley Service
@@ -45,7 +49,7 @@ class RecoverySeed : AppCompatActivity() {
         createButton.setOnClickListener {
             val seedString = findViewById<TextView>(R.id.seed_column).text.toString()
             val seedArray = JSONArray(seedString.split(" "))
-            createWallet(passwordString,seedArray)
+            createWallet(passwordString,seedArray, walletName)
         }
 
         val recoverButton = findViewById<Button>(R.id.button_wallet_recover_from_seed)
@@ -67,7 +71,7 @@ class RecoverySeed : AppCompatActivity() {
                 showLoading()
                 recoverButton.visibility = View.GONE
                 val seedPassText = findViewById<EditText>(R.id.editTextWalletSeedPass)
-                recoverWallet(passwordString, seedPassText.text.toString(), seedArray)
+                recoverWallet(passwordString, seedPassText.text.toString(), seedArray, walletName)
             }
         }
         val closeButton = findViewById<Button>(R.id.button_wallet_close)
@@ -169,7 +173,7 @@ class RecoverySeed : AppCompatActivity() {
         }
     }
 
-    private fun recoverWallet( password: String, seedPass:String, seedArray: JSONArray) {
+    private fun recoverWallet( password: String, seedPass:String, seedArray: JSONArray, walletName:String) {
         Log.i(LOGTAG, "recovering PKT wallet...")
         statusbar.text = getString(R.string.recovering_wallet)
         val jsonData = JSONObject()
@@ -178,15 +182,18 @@ class RecoverySeed : AppCompatActivity() {
         }
         jsonData.put("wallet_passphrase", password)
         jsonData.put("wallet_seed", seedArray)
+        jsonData.put("wallet_name", "$walletName.db")
         initWallet( jsonData, true)
     }
 
-    private fun createWallet( password: String, seedArray: JSONArray) {
+    private fun createWallet( password: String, seedArray: JSONArray, walletName:String) {
         Log.i(LOGTAG, "creating PKT wallet...")
         statusbar.text = getString(R.string.creating_wallet)
         val jsonData = JSONObject()
         jsonData.put("wallet_passphrase", password)
         jsonData.put("wallet_seed", seedArray)
+        //Default walletName is wallet.db
+        jsonData.put("wallet_name", "$walletName.db")
         initWallet( jsonData, false)
     }
 
@@ -200,6 +207,10 @@ class RecoverySeed : AppCompatActivity() {
                 (!response.has("error"))) {
                 //Update UI
                 statusbar.text = ""
+                //Set activeWallet
+                val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                val activeWallet = jsonData.getString("wallet_name")
+                prefs.edit().putString("activeWallet", activeWallet).apply()
                 confirmWalletLayout(isRecovery)
             } else {
                 Log.i(LOGTAG, "PKT create wallet failed")

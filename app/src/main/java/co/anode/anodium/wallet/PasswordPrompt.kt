@@ -33,6 +33,9 @@ class PasswordPrompt : AppCompatActivity() {
         AnodeClient.eventLog("Activity: PasswordPrompt created")
         val param = intent.extras
         val changePassphrase = param?.get("changepassphrase").toString().toBoolean()
+        var walletName = ""
+        if (param?.get("walletName").toString() != "null")
+            walletName = param?.get("walletName").toString()
         val noWallet = param?.get("noWallet").toString().toBoolean()
         val service = ServiceVolley()
         apiController = APIController(service)
@@ -72,7 +75,7 @@ class PasswordPrompt : AppCompatActivity() {
                 if (changePassphrase) {
                     changePassphrase(currentPassword, password.text.toString())
                 } else {
-                    loadPinPrompt(password.text.toString(), noNext = false)
+                    loadPinPrompt(password.text.toString(), noNext = false, walletName)
                 }
             } else {
                 confirmPassLayout.error = getString(R.string.passwords_not_match)
@@ -93,11 +96,12 @@ class PasswordPrompt : AppCompatActivity() {
         return true
     }
 
-    private fun loadPinPrompt(password: String, noNext: Boolean) {
+    private fun loadPinPrompt(password: String, noNext: Boolean, newWallet: String) {
         //Go to PIN prompt activity and pass it the password
         val pinPromptActivity = Intent(applicationContext, PinPrompt::class.java)
         pinPromptActivity.putExtra("password", password)
         pinPromptActivity.putExtra("noNext", noNext)
+        pinPromptActivity.putExtra("walletName", newWallet)
         startActivity(pinPromptActivity)
     }
 
@@ -160,7 +164,7 @@ class PasswordPrompt : AppCompatActivity() {
                 prefs.edit().remove("wallet_pin").apply()
                 prefs.edit().remove("encrypted_wallet_password")
                 Toast.makeText(this, "Wallet password changed!", Toast.LENGTH_LONG).show()
-                loadPinPrompt(newPassword, noNext = true)
+                loadPinPrompt(newPassword, noNext = true, "")
                 delayedFinish.start()
             }
         }
