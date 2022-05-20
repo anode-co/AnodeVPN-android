@@ -256,7 +256,9 @@ class WalletStatsActivity : AppCompatActivity() {
 
     private fun pinOrPasswordPrompt(wrongPass: Boolean, forcePassword:Boolean) {
         if (this::pinPasswordAlert.isInitialized && pinPasswordAlert.isShowing) { return }
-        val storedPin = AnodeUtil.getWalletPin()
+        val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val activeWallet = prefs.getString("activeWallet","wallet").toString()
+        val storedPin = AnodeUtil.getWalletPin(activeWallet)
         var isPin = false
         val builder = AlertDialog.Builder(this)
         if (wrongPass) {
@@ -291,7 +293,7 @@ class WalletStatsActivity : AppCompatActivity() {
                     wrongPinAttempts++
                 } else if (inputPassword == storedPin){
                     wrongPinAttempts = 0
-                    val encryptedPassword = AnodeUtil.getWalletPassword()
+                    val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
                     password = AnodeUtil.decrypt(encryptedPassword, inputPassword).toString()
                 }
             } else {

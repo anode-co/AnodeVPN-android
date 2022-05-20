@@ -47,6 +47,7 @@ class SendPaymentActivity : AppCompatActivity() {
         //Get our PKT wallet address
         val param = intent.extras
         myPKTAddress = param?.getString("walletAddress").toString()
+        val walletName = param?.getString("walletName").toString()
 
         var prevLength = 0
         val addressLayout = findViewById<TextInputLayout>(R.id.pktaddressLayout)
@@ -84,7 +85,7 @@ class SendPaymentActivity : AppCompatActivity() {
         })
 
         val passwordField = findViewById<EditText>(R.id.editTextPKTPassword)
-        val storedPin = AnodeUtil.getWalletPin()
+        val storedPin = AnodeUtil.getWalletPin(walletName)
         if (storedPin.isNotEmpty()) {
             passwordField.inputType = InputType.TYPE_CLASS_NUMBER
             passwordField.hint = getString(R.string.prompt_newpin)
@@ -109,7 +110,7 @@ class SendPaymentActivity : AppCompatActivity() {
             }
             var password = ""
             if (storedPin.isNotEmpty() && !forcePassword) {
-                val encryptedPassword = AnodeUtil.getWalletPassword()
+                val encryptedPassword = AnodeUtil.getWalletPassword(walletName)
                 password = AnodeUtil.decrypt(encryptedPassword, passwordField.text.toString()).toString()
             } else {
                 password = passwordField.text.toString()

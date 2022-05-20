@@ -62,6 +62,8 @@ class WalletFragment : Fragment() {
     private lateinit var root: View
     private lateinit var mycontext: Context
     private var txnDetailsNum = -1
+    private var activeWallet = "wallet"
+    private var initialGetInfo = true;
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -90,15 +92,18 @@ class WalletFragment : Fragment() {
         AnodeClient.statustv = statusBar
         statusIcon = root.findViewById(R.id.status_icon)
         val fileDir = mycontext.filesDir
-        val walletFile = File("$fileDir/pkt/wallet.db")
-        if (!walletFile.exists()) {
-            Log.i(LOGTAG, "Open password prompt activity, wallet file does not exist yet")
-            val passwordActivity = Intent(context, PasswordPrompt::class.java)
-            passwordActivity.putExtra("noWallet", true)
-            startActivity(passwordActivity)
-        } else {
-            Log.i(LOGTAG, "Wallet file found.")
+
+        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        //On first run show data consent
+        if (prefs.getBoolean("FirstRun", true)) {
+            AboutDialog.show(requireActivity())
+            with(prefs.edit()) {
+                putBoolean("FirstRun", false)
+                commit()
+            }
         }
+
+        activeWallet = prefs.getString("activeWallet","wallet").toString()
 
         //Init UI elements
         val walletAddress = root.findViewById<TextView>(R.id.walletAddress)
@@ -139,17 +144,8 @@ class WalletFragment : Fragment() {
             }
             val sendPaymentActivity = Intent(context, SendPaymentActivity::class.java)
             sendPaymentActivity.putExtra("walletAddress", myPKTAddress)
+            sendPaymentActivity.putExtra("walletName", activeWallet)
             startActivity(sendPaymentActivity)
-        }
-
-        //On first run show data consent
-        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-        if (prefs.getBoolean("FirstRun", true)) {
-            AboutDialog.show(requireActivity())
-            with(prefs.edit()) {
-                putBoolean("FirstRun", false)
-                commit()
-            }
         }
         return root
     }
@@ -162,8 +158,22 @@ class WalletFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         val fileDir = mycontext.filesDir
-        val walletFile = File("$fileDir/pkt/wallet.db")
-        if(isAdded && walletFile.exists()) {
+        val activeWalletFile = File("$fileDir/pkt/$activeWallet.db")
+        val walletFiles = AnodeUtil.getWalletFiles()
+        if (walletFiles.size < 1) {
+            Log.i(LOGTAG, "Open password prompt activity, no wallet file found")
+            val passwordActivity = Intent(context, PasswordPrompt::class.java)
+            passwordActivity.putExtra("noWallet", true)
+            startActivity(passwordActivity)
+        } else if (!activeWalletFile.exists()){
+            activeWallet = walletFiles[0]
+            Log.i(LOGTAG, "Active wallet file not found, will try to open $activeWallet.")
+        } else {
+            Log.i(LOGTAG, "Active wallet file $activeWallet found.")
+        }
+
+        if(isAdded) {
+            initialGetInfo = true
             //Show cached info
             showCachedData()
             h.postDelayed(getPldInfo, 0)
@@ -257,6 +267,7 @@ class WalletFragment : Fragment() {
         }
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
+        jsonRequest.put("wallet_name", "$activeWallet.db")
         showLoading()
         apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
             hideLoading()
@@ -335,7 +346,7 @@ class WalletFragment : Fragment() {
 
     private fun pinOrPasswordPrompt(wrongPass: Boolean, forcePassword:Boolean) {
         if (this::pinPasswordAlert.isInitialized && pinPasswordAlert.isShowing) { return }
-        val storedPin = AnodeUtil.getWalletPin()
+        val storedPin = AnodeUtil.getWalletPin(activeWallet)
         var isPin = false
         val builder = AlertDialog.Builder(mycontext)
         if (wrongPass) {
@@ -369,7 +380,7 @@ class WalletFragment : Fragment() {
                     wrongPinAttempts++
                 } else if (inputPassword == storedPin){
                     wrongPinAttempts = 0
-                    val encryptedPassword = AnodeUtil.getWalletPassword()
+                    val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
                     walletPasswordQuickRetry = AnodeUtil.decrypt(encryptedPassword, inputPassword)
                 }
             } else {
@@ -553,7 +564,8 @@ class WalletFragment : Fragment() {
         //Balance
         root.findViewById<TextView>(R.id.walletBalanceNumber).text = AnodeUtil.getCachedWalletBalance()
         //Address
-        root.findViewById<TextView>(R.id.walletAddress).text = AnodeUtil.getCachedWalletAddress()
+        myPKTAddress = AnodeUtil.getCachedWalletAddress()
+        root.findViewById<TextView>(R.id.walletAddress).text = myPKTAddress
         //Transactions
         val transactions = AnodeUtil.getCachedWalletTxns()
         makeListofTxns(transactions, transactions.length())
@@ -636,6 +648,7 @@ class WalletFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateStatusBar(peers: Int, chainTop: Int, chainHeight: Int, bHash: String, bTimestamp: Long, walletHeight: Int) {
         if (context == null) return
+
         if (peers == 0) {
             statusBar.text = getString(R.string.wallet_status_disconnected)
             statusIcon.setBackgroundResource(R.drawable.circle_red)
@@ -647,23 +660,28 @@ class WalletFragment : Fragment() {
             statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_syncing_transactions)+" $walletHeight/$chainHeight"
         } else if (walletHeight == chainHeight) {
             statusIcon.setBackgroundResource(R.drawable.circle_green)
-            val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
             val timeAgoText: String
-            if (diffSeconds > 60) {
-                val minutes = diffSeconds / 60
-                if (minutes == (1).toLong()) {
-                    timeAgoText = "$minutes "+getString(R.string.minute_ago)
-                } else {
-                    timeAgoText = "$minutes "+getString(R.string.minutes_ago)
-                }
-                if (diffSeconds > 1140) {//19min
-                    statusIcon.setBackgroundResource(R.drawable.warning)
-                }
+            if (initialGetInfo) {
+                statusBar.text = "Loading..."
             } else {
-                timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
+                val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
+                if (diffSeconds > 60) {
+                    val minutes = diffSeconds / 60
+                    if (minutes == (1).toLong()) {
+                        timeAgoText = "$minutes "+getString(R.string.minute_ago)
+                    } else {
+                        timeAgoText = "$minutes "+getString(R.string.minutes_ago)
+                    }
+                    if (diffSeconds > 1140) {//19min
+                        statusIcon.setBackgroundResource(R.drawable.warning)
+                    }
+                } else {
+                    timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
+                }
+                statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
             }
-            statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
         }
+        initialGetInfo = false
     }
 
     /**
