@@ -1,11 +1,7 @@
 package co.anode.anodium.support
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -20,7 +16,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import co.anode.anodium.R
@@ -155,6 +150,10 @@ object AnodeUtil {
         pld_pb.destroy()
     }
 
+    fun stopCjdns() {
+        cjdns_pb.destroy()
+    }
+
     fun deleteNeutrino() {
         val neutrinoDB = File("data/data/co.anode.anodium/files/pkt/neutrino.db")
         if (neutrinoDB.exists()) {
@@ -163,19 +162,18 @@ object AnodeUtil {
     }
 
     fun initializeCjdrouteConfFile() {
-        generateConfFile()
+        generateCjdnsConfFile()
         modifyJSONConfFile()
     }
 
-    private fun generateConfFile() {
+    private fun generateCjdnsConfFile() {
         Log.i(LOGTAG, "Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
             processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf")
-                    .redirectOutput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
-                    .start()
-                    .waitFor(2, TimeUnit.SECONDS)
-
+                .redirectOutput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
+                .start()
+                .waitFor(2, TimeUnit.SECONDS)
             //Clean conf
             Log.i(LOGTAG, "Clean conf file with cjdroute")
             processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--cleanconf")
@@ -183,6 +181,14 @@ object AnodeUtil {
                     .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor(2, TimeUnit.SECONDS)
+            val seedFile = File("$filesDirectory/seed.txt")
+            if (seedFile.exists()) {
+                processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf-seed")
+                    .redirectInput(File("$filesDirectory/seed.txt"))
+                    .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
+                    .start()
+                    .waitFor(2, TimeUnit.SECONDS)
+            }
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to generate new configuration file " + e.message)
         }
@@ -419,7 +425,9 @@ object AnodeUtil {
      *
      * @param password: String
      */
-    fun storeWalletPassword(password: String) {
+    fun storeWalletPassword(password: String, walletName: String) {
+        var wallet = walletName
+        if (wallet.isEmpty()) wallet = "wallet"
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -429,10 +437,13 @@ object AnodeUtil {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        encSharedPreferences.edit().putString("encrypted_wallet_password", password).apply()
+        val prefKey = wallet+"_password"
+        encSharedPreferences.edit().putString(prefKey, password).apply()
     }
 
-    fun storeWalletPin(pin: String) {
+    fun storeWalletPin(pin: String, walletName: String) {
+        var wallet = walletName
+        if (wallet.isEmpty()) wallet = "wallet"
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -442,15 +453,40 @@ object AnodeUtil {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        encSharedPreferences.edit().putString("wallet_pin", pin).apply()
+        val prefKey = wallet+"_pin"
+        encSharedPreferences.edit().putString(prefKey, pin).apply()
     }
 
-    fun getWalletPin():String {
-        return getValueFromEncSharedPreferences("wallet_pin")
+    fun renameEncryptedWalletPreferences(currentWalletName: String, newWalletName:String) {
+        //Store Password under new wallet name
+        val password = getWalletPassword(currentWalletName)
+        storeWalletPassword(password, newWalletName)
+        //Store PIN under new wallet name
+        val pin = getWalletPin(currentWalletName)
+        storeWalletPin(pin, newWalletName)
+        //Remove old entries
+        removeKeyFromEncSharedPreferences(currentWalletName)
     }
 
-    fun getWalletPassword():String {
-        return getValueFromEncSharedPreferences("encrypted_wallet_password")
+    fun removeEncryptedWalletPreferences(currentWalletName: String) {
+        val prefKeyPassword = currentWalletName+"_password"
+        removeKeyFromEncSharedPreferences(prefKeyPassword)
+        val prefKeyPin = currentWalletName+"_pin"
+        removeKeyFromEncSharedPreferences(prefKeyPin)
+    }
+
+    fun getWalletPin(walletName:String):String {
+        var wallet = walletName
+        if (wallet.isEmpty()) wallet = "wallet"
+        val prefKey = wallet+"_pin"
+        return getValueFromEncSharedPreferences(prefKey)
+    }
+
+    fun getWalletPassword(walletName:String):String {
+        var wallet = walletName
+        if (wallet.isEmpty()) wallet = "wallet"
+        val prefKey = wallet+"_password"
+        return getValueFromEncSharedPreferences(prefKey)
     }
     /**
      * Get the stored vale for a key from
@@ -474,6 +510,19 @@ object AnodeUtil {
         } else {
             return value
         }
+    }
+
+    private fun removeKeyFromEncSharedPreferences(key:String) {
+        val masterKey = getMasterKey()
+        val encSharedPreferences: SharedPreferences =
+            EncryptedSharedPreferences.create(
+                context!!,
+                "co.anode.anodium-encrypted-sharedPreferences",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        encSharedPreferences.edit().remove(key).apply()
     }
 
     /**
@@ -736,6 +785,18 @@ object AnodeUtil {
 
     fun setCacheWalletBalance(balance: String) {
         walletBalance = balance
+    }
+
+    fun cleatWalletCache() {
+        walletTransactions = JSONArray()
+        walletBalance = ""
+        walletAddress = ""
+    }
+
+    fun deleteWalletChainBackupFile() {
+        if (File("$filesDirectory/pkt/lnd/data/chain/pkt/mainnet/channel.backup").exists()) {
+            File("$filesDirectory/pkt/lnd/data/chain/pkt/mainnet/channel.backup").delete()
+        }
     }
 }
 
