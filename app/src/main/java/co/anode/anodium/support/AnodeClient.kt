@@ -79,6 +79,7 @@ object AnodeClient {
     }
 
     fun showToast(message: String) {
+        if (message == "") return
         Log.i(LOGTAG, message)
         if (mainActivity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             mainActivity.runOnUiThread {
