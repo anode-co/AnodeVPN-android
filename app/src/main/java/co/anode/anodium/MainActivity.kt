@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         AnodeUtil.initializeApp()
         AnodeUtil.launchPld()
         AnodeUtil.launchCJDNS()
+        AnodeUtil.serviceThreads()
         val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
