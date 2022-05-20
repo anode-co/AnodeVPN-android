@@ -1014,21 +1014,23 @@ object AnodeClient {
     }
 
     fun mainButtonState(state: Int) {
-        when(state) {
-            buttonStateConnected -> {
-                vpnFragment.requireActivity().runOnUiThread{
-                    //Status bar
-                    statustv.text = ""
-                    //Button
-                    connectButton.alpha = 1.0f
-                    connectButton.isChecked = false
+        if (this::vpnFragment.isInitialized) {
+            when (state) {
+                buttonStateConnected -> {
+                    vpnFragment.requireActivity().runOnUiThread {
+                        //Status bar
+                        statustv.text = ""
+                        //Button
+                        connectButton.alpha = 1.0f
+                        connectButton.isChecked = false
+                    }
                 }
-            }
-            buttonStateConnecting -> {
-                vpnFragment.requireActivity().runOnUiThread {
-                    statustv.text = mycontext.resources.getString(R.string.status_connecting)
-                    connectButton.textOn = "Cancel"
-                    connectButton.alpha = 0.5f
+                buttonStateConnecting -> {
+                    vpnFragment.requireActivity().runOnUiThread {
+                        statustv.text = mycontext.resources.getString(R.string.status_connecting)
+                        connectButton.textOn = "Cancel"
+                        connectButton.alpha = 0.5f
+                    }
                 }
             }
         }
