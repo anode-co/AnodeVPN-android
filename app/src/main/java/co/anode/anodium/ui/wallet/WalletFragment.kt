@@ -55,6 +55,7 @@ class WalletFragment : Fragment() {
     private var chainSyncLastShown: Long = 0
     private var updateConfirmations = arrayListOf<Boolean>()
     private var neutrinoTop = 0
+    private var resumedNeutrinoTop = 0
     private val numberOfTxnsToShow = 25
     private var walletPasswordQuickRetry: String? = null
     private lateinit var pinPasswordAlert: AlertDialog
@@ -63,7 +64,6 @@ class WalletFragment : Fragment() {
     private lateinit var mycontext: Context
     private var txnDetailsNum = -1
     private var activeWallet = "wallet"
-    private var initialGetInfo = true;
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -170,15 +170,29 @@ class WalletFragment : Fragment() {
             Log.i(LOGTAG, "Active wallet file not found, will try to open $activeWallet.")
         } else {
             Log.i(LOGTAG, "Active wallet file $activeWallet found.")
+            val label = root.findViewById<TextView>(R.id.walletAddressLabel)
+            var labelStr = getString(R.string.wallet_address)
+            if (activeWallet != "wallet") {
+                  labelStr += " ($activeWallet)"
+            }
+            label.text = labelStr
         }
-
+        resumedNeutrinoTop = neutrinoTop
         if(isAdded) {
-            initialGetInfo = true
             //Show cached info
             showCachedData()
             h.postDelayed(getPldInfo, 0)
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        if (this::h.isInitialized) {
+            h.removeCallbacks(refreshValues)
+            h.removeCallbacks(getPldInfo)
+        }
+    }
+
     private val getPldInfo = Runnable { getInfo() }
 
     /**
@@ -225,14 +239,16 @@ class WalletFragment : Fragment() {
                     if (neutrino.has("peers")) {
                         neutrinoPeers = neutrino.length()
                         val peers = neutrino.getJSONArray("peers")
-                        if (peers.length() > 0) {
+                        for (i in 0 until peers.length()) {
                             if (peers.getJSONObject(0).getInt("lastBlock") > 0) {
                                 val tempTop = peers.getJSONObject(0).getInt("lastBlock")
                                 if (tempTop > neutrinoTop) {
                                     neutrinoTop = tempTop
                                 }
                             }
-                            chainHeight = neutrino.getInt("height")
+                            if (neutrino.getInt("height") > chainHeight) {
+                                chainHeight = neutrino.getInt("height")
+                            }
                             chainSyncLastShown = System.currentTimeMillis()
                         }
                     }
@@ -359,16 +375,16 @@ class WalletFragment : Fragment() {
         input.layoutParams = lp
         builder.setView(input)
         if (wrongPinAttempts > 3) {
-            input.inputType = InputType.TYPE_CLASS_TEXT
+            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             builder.setTitle("Too many failed PIN attempts.")
-            builder.setMessage("Please enter your password")
+            builder.setMessage("Please enter password for $activeWallet")
         } else if (storedPin.isNotEmpty() && !forcePassword) {
             input.inputType = InputType.TYPE_CLASS_NUMBER
-            builder.setMessage("Please enter your PIN")
+            builder.setMessage("Please enter PIN for $activeWallet")
             isPin = true
         } else {
-            input.inputType = InputType.TYPE_CLASS_TEXT
-            builder.setMessage("Please enter your password")
+            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            builder.setMessage("Please enter password for $activeWallet")
         }
         input.transformationMethod = PasswordTransformationMethod.getInstance()
         builder.setPositiveButton("OK"
@@ -413,8 +429,8 @@ class WalletFragment : Fragment() {
                 pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
             }
         }
-
         pinPasswordAlert = builder.create()
+        pinPasswordAlert.setCanceledOnTouchOutside(false)
         pinPasswordAlert.show()
     }
 
@@ -648,7 +664,6 @@ class WalletFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateStatusBar(peers: Int, chainTop: Int, chainHeight: Int, bHash: String, bTimestamp: Long, walletHeight: Int) {
         if (context == null) return
-
         if (peers == 0) {
             statusBar.text = getString(R.string.wallet_status_disconnected)
             statusIcon.setBackgroundResource(R.drawable.circle_red)
@@ -661,27 +676,27 @@ class WalletFragment : Fragment() {
         } else if (walletHeight == chainHeight) {
             statusIcon.setBackgroundResource(R.drawable.circle_green)
             val timeAgoText: String
-            if (initialGetInfo) {
-                statusBar.text = "Loading..."
-            } else {
-                val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
-                if (diffSeconds > 60) {
-                    val minutes = diffSeconds / 60
-                    if (minutes == (1).toLong()) {
-                        timeAgoText = "$minutes "+getString(R.string.minute_ago)
+            val diffSeconds = (System.currentTimeMillis() - bTimestamp) / 1000
+            if (diffSeconds > 60) {
+                val minutes = diffSeconds / 60
+                if (minutes == (1).toLong()) {
+                    timeAgoText = "$minutes "+getString(R.string.minute_ago)
+                } else {
+                    timeAgoText = "$minutes "+getString(R.string.minutes_ago)
+                }
+                if (diffSeconds > 1140) {//19min
+                    if (resumedNeutrinoTop == neutrinoTop) {
+                        statusBar.text = "waiting for data..."
+                        return
                     } else {
-                        timeAgoText = "$minutes "+getString(R.string.minutes_ago)
-                    }
-                    if (diffSeconds > 1140) {//19min
                         statusIcon.setBackgroundResource(R.drawable.warning)
                     }
-                } else {
-                    timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
                 }
-                statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
+            } else {
+                timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
             }
+            statusBar.text = "$peers Peers | "+getString(R.string.wallet_status_synced)+"$chainHeight - $timeAgoText"
         }
-        initialGetInfo = false
     }
 
     /**
