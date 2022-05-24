@@ -748,6 +748,13 @@ object AnodeUtil {
         exitProcess(1)
     }
 
+    fun deleteWallet(walletName: String) {
+        val walletFile = File("$filesDirectory/pkt/$walletName.db")
+        if (walletFile.exists()) {
+            walletFile.delete()
+        }
+    }
+
     fun getWalletFiles():ArrayList<String> {
         val files = File("$filesDirectory/pkt").listFiles()
         var result = ArrayList<String>()
