@@ -3,6 +3,7 @@ package co.anode.anodium.ui.profile
 import android.content.*
 import android.os.Bundle
 import android.text.InputType
+import android.text.method.DigitsKeyListener
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -237,12 +238,12 @@ class ProfileFragment : Fragment() {
     }
 
     private fun walletNameDialog(addWallet: Boolean) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext(), R.style.EditWalletAlertDialog)
         builder.setTitle("Wallet name")
         if (addWallet) {
             builder.setMessage("New wallet")
         } else {
-            builder.setMessage("Rename $activeWallet")
+            builder.setMessage("Edit $activeWallet")
         }
 
         val input = EditText(requireContext())
@@ -250,11 +251,14 @@ class ProfileFragment : Fragment() {
         input.layoutParams = lp
         builder.setView(input)
         input.inputType = InputType.TYPE_CLASS_TEXT
+        input.keyListener = DigitsKeyListener.getInstance("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")
         builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss()
         }
         builder.setPositiveButton("Next") { dialog, _ ->
             val walletName = input.text.toString()
+            //TODO: check if walletName is valid and does not already exist
+
             if (addWallet) {
                 //restart pld
                 AnodeUtil.stopPld()
@@ -269,6 +273,42 @@ class ProfileFragment : Fragment() {
                 updateWallets()
             }
             dialog.dismiss()
+        }
+        if (!addWallet) {
+            builder.setNeutralButton("Delete") { dialog, _ ->
+                //2nd confirmation before deleting wallet
+                deleteWalletDialog()
+            }
+        }
+        val alert: AlertDialog = builder.create()
+        alert.show()
+    }
+
+    private fun deleteWalletDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext(), R.style.EditWalletAlertDialog)
+        builder.setTitle("Delete wallet")
+        builder.setMessage("Are you sure you want to permanently delete $activeWallet from this device? If yes enter the name of the wallet.")
+        val input = EditText(requireContext())
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        input.layoutParams = lp
+        builder.setView(input)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.keyListener = DigitsKeyListener.getInstance("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")
+        builder.setPositiveButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.setNeutralButton("Delete") { _, _ ->
+            var inputWallet = input.text.toString()
+            inputWallet = inputWallet.removeSuffix(".db")
+            if (inputWallet == activeWallet) {
+                //Delete Wallet
+                AnodeUtil.deleteWallet(inputWallet)
+                Toast.makeText(requireContext(), "Wallet $activeWallet has been deleted.", Toast.LENGTH_LONG).show()
+                //change active wallet
+                updateWallets()
+            } else {
+                Toast.makeText(requireContext(), "Wallet names do not match.", Toast.LENGTH_LONG).show()
+            }
         }
         val alert: AlertDialog = builder.create()
         alert.show()
@@ -311,7 +351,7 @@ class ProfileFragment : Fragment() {
         input.layoutParams = lp
         builder.setView(input)
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-        builder.setMessage("Please enter your password")
+        builder.setMessage("Please enter password for $activeWallet")
         input.transformationMethod = PasswordTransformationMethod.getInstance()
         builder.setPositiveButton("OK"
         ) { dialog, _ ->
