@@ -310,7 +310,7 @@ class ProfileFragment : Fragment() {
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
         input.layoutParams = lp
         builder.setView(input)
-        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         builder.setMessage("Please enter your password")
         input.transformationMethod = PasswordTransformationMethod.getInstance()
         builder.setPositiveButton("OK"
@@ -326,6 +326,7 @@ class ProfileFragment : Fragment() {
         }
 
         val alert = builder.create()
+        alert.setCanceledOnTouchOutside(false)
         alert.show()
     }
 }
