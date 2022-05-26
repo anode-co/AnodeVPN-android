@@ -68,6 +68,7 @@ class ProfileFragment : Fragment() {
             Log.i(LOGTAG, "Open PasswordPrompt activity for changing password")
             val promptPasswordActivity = Intent(mycontext, PasswordPrompt::class.java)
             promptPasswordActivity.putExtra("changepassphrase", true)
+            promptPasswordActivity.putExtra("walletName", activeWallet)
             startActivity(promptPasswordActivity)
         }
         val showSeedButton = root.findViewById<Button>(R.id.button_show_seed)
@@ -82,7 +83,9 @@ class ProfileFragment : Fragment() {
         val walletStatsButton = root.findViewById<Button>(R.id.button_wallet_stats)
         walletStatsButton.setOnClickListener {
             Log.i(LOGTAG, "Start wallet stats activity")
-            startActivity(Intent(mycontext, WalletStatsActivity::class.java))
+            val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
+            statsActivity.putExtra("walletName", activeWallet)
+            startActivity(statsActivity)
         }
         val setPinButton = root.findViewById<Button>(R.id.button_set_pin)
         setPinButton.setOnClickListener {
@@ -90,6 +93,7 @@ class ProfileFragment : Fragment() {
             val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
             promptPinActivity.putExtra("changepassphrase", true)
             promptPinActivity.putExtra("noNext", true)
+            promptPinActivity.putExtra("walletName", activeWallet)
             startActivity(promptPinActivity)
         }
         val checkUpdateButton = root.findViewById<Button>(R.id.button_check_update)

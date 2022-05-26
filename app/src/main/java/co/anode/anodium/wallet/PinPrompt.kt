@@ -77,7 +77,8 @@ class PinPrompt : AppCompatActivity() {
                     AnodeUtil.storeWalletPin(pin,walletName)
                     if (noNext) {
                         //coming from passwordchange or pin reset
-                        finish()
+                        Toast.makeText(this, "Wallet PIN set.", Toast.LENGTH_LONG).show()
+                        delayedFinish.start()
                     } else {
                         //Go to seed activity, where wallet is actually created
                         val recoveryActivity = Intent(applicationContext, RecoverySeed::class.java)
@@ -167,6 +168,17 @@ class PinPrompt : AppCompatActivity() {
                 checkCurrentPassphrase(true)
             } else {
                 Toast.makeText(this, "Current password validated!", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    var delayedFinish: Thread = object : Thread() {
+        override fun run() {
+            try {
+                sleep(Toast.LENGTH_LONG.toLong())
+                finish()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

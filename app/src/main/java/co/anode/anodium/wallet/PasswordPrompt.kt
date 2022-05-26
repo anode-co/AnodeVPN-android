@@ -24,6 +24,7 @@ class PasswordPrompt : AppCompatActivity() {
     private lateinit var apiController: APIController
     private var currentPasswordValidated = true
     private var currentPassword = ""
+    private var changePassphrase = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +33,7 @@ class PasswordPrompt : AppCompatActivity() {
         actionbar!!.setDisplayHomeAsUpEnabled(true)
         AnodeClient.eventLog("Activity: PasswordPrompt created")
         val param = intent.extras
-        val changePassphrase = param?.get("changepassphrase").toString().toBoolean()
+        changePassphrase = param?.get("changepassphrase").toString().toBoolean()
         var walletName = ""
         if (param?.get("walletName").toString() != "null")
             walletName = param?.get("walletName").toString()
@@ -164,7 +165,9 @@ class PasswordPrompt : AppCompatActivity() {
                 prefs.edit().remove("wallet_pin").apply()
                 prefs.edit().remove("encrypted_wallet_password")
                 Toast.makeText(this, "Wallet password changed!", Toast.LENGTH_LONG).show()
-                loadPinPrompt(newPassword, noNext = true, "")
+                if (!changePassphrase) {
+                    loadPinPrompt(newPassword, noNext = true, "")
+                }
                 delayedFinish.start()
             }
         }
