@@ -411,13 +411,6 @@ class WalletFragment : Fragment() {
             }
         }
 
-        builder.setNegativeButton("Cancel"
-        ) { dialog, _ ->
-            if (isAdded) {
-                h.postDelayed(getPldInfo, 0)
-            }
-            dialog.dismiss()
-        }
         if (isPin) {
             builder.setNeutralButton("Password") { dialog, _ ->
                 dialog.dismiss()
