@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:id="@+id/wstats_address_label"
+                android:id="@+id/wstats_name_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
@@ -24,6 +24,23 @@
                 android:textSize="8pt"
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"
+                android:text="Name"/>
+            <TextView
+                android:id="@+id/wstats_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textIsSelectable="true"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_name_label"
+                app:layout_constraintStart_toStartOf="@+id/wstats_name_label"/>
+            <TextView
+                android:id="@+id/wstats_address_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/wstats_name"
+                app:layout_constraintStart_toStartOf="@+id/wstats_name"
+                android:textStyle="bold"
+                android:textSize="8pt"
                 android:text="Address"/>
             <TextView
                 android:id="@+id/wstats_address"

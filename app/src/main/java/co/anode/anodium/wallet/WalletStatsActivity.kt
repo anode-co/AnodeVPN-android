@@ -35,6 +35,7 @@ class WalletStatsActivity : AppCompatActivity() {
     val peersListDetails = mutableListOf<String>()
     private var wrongPinAttempts= 0
     private var walletPasswordQuickRetry: String? = null
+    private var activeWallet = "wallet"
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,21 +51,24 @@ class WalletStatsActivity : AppCompatActivity() {
         //Initialize handlers
         val service = ServiceVolley()
         apiController = APIController(service)
-
-
-        val walletfile = File("$filesDir/pkt/wallet.db")
-        if (!walletfile.exists()) {
+        val param = intent.extras
+        if (param?.get("walletName").toString() != "null") {
+            activeWallet = param?.get("walletName").toString()
+        }
+        val walletFile = File("$filesDir/pkt/$activeWallet.db")
+        if (!walletFile.exists()) {
             Toast.makeText(baseContext, "PKT wallet does not exist.", Toast.LENGTH_LONG).show()
             return
         }
-        val param = intent.extras
+
         //Getting password from password prompt
         walletPasswordQuickRetry = param?.getString("password")
 
         //Initializing UI components
         myBalance = findViewById(R.id.wstats_balance)
         val peersListView = findViewById<ListView>(R.id.peers_list)
-
+        val name = findViewById<TextView>(R.id.wstats_name)
+        name.text = "$activeWallet.db"
         //Handle peer list click
         peersListView.setOnItemClickListener { _, _, position, _ ->
             showPeerDetails(peersListDetails[position])
@@ -82,17 +86,12 @@ class WalletStatsActivity : AppCompatActivity() {
 
     private fun loadWalletStats() {
         getInfo()
-        if (!walletUnlocked) {
-            if (walletPasswordQuickRetry.isNullOrEmpty()) {
-                pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
-            } else {
-                unlockWallet(walletPasswordQuickRetry!!)
+        if (walletUnlocked) {
+            if (findViewById<TextView>(R.id.wstats_address).text.toString().isEmpty()) {
+                getCurrentPKTAddress()
             }
+            getBalance()
         }
-        if (findViewById<TextView>(R.id.wstats_address).text.toString().isEmpty()) {
-            getCurrentPKTAddress()
-        }
-        getBalance()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean { // Inflate the menu; this adds items to the action bar if it is present.
@@ -151,12 +150,18 @@ class WalletStatsActivity : AppCompatActivity() {
 
         apiController.get(apiController.getInfoURL) { response ->
             if (response != null) {
+                walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
+                if (!walletUnlocked) {
+                    pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+                    return@get
+                }
                 if (response.has("wallet") && !response.isNull("wallet")) {
                     val walletInfo = response.getJSONObject("wallet")
                     val localDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(walletInfo.getString("currentBlockTimestamp"))
                     walletSync.text = walletInfo.getInt("currentHeight").toString() + " | " +SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(localDateTime)
-                    walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
+
                 }
+
                 if (response.has("neutrino") && !response.isNull("neutrino")) {
                     peersListDetails.clear()
                     val peersList = mutableListOf<String>()
@@ -256,8 +261,6 @@ class WalletStatsActivity : AppCompatActivity() {
 
     private fun pinOrPasswordPrompt(wrongPass: Boolean, forcePassword:Boolean) {
         if (this::pinPasswordAlert.isInitialized && pinPasswordAlert.isShowing) { return }
-        val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-        val activeWallet = prefs.getString("activeWallet","wallet").toString()
         val storedPin = AnodeUtil.getWalletPin(activeWallet)
         var isPin = false
         val builder = AlertDialog.Builder(this)
@@ -329,6 +332,7 @@ class WalletStatsActivity : AppCompatActivity() {
         Log.i(LOGTAG, "Trying to unlock wallet")
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
+        jsonRequest.put("wallet_name", "$activeWallet.db")
         apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet")
