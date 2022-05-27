@@ -354,7 +354,7 @@ class ProfileFragment : Fragment() {
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
         input.layoutParams = lp
         builder.setView(input)
-        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        input.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
         builder.setMessage("Please enter password for $activeWallet")
         input.transformationMethod = PasswordTransformationMethod.getInstance()
         builder.setPositiveButton("OK"

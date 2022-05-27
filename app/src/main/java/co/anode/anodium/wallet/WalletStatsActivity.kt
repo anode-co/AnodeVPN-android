@@ -271,7 +271,7 @@ class WalletStatsActivity : AppCompatActivity() {
         input.layoutParams = lp
         builder.setView(input)
         if (wrongPinAttempts > 3) {
-            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            input.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             builder.setTitle("Too many failed PIN attempts.")
             builder.setMessage("Please enter your password")
         } else if (storedPin.isNotEmpty() && !forcePassword) {
@@ -279,7 +279,7 @@ class WalletStatsActivity : AppCompatActivity() {
             builder.setMessage("Please enter your PIN")
             isPin = true
         } else {
-            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            input.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             builder.setMessage("Please enter your password")
         }
         input.transformationMethod = PasswordTransformationMethod.getInstance()

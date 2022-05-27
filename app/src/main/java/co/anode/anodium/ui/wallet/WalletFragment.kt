@@ -375,7 +375,7 @@ class WalletFragment : Fragment() {
         input.layoutParams = lp
         builder.setView(input)
         if (wrongPinAttempts > 3) {
-            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            input.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             builder.setTitle("Too many failed PIN attempts.")
             builder.setMessage("Please enter password for $activeWallet")
         } else if (storedPin.isNotEmpty() && !forcePassword) {
@@ -383,7 +383,7 @@ class WalletFragment : Fragment() {
             builder.setMessage("Please enter PIN for $activeWallet")
             isPin = true
         } else {
-            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            input.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             builder.setMessage("Please enter password for $activeWallet")
         }
         input.transformationMethod = PasswordTransformationMethod.getInstance()

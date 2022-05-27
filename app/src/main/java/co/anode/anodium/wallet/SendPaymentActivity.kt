@@ -90,7 +90,7 @@ class SendPaymentActivity : AppCompatActivity() {
             passwordField.inputType = InputType.TYPE_CLASS_NUMBER
             passwordField.hint = getString(R.string.prompt_newpin)
         } else {
-            passwordField.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            passwordField.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             passwordField.hint = getString(R.string.send_pkt_password)
         }
         passwordField.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -174,7 +174,7 @@ class SendPaymentActivity : AppCompatActivity() {
                     passwordField.error = getString(R.string.wallet_wrong_password)
                     //switch to using password
                     forcePassword = true
-                    passwordField.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                    passwordField.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
                     passwordField.hint = getString(R.string.send_pkt_password)
                     passwordField.transformationMethod = PasswordTransformationMethod.getInstance()
                 }
