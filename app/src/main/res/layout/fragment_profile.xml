@@ -52,6 +52,14 @@
                     android:background="@color/colorPrimarybackground"
                     app:tint="@color/colorPrimary"
                     android:contentDescription="Add wallet" />
+                <ImageButton
+                    android:id="@+id/button_export_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_baseline_arrow_circle_up_24"
+                    android:background="@color/colorPrimarybackground"
+                    app:tint="@color/colorPrimary"
+                    android:contentDescription="Export wallet" />
         </LinearLayout>
 
         <TextView

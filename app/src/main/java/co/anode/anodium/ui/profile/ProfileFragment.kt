@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
@@ -110,6 +111,18 @@ class ProfileFragment : Fragment() {
             //Dialog for renaming wallet
             walletNameDialog(false)
         }
+        val exportWalletButton = root.findViewById<ImageButton>(R.id.button_export_wallet)
+        exportWalletButton.setOnClickListener {
+            val walletUri = FileProvider.getUriForFile(requireContext(),BuildConfig.APPLICATION_ID +".provider", File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db"))
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "*/*"
+                putExtra(Intent.EXTRA_STREAM, walletUri)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
+        }
 
         walletsSpinner = root.findViewById(R.id.wallet_selector)
         walletNames = AnodeUtil.getWalletFiles()
@@ -205,6 +218,11 @@ class ProfileFragment : Fragment() {
                     //launch cjdns
                     AnodeUtil.launchCJDNS()
                 }
+            } else if ((response != null) &&
+                    response.has("error") &&
+                    response.getJSONObject("error").getString("message").contains("[LightningServer] is not ready yet")) {
+                Log.e(co.anode.anodium.support.LOGTAG, "Wallet is not unlocked")
+                Toast.makeText(requireContext(), "Wallet is not unlocked.", Toast.LENGTH_LONG).show()
             } else {
                 Log.e(co.anode.anodium.support.LOGTAG, "Error in generating wallet seed")
                 Toast.makeText(requireContext(), "Failed to get wallet seed.", Toast.LENGTH_LONG).show()
