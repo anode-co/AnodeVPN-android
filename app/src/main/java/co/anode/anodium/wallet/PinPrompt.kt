@@ -1,5 +1,6 @@
 package co.anode.anodium.wallet
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -22,6 +23,7 @@ class PinPrompt : AppCompatActivity() {
     private var currentPasswordValidated = true
     private var validPassword: String? = null
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pin_prompt)
@@ -32,12 +34,16 @@ class PinPrompt : AppCompatActivity() {
         //Getting password from password prompt
         val passwordString = param?.getString("password")
         var walletName = ""
-        if (param?.get("walletName").toString() != "null")
+        if (param?.get("walletName").toString() != "null") {
             walletName = param?.get("walletName").toString()
+            val topLabel = findViewById<TextView>(R.id.text_walletcreate_label)
+            topLabel.text = getString(R.string.prompt_label_pin)+"\n$walletName"
+        }
         if (!passwordString.isNullOrEmpty()) {
             //This is for when entering the activity from the wallet menu
             //in which case we ask the user to enter their password for validation
             validPassword = passwordString
+
         }
         val changePassphrase = param?.get("changepassphrase").toString().toBoolean()
         val noNext = param?.get("noNext").toString().toBoolean()
@@ -58,6 +64,7 @@ class PinPrompt : AppCompatActivity() {
         } else {
             nextButton.text = getString(R.string.action_next)
         }
+
 
         nextButton.setOnClickListener {
             if (!currentPasswordValidated) {

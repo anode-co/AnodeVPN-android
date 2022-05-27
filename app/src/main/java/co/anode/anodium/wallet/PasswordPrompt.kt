@@ -1,5 +1,6 @@
 package co.anode.anodium.wallet
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -13,19 +14,19 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 
 class PasswordPrompt : AppCompatActivity() {
+    private val LOGTAG = "co.anode.anodium"
     private lateinit var apiController: APIController
     private var currentPasswordValidated = true
     private var currentPassword = ""
     private var changePassphrase = false
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_password_prompt)
@@ -35,8 +36,11 @@ class PasswordPrompt : AppCompatActivity() {
         val param = intent.extras
         changePassphrase = param?.get("changepassphrase").toString().toBoolean()
         var walletName = ""
-        if (param?.get("walletName").toString() != "null")
+        if (param?.get("walletName").toString() != "null") {
             walletName = param?.get("walletName").toString()
+            val topLabel = findViewById<TextView>(R.id.passwordprompt_top_label)
+            topLabel.text = getString(R.string.password_prompt_label_password)+"\n$walletName"
+        }
         val noWallet = param?.get("noWallet").toString().toBoolean()
         val service = ServiceVolley()
         apiController = APIController(service)
