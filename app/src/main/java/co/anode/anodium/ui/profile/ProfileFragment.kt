@@ -2,8 +2,11 @@ package co.anode.anodium.ui.profile
 
 import android.content.*
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
+import android.text.method.KeyListener
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +16,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
@@ -272,8 +276,25 @@ class ProfileFragment : Fragment() {
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
         input.layoutParams = lp
         builder.setView(input)
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        input.keyListener = DigitsKeyListener.getInstance("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")
+        input.inputType = InputType.TYPE_TEXT_VARIATION_FILTER
+        input.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //nothing
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                //nothing
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val regex = "([a-zA-Z0-9]*)".toRegex()
+                if (!regex.matches(s.toString())) {
+                    input.error = "Name should only contain alphanumeric."
+                } else {
+                    input.error = null
+                }
+            }
+        })
         builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss()
         }
@@ -315,7 +336,24 @@ class ProfileFragment : Fragment() {
         input.layoutParams = lp
         builder.setView(input)
         input.inputType = InputType.TYPE_CLASS_TEXT
-        input.keyListener = DigitsKeyListener.getInstance("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")
+        input.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //nothing
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                //nothing
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val regex = "([a-zA-Z0-9]*)".toRegex()
+                if (!regex.matches(s.toString())) {
+                    input.error = "Name contains only alphanumeric."
+                } else {
+                    input.error = null
+                }
+            }
+        })
         builder.setPositiveButton("Cancel") { dialog, _ ->
             dialog.dismiss()
         }
