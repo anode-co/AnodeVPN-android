@@ -60,7 +60,7 @@ class RecoverySeed : AppCompatActivity() {
             keyboard.hideSoftInputFromWindow(window.decorView.rootView.windowToken, 0)
             val seedInputText = findViewById<EditText>(R.id.input_seed)
             //Check for seed length
-            val seedWords = seedInputText.text.split(" ")
+            val seedWords = seedInputText.text.trim().split(" ")
             if (seedWords.size != 15) {
                 seedInputText.error = getString(R.string.wallet_seed_length_msg)
             } else {
