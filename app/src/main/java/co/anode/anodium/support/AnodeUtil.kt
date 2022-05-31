@@ -794,7 +794,7 @@ object AnodeUtil {
         walletBalance = balance
     }
 
-    fun cleatWalletCache() {
+    fun clearWalletCache() {
         walletTransactions = JSONArray()
         walletBalance = ""
         walletAddress = ""
