@@ -37,9 +37,9 @@ import java.util.concurrent.Executors
 
 class VPNFragment : Fragment() {
     private val LOGTAG = "co.anode.anodium"
-    private val buttonStateDisconnected = 0
-    private val buttonStateConnecting = 1
-    private val buttonStateConnected = 2
+    val buttonStateDisconnected = 0
+    val buttonStateConnecting = 1
+    val buttonStateConnected = 2
     private var mainMenu: Menu? = null
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
@@ -67,7 +67,6 @@ class VPNFragment : Fragment() {
         AnodeClient.statustv = root.findViewById(R.id.textview_status)
         AnodeClient.vpnFragment = this
         val buttonConnectVPNs = root.findViewById<ToggleButton>(R.id.buttonconnectvpns)
-        AnodeClient.connectButton = buttonConnectVPNs
 
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
         val minClickInterval: Long = 1000
@@ -269,6 +268,7 @@ class VPNFragment : Fragment() {
         val buttonconnectvpns = root.findViewById<ToggleButton>(R.id.buttonconnectvpns)
         when(state) {
             buttonStateDisconnected -> {
+                buttonconnectvpns.isChecked = false
                 AnodeClient.eventLog("Main button status DISCONNECTING")
                 h.removeCallbacks(VpnConnectionWaitingDialog)
                 //Status bar
@@ -291,7 +291,7 @@ class VPNFragment : Fragment() {
                 h.removeCallbacks(VpnConnectionWaitingDialog)
                 status.text = ""
                 buttonconnectvpns.alpha = 1.0f
-                AnodeClient.connectButton.isChecked = true
+                buttonconnectvpns.isChecked = true
                 status.text = resources.getString(R.string.status_connected)
             }
         }
