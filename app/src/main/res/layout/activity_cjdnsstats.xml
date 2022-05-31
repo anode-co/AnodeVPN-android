@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,296 +7,304 @@
     android:layout_height="match_parent"
     android:id="@+id/activity_debug"
     tools:context=".CjdnsStatsActivity">
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:id="@+id/label_AppVersion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="30dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="App Version: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <TextView
-            android:id="@+id/text_AppVersion"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@+id/label_AppVersion"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/label_AppVersion"/>
+        android:layout_height="match_parent"
+        android:id="@+id/cjdns_stats_data">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/label_AppVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="30dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="App Version: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/text_AppVersion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@+id/label_AppVersion"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/label_AppVersion"/>
 
-        <TextView
-            android:id="@+id/label_ipv4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="IPv4: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_AppVersion" />
-        <TextView
-            android:id="@+id/text_ipv4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintTop_toTopOf="@id/label_ipv4"
-            app:layout_constraintStart_toEndOf="@+id/label_ipv4" />
-        <TextView
-            android:id="@+id/label_internetipv6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Internet IPv6: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_ipv4" />
-        <TextView
-            android:id="@+id/text_internetipv6"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@+id/label_internetipv6"
-            app:layout_constraintTop_toTopOf="@+id/label_internetipv6"/>
+            <TextView
+                android:id="@+id/label_ipv4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="IPv4: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_AppVersion" />
+            <TextView
+                android:id="@+id/text_ipv4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintTop_toTopOf="@id/label_ipv4"
+                app:layout_constraintStart_toEndOf="@+id/label_ipv4" />
+            <TextView
+                android:id="@+id/label_internetipv6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Internet IPv6: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_ipv4" />
+            <TextView
+                android:id="@+id/text_internetipv6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@+id/label_internetipv6"
+                app:layout_constraintTop_toTopOf="@+id/label_internetipv6"/>
 
-        <TextView
-            android:id="@+id/label_cjdnsipv6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="cjdns IPv6: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_internetipv6" />
-        <TextView
-            android:id="@+id/text_cjdnsipv6"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_cjdnsipv6"
-            app:layout_constraintTop_toTopOf="@id/label_cjdnsipv6" />
-        <TextView
-            android:id="@+id/label_pubkey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Public Key: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_cjdnsipv6" />
-        <TextView
-            android:id="@+id/text_pubkey"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_pubkey"
-            app:layout_constraintTop_toTopOf="@id/label_pubkey" />
-        <TextView
-            android:id="@+id/label_nodes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Node map "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_pubkey" />
-        <TextView
-            android:id="@+id/text_nodes"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_nodes"
-            app:layout_constraintTop_toTopOf="@id/label_nodes" />
-        <TextView
-            android:id="@+id/label_username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Username: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_nodes" />
-        <TextView
-            android:id="@+id/text_username"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_username"
-            app:layout_constraintTop_toTopOf="@id/label_username" />
-        <TextView
-            android:id="@+id/label_node"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="VPN exit key: "
-            android:textIsSelectable="true"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_username" />
-        <TextView
-            android:id="@+id/text_node"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_node"
-            app:layout_constraintTop_toTopOf="@id/label_node" />
-        <TextView
-            android:id="@+id/label_publicIP"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Public IP: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_node" />
-        <TextView
-            android:id="@+id/text_publicIP"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_publicIP"
-            app:layout_constraintTop_toTopOf="@id/label_publicIP" />
-        <TextView
-            android:id="@+id/label_peerstats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Peer stats: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_publicIP" />
-        <TextView
-            android:id="@+id/text_peerstats"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_peerstats"
-            app:layout_constraintTop_toTopOf="@id/label_peerstats" />
-        <TextView
-            android:id="@+id/label_listconnections"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Connections: "
-            android:textIsSelectable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_peerstats" />
-        <TextView
-            android:id="@+id/text_listconnections"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toEndOf="@id/label_listconnections"
-            app:layout_constraintTop_toTopOf="@id/label_listconnections" />
-        <TextView
-            android:id="@+id/text_rpc"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/label_listconnections"/>
-        <TextView
-            android:id="@+id/label_errorfiles"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:text="Error files:"
-            app:layout_constraintStart_toStartOf="@id/label_listconnections"
-            app:layout_constraintTop_toBottomOf="@id/text_rpc" />
-        <TextView
-            android:id="@+id/text_errorfiles"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textIsSelectable="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="20dp"
-            android:layout_marginStart="20dp"
-            app:layout_constraintStart_toEndOf="@+id/label_errorfiles"
-            app:layout_constraintBottom_toBottomOf="@+id/label_errorfiles"/>
+            <TextView
+                android:id="@+id/label_cjdnsipv6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="cjdns IPv6: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_internetipv6" />
+            <TextView
+                android:id="@+id/text_cjdnsipv6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_cjdnsipv6"
+                app:layout_constraintTop_toTopOf="@id/label_cjdnsipv6" />
+            <TextView
+                android:id="@+id/label_pubkey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Public Key: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_cjdnsipv6" />
+            <TextView
+                android:id="@+id/text_pubkey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_pubkey"
+                app:layout_constraintTop_toTopOf="@id/label_pubkey" />
+            <TextView
+                android:id="@+id/label_nodes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Node map "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_pubkey" />
+            <TextView
+                android:id="@+id/text_nodes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_nodes"
+                app:layout_constraintTop_toTopOf="@id/label_nodes" />
+            <TextView
+                android:id="@+id/label_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Username: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_nodes" />
+            <TextView
+                android:id="@+id/text_username"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_username"
+                app:layout_constraintTop_toTopOf="@id/label_username" />
+            <TextView
+                android:id="@+id/label_node"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="VPN exit key: "
+                android:textIsSelectable="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_username" />
+            <TextView
+                android:id="@+id/text_node"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_node"
+                app:layout_constraintTop_toTopOf="@id/label_node" />
+            <TextView
+                android:id="@+id/label_publicIP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Public IP: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_node" />
+            <TextView
+                android:id="@+id/text_publicIP"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_publicIP"
+                app:layout_constraintTop_toTopOf="@id/label_publicIP" />
+            <TextView
+                android:id="@+id/label_peerstats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Peer stats: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_publicIP" />
+            <TextView
+                android:id="@+id/text_peerstats"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_peerstats"
+                app:layout_constraintTop_toTopOf="@id/label_peerstats" />
+            <TextView
+                android:id="@+id/label_listconnections"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Connections: "
+                android:textIsSelectable="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_peerstats" />
+            <TextView
+                android:id="@+id/text_listconnections"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toEndOf="@id/label_listconnections"
+                app:layout_constraintTop_toTopOf="@id/label_listconnections" />
+            <TextView
+                android:id="@+id/text_rpc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/label_listconnections"/>
+            <TextView
+                android:id="@+id/label_errorfiles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:text="Error files:"
+                app:layout_constraintStart_toStartOf="@id/label_listconnections"
+                app:layout_constraintTop_toBottomOf="@id/text_rpc" />
+            <TextView
+                android:id="@+id/text_errorfiles"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="20dp"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toEndOf="@+id/label_errorfiles"
+                app:layout_constraintBottom_toBottomOf="@+id/label_errorfiles"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_margin="20dp">
         <Button
             android:id="@+id/button_SubmitLogs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
             android:text="Submit logs"
             android:textColor="#C9DDE9"
-            android:background="@drawable/buttonshape"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_errorfiles"/>
+            android:background="@drawable/buttonshape" />
         <Button
             android:id="@+id/button_Deleteaccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
             android:text="Delete account"
             android:textColor="#C9DDE9"
-            android:background="@drawable/buttonshape"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/button_SubmitLogs"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+            android:background="@drawable/buttonshape" />
+    </LinearLayout>
+</RelativeLayout>
+
