@@ -48,6 +48,7 @@
         android:padding="20dp"
         android:background="@color/colorPrimary"
         android:textColor="#FFF"
+        android:textSize="14sp"
         android:textIsSelectable="true"
         android:text=""/>
     <Button
