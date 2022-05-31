@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
-import android.text.method.DigitsKeyListener
-import android.text.method.KeyListener
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,7 +14,6 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
@@ -152,7 +149,7 @@ class ProfileFragment : Fragment() {
                     disconnectVPN()
                     //close cjdns
                     AnodeUtil.stopCjdns()
-                    AnodeUtil.cleatWalletCache()
+                    AnodeUtil.clearWalletCache()
                     AnodeUtil.deleteWalletChainBackupFile()
                     //restart pld
                     AnodeUtil.stopPld()
@@ -271,7 +268,7 @@ class ProfileFragment : Fragment() {
         } else {
             builder.setMessage("Edit $activeWallet")
         }
-
+        val existingWallets = AnodeUtil.getWalletFiles()
         val input = EditText(requireContext())
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
         input.layoutParams = lp
@@ -290,6 +287,8 @@ class ProfileFragment : Fragment() {
                 val regex = "([a-zA-Z0-9]*)".toRegex()
                 if (!regex.matches(s.toString())) {
                     input.error = "Name should only contain alphanumeric."
+                } else if (existingWallets.contains(s.toString())) {
+                    input.error = "Name already exists"
                 } else {
                     input.error = null
                 }
@@ -300,8 +299,6 @@ class ProfileFragment : Fragment() {
         }
         builder.setPositiveButton("Next") { dialog, _ ->
             val walletName = input.text.toString()
-            //TODO: check if walletName is valid and does not already exist
-
             if (addWallet) {
                 //restart pld
                 AnodeUtil.stopPld()
@@ -309,6 +306,7 @@ class ProfileFragment : Fragment() {
                 passwordActivity.putExtra("walletName", walletName)
                 startActivity(passwordActivity)
             } else {
+                AnodeUtil.renameEncryptedWalletPreferences(activeWallet,walletName)
                 renameWallet(walletName)
                 //restart pld
                 AnodeUtil.stopPld()
@@ -361,6 +359,8 @@ class ProfileFragment : Fragment() {
             var inputWallet = input.text.toString()
             inputWallet = inputWallet.removeSuffix(".db")
             if (inputWallet == activeWallet) {
+                //Delete saved pin/password
+                AnodeUtil.removeEncryptedWalletPreferences(inputWallet)
                 //Delete Wallet
                 AnodeUtil.deleteWallet(inputWallet)
                 Toast.makeText(requireContext(), "Wallet $activeWallet has been deleted.", Toast.LENGTH_LONG).show()
