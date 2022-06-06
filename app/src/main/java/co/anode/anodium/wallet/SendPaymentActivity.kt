@@ -1,8 +1,8 @@
 package co.anode.anodium.wallet
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -115,7 +115,13 @@ class SendPaymentActivity : AppCompatActivity() {
             } else {
                 password = passwordField.text.toString()
             }
-            validateWalletPassphraseAndSendCoins(password, address.text.toString(), amount.text.toString().toFloat())
+            val minClickInterval: Long = 1000
+            var mLastClickTime: Long = 0
+            //avoid accidental double clicks
+            if (SystemClock.elapsedRealtime() - mLastClickTime > minClickInterval) {
+                mLastClickTime = SystemClock.elapsedRealtime()
+                validateWalletPassphraseAndSendCoins(password, address.text.toString(), amount.text.toString().toFloat())
+            }
         }
     }
 
