@@ -110,7 +110,7 @@
     <string name="title_activity_wallet">MainActivity</string>
 
     <!--Wallet Status messages-->
-    <string name="wallet_status_disconnected">Waiting for wallet startup</string>
+    <string name="wallet_status_disconnected">Connecting to peers</string>
     <string name="wallet_status_syncing_headers">Downloading:</string>
     <string name="wallet_status_syncing_transactions">Scanning:</string>
     <string name="wallet_status_synced">Block: </string>
