@@ -237,8 +237,8 @@ class WalletFragment : Fragment() {
                         bTimestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").parse(timestamp).time
                     }
                     if (neutrino.has("peers")) {
-                        neutrinoPeers = neutrino.length()
                         val peers = neutrino.getJSONArray("peers")
+                        neutrinoPeers = peers.length()
                         for (i in 0 until peers.length()) {
                             if (peers.getJSONObject(0).getInt("lastBlock") > 0) {
                                 val tempTop = peers.getJSONObject(0).getInt("lastBlock")
