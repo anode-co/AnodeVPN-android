@@ -7,4 +7,8 @@
     <color name="colorlightGrey">#AAAAAA</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="colorDarkPrimaryBackground">#141528</color>
+    <color name="colorDarkPrimaryText">#EAF7FA</color>
+    <color name="colorDarkPrimaryButton">#4BA7C4</color>
+    <color name="colorDarkSecondaryButton">#0B7BD0</color>
 </resources>
