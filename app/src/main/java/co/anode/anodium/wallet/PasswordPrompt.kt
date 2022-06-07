@@ -16,6 +16,7 @@ import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 
@@ -42,6 +43,7 @@ class PasswordPrompt : AppCompatActivity() {
             topLabel.text = getString(R.string.password_prompt_label_password)+"\n$walletName"
         }
         val noWallet = param?.get("noWallet").toString().toBoolean()
+        val recoverWallet = param?.get("recoverWallet").toString().toBoolean()
         val service = ServiceVolley()
         apiController = APIController(service)
         val nextButton = findViewById<Button>(R.id.button_passwordprompt_next)
@@ -54,6 +56,15 @@ class PasswordPrompt : AppCompatActivity() {
             currentPasswordValidated = true
             nextButton.text = getString(R.string.action_next)
             actionbar.title = getString(R.string.wallet_create_title)
+            val mStepsView = findViewById<StepsView>(R.id.stepsView)
+            mStepsView.visibility = View.VISIBLE
+            mStepsView.setLabels(arrayOf("Password","PIN","Seed"))
+                .setBarColorIndicator(resources.getColor(R.color.colorlightGrey))
+                .setProgressColorIndicator(resources.getColor(R.color.colorPrimary))
+                .setLabelColorIndicator(resources.getColor(R.color.colorPrimary))
+                .setCompletedPosition(0)
+                .drawView()
+
         }
 
         if(noWallet) {
@@ -80,7 +91,7 @@ class PasswordPrompt : AppCompatActivity() {
                 if (changePassphrase) {
                     changePassphrase(currentPassword, password.text.toString())
                 } else {
-                    loadPinPrompt(password.text.toString(), noNext = false, walletName)
+                    loadPinPrompt(password.text.toString(), noNext = false, walletName, recoverWallet)
                 }
             } else {
                 confirmPassLayout.error = getString(R.string.passwords_not_match)
@@ -101,12 +112,13 @@ class PasswordPrompt : AppCompatActivity() {
         return true
     }
 
-    private fun loadPinPrompt(password: String, noNext: Boolean, newWallet: String) {
+    private fun loadPinPrompt(password: String, noNext: Boolean, newWallet: String, recover: Boolean) {
         //Go to PIN prompt activity and pass it the password
         val pinPromptActivity = Intent(applicationContext, PinPrompt::class.java)
         pinPromptActivity.putExtra("password", password)
         pinPromptActivity.putExtra("noNext", noNext)
         pinPromptActivity.putExtra("walletName", newWallet)
+        pinPromptActivity.putExtra("recoverWallet", recover)
         startActivity(pinPromptActivity)
     }
 
@@ -170,7 +182,7 @@ class PasswordPrompt : AppCompatActivity() {
                 prefs.edit().remove("encrypted_wallet_password")
                 Toast.makeText(this, "Wallet password changed!", Toast.LENGTH_LONG).show()
                 if (!changePassphrase) {
-                    loadPinPrompt(newPassword, noNext = true, "")
+                    loadPinPrompt(newPassword, noNext = true, "", recover = false)
                 }
                 delayedFinish.start()
             }

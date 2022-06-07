@@ -95,6 +95,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     compileOnly 'com.google.api.grpc:googleapis-common-protos:0.0.3'
     implementation 'com.android.volley:volley:1.2.1'
+    compileOnly 'com.anton46:stepsview:0.0.2'
+    implementation 'com.anton46:stepsview:0.0.2'
 }
 repositories {
     mavenCentral()

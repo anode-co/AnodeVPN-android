@@ -3,6 +3,7 @@ package co.anode.anodium.wallet
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -16,9 +17,11 @@ import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.random.Random
 
 class RecoverySeed : AppCompatActivity() {
     private lateinit var statusbar: TextView
@@ -33,6 +36,7 @@ class RecoverySeed : AppCompatActivity() {
         AnodeClient.eventLog("Activity: PinPrompt created")
         val param = intent.extras
         val passwordString = param?.get("password").toString()
+        val recoverWallet = param?.get("recoverWallet").toString().toBoolean()
         var walletName = "wallet"
         if (param?.get("walletName").toString() != "null")
             walletName = param?.get("walletName").toString()
@@ -43,13 +47,39 @@ class RecoverySeed : AppCompatActivity() {
         //Initialize Volley Service
         val service = ServiceVolley()
         apiController = APIController(service)
-        //Prompt user for existing seed
-        recoveryPrompt()
+
         val createButton = findViewById<Button>(R.id.button_wallet_create)
         createButton.setOnClickListener {
             val seedString = findViewById<TextView>(R.id.seed_column).text.toString()
             val seedArray = JSONArray(seedString.split(" "))
-            createWallet(passwordString,seedArray, walletName)
+            if (createButton.text.equals("Next")) {
+                //Ask to confirm seed
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.EditWalletAlertDialog)
+                builder.setTitle("Confirm Seed Phrase")
+                val num = Random.nextInt(2, 15)
+                builder.setMessage("Please write below the "+num+"th word of your seed phrase.")
+                val input = EditText(this)
+                val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+                input.layoutParams = lp
+                builder.setView(input)
+                input.inputType = InputType.TYPE_CLASS_TEXT
+
+                builder.setPositiveButton("Confirm") { dialog, _ ->
+                    val seedWord = input.text.toString()
+                    if (seedWord == seedArray.getString(num - 1)) {
+                        createButton.text = "Create Wallet"
+                    } else {
+                        Toast.makeText(this, "You need to confirm your seed word before continuing.", Toast.LENGTH_LONG).show()
+                    }
+                }
+                builder.setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                val alert: AlertDialog = builder.create()
+                alert.show()
+            } else {
+                createWallet(passwordString,seedArray, walletName)
+            }
         }
 
         val recoverButton = findViewById<Button>(R.id.button_wallet_recover_from_seed)
@@ -83,6 +113,18 @@ class RecoverySeed : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
         }
+        initLayout(recoverWallet)
+        if (!recoverWallet) {
+            generateSeed()
+        }
+        val mStepsView = findViewById<StepsView>(R.id.stepsView)
+        mStepsView.visibility = View.VISIBLE
+        mStepsView.setLabels(arrayOf("Password","PIN","Seed"))
+            .setBarColorIndicator(resources.getColor(R.color.colorlightGrey))
+            .setProgressColorIndicator(resources.getColor(R.color.colorPrimary))
+            .setLabelColorIndicator(resources.getColor(R.color.colorPrimary))
+            .setCompletedPosition(2)
+            .drawView()
     }
 
     private fun confirmWalletLayout(isRecovery: Boolean) {
@@ -112,6 +154,7 @@ class RecoverySeed : AppCompatActivity() {
         val createButton = findViewById<Button>(R.id.button_wallet_create)
         val closeButton = findViewById<Button>(R.id.button_wallet_close)
         closeButton.visibility = View.GONE
+        createButton.text = "Next"
         if (recovery) {
             recoveryLayout.visibility = View.VISIBLE
             recoverButton.visibility = View.VISIBLE
@@ -125,20 +168,20 @@ class RecoverySeed : AppCompatActivity() {
         }
     }
 
-    private fun recoveryPrompt() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Creating PKT wallet")
-        builder.setMessage("Do you have an existing PKTwallet seed you want to use?")
-        builder.setNegativeButton("No") { _, _ ->
-            initLayout(false)
-            generateSeed()
-        }
-        builder.setPositiveButton("Yes") { _, _ ->
-            initLayout(true)
-        }
-        val alert: AlertDialog = builder.create()
-        alert.show()
-    }
+//    private fun recoveryPrompt() {
+//        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+//        builder.setTitle("Creating PKT wallet")
+//        builder.setMessage("Do you have an existing PKTwallet seed you want to use?")
+//        builder.setNegativeButton("No") { _, _ ->
+//            initLayout(false)
+//            generateSeed()
+//        }
+//        builder.setPositiveButton("Yes") { _, _ ->
+//            initLayout(true)
+//        }
+//        val alert: AlertDialog = builder.create()
+//        alert.show()
+//    }
 
     private fun generateSeed() {
         AnodeClient.eventLog("Button: Create PKT wallet clicked")

@@ -165,13 +165,13 @@
     <!-- Wallet password prompt-->
     <string name="password_prompt_title">Set wallet password</string>
     <string name="password_prompt_label_password">Enter your wallet password</string>
-    <string name="passwords_not_match">Passwords do not match. Please try again.</string>
+    <string name="passwords_not_match">Passwords do not match.</string>
     <!-- Wallet PIN prompt-->
     <string name="pin_prompt_title">Set wallet PIN</string>
     <string name="prompt_label_pin">Use a PIN\nfor easier access</string>
     <string name="prompt_newpin">new pin</string>
     <string name="prompt_confirmpin">confirm pin</string>
-    <string name="pins_not_match">Pins do not match. Please try again.</string>
+    <string name="pins_not_match">Pins do not match.</string>
     <!-- Send PKT -->
     <string name="wallet_password_validating">Validating your password.</string>
     <string name="wallet_sending_coins">Sending PKT cash…</string>

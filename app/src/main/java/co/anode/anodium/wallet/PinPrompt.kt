@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.InputType
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import co.anode.anodium.R
@@ -15,6 +16,7 @@ import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 
@@ -33,6 +35,7 @@ class PinPrompt : AppCompatActivity() {
         val param = intent.extras
         //Getting password from password prompt
         val passwordString = param?.getString("password")
+        val recoverWallet = param?.get("recoverWallet").toString().toBoolean()
         var walletName = ""
         if (param?.get("walletName").toString() != "null") {
             walletName = param?.get("walletName").toString()
@@ -63,6 +66,14 @@ class PinPrompt : AppCompatActivity() {
             nextButton.text = getString(R.string.button_wallet_update_pin)
         } else {
             nextButton.text = getString(R.string.action_next)
+            val mStepsView = findViewById<StepsView>(R.id.stepsView)
+            mStepsView.visibility = View.VISIBLE
+            mStepsView.setLabels(arrayOf("Password","PIN","Seed"))
+                .setBarColorIndicator(resources.getColor(R.color.colorlightGrey))
+                .setProgressColorIndicator(resources.getColor(R.color.colorPrimary))
+                .setLabelColorIndicator(resources.getColor(R.color.colorPrimary))
+                .setCompletedPosition(1)
+                .drawView()
         }
 
 
@@ -91,6 +102,7 @@ class PinPrompt : AppCompatActivity() {
                         val recoveryActivity = Intent(applicationContext, RecoverySeed::class.java)
                         recoveryActivity.putExtra("password", passwordString)
                         recoveryActivity.putExtra("walletName", walletName)
+                        recoveryActivity.putExtra("recoverWallet", recoverWallet)
                         startActivity(recoveryActivity)
                     }
                 } else {
