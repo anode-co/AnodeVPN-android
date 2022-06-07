@@ -53,6 +53,11 @@ class VPNFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        AnodeClient.vpnFragment = this
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,7 +70,7 @@ class VPNFragment : Fragment() {
         root = binding.root
         mycontext = requireContext()
         AnodeClient.statustv = root.findViewById(R.id.textview_status)
-        AnodeClient.vpnFragment = this
+
         val buttonConnectVPNs = root.findViewById<ToggleButton>(R.id.buttonconnectvpns)
 
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
