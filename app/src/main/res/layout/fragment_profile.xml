@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.profile.ProfileFragment"
-    android:background="@color/colorPrimarybackground">
+    android:theme="@style/AppTheme">
         <include layout="@layout/statusbar"/>
         <TextView
             android:id="@+id/label_wallets"

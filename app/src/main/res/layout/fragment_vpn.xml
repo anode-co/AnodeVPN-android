@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorPrimarybackground"
-    tools:context=".ui.vpn.VPNFragment">
+    tools:context=".ui.vpn.VPNFragment"
+    android:id="@+id/fragment_vpn">
     <include layout="@layout/statusbar"/>
     <ImageView
         android:layout_width="match_parent"

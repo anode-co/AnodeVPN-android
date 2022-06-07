@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/fragment_wallet"
-    android:fitsSystemWindows="true"
-    android:background="@color/colorPrimarybackground">
+    android:fitsSystemWindows="true">
     <include layout="@layout/statusbar"/>
     <LinearLayout
         android:id="@+id/walletBalanceLayout"
