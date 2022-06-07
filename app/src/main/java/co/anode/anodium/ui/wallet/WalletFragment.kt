@@ -27,10 +27,7 @@ import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
-import co.anode.anodium.wallet.PasswordPrompt
-import co.anode.anodium.wallet.SendPaymentActivity
-import co.anode.anodium.wallet.TransactionDetailsFragment
-import co.anode.anodium.wallet.TransactionHistoryActivity
+import co.anode.anodium.wallet.*
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONArray
 import org.json.JSONObject
@@ -94,14 +91,6 @@ class WalletFragment : Fragment() {
         val fileDir = mycontext.filesDir
 
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-        //On first run show data consent
-        if (prefs.getBoolean("FirstRun", true)) {
-            AboutDialog.show(requireActivity())
-            with(prefs.edit()) {
-                putBoolean("FirstRun", false)
-                commit()
-            }
-        }
 
         activeWallet = prefs.getString("activeWallet","wallet").toString()
 
@@ -162,9 +151,8 @@ class WalletFragment : Fragment() {
         val walletFiles = AnodeUtil.getWalletFiles()
         if (walletFiles.size < 1) {
             Log.i(LOGTAG, "Open password prompt activity, no wallet file found")
-            val passwordActivity = Intent(context, PasswordPrompt::class.java)
-            passwordActivity.putExtra("noWallet", true)
-            startActivity(passwordActivity)
+            val newWalletActivity = Intent(context, NewWalletActivity::class.java)
+            startActivity(newWalletActivity)
         } else if (!activeWalletFile.exists()){
             activeWallet = walletFiles[0]
             Log.i(LOGTAG, "Active wallet file not found, will try to open $activeWallet.")
