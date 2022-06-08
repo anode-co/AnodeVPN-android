@@ -56,6 +56,7 @@ class VPNFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AnodeClient.vpnFragment = this
+        AnodeClient.vpnFragmentInitialized = true
     }
 
     override fun onCreateView(
