@@ -3,14 +3,17 @@ package co.anode.anodium.wallet
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
@@ -18,7 +21,9 @@ import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
+import com.ybs.passwordstrengthmeter.PasswordStrength
 import org.json.JSONObject
+
 
 class PasswordPrompt : AppCompatActivity() {
     private val LOGTAG = "co.anode.anodium"
@@ -74,7 +79,14 @@ class PasswordPrompt : AppCompatActivity() {
         }
 
         val confirmPassLayout = findViewById<TextInputLayout>(R.id.confirmwalletpasswordLayout)
-
+        val password = findViewById<TextView>(R.id.editTextWalletPassword)
+        password.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updatePasswordStrengthView(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
         nextButton.setOnClickListener {
             if (!currentPasswordValidated) {
                 Toast.makeText(this,"Please validate current password first.",Toast.LENGTH_SHORT).show()
@@ -87,7 +99,8 @@ class PasswordPrompt : AppCompatActivity() {
                 val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
                 prefs.edit().remove("encrypted_wallet_password").apply()
                 prefs.edit().remove("wallet_pin").apply()
-                val password = findViewById<TextView>(R.id.editTextWalletPassword)
+
+
                 if (changePassphrase) {
                     changePassphrase(currentPassword, password.text.toString())
                 } else {
@@ -249,6 +262,30 @@ class PasswordPrompt : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private fun updatePasswordStrengthView(password: String) {
+        val progressBar = findViewById<View>(R.id.progressBar) as ProgressBar
+        val strengthView = findViewById<View>(R.id.password_strength) as TextView
+        if (TextView.VISIBLE != strengthView.visibility) return
+        if (password.isEmpty()) {
+            strengthView.text = ""
+            progressBar.progress = 0
+            return
+        }
+        val str = PasswordStrength.calculateStrength(password)
+        strengthView.text = str.getText(this)
+        strengthView.setTextColor(str.color)
+        progressBar.progressDrawable.setColorFilter(str.color, PorterDuff.Mode.SRC_IN)
+        if (str.getText(this) == "Weak") {
+            progressBar.progress = 25
+        } else if (str.getText(this) == "Medium") {
+            progressBar.progress = 50
+        } else if (str.getText(this) == "Strong") {
+            progressBar.progress = 75
+        } else {
+            progressBar.progress = 100
         }
     }
 }
