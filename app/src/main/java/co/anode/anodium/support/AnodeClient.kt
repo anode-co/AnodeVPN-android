@@ -46,6 +46,7 @@ object AnodeClient {
     lateinit var statustv: TextView
     lateinit var mainActivity: AppCompatActivity
     lateinit var vpnFragment: VPNFragment
+    var vpnFragmentInitialized = false
     lateinit var apiController: APIController
     var vpnConnected: Boolean = false
     private const val apiVersion = "0.3"
@@ -593,7 +594,7 @@ object AnodeClient {
         override fun onCancelled() {
             super.onCancelled()
             vpnConnected = false
-            if(vpnFragment.isAdded) {
+            if(vpnFragmentInitialized && vpnFragment.isAdded) {
                 vpnFragment.bigbuttonState(vpnFragment.buttonStateDisconnected)
             }
         }
@@ -604,7 +605,7 @@ object AnodeClient {
             Log.i(LOGTAG,"Received from $API_AUTH_VPN: $result")
             //if 200 or 201 then connect to VPN
             if (result.isNullOrBlank() || result.contains("ERROR: ")) {
-                if(vpnFragment.isAdded) {
+                if(vpnFragmentInitialized && vpnFragment.isAdded) {
                     vpnFragment.bigbuttonState(vpnFragment.buttonStateDisconnected)
                 }
                 statustv.post(Runnable {
@@ -645,7 +646,7 @@ object AnodeClient {
                                 putLong("LastAuthorized", 0)
                                 commit()
                             }
-                            if(vpnFragment.isAdded) {
+                            if(vpnFragmentInitialized && vpnFragment.isAdded) {
                                 vpnFragment.bigbuttonState(vpnFragment.buttonStateConnected)
                             }
                             CjdnsSocket.IpTunnel_removeAllConnections()
@@ -655,7 +656,7 @@ object AnodeClient {
                         }
                     }
                 } catch (e: JSONException) {
-                    if (vpnFragment.isAdded) {
+                    if (vpnFragmentInitialized && vpnFragment.isAdded) {
                         vpnFragment.bigbuttonState(vpnFragment.buttonStateDisconnected)
                     }
                     statustv.post(Runnable {
@@ -693,7 +694,7 @@ object AnodeClient {
             } else {
                 Log.i(LOGTAG,"VPN connection failed")
                 vpnConnected = false
-                if(vpnFragment.isAdded) {
+                if(vpnFragmentInitialized && vpnFragment.isAdded) {
                     vpnFragment.bigbuttonState(vpnFragment.buttonStateConnected)
                 }
                 CjdnsSocket.IpTunnel_removeAllConnections()
@@ -797,7 +798,7 @@ object AnodeClient {
                 CjdnsSocket.Core_stopTun()
                 CjdnsSocket.clearRoutes()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
-                if(vpnFragment.isAdded) {
+                if(vpnFragmentInitialized && vpnFragment.isAdded) {
                     vpnFragment.bigbuttonState(vpnFragment.buttonStateConnected)
                 }
             }
@@ -808,7 +809,7 @@ object AnodeClient {
                 statustv.post(Runnable {
                     statustv.text  = mycontext.resources.getString(R.string.status_connecting)
                 } )
-                if(vpnFragment.isAdded) {
+                if(vpnFragmentInitialized && vpnFragment.isAdded) {
                     vpnFragment.bigbuttonState(vpnFragment.buttonStateConnecting)
                 }
                 //Restart Service
