@@ -1,9 +1,6 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
-        <!--        <item name="android:background">@color/colorDarkPrimaryBackground</item>
-                <item name="android:textColor">@color/colorDarkPrimaryText</item>-->
-<!--        <item name="android:background">@color/colorPrimarybackground</item>-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:textColor">@color/colorPrimaryDarkText</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionBarStyle">@style/MyActionBarStyle</item>
@@ -11,21 +8,8 @@
         <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
         <item name="android:fontFamily">@font/lato</item>
         <item name="android:textAllCaps">false</item>
-        <!--        <item name="textInputStyle">@style/MyTextInputStyle</item>
-                <item name="editTextStyle">@style/MyEditTextStyle</item>-->
     </style>
-    <!--    <style name="MyTextInputStyle" parent="Widget.Design.TextInputLayout">
-            <item name="android:textColorHint">#4BA7C4</item>
-            <item name="passwordToggleTint">#4BA7C4</item>
-            <item name="android:text">@color/colorDarkPrimaryText</item>
-        </style>
-        <style name="MyEditTextStyle" parent="Widget.AppCompat.EditText">
-            <item name="android:textColorHint">#4BA7C4</item>
-            <item name="passwordToggleTint">#4BA7C4</item>
-            <item name="android:textCheckMark">@color/colorDarkPrimaryText</item>
-        </style>-->
     <style name="AppTheme.NoActionBar">
-        <item name="android:background">@color/colorPrimarybackground</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowActionBarOverlay">true</item>
@@ -34,13 +18,12 @@
     <style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="color">@color/colorPrimaryDarkText</item>
     </style>
-    <style name="MyActionBarStyle"  parent="Theme.AppCompat.DayNight">
+    <style name="MyActionBarStyle"  parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/colorPrimaryDarkText</item>
         <item name="android:background">@color/colorPrimarybackground</item>
-        <item name="android:forceDarkAllowed">false</item>
     </style>
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar" />
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
     <style name="AlertDialogRedButtonStyle">
         <item name="android:textColor">@android:color/holo_red_light</item>
     </style>

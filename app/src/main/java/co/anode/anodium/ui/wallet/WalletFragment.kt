@@ -211,7 +211,7 @@ class WalletFragment : Fragment() {
                     h.postDelayed(refreshValues, 50)
                 }
                 val layout = root.findViewById<ConstraintLayout>(R.id.fragment_wallet)
-                activity?.let { layout.setBackgroundColor(it.getColor(android.R.color.white)) }
+                activity?.let { layout.setBackgroundColor(it.getColor(android.R.color.transparent)) }
                 root.findViewById<Button>(R.id.button_sendPayment).isEnabled = true
 
                 if (((System.currentTimeMillis() - refreshPldInterval) > chainSyncLastShown) &&
@@ -459,7 +459,7 @@ class WalletFragment : Fragment() {
                 transactionDetailsFragment.show(parentFragmentManager, "")
                 line.setBackgroundColor(Color.GRAY)
             }
-            line.setBackgroundColor(Color.WHITE)
+            line.setBackgroundColor(mycontext.getColor(android.R.color.transparent))
             line.id = i
             line.tag = "TxLine$i"
             //line.orientation = LinearLayout.HORIZONTAL
@@ -687,12 +687,12 @@ class WalletFragment : Fragment() {
     fun clearLines(lineID: Int) {
         txnDetailsNum = -1
         val l = root.findViewWithTag<ConstraintLayout>("TxLine$lineID")
-        l?.setBackgroundColor(Color.WHITE)
+        l?.setBackgroundColor(mycontext.getColor(android.R.color.transparent))
     }
 
     private fun makeBackgroundWhite(){
         val layout = root.findViewById<ConstraintLayout>(R.id.fragment_wallet)
-        layout.setBackgroundColor(mycontext.getColor(android.R.color.white))
+        layout.setBackgroundColor(mycontext.getColor(android.R.color.transparent))
     }
 
     private fun makeBackgroundGrey() {

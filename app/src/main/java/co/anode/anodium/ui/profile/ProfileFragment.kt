@@ -18,9 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentProfileBinding
-import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.CjdnsSocket
+import co.anode.anodium.support.*
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import co.anode.anodium.wallet.PasswordPrompt
@@ -65,7 +63,7 @@ class ProfileFragment : Fragment() {
         }
         versionTextview.text = "Version: "+ BuildConfig.VERSION_NAME
 
-        val changePasswordButton = root.findViewById<Button>(R.id.button_change_password)
+        val changePasswordButton = root.findViewById<LinearLayout>(R.id.button_change_password)
         changePasswordButton.setOnClickListener {
             Log.i(LOGTAG, "Open PasswordPrompt activity for changing password")
             val promptPasswordActivity = Intent(mycontext, PasswordPrompt::class.java)
@@ -73,23 +71,23 @@ class ProfileFragment : Fragment() {
             promptPasswordActivity.putExtra("walletName", activeWallet)
             startActivity(promptPasswordActivity)
         }
-        val showSeedButton = root.findViewById<Button>(R.id.button_show_seed)
+        val showSeedButton = root.findViewById<LinearLayout>(R.id.button_show_seed)
         showSeedButton.setOnClickListener {
             getWalletSeed(showDialog = true, saveToFile = false)
         }
-        val cjdnsStatsButton = root.findViewById<Button>(R.id.button_cjdns_stats)
+        val cjdnsStatsButton = root.findViewById<LinearLayout>(R.id.button_cjdns_stats)
         cjdnsStatsButton.setOnClickListener {
             Log.i(LOGTAG, "Start cjdns stats (debug) activity")
             startActivity(Intent(mycontext, CjdnsStatsActivity::class.java))
         }
-        val walletStatsButton = root.findViewById<Button>(R.id.button_wallet_stats)
+        val walletStatsButton = root.findViewById<LinearLayout>(R.id.button_wallet_stats)
         walletStatsButton.setOnClickListener {
             Log.i(LOGTAG, "Start wallet stats activity")
             val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
             statsActivity.putExtra("walletName", activeWallet)
             startActivity(statsActivity)
         }
-        val setPinButton = root.findViewById<Button>(R.id.button_set_pin)
+        val setPinButton = root.findViewById<LinearLayout>(R.id.button_set_pin)
         setPinButton.setOnClickListener {
             Log.i(LOGTAG, "Open PasswordPin activity for setting PIN")
             val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
@@ -98,9 +96,13 @@ class ProfileFragment : Fragment() {
             promptPinActivity.putExtra("walletName", activeWallet)
             startActivity(promptPinActivity)
         }
-        val checkUpdateButton = root.findViewById<Button>(R.id.button_check_update)
+        val checkUpdateButton = root.findViewById<LinearLayout>(R.id.button_check_update)
         checkUpdateButton.setOnClickListener {
             AnodeClient.checkNewVersion(true)
+        }
+        val dataConsentButton = root.findViewById<LinearLayout>(R.id.button_data_collection)
+        dataConsentButton.setOnClickListener {
+            AboutDialog.show(requireActivity())
         }
         val addWalletButton = root.findViewById<ImageButton>(R.id.button_add_wallet)
         addWalletButton.setOnClickListener {

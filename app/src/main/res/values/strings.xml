@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Anodium</string>
+    <string name="app_name">Anode VPN</string>
     <!-- Bottom Navigation Main-->
     <string name="navigation_vpn">VPN</string>
     <string name="navigation_wallet">PKT Wallet</string>
@@ -158,6 +158,7 @@
     <string name="button_cjdns_stats">Cjdns stats</string>
     <string name="button_wallet_stats">Wallet stats</string>
     <string name="button_set_pin">Set PIN</string>
+    <string name="button_data_collection">Data collection</string>
     <!-- Wallet menu-->
     <string name="action_wallet_stats">Stats</string>
     <string name="action_wallet_pin">Set PIN</string>
