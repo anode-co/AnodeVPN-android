@@ -97,6 +97,8 @@ dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     compileOnly 'com.anton46:stepsview:0.0.2'
     implementation 'com.anton46:stepsview:0.0.2'
+    compileOnly 'com.github.yesterselga:password-strength-checker-android:v1.0'
+    implementation 'com.github.yesterselga:password-strength-checker-android:v1.0'
 }
 repositories {
     mavenCentral()
