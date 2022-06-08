@@ -24,10 +24,6 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="q">
         <activity
-            android:name=".wallet.ConfirmSeedActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".wallet.NewWalletActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
