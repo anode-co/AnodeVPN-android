@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/colorPrimarybackground"
         android:paddingStart="60dp"
         android:paddingEnd="60dp"
         app:layout_constraintBottom_toTopOf="@+id/buttonCreateNewWallet"
