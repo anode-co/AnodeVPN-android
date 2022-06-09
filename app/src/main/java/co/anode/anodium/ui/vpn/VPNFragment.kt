@@ -1,8 +1,10 @@
 package co.anode.anodium.ui.vpn
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
@@ -24,6 +26,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentVpnBinding
 import co.anode.anodium.support.AnodeClient
@@ -49,15 +52,12 @@ class VPNFragment : Fragment() {
     private var _binding: FragmentVpnBinding? = null
     private lateinit var mycontext: Context
     private lateinit var root: View
+    private val VPN_CONNECTED = IntentFilter("co.anode.anodium.action.VPN.Connected")
+    private val VPN_DISCONNECTED = IntentFilter("co.anode.anodium.action.VPN.Disonnected")
+    private val VPN_CONNECTING = IntentFilter("co.anode.anodium.action.VPN.Connecting")
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        AnodeClient.vpnFragment = this
-        AnodeClient.vpnFragmentInitialized = true
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -299,6 +299,32 @@ class VPNFragment : Fragment() {
                 buttonconnectvpns.alpha = 1.0f
                 buttonconnectvpns.isChecked = true
                 status.text = resources.getString(R.string.status_connected)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(vpnStatusReceiver, IntentFilter(VPN_CONNECTED))
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(vpnStatusReceiver, IntentFilter(VPN_CONNECTING))
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(vpnStatusReceiver, IntentFilter(VPN_DISCONNECTED))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(requireContext())
+            .unregisterReceiver(vpnStatusReceiver)
+    }
+
+    private val vpnStatusReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.action) {
+                VPN_CONNECTED.getAction(0) -> bigbuttonState(buttonStateConnected)
+                VPN_DISCONNECTED.getAction(0) -> bigbuttonState(buttonStateDisconnected)
+                VPN_CONNECTING.getAction(0) -> bigbuttonState(buttonStateConnecting)
             }
         }
     }
