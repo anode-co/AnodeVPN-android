@@ -127,7 +127,7 @@ class VPNFragment : Fragment() {
     private fun startBackgroundThreads() {
         //Check internet connectivity & public IP
         Thread({
-            while (true) {
+            while (this.isVisible) {
                 if (!internetConnection() && uiInForeground) {
                     activity?.runOnUiThread {
                         Toast.makeText(mycontext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG).show()
@@ -135,7 +135,7 @@ class VPNFragment : Fragment() {
                 }
                 Thread.sleep(3000)
             }
-        }, "MainActivity.CheckInternetConnectivity").start()
+        }, "VPNFragment.CheckInternetConnectivity").start()
 
         //Get v4 public IP
         Thread({
