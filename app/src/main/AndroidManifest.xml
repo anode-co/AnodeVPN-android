@@ -76,8 +76,8 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".VpnListActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/title_activity_vpn_servers_list" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@color/colorPrimarybackground"
+    android:theme="@style/AppTheme.NoActionBar"
     tools:context="co.anode.anodium.VpnListActivity">
 
     <include layout="@layout/content_vpn_servers_list" />

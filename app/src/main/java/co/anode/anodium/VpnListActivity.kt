@@ -20,13 +20,6 @@ class VpnListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vpn_servers_list)
-        //actionbar
-        val actionbar = supportActionBar
-        //set actionbar title
-        actionbar!!.title = getString(R.string.title_activity_vpn_servers_list)
-        //set back button
-        actionbar.setDisplayHomeAsUpEnabled(true)
-
         AnodeClient.eventLog("Activity: VPN List created")
         val loading = findViewById<ProgressBar>(R.id.loadingAnimation)
         loading.visibility = View.VISIBLE
@@ -92,10 +85,5 @@ class VpnListActivity : AppCompatActivity() {
                 return false
             }
         })
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
     }
 }
