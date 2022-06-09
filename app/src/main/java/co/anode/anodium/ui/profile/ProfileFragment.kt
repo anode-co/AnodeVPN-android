@@ -223,7 +223,7 @@ class ProfileFragment : Fragment() {
                 }
             } else if ((response != null) &&
                     response.has("error") &&
-                    response.getJSONObject("error").getString("message").contains("[LightningServer] is not ready yet")) {
+                    response.getString("error").contains("[LightningServer] is not yet ready")) {
                 Log.e(co.anode.anodium.support.LOGTAG, "Wallet is not unlocked")
                 Toast.makeText(requireContext(), "Wallet is not unlocked.", Toast.LENGTH_LONG).show()
             } else {
