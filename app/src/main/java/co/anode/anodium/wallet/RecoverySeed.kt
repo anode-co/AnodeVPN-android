@@ -115,7 +115,7 @@ class RecoverySeed : AppCompatActivity() {
         }
         initLayout(recoverWallet)
         if (!recoverWallet) {
-            generateSeed()
+            generateSeed(passwordString)
         }
         val mStepsView = findViewById<StepsView>(R.id.stepsView)
         mStepsView.visibility = View.VISIBLE
@@ -184,13 +184,14 @@ class RecoverySeed : AppCompatActivity() {
 //        alert.show()
 //    }
 
-    private fun generateSeed() {
+    private fun generateSeed(password: String) {
         AnodeClient.eventLog("Button: Create PKT wallet clicked")
         Log.i(LOGTAG, "RecoverySeed Activity creating wallet")
         //Set up UI
         statusbar.text = getString(R.string.generating_wallet_seed)
         showLoading()
         val jsonData = JSONObject()
+        jsonData.put("wallet_passphrase", password)
         Log.i(LOGTAG, "generating wallet seed...")
         apiController.post(apiController.createSeedURL, jsonData)
         { response ->

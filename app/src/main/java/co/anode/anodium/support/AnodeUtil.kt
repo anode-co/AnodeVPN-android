@@ -95,6 +95,8 @@ object AnodeUtil {
         if (!lnddir.exists()) {
             lnddir.mkdir()
         }
+        //Copy neutrino.db
+        copyAssets()
     }
 
     fun generateUsername(textview:TextView) {
@@ -805,6 +807,32 @@ object AnodeUtil {
             File("$filesDirectory/pkt/lnd/data/chain/pkt/mainnet/channel.backup").delete()
         }
     }
+
+    fun copyAssets() {
+        val neutrinofile = File("$filesDirectory/pkt/neutrino.db")
+        if (neutrinofile.exists()) {
+            return
+        }
+        val executor = Executors.newSingleThreadExecutor()
+        executor.execute {
+            val `is` = context?.assets?.open("neutrino.db")
+            val os = FileOutputStream(neutrinofile)
+            val buffer = ByteArray(1024)
+            if (`is` != null) {
+                while (`is`.read(buffer) > 0) {
+                    os.write(buffer)
+                    Log.d("#DB", "writing>>")
+                }
+            }
+
+            os.flush()
+            os.close()
+            if (`is` != null) {
+                `is`.close()
+            }
+        }
+    }
+
 }
 
 class AnodeUtilException(message: String): Exception(message)
