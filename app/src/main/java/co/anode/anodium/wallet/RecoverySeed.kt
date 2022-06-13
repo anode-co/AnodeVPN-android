@@ -125,6 +125,7 @@ class RecoverySeed : AppCompatActivity() {
             .setLabelColorIndicator(resources.getColor(R.color.colorPrimary))
             .setCompletedPosition(2)
             .drawView()
+        mStepsView.setBackgroundColor(getColor(R.color.colorPrimarybackground))
     }
 
     private fun confirmWalletLayout(isRecovery: Boolean) {

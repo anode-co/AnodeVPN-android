@@ -69,7 +69,7 @@ class PasswordPrompt : AppCompatActivity() {
                 .setLabelColorIndicator(resources.getColor(R.color.colorPrimary))
                 .setCompletedPosition(0)
                 .drawView()
-
+            mStepsView.setBackgroundColor(getColor(R.color.colorPrimarybackground))
         }
 
         if(noWallet) {

@@ -74,6 +74,7 @@ class PinPrompt : AppCompatActivity() {
                 .setLabelColorIndicator(resources.getColor(R.color.colorPrimary))
                 .setCompletedPosition(1)
                 .drawView()
+            mStepsView.setBackgroundColor(getColor(R.color.colorPrimarybackground))
         }
 
 
