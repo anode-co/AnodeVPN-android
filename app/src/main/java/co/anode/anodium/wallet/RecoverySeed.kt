@@ -67,7 +67,7 @@ class RecoverySeed : AppCompatActivity() {
                 builder.setPositiveButton("Confirm") { dialog, _ ->
                     val seedWord = input.text.toString()
                     if (seedWord == seedArray.getString(num - 1)) {
-                        createButton.text = "Create Wallet"
+                        createWallet(passwordString,seedArray, walletName)
                     } else {
                         Toast.makeText(this, "You need to confirm your seed word before continuing.", Toast.LENGTH_LONG).show()
                     }
@@ -191,7 +191,7 @@ class RecoverySeed : AppCompatActivity() {
         statusbar.text = getString(R.string.generating_wallet_seed)
         showLoading()
         val jsonData = JSONObject()
-        jsonData.put("wallet_passphrase", password)
+        jsonData.put("seed_passphrase", password)
         Log.i(LOGTAG, "generating wallet seed...")
         apiController.post(apiController.createSeedURL, jsonData)
         { response ->
@@ -236,6 +236,7 @@ class RecoverySeed : AppCompatActivity() {
         statusbar.text = getString(R.string.creating_wallet)
         val jsonData = JSONObject()
         jsonData.put("wallet_passphrase", password)
+        jsonData.put("seed_passphrase", password)
         jsonData.put("wallet_seed", seedArray)
         //Default walletName is wallet.db
         jsonData.put("wallet_name", "$walletName.db")
@@ -268,7 +269,7 @@ class RecoverySeed : AppCompatActivity() {
                 } else  if (errorString != null) {
                     Log.e(LOGTAG, errorString)
                     //Get user friendly message
-                    errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
+                    //errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
                     Toast.makeText(this, "Error: $errorString", Toast.LENGTH_LONG).show()
                 }
                 //Reset UI
