@@ -188,7 +188,7 @@
     <string name="wallet_recovery_success">Wallet recovery success!</string>
     <string name="wallet_creation_success">Wallet creation success!</string>
     <string name="seed_wrong_password">Wrong seed password</string>
-    <string name="wallet_create_seed_instructions">You must write down these words and keep them in a safe place. You will need these words if you ever need to recover your wallet.\nYou will only see these words once.</string>
+    <string name="wallet_create_seed_instructions">You must write down these words and keep them in a safe place. You will need these words if you ever need to recover your wallet.</string>
     <string name="wallet_write_seed_label">Enter the 15 word seed phrase separated by spaces below and the seed password if the seed is encrypted.</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_home">Home</string>
