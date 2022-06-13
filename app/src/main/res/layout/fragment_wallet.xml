@@ -40,16 +40,17 @@
         android:layout_marginTop="10dp"/>
     <TextView
         android:id="@+id/walletAddress"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingVertical="20dp"
+        android:paddingStart="10dp"
         app:layout_constraintTop_toBottomOf="@+id/walletAddressLabel"
         app:layout_constraintEnd_toEndOf="parent"
-        android:padding="20dp"
         android:background="@color/colorPrimary"
-        android:textColor="#FFF"
-        android:textSize="14sp"
+        android:textColor="@color/colorDarkPrimaryText"
+        android:textSize="13sp"
         android:textIsSelectable="true"
-        android:text=""/>
+        android:text="pkt1qy4egewsutha4pqxarndfr9w4g3n4rhh47amu5u"/>
     <Button
         android:id="@+id/walletAddressSharebutton"
         android:layout_width="40dp"

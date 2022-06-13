@@ -100,6 +100,7 @@ class WalletFragment : Fragment() {
             AnodeClient.eventLog("Button: Copy wallet address clicked")
             Toast.makeText(context, "address has been copied", Toast.LENGTH_LONG).show()
         }
+        walletAddress.text = getString(R.string.wallet_address_loading)
         val history = root.findViewById<TextView>(R.id.texthistory)
         history.setOnClickListener {
             AnodeClient.eventLog("Button: Older transactions clicked")
@@ -117,7 +118,7 @@ class WalletFragment : Fragment() {
             AnodeClient.eventLog("Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, "This is my PKT wallet address: $myPKTAddress")
+                putExtra(Intent.EXTRA_TEXT, "$myPKTAddress")
                 type = "text/plain"
             }
             val shareIntent = Intent.createChooser(sendIntent, null)
@@ -562,7 +563,11 @@ class WalletFragment : Fragment() {
         root.findViewById<TextView>(R.id.walletBalanceNumber).text = AnodeUtil.getCachedWalletBalance()
         //Address
         myPKTAddress = AnodeUtil.getCachedWalletAddress()
-        root.findViewById<TextView>(R.id.walletAddress).text = myPKTAddress
+        if (myPKTAddress.isEmpty()) {
+            root.findViewById<TextView>(R.id.walletAddress).text = getString(R.string.wallet_address_loading)
+        } else {
+            root.findViewById<TextView>(R.id.walletAddress).text = myPKTAddress
+        }
         //Transactions
         val transactions = AnodeUtil.getCachedWalletTxns()
         makeListofTxns(transactions, transactions.length())
