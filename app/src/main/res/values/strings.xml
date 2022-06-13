@@ -123,7 +123,7 @@
     <string name="generating_wallet_seed">Generating seed phrase…</string>
     <string name="recovering_wallet">Recovering wallet please wait…</string>
 
-
+    <string name="wallet_address_loading">loading address…</string>
     <string name="wallet_seed_length_msg">Seed must be 15 words.</string>
     <!-- About dialog box -->
     <string name="about_description">AnodiumVPN is an application that provides VPN connections using CJDNS while also using PKT to pay for faster VPN connection speed.</string>
@@ -170,7 +170,8 @@
     <!-- Wallet PIN prompt-->
     <string name="pin_prompt_title">Set wallet PIN</string>
     <string name="prompt_label_pin">Use a PIN\nfor easier access</string>
-    <string name="prompt_newpin">new pin</string>
+    <string name="prompt_newpin">new PIN</string>
+    <string name="prompt_pin">PIN</string>
     <string name="prompt_confirmpin">confirm pin</string>
     <string name="pins_not_match">Pins do not match.</string>
     <!-- Send PKT -->
