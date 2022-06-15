@@ -70,8 +70,9 @@ object AnodeClient {
     var lastpostmessage: Long = 0
     val h = Handler()
     private val VPN_CONNECTED = Intent("co.anode.anodium.action.VPN.Connected")
-    private val VPN_DISCONNECTED = Intent("co.anode.anodium.action.VPN.Disonnected")
+    private val VPN_DISCONNECTED = Intent("co.anode.anodium.action.VPN.Disconnected")
     private val VPN_CONNECTING = Intent("co.anode.anodium.action.VPN.Connecting")
+    private val defaultNode = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
 
     fun init(context: Context, activity: AppCompatActivity)  {
         mycontext = context
@@ -624,7 +625,7 @@ object AnodeClient {
                             })
                             //do not try to reconnect while re-authorization
                             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-                            val node = prefs.getString("LastServerPubkey","cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k")
+                            val node = prefs.getString("LastServerPubkey", defaultNode)
                             val connectedNode = prefs.getString("ServerPublicKey","")
                             if ((!node.isNullOrEmpty()) && ((!isVpnActive()) || (node != connectedNode))) {
                                 cjdnsConnectVPN(node)
@@ -670,12 +671,18 @@ object AnodeClient {
         //Check for ip address given by cjdns try for 20 times, 10secs
         Thread(Runnable {
             while (!iconnected && (tries < 10)) {
+                statustv.post(Runnable {
+                    statustv.text  = "Getting routes..."
+                } )
                 vpnConnected = false
                 iconnected = CjdnsSocket.getCjdnsRoutes()
                 tries++
                 Thread.sleep(2000)
             }
             if (iconnected) {
+                statustv.post(Runnable {
+                    statustv.text  = "Got routes..."
+                } )
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
@@ -687,7 +694,7 @@ object AnodeClient {
             } else {
                 Log.i(LOGTAG,"VPN connection failed")
                 vpnConnected = false
-                LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_CONNECTED)
+                LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_DISCONNECTED)
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 //Stop UI thread
                 h.removeCallbacks(runnableConnection)
@@ -810,7 +817,7 @@ object AnodeClient {
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
             val Authtimestamp = prefs.getLong("LastAuthorized",0)
             if ((System.currentTimeMillis() - Authtimestamp) > Auth_TIMEOUT) {
-                AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "cmnkylz1dx8mx3bdxku80yw20gqmg0s9nsrusdv0psnxnfhqfmu0.k"))
+                AuthorizeVPN().execute(prefs.getString("LastServerPubkey", defaultNode))
             }
             //GetPublicIP().execute(status)
             h!!.postDelayed(this, 10000) //ms
@@ -848,7 +855,7 @@ object AnodeClient {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            if (result != null) {
+            if ((result != null) && (result.isNotEmpty()) && (result.contains("No user consent to submit data"))) {
                 showToast(result)
             }
         }
