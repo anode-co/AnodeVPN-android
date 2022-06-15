@@ -2,6 +2,7 @@ package co.anode.anodium.support
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.VpnService
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -163,19 +164,32 @@ object AnodeUtil {
         }
     }
 
-    fun initializeCjdrouteConfFile() {
-        generateCjdnsConfFile()
+    fun initializeCjdrouteConfFile(secret: String) {
+        generateCjdnsConfFile(secret)
         modifyJSONConfFile()
     }
 
-    private fun generateCjdnsConfFile() {
+    private fun generateCjdnsConfFile(secret: String) {
         Log.i(LOGTAG, "Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
-            processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf")
-                .redirectOutput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
-                .start()
-                .waitFor(2, TimeUnit.SECONDS)
+            if (secret.isNotEmpty()) {
+                //Create secret file
+                val filename = "$filesDirectory/secret.txt"
+                File(filename).writeText(secret)
+                processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf-seed")
+                    .redirectInput(File("$filesDirectory/secret.txt"))
+                    .redirectOutput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
+                    .start()
+                    .waitFor(2, TimeUnit.SECONDS)
+                //delete secret file
+                File(filename).delete()
+            } else {
+                processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf")
+                    .redirectOutput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
+                    .start()
+                    .waitFor(2, TimeUnit.SECONDS)
+            }
             //Clean conf
             Log.i(LOGTAG, "Clean conf file with cjdroute")
             processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--cleanconf")
@@ -183,14 +197,7 @@ object AnodeUtil {
                     .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor(2, TimeUnit.SECONDS)
-            val seedFile = File("$filesDirectory/seed.txt")
-            if (seedFile.exists()) {
-                processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--genconf-seed")
-                    .redirectInput(File("$filesDirectory/seed.txt"))
-                    .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
-                    .start()
-                    .waitFor(2, TimeUnit.SECONDS)
-            }
+
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to generate new configuration file " + e.message)
         }
@@ -202,7 +209,8 @@ object AnodeUtil {
     fun launchCJDNS() {
         val confFile = File("$filesDirectory/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
-            initializeCjdrouteConfFile()
+            val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+            initializeCjdrouteConfFile(prefs?.getString("wallet_secret","").toString())
         }
         try {
             Log.i(
@@ -630,7 +638,7 @@ object AnodeUtil {
         //Check for event log files daily
         Thread({
             val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-            Log.i(LOGTAG, "MainActivity.UploadEventsThread startup")
+            Log.i(LOGTAG, "AnodeUtil.UploadEventsThread startup")
             while (true) {
                 AnodeClient.ignoreErr {
                     //Check if 24 hours have passed since last log file submitted
@@ -675,10 +683,10 @@ object AnodeUtil {
                     Thread.sleep((60 * 60000).toLong())
                 }
             }
-        }, "MainActivity.UploadEventsThread").start()
+        }, "AnodeUtil.UploadEventsThread").start()
         //Check for uploading Errors
         Thread({
-            Log.i(LOGTAG, "MainActivity.UploadErrorsThread startup")
+            Log.i(LOGTAG, "AnodeUtil.UploadErrorsThread startup")
             val arch = System.getProperty("os.arch")
             while (!(arch.contains("x86") || arch.contains("i686"))) {
                 AnodeClient.ignoreErr {
@@ -702,10 +710,10 @@ object AnodeUtil {
                     }
                 }
             }
-        }, "MainActivity.UploadErrorsThread").start()
+        }, "AnodeUtil.UploadErrorsThread").start()
         //Check for updates every 5min
         Thread({
-            Log.i(LOGTAG, "MainActivity.CheckUpdates")
+            Log.i(LOGTAG, "AnodeUtil.CheckUpdates")
             while (true) {
                 AnodeClient.checkNewVersion(false)
                 if (AnodeClient.downloadFails > 1) {
@@ -719,7 +727,7 @@ object AnodeUtil {
                     Thread.sleep((5 * 60000).toLong())
                 }
             }
-        }, "MainActivity.CheckUpdates").start()
+        }, "AnodeUtil.CheckUpdates").start()
     }
 
     fun exception(paramThrowable: Throwable) {
