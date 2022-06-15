@@ -97,7 +97,7 @@ object AnodeUtil {
             lnddir.mkdir()
         }
         //Copy neutrino.db
-        copyAssets()
+        //copyAssets()
     }
 
     fun generateUsername(textview:TextView) {
