@@ -17,6 +17,7 @@ class APIController constructor(serviceInjection: ServiceInterface): ServiceInte
     val sendFromURL = "$baseRestAPIURL/wallet/transaction/sendfrom"
     val changePassphraseURL = "$baseRestAPIURL/wallet/changepassphrase"
     val checkPassphraseURL = "$baseRestAPIURL/wallet/checkpassphrase"
+    val getSecretURL = "$baseRestAPIURL/wallet/getsecret"
     //GetInfo
     val getInfoURL = "$baseRestAPIURL/meta/getinfo"
 
