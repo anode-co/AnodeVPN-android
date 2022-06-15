@@ -13,7 +13,6 @@ import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.R
-import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.textfield.TextInputLayout
@@ -21,11 +20,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class SendPaymentActivity : AppCompatActivity() {
+    private val LOGTAG = "co.anode.anodium"
     lateinit var apiController: APIController
     private var myPKTAddress = ""
     private var canSendCoins = false
     lateinit var statusBar: TextView
     private var forcePassword = false
+    private var maxClicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,25 +89,34 @@ class SendPaymentActivity : AppCompatActivity() {
         val storedPin = AnodeUtil.getWalletPin(walletName)
         if (storedPin.isNotEmpty()) {
             passwordField.inputType = InputType.TYPE_CLASS_NUMBER
-            passwordField.hint = getString(R.string.prompt_newpin)
+            passwordField.hint = getString(R.string.prompt_pin)
         } else {
             passwordField.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             passwordField.hint = getString(R.string.send_pkt_password)
         }
         passwordField.transformationMethod = PasswordTransformationMethod.getInstance()
+        val minClickInterval: Long = 1000
+        var mLastClickTime: Long = 0
+
+        val amount = findViewById<EditText>(R.id.editTextPKTAmount)
 
         sendButton.setOnClickListener {
-            val amount = findViewById<EditText>(R.id.editTextPKTAmount)
             //Check fields
             if (address.text.toString().isEmpty()) {
                 Toast.makeText(applicationContext, "Please fill in the receiver's address", Toast.LENGTH_SHORT).show()
                 canSendCoins = false
                 return@setOnClickListener
             }
-            if (amount.text.toString().isEmpty()) {
-                Toast.makeText(applicationContext, "Please fill in the PKT amount", Toast.LENGTH_SHORT).show()
-                canSendCoins = false
-                return@setOnClickListener
+            if (!maxClicked) {
+                if (amount.text.toString().isEmpty()) {
+                    Toast.makeText(applicationContext, "Please fill in the PKT amount", Toast.LENGTH_SHORT).show()
+                    canSendCoins = false
+                    return@setOnClickListener
+                } else if (amount.text.toString().toFloat() == 0.0f) {
+                    Toast.makeText(applicationContext, "Can not send 0PKT. Please fill a valid amount.", Toast.LENGTH_SHORT).show()
+                    canSendCoins = false
+                    return@setOnClickListener
+                }
             }
             var password = ""
             if (storedPin.isNotEmpty() && !forcePassword) {
@@ -115,12 +125,27 @@ class SendPaymentActivity : AppCompatActivity() {
             } else {
                 password = passwordField.text.toString()
             }
-            val minClickInterval: Long = 1000
-            var mLastClickTime: Long = 0
             //avoid accidental double clicks
             if (SystemClock.elapsedRealtime() - mLastClickTime > minClickInterval) {
                 mLastClickTime = SystemClock.elapsedRealtime()
-                validateWalletPassphraseAndSendCoins(password, address.text.toString(), amount.text.toString().toFloat())
+                var fAmount = 0.0f
+                if (!maxClicked) {
+                    amount.text.toString().toFloat()
+                }
+                validateWalletPassphraseAndSendCoins(password, address.text.toString(), fAmount)
+            }
+        }
+
+        val maxButton = findViewById<Button>(R.id.button_amountMax)
+        maxButton.setOnClickListener {
+            if (maxClicked) {
+                amount.visibility = View.VISIBLE
+                maxButton.setBackgroundColor(getColor(R.color.colorPrimary))
+                maxClicked = false
+            } else {
+                amount.visibility = View.INVISIBLE
+                maxButton.setBackgroundColor(getColor(android.R.color.holo_green_dark))
+                maxClicked = true
             }
         }
     }
