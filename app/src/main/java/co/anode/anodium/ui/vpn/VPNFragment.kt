@@ -15,7 +15,6 @@ import android.os.SystemClock
 import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -25,7 +24,6 @@ import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentVpnBinding
@@ -53,8 +51,9 @@ class VPNFragment : Fragment() {
     private lateinit var mycontext: Context
     private lateinit var root: View
     private val VPN_CONNECTED = IntentFilter("co.anode.anodium.action.VPN.Connected")
-    private val VPN_DISCONNECTED = IntentFilter("co.anode.anodium.action.VPN.Disonnected")
+    private val VPN_DISCONNECTED = IntentFilter("co.anode.anodium.action.VPN.Disconnected")
     private val VPN_CONNECTING = IntentFilter("co.anode.anodium.action.VPN.Connecting")
+    private val defaultNode = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -64,9 +63,6 @@ class VPNFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(VPNViewModel::class.java)
-
         _binding = FragmentVpnBinding.inflate(inflater, container, false)
         root = binding.root
         mycontext = requireContext()
@@ -85,7 +81,7 @@ class VPNFragment : Fragment() {
                 if (!buttonConnectVPNs.isChecked) {
                     disconnectVPN(false)
                 } else {
-                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", "1y7k7zb64f242hvv8mht54ssvgcqdfzbxrng5uz7qpgu7fkjudd0.k"))
+                    AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", defaultNode))
                     bigbuttonState(buttonStateConnecting)
                 }
             }
@@ -158,7 +154,7 @@ class VPNFragment : Fragment() {
                 }
                 Thread.sleep(publicIpThreadSleep)
             }
-        }, "MainActivity.GetPublicIPv4").start()
+        }, "VPNFragment.GetPublicIPv4").start()
 
         //Get v6 public IP
         Thread({
@@ -178,7 +174,7 @@ class VPNFragment : Fragment() {
                 }
                 Thread.sleep(publicIpThreadSleep)
             }
-        }, "MainActivity.GetPublicIPv4").start()
+        }, "VPNFragment.GetPublicIPv4").start()
     }
 
     private fun startVPNService() {
@@ -280,8 +276,6 @@ class VPNFragment : Fragment() {
                 h.removeCallbacks(VpnConnectionWaitingDialog)
                 //Status bar
                 status.text = ""
-                //Show disconnected on toast so it times out
-                Toast.makeText(mycontext, getString(R.string.status_disconnected), Toast.LENGTH_LONG).show()
                 //Button
                 buttonconnectvpns.alpha = 1.0f
             }
