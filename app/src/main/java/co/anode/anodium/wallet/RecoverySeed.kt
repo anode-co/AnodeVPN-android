@@ -14,6 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.MainActivity
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
@@ -21,6 +22,7 @@ import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import kotlin.random.Random
 
 class RecoverySeed : AppCompatActivity() {
@@ -255,8 +257,10 @@ class RecoverySeed : AppCompatActivity() {
                 statusbar.text = ""
                 //Set activeWallet
                 val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-                val activeWallet = jsonData.getString("wallet_name")
+                var activeWallet = jsonData.getString("wallet_name")
+                activeWallet = activeWallet.replace(".db","", false)
                 prefs.edit().putString("activeWallet", activeWallet).apply()
+                getSecret(true)
                 confirmWalletLayout(isRecovery)
             } else {
                 Log.i(LOGTAG, "PKT create wallet failed")
@@ -274,6 +278,22 @@ class RecoverySeed : AppCompatActivity() {
                 }
                 //Reset UI
                 initLayout(isRecovery)
+            }
+        }
+    }
+
+    private fun getSecret(resetCjdns: Boolean) {
+        val jsonRequest = JSONObject()
+        apiController.post(apiController.getSecretURL,jsonRequest) { response ->
+            if ((response != null) && (response.has("secret") && !response.isNull("secret"))) {
+                Log.i(LOGTAG, "wallet secret retrieved")
+                val secret = response.getString("secret")
+                if (resetCjdns) {
+                    //cjdns seed genconf
+                    AnodeUtil.initializeCjdrouteConfFile(secret)
+                    //launch cjdns
+                    AnodeUtil.launchCJDNS()
+                }
             }
         }
     }

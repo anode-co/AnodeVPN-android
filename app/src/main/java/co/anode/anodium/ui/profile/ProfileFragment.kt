@@ -73,7 +73,7 @@ class ProfileFragment : Fragment() {
         }
         val showSeedButton = root.findViewById<LinearLayout>(R.id.button_show_seed)
         showSeedButton.setOnClickListener {
-            getWalletSeed(showDialog = true, saveToFile = false)
+            getWalletSeed(showDialog = true)
         }
         val cjdnsStatsButton = root.findViewById<LinearLayout>(R.id.button_cjdns_stats)
         cjdnsStatsButton.setOnClickListener {
@@ -155,7 +155,7 @@ class ProfileFragment : Fragment() {
                     AnodeUtil.deleteWalletChainBackupFile()
                     //restart pld
                     AnodeUtil.stopPld()
-                    //unlock selected wallet->getWalletSeed to file
+                    //unlock selected wallet->getSecret
                     walletPasswordPrompt()
                     //connect back to VPN
                     notifyUserDialog()
@@ -200,7 +200,25 @@ class ProfileFragment : Fragment() {
         _binding = null
     }
 
-    private fun getWalletSeed(showDialog:Boolean, saveToFile:Boolean) {
+    private fun getSecret(resetCjdns: Boolean) {
+        val jsonRequest = JSONObject()
+        apiController.post(apiController.getSecretURL,jsonRequest) { response ->
+            if ((response != null) && (response.has("secret") && !response.isNull("secret"))) {
+                Log.i(LOGTAG, "wallet secret retrieved")
+                val secret = response.getString("secret")
+                val prefs = mycontext.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                prefs.edit().putString("wallet_secret", secret).apply()
+                if (resetCjdns) {
+                    //cjdns seed genconf
+                    AnodeUtil.initializeCjdrouteConfFile(secret)
+                    //launch cjdns
+                    AnodeUtil.launchCJDNS()
+                }
+            }
+        }
+    }
+
+    private fun getWalletSeed(showDialog:Boolean) {
         apiController.get(apiController.getSeedURL) { response ->
             if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
                 Log.i(LOGTAG, "wallet seed retrieved")
@@ -212,14 +230,6 @@ class ProfileFragment : Fragment() {
                 }
                 if(showDialog) {
                     seedDialog(seedString)
-                }
-                if (saveToFile) {
-                    val filename = mycontext.filesDir.toString()+"/seed.txt"
-                    File(filename).writeText(seedString)
-                    //cjdns seed genconf
-                    AnodeUtil.initializeCjdrouteConfFile()
-                    //launch cjdns
-                    AnodeUtil.launchCJDNS()
                 }
             } else if ((response != null) &&
                     response.has("error") &&
@@ -401,7 +411,7 @@ class ProfileFragment : Fragment() {
                 //empty response is success
                 Log.i(LOGTAG, "Wallet unlocked")
                 //getseed
-                getWalletSeed(showDialog = false,saveToFile = true)
+                getSecret(true)
             }
         }
     }
