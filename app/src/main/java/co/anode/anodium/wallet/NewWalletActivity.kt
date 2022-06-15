@@ -1,6 +1,7 @@
 package co.anode.anodium.wallet
 
 import android.content.Intent
+import android.net.VpnService
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -32,6 +33,14 @@ class NewWalletActivity : AppCompatActivity() {
                 putBoolean("FirstRun", false)
                 commit()
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val vpnPrepare = VpnService.prepare(this)
+        if (vpnPrepare != null) {
+            startActivityForResult(vpnPrepare, 0);
         }
     }
 }
