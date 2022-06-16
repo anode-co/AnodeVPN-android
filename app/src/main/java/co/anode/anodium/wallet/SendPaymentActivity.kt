@@ -130,7 +130,7 @@ class SendPaymentActivity : AppCompatActivity() {
                 mLastClickTime = SystemClock.elapsedRealtime()
                 var fAmount = 0.0f
                 if (!maxClicked) {
-                    amount.text.toString().toFloat()
+                    fAmount = amount.text.toString().toFloat()
                 }
                 validateWalletPassphraseAndSendCoins(password, address.text.toString(), fAmount)
             }
