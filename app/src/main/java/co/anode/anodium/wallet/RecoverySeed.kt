@@ -67,7 +67,7 @@ class RecoverySeed : AppCompatActivity() {
                 input.inputType = InputType.TYPE_CLASS_TEXT
 
                 builder.setPositiveButton("Confirm") { dialog, _ ->
-                    val seedWord = input.text.toString()
+                    val seedWord = input.text.toString().trim()
                     if (seedWord == seedArray.getString(num - 1)) {
                         createWallet(passwordString,seedArray, walletName)
                     } else {
