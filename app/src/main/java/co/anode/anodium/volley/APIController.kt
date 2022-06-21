@@ -1,5 +1,6 @@
 package co.anode.anodium.volley
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 class APIController constructor(serviceInjection: ServiceInterface): ServiceInterface {
@@ -24,6 +25,10 @@ class APIController constructor(serviceInjection: ServiceInterface): ServiceInte
     private val service: ServiceInterface = serviceInjection
     override fun get(url: String, completionHandler: (response: JSONObject?) -> Unit) {
         service.get(url, completionHandler)
+    }
+
+    override fun getArray(url: String, completionHandler: (response: JSONArray?) -> Unit) {
+        service.getArray(url, completionHandler)
     }
 
     override fun post(url: String, params: JSONObject, completionHandler: (response: JSONObject?) -> Unit) {

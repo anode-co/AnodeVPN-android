@@ -166,6 +166,12 @@ class ProfileFragment : Fragment() {
 
             }
         }
+
+        val checkbox = root.findViewById<CheckBox>(R.id.upgrade_checkbox)
+        checkbox.isChecked = prefs.getBoolean("preRelease", false)
+        checkbox.setOnClickListener {
+            prefs.edit().putBoolean("preRelease", checkbox.isChecked).apply()
+        }
         return root
     }
 

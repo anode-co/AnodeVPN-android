@@ -214,6 +214,13 @@
                             android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
                             app:tint="@color/colorPrimary" />
                 </LinearLayout>
+                <CheckBox
+                    android:id="@+id/upgrade_checkbox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:paddingVertical="15dp"
+                        android:text="Upgrade with pre-release"/>
         </LinearLayout>
         <TextView
             android:id="@+id/user_id_label"

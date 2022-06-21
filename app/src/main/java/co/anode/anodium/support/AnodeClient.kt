@@ -59,7 +59,7 @@ object AnodeClient {
     private const val API_AUTH_VPN = "https://vpn.anode.co/api/$apiVersion/vpn/servers/"
     private const val API_RATINGS_URL = "https://vpn.anode.co/api/$apiVersion/vpn/servers/ratings/"
     private const val API_GET_LATEST_RELEASE = "https://api.github.com/repos/anode-co/AnodeVPN-android/releases/latest"
-    private const val API_DOWNLOAD_URL = "https://github.com/anode-co/AnodeVPN-android/releases/download/"
+    private const val API_GET_ALL_RELEASES = "https://api.github.com/repos/anode-co/AnodeVPN-android/releases"
     private var apiUsernameGenerate = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/username/"
     private const val buttonStateConnected = 0
     private const val buttonStateConnecting = 1
@@ -415,40 +415,51 @@ object AnodeClient {
     }
 
     fun getLatestRelease(userInitiated: Boolean) {
-        apiController.get(API_GET_LATEST_RELEASE) {
+        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        apiController.getArray(API_GET_ALL_RELEASES) {
             response ->
-            if ((response != null) && response.has("name") && !response.isNull("name")) {
-                //Check against current version
-                val versionName = BuildConfig.VERSION_NAME
-                val curMajorNumber = versionName.split(".")[0].toInt()
-                val curMinorNumber = versionName.split(".")[1].toInt()
-                val curRevisionNumber = versionName.split(".")[2].toInt()
-                val gitVersion = response.getString("name").split("-").get(1)
-                val latestMajorNumber = gitVersion.split(".")[0].toInt()
-                val latestMinorNumber = gitVersion.split(".")[1].toInt()
-                val latestRevisionNumber = gitVersion.split(".")[2].toInt()
-                if ((latestMajorNumber > curMajorNumber) ||
-                    (latestMinorNumber> curMinorNumber) ||
-                    (latestRevisionNumber> curRevisionNumber)){
-                    //Checking for update
-                    //Get assets
-                    val assets = response.getJSONArray("assets")
-                    var url: String
-                    var filesize: Long
-                    //Get apk from assets
-                    for (i in 0 until assets.length()) {
-                        if (assets.getJSONObject(i).getString("name").endsWith(".apk")) {
-                            url = assets.getJSONObject(i).getString("browser_download_url")
-                            filesize = assets.getJSONObject(i).getLong("size")
-                            downloadFile(Uri.parse(url), gitVersion, filesize)
-                            return@get
+            if (response != null) {
+                for (i in 0 until response.length()) {
+                    val release = response.getJSONObject(i)
+                    if ((release != null) && release.has("name") && !release.isNull("name")) {
+                        //Check for release/pre-release
+                        if (release.getBoolean("prerelease") && !prefs.getBoolean("preRelease",false))
+                        {
+                            continue
+                        }
+                        //Check against current version
+                        val versionName = BuildConfig.VERSION_NAME
+                        val curMajorNumber = versionName.split(".")[0].toInt()
+                        val curMinorNumber = versionName.split(".")[1].toInt()
+                        val curRevisionNumber = versionName.split(".")[2].toInt()
+                        val gitVersion = release.getString("name").split("-").get(1)
+                        val latestMajorNumber = gitVersion.split(".")[0].toInt()
+                        val latestMinorNumber = gitVersion.split(".")[1].toInt()
+                        val latestRevisionNumber = gitVersion.split(".")[2].toInt()
+                        if ((latestMajorNumber > curMajorNumber) ||
+                            (latestMinorNumber> curMinorNumber) ||
+                            (latestRevisionNumber> curRevisionNumber)){
+                            //Checking for update
+                            //Get assets
+                            val assets = release.getJSONArray("assets")
+                            var url: String
+                            var filesize: Long
+                            //Get apk from assets
+                            for (i in 0 until assets.length()) {
+                                if (assets.getJSONObject(i).getString("name").endsWith(".apk")) {
+                                    url = assets.getJSONObject(i).getString("browser_download_url")
+                                    filesize = assets.getJSONObject(i).getLong("size")
+                                    downloadFile(Uri.parse(url), gitVersion, filesize)
+                                    return@getArray
+                                }
+                            }
+                        } else {
+                            if (userInitiated) {
+                                showToast("Application already at latest version")
+                            }
+                            return@getArray
                         }
                     }
-                } else {
-                    if (userInitiated) {
-                        showToast("Application already at latest version")
-                    }
-                    return@get
                 }
             }
         }

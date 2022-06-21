@@ -6,7 +6,9 @@ import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response
 import com.android.volley.VolleyLog
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
+import org.json.JSONArray
 import org.json.JSONObject
 
 class ServiceVolley : ServiceInterface {
@@ -37,6 +39,34 @@ class ServiceVolley : ServiceInterface {
             }) {}
         jsonObjReq.retryPolicy = DefaultRetryPolicy(4000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         BackendVolley.instance?.addToRequestQueue(jsonObjReq, TAG)
+    }
+
+    override fun getArray(url: String, completionHandler: (response: JSONArray?) -> Unit) {
+        val jsonArrReq = object : JsonArrayRequest(Method.GET, url, null,
+            Response.Listener { response ->
+                Log.d(TAG, "/post request OK! Response: $response")
+                completionHandler(response)
+            },
+            Response.ErrorListener { error ->
+                VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
+                val jsonError = JSONArray()
+                jsonError.optJSONObject(0)
+                if ((error.networkResponse != null) && (error.networkResponse.data != null )) {
+                    val errorString = String(error.networkResponse.data)
+                    jsonError.optJSONObject(0).put("error", errorString)
+                    completionHandler(jsonError)
+                } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
+                    //pls is not running try to launch it
+                    //AnodeUtil.launchPld()
+                    jsonError.optJSONObject(0).put("error", "pld not responding")
+                    completionHandler(jsonError)
+                } else {
+                    jsonError.optJSONObject(0).put("error", "unknown")
+                    completionHandler(jsonError)
+                }
+            }) {}
+        jsonArrReq.retryPolicy = DefaultRetryPolicy(4000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+        BackendVolley.instance?.addToRequestQueue(jsonArrReq, TAG)
     }
 
     override fun post(url: String, params: JSONObject, completionHandler: (response: JSONObject?) -> Unit) {
