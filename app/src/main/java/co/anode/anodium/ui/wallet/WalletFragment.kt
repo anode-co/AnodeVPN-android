@@ -20,7 +20,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import co.anode.anodium.AboutDialog
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
 import co.anode.anodium.support.AnodeClient
@@ -45,7 +44,7 @@ class WalletFragment : Fragment() {
     private var walletUnlocked = false
     private var neutrinoSynced = false
     private var myPKTAddress = ""
-    private val refreshPldInterval: Long = 10000
+    private val refreshPldInterval: Long = 2000
     lateinit var h: Handler
     private var balanceLastTimeUpdated: Long = 0
     private var transactionsLastTimeUpdated: Long = 0
@@ -53,7 +52,9 @@ class WalletFragment : Fragment() {
     private var updateConfirmations = arrayListOf<Boolean>()
     private var neutrinoTop = 0
     private var resumedNeutrinoTop = 0
-    private val numberOfTxnsToShow = 25
+    private val numberOfTxnsToShow = 10
+    private var txnsLimit = 10
+    private var txnsLimitReached = false
     private var walletPasswordQuickRetry: String? = null
     private lateinit var pinPasswordAlert: AlertDialog
     private var wrongPinAttempts= 0
@@ -115,6 +116,7 @@ class WalletFragment : Fragment() {
 
         val shareButton = root.findViewById<Button>(R.id.walletAddressSharebutton)
         shareButton.setOnClickListener {
+            //throw Error("testing")
             AnodeClient.eventLog("Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
@@ -425,7 +427,7 @@ class WalletFragment : Fragment() {
                 getBalance()
             }
             if ((System.currentTimeMillis()-5000) > transactionsLastTimeUpdated) {
-                getWalletTransactions()
+                getWalletTransactions(false)
             }
         }
     }
@@ -577,15 +579,17 @@ class WalletFragment : Fragment() {
      * get Transactions
      */
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
-    private fun getWalletTransactions() {
+    private fun getWalletTransactions(nextPage: Boolean) {
         val listsLayout = root.findViewById<LinearLayout>(R.id.paymentsList)
-        val simpleDate = SimpleDateFormat("yyyy-MM-dd HH:mm")
         val params = JSONObject()
+        if (!txnsLimitReached && nextPage) {
+            txnsLimit *= 2
+        }
         //Exclude mining transactions
         params.put("coinbase", 1)
-        params.put("reversed", true)
-        params.put("txnsLimit", numberOfTxnsToShow+1)
-        val textSize = 15.0f
+        params.put("reversed", false)
+        params.put("txnsSkip", 0)
+        params.put("txnsLimit", txnsLimit)
         apiController.post(apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
@@ -604,11 +608,14 @@ class WalletFragment : Fragment() {
                     AnodeUtil.pushNotification("Got paid!", AnodeUtil.satoshisToPKT(lastAmount))
                 }
 
-                var txnsSize = transactions.length()
-                if (txnsSize > 25) {
+                val txnsSize = transactions.length()
+                if (txnsLimit >= txnsSize) {
+                    txnsLimitReached = true
+                }
+                /*if (txnsSize > 25) {
                     txnsSize = 25
                     root.findViewById<TextView>(R.id.texthistory).visibility = View.VISIBLE
-                }
+                }*/
                 AnodeUtil.setCacheWalletTxns(transactions)
                 makeListofTxns(transactions, txnsSize)
             } else if ((response != null) &&

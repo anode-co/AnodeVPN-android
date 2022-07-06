@@ -50,18 +50,20 @@ class ServiceVolley : ServiceInterface {
             Response.ErrorListener { error ->
                 VolleyLog.e(TAG, "/post request fail! Error: ${error.message}")
                 val jsonError = JSONArray()
-                jsonError.optJSONObject(0)
                 if ((error.networkResponse != null) && (error.networkResponse.data != null )) {
                     val errorString = String(error.networkResponse.data)
-                    jsonError.optJSONObject(0).put("error", errorString)
+                    val jsonObj = JSONObject().put("error", errorString)
+                    jsonError.put(jsonObj)
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
                     //pls is not running try to launch it
                     //AnodeUtil.launchPld()
-                    jsonError.optJSONObject(0).put("error", "pld not responding")
+                    val jsonObj = JSONObject().put("error", "pld not responding")
+                    jsonError.put(jsonObj)
                     completionHandler(jsonError)
                 } else {
-                    jsonError.optJSONObject(0).put("error", "unknown")
+                    val jsonObj = JSONObject().put("error", "unknown")
+                    jsonError.put(jsonObj)
                     completionHandler(jsonError)
                 }
             }) {}
