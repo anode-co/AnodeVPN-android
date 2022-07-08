@@ -16,6 +16,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.concurrent.Executors
+import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,6 +27,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        //Error Handling
+        Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
+            exception(paramThrowable)
+        }
 
         val navView: BottomNavigationView = binding.navView
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
@@ -84,5 +90,33 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun exception(paramThrowable: Throwable) {
+        //Toast message before exiting app
+        var type = "other"
+        if (paramThrowable.toString().contains("CjdnsException") ) type = "cjdnsSocket"
+        else if (paramThrowable.toString().contains("AnodeUtilException") ) type = "cjdroute"
+        else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
+        else if (paramThrowable.toString().contains("LndRPCException") ) {
+            type = "lnd"
+            AnodeClient.storeFileAsError(AnodeUtil.context!!, type, "data/data/co.anode.anodium/files/pld.log")
+        }
+        // we'll post the error on next startup
+        AnodeClient.storeError(AnodeUtil.context!!, type, paramThrowable)
+
+        object : Thread() {
+            override fun run() {
+                Looper.prepare()
+                Toast.makeText(AnodeUtil.context!!, "ERROR: " + paramThrowable.message, Toast.LENGTH_LONG).show()
+                AnodeClient.mycontext = AnodeUtil.context!!
+                Looper.loop()
+            }
+        }.start()
+        try {
+            // Let the Toast display and give some time to post to server before app will get shutdown
+            Thread.sleep(10000)
+        } catch (e: InterruptedException) {}
+        exitProcess(1)
     }
 }

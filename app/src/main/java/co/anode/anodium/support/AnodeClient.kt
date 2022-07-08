@@ -300,7 +300,7 @@ object AnodeClient {
         if (pubkey == "") pubkey = "unknown"
         jsonObject.accumulate("publicKey", pubkey)
         jsonObject.accumulate("error", type)
-        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_CODE)
+        jsonObject.accumulate("clientSoftwareVersion", BuildConfig.VERSION_NAME)
         jsonObject.accumulate("clientOs", "Android")
         jsonObject.accumulate("clientOsVersion", android.os.Build.VERSION.RELEASE)
         ignoreErr{ jsonObject.accumulate("localTimestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.now())) }

@@ -730,34 +730,6 @@ object AnodeUtil {
         }, "AnodeUtil.CheckUpdates").start()
     }
 
-    fun exception(paramThrowable: Throwable) {
-        //Toast message before exiting app
-        var type = "other"
-        if (paramThrowable.toString().contains("CjdnsException") ) type = "cjdnsSocket"
-        else if (paramThrowable.toString().contains("AnodeUtilException") ) type = "cjdroute"
-        else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
-        else if (paramThrowable.toString().contains("LndRPCException") ) {
-            type = "lnd"
-            AnodeClient.storeFileAsError(context!!, type, "data/data/co.anode.anodium/files/pld.log")
-        }
-        // we'll post the error on next startup
-        AnodeClient.storeError(context!!, type, paramThrowable)
-
-        object : Thread() {
-            override fun run() {
-                Looper.prepare()
-                Toast.makeText(context!!, "ERROR: " + paramThrowable.message, Toast.LENGTH_LONG).show()
-                AnodeClient.mycontext = context!!
-                Looper.loop()
-            }
-        }.start()
-        try {
-            // Let the Toast display and give some time to post to server before app will get shutdown
-            Thread.sleep(10000)
-        } catch (e: InterruptedException) {}
-        exitProcess(1)
-    }
-
     fun deleteWallet(walletName: String) {
         val walletFile = File("$filesDirectory/pkt/$walletName.db")
         if (walletFile.exists()) {

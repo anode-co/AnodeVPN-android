@@ -116,7 +116,6 @@ class WalletFragment : Fragment() {
 
         val shareButton = root.findViewById<Button>(R.id.walletAddressSharebutton)
         shareButton.setOnClickListener {
-            //throw Error("testing")
             AnodeClient.eventLog("Button: Share wallet address clicked")
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
