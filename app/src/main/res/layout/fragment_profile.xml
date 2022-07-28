@@ -214,6 +214,28 @@
                             android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
                             app:tint="@color/colorPrimary" />
                 </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/button_connectPktcube"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginHorizontal="20dp"
+                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                    android:background="@drawable/borderline">
+                        <TextView
+                            android:id="@+id/text_connectPktcube"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="1dp"
+                            android:textSize="20sp"
+                            android:text="@string/button_connect_pktcube"/>
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                            app:tint="@color/colorPrimary" />
+                </LinearLayout>
                 <CheckBox
                     android:id="@+id/upgrade_checkbox"
                         android:layout_width="wrap_content"

@@ -167,10 +167,24 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        val checkbox = root.findViewById<CheckBox>(R.id.upgrade_checkbox)
-        checkbox.isChecked = prefs.getBoolean("preRelease", false)
-        checkbox.setOnClickListener {
-            prefs.edit().putBoolean("preRelease", checkbox.isChecked).apply()
+        val upgradeCheckbox = root.findViewById<CheckBox>(R.id.upgrade_checkbox)
+        upgradeCheckbox.isChecked = prefs.getBoolean("preRelease", false)
+        upgradeCheckbox.setOnClickListener {
+            prefs.edit().putBoolean("preRelease", upgradeCheckbox.isChecked).apply()
+        }
+        val wifiCheckbox = root.findViewById<LinearLayout>(R.id.button_connectPktcube)
+        //Initialize cube object
+        CubeWifi.init(requireContext())
+        CubeWifi.statusbar = root.findViewById(R.id.textview_status)
+        val textConnect = root.findViewById<TextView>(R.id.text_connectPktcube)
+        wifiCheckbox.setOnClickListener {
+            if (textConnect.text.equals(getString(R.string.button_connect_pktcube))) {
+                CubeWifi.connect()
+                textConnect.text = getString(R.string.button_disconnect_pktcube)
+            } else {
+                textConnect.text = getString(R.string.button_connect_pktcube)
+                CubeWifi.disconnect()
+            }
         }
         return root
     }
