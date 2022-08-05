@@ -688,7 +688,7 @@ object AnodeUtil {
         Thread({
             Log.i(LOGTAG, "AnodeUtil.UploadErrorsThread startup")
             val arch = System.getProperty("os.arch")
-            while (!(arch.contains("x86") || arch.contains("i686"))) {
+            while (!(arch!!.contains("x86") || arch.contains("i686"))) {
                 AnodeClient.ignoreErr {
                     val erCount = context?.let { AnodeClient.errorCount(it) }
                     if (erCount == 0) {

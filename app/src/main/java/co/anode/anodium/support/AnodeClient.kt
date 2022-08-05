@@ -100,7 +100,9 @@ object AnodeClient {
     fun httpPostError(dir: File): String {
         //Do not post when in x86 or x86_64 (emulator) for development use
         val arch = System.getProperty("os.arch")
-        if (arch.contains("x86") || arch.contains("i686")) { return ""}
+        if (arch != null) {
+            if (arch.contains("x86") || arch.contains("i686")) { return ""}
+        }
         //Do not post without consent
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
@@ -138,7 +140,9 @@ object AnodeClient {
     fun httpPostMessage(type:String, message: String, force: String): String {
         //Do not post when on x86 or x86_64 (emulator) for development use only
         val arch = System.getProperty("os.arch")
-        if (arch.contains("x86") || arch.contains("i686")) { return ""}
+        if (arch != null) {
+            if (arch.contains("x86") || arch.contains("i686")) { return ""}
+        }
         //Do not post without consent
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
         val bforce = force.toBoolean()
