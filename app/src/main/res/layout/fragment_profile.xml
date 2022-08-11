@@ -236,6 +236,27 @@
                             android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
                             app:tint="@color/colorPrimary" />
                 </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/button_connectCjdns"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                    android:orientation="horizontal"
+                    android:layout_marginHorizontal="20dp"
+                    android:background="@drawable/borderline">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="20sp"
+                            android:layout_marginStart="1dp"
+                            android:text="Connect CJDNS"/>
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                            app:tint="@color/colorPrimary" />
+                </LinearLayout>
                 <CheckBox
                     android:id="@+id/upgrade_checkbox"
                         android:layout_width="wrap_content"

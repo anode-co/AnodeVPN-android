@@ -34,6 +34,7 @@ object CubeWifi {
     lateinit var mServiceHost: InetAddress
     var mServicePort = 0
     lateinit var udpSocket: DatagramSocket
+    lateinit var pktNetwork: Network
     private var nsdListenerActive = false
     private var usemDNS = false
 
@@ -68,17 +69,11 @@ object CubeWifi {
                     override fun onAvailable(network: Network) {
                         super.onAvailable(network)
                         network.bindSocket(udpSocket)
+                        pktNetwork = network
                         discoverService()
                         statusbar.post { statusbar.text = "Connected to $wifiSSID" }
-                        //Get new ip address
-                        /*val interfaces = NetworkInterface.getNetworkInterfaces()
-                        val list = interfaces.toList()
-                        for (element in list) {
-                            if (element.name.equals("wlan0")) {
-                                val ipaddress = element.inetAddresses.toList()[1].hostAddress
-                            }
-                        }*/
                     }
+
                     override fun onUnavailable() {
                         super.onUnavailable()
                         statusbar.post { statusbar.text = "$wifiSSID unavailable" }
@@ -94,10 +89,17 @@ object CubeWifi {
                     }
                 }
                 connManager.requestNetwork(networkReq, networkCallback)
-
-
             }, "CubeWifi.Connect").start()
         }
+    }
+
+    fun bindSocket(socket:DatagramSocket) {
+        if (this::pktNetwork.isInitialized)
+            pktNetwork.bindSocket(socket)
+    }
+
+    fun isConnected() :Boolean {
+        return this::connManager.isInitialized && this::pktNetwork.isInitialized
     }
 
     fun discoverService() {

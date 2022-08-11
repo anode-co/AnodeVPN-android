@@ -26,6 +26,7 @@ import co.anode.anodium.wallet.PinPrompt
 import co.anode.anodium.wallet.WalletStatsActivity
 import org.json.JSONObject
 import java.io.File
+import java.net.*
 
 
 class ProfileFragment : Fragment() {
@@ -186,7 +187,45 @@ class ProfileFragment : Fragment() {
                 CubeWifi.disconnect()
             }
         }
+
+        val cjdnsConnect = root.findViewById<LinearLayout>(R.id.button_connectCjdns)
+        cjdnsConnect.setOnClickListener {
+            if (CubeWifi.isConnected()) {
+                val wlanAddress = getLocalIpAddress()
+                val address = "$wlanAddress:0"
+                val beaconPort = 7778
+                val cjdnsSocket = DatagramSocket(7777, InetAddress.getByName(wlanAddress))
+                CubeWifi.bindSocket(cjdnsSocket)
+                val interfaceNumber = CjdnsSocket.UDPInterface_new(address, beaconPort)
+                CjdnsSocket.UDPInterface_beacon(interfaceNumber)
+                //removeall, stoptunnel?, clear routes?
+                CjdnsSocket.IpTunnel_removeAllConnections()
+                //CjdnsSocket.Core_stopTun()
+                //CjdnsSocket.clearRoutes()
+                //when we have internet re establish routes
+                //AnodeUtil.addCjdnsPeers()
+            } else {
+                Toast.makeText(mycontext, "Connect to Pkt.cube first.",Toast.LENGTH_LONG).show()
+            }
+        }
         return root
+    }
+
+    private fun getLocalIpAddress(): String {
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        val list = interfaces.toList()
+        for (element in list) {
+            if (element.name.equals("wlan0")) {
+                val inetAddresses = element.inetAddresses.toList()
+                for (inetAddress in inetAddresses) {
+                    //return ipv4 - wlan0
+                    if (inetAddress.hostAddress.indexOf(":") < 0) {
+                        return inetAddress.hostAddress
+                    }
+                }
+            }
+        }
+        return ""
     }
 
     private fun disconnectVPN() {
