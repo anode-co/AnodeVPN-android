@@ -2,19 +2,19 @@ package co.anode.anodium.support
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Context.CONNECTIVITY_SERVICE
-import android.content.Context.NSD_SERVICE
+import android.content.Context.*
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import android.net.wifi.WifiConfiguration
+import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.util.Log
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import java.io.IOException
 import java.net.*
 import java.util.concurrent.Executors
@@ -54,44 +54,68 @@ object CubeWifi {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     fun connect() {
-        Thread({
-            connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-            val wifi = WifiNetworkSpecifier.Builder()
-                .setSsid(wifiSSID)
-                .build()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Thread({
+                connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+                val wifi = WifiNetworkSpecifier.Builder()
+                    .setSsid(wifiSSID)
+                    .build()
 
-            val networkReq = NetworkRequest.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .setNetworkSpecifier(wifi)
-                .build()
+                val networkReq = NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .setNetworkSpecifier(wifi)
+                    .build()
 
-            networkCallback = object : ConnectivityManager.NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    super.onAvailable(network)
-                    network.bindSocket(udpSocket)
-                    pktNetwork = network
-                    discoverService()
-                    statusbar.post { statusbar.text = "Connected to $wifiSSID" }
+                networkCallback = object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        super.onAvailable(network)
+                        network.bindSocket(udpSocket)
+                        pktNetwork = network
+                        discoverService()
+                        statusbar.post { statusbar.text = "Connected to $wifiSSID" }
+                    }
+
+                    override fun onUnavailable() {
+                        super.onUnavailable()
+                        statusbar.post { statusbar.text = "$wifiSSID unavailable" }
+                        Thread.sleep(10000)
+                        connect()
+                    }
+
+                    override fun onLost(network: Network) {
+                        super.onLost(network)
+                        statusbar.post { statusbar.text = "Lost $wifiSSID" }
+                        Thread.sleep(10000)
+                        connect()
+                    }
                 }
+                connManager.requestNetwork(networkReq, networkCallback)
+            }, "CubeWifi.Connect").start()
+        } else {
+            connectToAP()
+        }
+    }
 
-                override fun onUnavailable() {
-                    super.onUnavailable()
-                    statusbar.post { statusbar.text = "$wifiSSID unavailable" }
-                    Thread.sleep(10000)
-                    connect()
-                }
+    fun connectToAP() {
+        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager
+        val wifiConfiguration = WifiConfiguration()
 
-                override fun onLost(network: Network) {
-                    super.onLost(network)
-                    statusbar.post { statusbar.text = "Lost $wifiSSID" }
-                    Thread.sleep(10000)
-                    connect()
-                }
-            }
-            connManager.requestNetwork(networkReq, networkCallback)
-        }, "CubeWifi.Connect").start()
+        wifiConfiguration.SSID = "\"" + wifiSSID + "\""
+        wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
+        var res: Int = wifiManager.addNetwork(wifiConfiguration)
+        val b: Boolean = wifiManager.enableNetwork(res, true)
+        wifiManager.setWifiEnabled(true)
+        wifiConfiguration.status = WifiConfiguration.Status.ENABLED
+        res = wifiManager.addNetwork(wifiConfiguration)
+        wifiManager.enableNetwork(res, true)
+        val changeHappen: Boolean = wifiManager.saveConfiguration()
+        /*if (res != -1 && changeHappen) {
+            connectedSsidName = wifiSSID
+        } else {
+            Log.d(TAG, "*** Change NOT happen")
+        }*/
+        wifiManager.setWifiEnabled(true)
     }
 
     fun bindSocket(socket:DatagramSocket) {
