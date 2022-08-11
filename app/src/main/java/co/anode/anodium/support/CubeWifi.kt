@@ -14,7 +14,7 @@ import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.util.Log
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.annotation.RequiresApi
 import java.io.IOException
 import java.net.*
 import java.util.concurrent.Executors
@@ -49,48 +49,49 @@ object CubeWifi {
 
     fun disconnect() {
         statusbar.post{ statusbar.text = "Disconnect $wifiSSID" }
-        connManager.unregisterNetworkCallback(networkCallback)
+        if (this::connManager.isInitialized) {
+            connManager.unregisterNetworkCallback(networkCallback)
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun connect() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Thread({
-                connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-                val wifi = WifiNetworkSpecifier.Builder()
-                    .setSsid(wifiSSID)
-                    .build()
+        Thread({
+            connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+            val wifi = WifiNetworkSpecifier.Builder()
+                .setSsid(wifiSSID)
+                .build()
 
-                val networkReq = NetworkRequest.Builder()
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .setNetworkSpecifier(wifi)
-                    .build()
+            val networkReq = NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .setNetworkSpecifier(wifi)
+                .build()
 
-                networkCallback = object : ConnectivityManager.NetworkCallback() {
-                    override fun onAvailable(network: Network) {
-                        super.onAvailable(network)
-                        network.bindSocket(udpSocket)
-                        pktNetwork = network
-                        discoverService()
-                        statusbar.post { statusbar.text = "Connected to $wifiSSID" }
-                    }
-
-                    override fun onUnavailable() {
-                        super.onUnavailable()
-                        statusbar.post { statusbar.text = "$wifiSSID unavailable" }
-                        Thread.sleep(10000)
-                        connect()
-                    }
-
-                    override fun onLost(network: Network) {
-                        super.onLost(network)
-                        statusbar.post { statusbar.text = "Lost $wifiSSID" }
-                        Thread.sleep(10000)
-                        connect()
-                    }
+            networkCallback = object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    super.onAvailable(network)
+                    network.bindSocket(udpSocket)
+                    pktNetwork = network
+                    discoverService()
+                    statusbar.post { statusbar.text = "Connected to $wifiSSID" }
                 }
-                connManager.requestNetwork(networkReq, networkCallback)
-            }, "CubeWifi.Connect").start()
-        }
+
+                override fun onUnavailable() {
+                    super.onUnavailable()
+                    statusbar.post { statusbar.text = "$wifiSSID unavailable" }
+                    Thread.sleep(10000)
+                    connect()
+                }
+
+                override fun onLost(network: Network) {
+                    super.onLost(network)
+                    statusbar.post { statusbar.text = "Lost $wifiSSID" }
+                    Thread.sleep(10000)
+                    connect()
+                }
+            }
+            connManager.requestNetwork(networkReq, networkCallback)
+        }, "CubeWifi.Connect").start()
     }
 
     fun bindSocket(socket:DatagramSocket) {

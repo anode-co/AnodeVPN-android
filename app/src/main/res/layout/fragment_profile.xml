@@ -60,218 +60,227 @@
                     app:tint="@color/colorPrimary"
                     android:contentDescription="Export wallet" />
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/listOfActions"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="30dp"
-            app:layout_constraintTop_toBottomOf="@id/layout_wallets">
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_wallets"
+            app:layout_constraintBottom_toTopOf="@+id/user_id_label"
+            android:layout_marginBottom="20dp">
                 <LinearLayout
-                    android:id="@+id/button_change_password"
+                    android:id="@+id/listOfActions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
+                    android:orientation="vertical"
+                    android:layout_marginTop="30dp"
+                    app:layout_constraintTop_toBottomOf="@id/layout_wallets">
+                        <LinearLayout
+                            android:id="@+id/button_change_password"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            android:layout_marginStart="1dp"
-                            android:text="@string/button_wallet_change_password"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textSize="20sp"
+                                    android:layout_marginStart="1dp"
+                                    android:text="@string/button_wallet_change_password"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_set_pin"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textSize="20sp"
+                                    android:layout_marginStart="1dp"
+                                    android:text="@string/button_set_pin"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_show_seed"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textSize="20sp"
+                                    android:layout_marginStart="1dp"
+                                    android:text="@string/button_show_seed"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_cjdns_stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textSize="20sp"
+                                    android:layout_marginStart="1dp"
+                                    android:text="@string/button_cjdns_stats"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_wallet_stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textSize="20sp"
+                                    android:layout_marginStart="1dp"
+                                    android:text="@string/button_wallet_stats"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_check_update"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="1dp"
+                                    android:textSize="20sp"
+                                    android:text="@string/action_check_update"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_data_collection"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="1dp"
+                                    android:textSize="20sp"
+                                    android:text="@string/button_data_collection"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_connectPktcube"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:id="@+id/text_connectPktcube"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="1dp"
+                                    android:textSize="20sp"
+                                    android:text="@string/button_connect_pktcube"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/button_connectCjdns"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="@dimen/verticalPaddingListofButtons"
+                            android:orientation="horizontal"
+                            android:layout_marginHorizontal="20dp"
+                            android:background="@drawable/borderline">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textSize="20sp"
+                                    android:layout_marginStart="1dp"
+                                    android:text="Connect CJDNS"/>
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="@color/colorPrimary" />
+                        </LinearLayout>
+                        <CheckBox
+                            android:id="@+id/upgrade_checkbox"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="20dp"
+                                android:paddingVertical="15dp"
+                                android:text="Upgrade with pre-release"/>
                 </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_set_pin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            android:layout_marginStart="1dp"
-                            android:text="@string/button_set_pin"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_show_seed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            android:layout_marginStart="1dp"
-                            android:text="@string/button_show_seed"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_cjdns_stats"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            android:layout_marginStart="1dp"
-                            android:text="@string/button_cjdns_stats"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_wallet_stats"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            android:layout_marginStart="1dp"
-                            android:text="@string/button_wallet_stats"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_check_update"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="1dp"
-                            android:textSize="20sp"
-                            android:text="@string/action_check_update"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_data_collection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="1dp"
-                            android:textSize="20sp"
-                            android:text="@string/button_data_collection"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_connectPktcube"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:id="@+id/text_connectPktcube"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="1dp"
-                            android:textSize="20sp"
-                            android:text="@string/button_connect_pktcube"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/button_connectCjdns"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingVertical="@dimen/verticalPaddingListofButtons"
-                    android:orientation="horizontal"
-                    android:layout_marginHorizontal="20dp"
-                    android:background="@drawable/borderline">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            android:layout_marginStart="1dp"
-                            android:text="Connect CJDNS"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/colorPrimary" />
-                </LinearLayout>
-                <CheckBox
-                    android:id="@+id/upgrade_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:paddingVertical="15dp"
-                        android:text="Upgrade with pre-release"/>
-        </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
         <TextView
             android:id="@+id/user_id_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ID:"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/listOfActions"
+            app:layout_constraintBottom_toTopOf="@+id/version_number"
             android:textSize="10sp"
             android:textColor="@android:color/darker_gray"
             android:layout_marginTop="20dp"
@@ -291,10 +300,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_id_label"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:text="Version: "
             android:textSize="10sp"
             android:textColor="@android:color/darker_gray"
-            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:layout_marginStart="20dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
