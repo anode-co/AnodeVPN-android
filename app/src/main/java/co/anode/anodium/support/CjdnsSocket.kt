@@ -26,6 +26,7 @@ object CjdnsSocket {
     var logpeerStats: String = ""
     var logshowConnections: String = ""
     val cjdnsPath = "data/data/co.anode.anodium/files/cjdroute.sock"
+    const val InterfaceController_beaconState_newState_SEND = 2
 
     fun init(path:String ) {
         var tries = 0
@@ -151,6 +152,7 @@ object CjdnsSocket {
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
             //logpeerStats = peerStats.str()
+            val numOfPeers = peerStats["peers"].size()
             if(peerStats["peers"].toString() != "[]") {
                 var x =0
                 try {
@@ -206,13 +208,13 @@ object CjdnsSocket {
 
     fun getNumberofEstablishedPeers(): Int {
         val peers:ArrayList<Benc.Bdict> = InterfaceController_peerStats()
-        var totalSstablishedPeers = 0
+        var totalEstablishedPeers = 0
         for (i in 0 until peers.count()) {
             if (peers[i]["state"].toString() == "\"ESTABLISHED\"") {
-                totalSstablishedPeers++
+                totalEstablishedPeers++
             }
         }
-        return totalSstablishedPeers
+        return totalEstablishedPeers
     }
 
     fun ipTunnelConnectTo(node: String) {
@@ -319,6 +321,15 @@ object CjdnsSocket {
         Log.i(LOGTAG, "SwitchPinger_ping for path: "+path)
         call("SwitchPinger_ping", Benc.dict("path",path))
     }
+
+    fun UDPInterface_beacon(interfaceNumber:Benc.Obj) {
+        val number = interfaceNumber["interfaceNumber"].num().toInt()
+        call("UDPInterface_beacon", Benc.dict("interfaceNumber", number, "state", InterfaceController_beaconState_newState_SEND))
+    }
+
+    fun UDPInterface_new(address:String, port:Int) :Benc.Obj =
+        call("UDPInterface_new",Benc.dict("bindAddress",address,"beaconPort",port))
+
 }
 
 class CjdnsException(message:String): Exception(message)
