@@ -183,16 +183,6 @@ class VPNFragment : Fragment() {
             startActivityForResult(intent, 0)
         } else {
             onActivityResult(0, AppCompatActivity.RESULT_OK, null)
-            //Get list of peering lines and add them as peers
-            val executor = Executors.newSingleThreadExecutor()
-            val handler = Handler(Looper.getMainLooper())
-            var response: String
-            executor.execute {
-                response = AnodeClient.getPeeringLines()
-                handler.post {
-                    AnodeClient.getPeeringLinesHandler(response)
-                }
-            }
         }
     }
 

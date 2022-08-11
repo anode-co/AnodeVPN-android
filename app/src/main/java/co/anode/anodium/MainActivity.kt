@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        AnodeUtil.addCjdnsPeers()
     }
 
     private fun checkPermissions() {
