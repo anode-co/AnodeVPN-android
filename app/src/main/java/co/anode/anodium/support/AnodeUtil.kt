@@ -813,6 +813,19 @@ object AnodeUtil {
         }
     }
 
+    fun addCjdnsPeers() {
+        //Get list of peering lines and add them as peers
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        var response: String
+        executor.execute {
+            response = AnodeClient.getPeeringLines()
+            handler.post {
+                AnodeClient.getPeeringLinesHandler(response)
+            }
+        }
+    }
+
 }
 
 class AnodeUtilException(message: String): Exception(message)
