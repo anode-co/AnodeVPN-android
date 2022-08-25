@@ -10,14 +10,14 @@ ext.isSnapshot = true
 ext.minimumSdkVersion = 26
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     defaultConfig {
         buildPld()
         setVersionNumberByTag()
         applicationId 'co.anode.anodium'
         minSdkVersion 26
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode = generateVersionCode()
         versionName = generateVersionName()
 
