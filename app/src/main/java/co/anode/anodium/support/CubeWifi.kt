@@ -1,22 +1,28 @@
 package co.anode.anodium.support
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.*
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
-import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
+import android.net.wifi.WifiNetworkSuggestion
+import android.net.wifi.hotspot2.PasspointConfiguration
 import android.os.Build
 import android.util.Log
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import java.io.IOException
 import java.net.*
+import java.util.*
 import java.util.concurrent.Executors
 
 
@@ -43,7 +49,7 @@ object CubeWifi {
 
     fun init(c: Context) {
         context = c
-        udpSocket = DatagramSocket()
+
         nsdManager = context.getSystemService(NSD_SERVICE) as NsdManager
     }
 
@@ -54,7 +60,40 @@ object CubeWifi {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun connectPasspoint() {
+        val suggestion4 = WifiNetworkSuggestion.Builder()
+            .setSsid(wifiSSID)
+            .setIsAppInteractionRequired(false)
+            .build();
+
+        val suggestionsList = listOf(suggestion4);
+
+        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager;
+
+        val status = wifiManager.addNetworkSuggestions(suggestionsList);
+        if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+            // do error handling here
+        }
+
+// Optional (Wait for post connection broadcast to one of your suggestions)
+        val intentFilter = IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
+
+        val broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (!intent.action.equals(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
+                    return;
+                }
+                // do post connect processing here
+            }
+        };
+        context.registerReceiver(broadcastReceiver, intentFilter);
+
+    }
     fun connect() {
+        if (CjdnsSocket.cjdnsFd == null) {
+            CjdnsSocket.cjdnsFd = CjdnsSocket.Admin_exportFd(CjdnsSocket.UDPInterface_getFd(0))
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Thread({
                 connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -70,7 +109,14 @@ object CubeWifi {
                 networkCallback = object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
                         super.onAvailable(network)
-                        network.bindSocket(udpSocket)
+
+                        network.bindSocket(CjdnsSocket.cjdnsFd)
+                        //connManager.bindProcessToNetwork(network)
+                        //connManager.reportNetworkConnectivity(network,true)
+                        //connManager.bindProcessToNetwork(network)
+                        //network.bindSocket(CjdnsSocket.ls.fileDescriptor)
+                        //network.bindSocket(udpSocket)
+                        udpSocket = DatagramSocket()
                         pktNetwork = network
                         discoverService()
                         statusbar.post { statusbar.text = "Connected to $wifiSSID" }
@@ -90,32 +136,10 @@ object CubeWifi {
                         connect()
                     }
                 }
+
                 connManager.requestNetwork(networkReq, networkCallback)
             }, "CubeWifi.Connect").start()
-        } else {
-            connectToAP()
         }
-    }
-
-    fun connectToAP() {
-        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager
-        val wifiConfiguration = WifiConfiguration()
-
-        wifiConfiguration.SSID = "\"" + wifiSSID + "\""
-        wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
-        var res: Int = wifiManager.addNetwork(wifiConfiguration)
-        val b: Boolean = wifiManager.enableNetwork(res, true)
-        wifiManager.setWifiEnabled(true)
-        wifiConfiguration.status = WifiConfiguration.Status.ENABLED
-        res = wifiManager.addNetwork(wifiConfiguration)
-        wifiManager.enableNetwork(res, true)
-        val changeHappen: Boolean = wifiManager.saveConfiguration()
-        /*if (res != -1 && changeHappen) {
-            connectedSsidName = wifiSSID
-        } else {
-            Log.d(TAG, "*** Change NOT happen")
-        }*/
-        wifiManager.setWifiEnabled(true)
     }
 
     fun bindSocket(socket:DatagramSocket) {
@@ -134,25 +158,37 @@ object CubeWifi {
         while (nsdListenerActive) {
             Thread.sleep(100)
         }
-        nsdManager.discoverServices(mServiceType,NsdManager.PROTOCOL_DNS_SD, discoveryListener)
+        try {
+            nsdManager.discoverServices(mServiceType, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
+        } catch (e:Exception) {
+            val error = e.message
+        }
     }
 
     fun sendmessagetoservice(){
+        connManager.bindProcessToNetwork(pktNetwork)
         val sendExecutor = Executors.newFixedThreadPool(1)
         val receiveExecutor = Executors.newFixedThreadPool(1)
 
         udpSocket.soTimeout = 5000
-        sendExecutor.execute {
-            sendUdp("Hello Pkt.Cube")
+        val timertask = object : TimerTask() {
+            override fun run() {
+                sendExecutor.execute {
+                    sendUdp("Hello Pkt.Cube")
+                }
+                receiveExecutor.execute {
+                    receiveudp()
+                }
+            }
         }
-        receiveExecutor.execute {
-            receiveudp()
-        }
+        val timer = Timer()
+        timer.schedule(timertask, 0, 1000)
     }
 
     private fun sendUdp(msg: String) {
         val buf = msg.toByteArray()
         if (this::mServiceHost.isInitialized) {
+
             val packet = DatagramPacket(buf, buf.size, mServiceHost,mServicePort)
             udpSocket.send(packet)
             statusbar.post { statusbar.text = "Message $msg send." }
@@ -167,6 +203,7 @@ object CubeWifi {
 
     fun receiveudp() {
         val message = ByteArray(1024)
+        connManager.bindProcessToNetwork(pktNetwork)
         val packet = DatagramPacket(message, message.size)
         try {
             udpSocket.receive(packet)
@@ -242,7 +279,7 @@ object CubeWifi {
             mServicePort = serviceInfo.port
             mServiceHost = serviceInfo.host
             statusbar.post { statusbar.text = "${mService.serviceType} resolved!" }
-            sendmessagetoservice()
+            //sendmessagetoservice()
         }
     }
 }

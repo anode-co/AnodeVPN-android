@@ -6,6 +6,7 @@ import android.util.Log
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.InetAddress
+import java.net.Socket
 import kotlin.concurrent.thread
 import kotlin.experimental.and
 
@@ -13,6 +14,7 @@ val LOGTAG = "co.anode.anodiumvpn"
 
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
+    var socket: Socket? = null
     var ipv4Address: String = ""
     var VPNipv4Address: String = ""
     var ipv4AddressPrefix: Int = 0
@@ -27,6 +29,7 @@ object CjdnsSocket {
     var logshowConnections: String = ""
     val cjdnsPath = "data/data/co.anode.anodium/files/cjdroute.sock"
     const val InterfaceController_beaconState_newState_SEND = 2
+    var cjdnsFd: FileDescriptor? = null
 
     fun init(path:String ) {
         var tries = 0
@@ -327,8 +330,8 @@ object CjdnsSocket {
         call("UDPInterface_beacon", Benc.dict("interfaceNumber", number, "state", InterfaceController_beaconState_newState_SEND))
     }
 
-    fun UDPInterface_new(address:String, port:Int) :Benc.Obj =
-        call("UDPInterface_new",Benc.dict("bindAddress",address,"beaconPort",port))
+    fun UDPInterface_new(dscp:Int, address:String, port:Int) :Benc.Obj =
+        call("UDPInterface_new",Benc.dict("dscp",dscp,"bindAddress",address,"beaconPort",port))
 
 }
 

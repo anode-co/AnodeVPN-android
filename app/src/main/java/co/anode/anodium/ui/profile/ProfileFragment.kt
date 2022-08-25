@@ -1,6 +1,7 @@
 package co.anode.anodium.ui.profile
 
 import android.content.*
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
@@ -18,7 +19,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentProfileBinding
-import co.anode.anodium.support.*
+import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.CjdnsSocket
+import co.anode.anodium.support.CubeWifi
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import co.anode.anodium.wallet.PasswordPrompt
@@ -26,7 +30,7 @@ import co.anode.anodium.wallet.PinPrompt
 import co.anode.anodium.wallet.WalletStatsActivity
 import org.json.JSONObject
 import java.io.File
-import java.net.*
+import java.net.NetworkInterface
 
 
 class ProfileFragment : Fragment() {
@@ -181,6 +185,7 @@ class ProfileFragment : Fragment() {
         wifiCheckbox.setOnClickListener {
             if (textConnect.text.equals(getString(R.string.button_connect_pktcube))) {
                 CubeWifi.connect()
+                //CubeWifi.connectPasspoint()
                 textConnect.text = getString(R.string.button_disconnect_pktcube)
             } else {
                 textConnect.text = getString(R.string.button_connect_pktcube)
@@ -188,25 +193,9 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        val cjdnsConnect = root.findViewById<LinearLayout>(R.id.button_connectCjdns)
-        cjdnsConnect.setOnClickListener {
-            if (CubeWifi.isConnected()) {
-                val wlanAddress = getLocalIpAddress()
-                val address = "$wlanAddress:0"
-                val beaconPort = 7778
-                val cjdnsSocket = DatagramSocket(7777, InetAddress.getByName(wlanAddress))
-                CubeWifi.bindSocket(cjdnsSocket)
-                val interfaceNumber = CjdnsSocket.UDPInterface_new(address, beaconPort)
-                CjdnsSocket.UDPInterface_beacon(interfaceNumber)
-                //removeall, stoptunnel?, clear routes?
-                CjdnsSocket.IpTunnel_removeAllConnections()
-                //CjdnsSocket.Core_stopTun()
-                //CjdnsSocket.clearRoutes()
-                //when we have internet re establish routes
-                //AnodeUtil.addCjdnsPeers()
-            } else {
-                Toast.makeText(mycontext, "Connect to Pkt.cube first.",Toast.LENGTH_LONG).show()
-            }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            wifiCheckbox.visibility = View.GONE
         }
         return root
     }

@@ -226,6 +226,7 @@ object AnodeUtil {
             cjdns_pb = processBuilder.start()
             cjdns_pb.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + cjdns_pb.exitValue())
+            CjdnsSocket.init(AnodeUtil.filesDirectory + "/" + AnodeUtil.CJDROUTE_SOCK)
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
