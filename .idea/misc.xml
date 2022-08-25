@@ -9,17 +9,22 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.3086816720257235" />
+        <entry key="../../.gradle/caches/transforms-3/3bfeec546d71bb9a611f7615d894a86c/transformed/jetified-stepsview-0.0.2/res/layout/widget_steps_view.xml" value="0.2894736842105263" />
         <entry key="../../Android/Sdk/platforms/android-30/data/res/layout/simple_list_item_1.xml" value="0.2894736842105263" />
         <entry key="../../Android/Sdk/platforms/android-30/data/res/layout/simple_list_item_2.xml" value="0.2894736842105263" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2085" />
+        <entry key="app/src/main/res/drawable/borderline.xml" value="0.232" />
         <entry key="app/src/main/res/drawable/button_clicked.xml" value="0.238" />
         <entry key="app/src/main/res/drawable/button_notclicked.xml" value="0.176" />
         <entry key="app/src/main/res/drawable/button_power_red.xml" value="0.176" />
         <entry key="app/src/main/res/drawable/button_round_fav_small.xml" value="0.176" />
         <entry key="app/src/main/res/drawable/button_round_share.xml" value="0.2185" />
         <entry key="app/src/main/res/drawable/buttonshape.xml" value="0.1425" />
+        <entry key="app/src/main/res/drawable/ic_add_circle_24.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/ic_anode_logo.xml" value="0.2085" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_circle_up_24.xml" value="0.206" />
         <entry key="app/src/main/res/drawable/ic_baseline_check_24.xml" value="0.2085" />
+        <entry key="app/src/main/res/drawable/ic_baseline_keyboard_arrow_right_24.xml" value="0.14" />
         <entry key="app/src/main/res/drawable/ic_baseline_power_settings_new_24.xml" value="0.1515" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.2085" />
         <entry key="app/src/main/res/drawable/ic_logo_background.xml" value="0.2085" />
@@ -30,21 +35,24 @@
         <entry key="app/src/main/res/layout/activity_accountnickname.xml" value="0.1539855072463768" />
         <entry key="app/src/main/res/layout/activity_change_password.xml" value="0.1405312767780634" />
         <entry key="app/src/main/res/layout/activity_cjdnsdebug.xml" value="0.2894736842105263" />
+        <entry key="app/src/main/res/layout/activity_cjdnsstats.xml" value="0.2894736842105263" />
+        <entry key="app/src/main/res/layout/activity_confirm_seed.xml" value="0.16359649122807018" />
         <entry key="app/src/main/res/layout/activity_debug_wallet.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/activity_forgot_password.xml" value="0.1405312767780634" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.18704710144927536" />
-        <entry key="app/src/main/res/layout/activity_password_prompt.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_new_wallet.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_password_prompt.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_pin_prompt.xml" value="0.22719298245614036" />
         <entry key="app/src/main/res/layout/activity_profile.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_recovery_seed.xml" value="0.22719298245614036" />
-        <entry key="app/src/main/res/layout/activity_send_payment.xml" value="0.1585144927536232" />
+        <entry key="app/src/main/res/layout/activity_send_payment.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.14385964912280702" />
         <entry key="app/src/main/res/layout/activity_transaction_history.xml" value="0.11503623188405797" />
         <entry key="app/src/main/res/layout/activity_vpn.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_vpn_servers_list.xml" value="0.1062553556126821" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.18" />
         <entry key="app/src/main/res/layout/activity_wallet_info.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/activity_wallet_stats.xml" value="0.21875" />
+        <entry key="app/src/main/res/layout/activity_wallet_stats.xml" value="0.33" />
         <entry key="app/src/main/res/layout/bottom_navigation_main.xml" value="0.14912280701754385" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.19517543859649122" />
         <entry key="app/src/main/res/layout/content_vpn_servers_list.xml" value="0.18728070175438596" />
@@ -52,13 +60,14 @@
         <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.2649122807017544" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2649122807017544" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.2649122807017544" />
-        <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.2649122807017544" />
+        <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_transactiondetails.xml" value="0.2804198800342759" />
-        <entry key="app/src/main/res/layout/fragment_vpn.xml" value="0.1293916023993145" />
-        <entry key="app/src/main/res/layout/fragment_wallet.xml" value="0.1293916023993145" />
+        <entry key="app/src/main/res/layout/fragment_vpn.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_wallet.xml" value="0.5" />
         <entry key="app/src/main/res/layout/list_row.xml" value="0.1405312767780634" />
         <entry key="app/src/main/res/layout/simple_list_item.xml" value="0.24605263157894736" />
         <entry key="app/src/main/res/layout/statusbar.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/wallet_create_progress.xml" value="0.25" />
         <entry key="app/src/main/res/layout/walletfragment_main.xml" value="0.1787037037037037" />
         <entry key="app/src/main/res/layout/walletfragment_setup.xml" value="0.25" />
         <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.2649122807017544" />
