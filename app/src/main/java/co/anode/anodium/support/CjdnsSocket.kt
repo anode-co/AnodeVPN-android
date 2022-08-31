@@ -30,6 +30,7 @@ object CjdnsSocket {
     val cjdnsPath = "data/data/co.anode.anodium/files/cjdroute.sock"
     const val InterfaceController_beaconState_newState_SEND = 2
     var cjdnsFd: FileDescriptor? = null
+    var peers:ArrayList<Benc.Bdict> = ArrayList()
 
     fun init(path:String ) {
         var tries = 0
@@ -154,10 +155,8 @@ object CjdnsSocket {
         var i = 0
         while(true) {
             peerStats = call("InterfaceController_peerStats", Benc.dict("page", i))
-            //logpeerStats = peerStats.str()
-            val numOfPeers = peerStats["peers"].size()
             if(peerStats["peers"].toString() != "[]") {
-                var x =0
+                var x = 0
                 try {
                     val size = peerStats["peers"].size()
                     while (x < size) {
@@ -172,6 +171,7 @@ object CjdnsSocket {
             }
             i++
         }
+        peers = out
         return out
     }
 
@@ -310,6 +310,10 @@ object CjdnsSocket {
     fun UDPInterface_beginConnection(publickey:String, ip:String, port:Int, password:String,login:String) {
         val address = "$ip:$port"
         call("UDPInterface_beginConnection", Benc.dict("publicKey",publickey,"address", address,"peerName", "", "password",password,"login", login, "interfaceNumber",0))
+    }
+
+    fun InterfaceController_disconnectPeer(pubKey:String) {
+        call("InterfaceController_disconnectPeer", Benc.dict("pubkey",pubKey))
     }
 
     fun SessionManager_sessionStatsByIP(address:String) {
