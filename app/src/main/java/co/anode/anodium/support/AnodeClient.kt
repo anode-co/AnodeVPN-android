@@ -1,6 +1,5 @@
 package co.anode.anodium.support
 
-import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -22,7 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
-import co.anode.anodium.support.CjdnsSocket.UDPInterface_beginConnection
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONArray
@@ -45,7 +43,6 @@ object AnodeClient {
     lateinit var mycontext: Context
     lateinit var statustv: TextView
     lateinit var mainActivity: AppCompatActivity
-    lateinit var apiController: APIController
     var vpnConnected: Boolean = false
     private const val apiVersion = "0.3"
     private const val FILE_BASE_PATH = "file://"
@@ -77,8 +74,6 @@ object AnodeClient {
     fun init(context: Context, activity: AppCompatActivity)  {
         mycontext = context
         mainActivity = activity
-        val service = ServiceVolley()
-        apiController = APIController(service)
     }
 
     fun showToast(message: String) {
@@ -420,7 +415,7 @@ object AnodeClient {
 
     fun getLatestRelease(userInitiated: Boolean) {
         val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
-        apiController.getArray(API_GET_ALL_RELEASES) {
+        AnodeUtil.apiController.getArray(API_GET_ALL_RELEASES) {
             response ->
             if (response != null) {
                 for (i in 0 until response.length()) {
@@ -614,7 +609,6 @@ object AnodeClient {
             LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_DISCONNECTED)
         }
 
-        @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.i(LOGTAG,"Received from $API_AUTH_VPN: $result")
@@ -680,12 +674,14 @@ object AnodeClient {
         var iconnected: Boolean = false
         runnableConnection.init(h)
         CjdnsSocket.IpTunnel_removeAllConnections()
-        //Connect to Internet
-        CjdnsSocket.ipTunnelConnectTo(node)
+        if (node.isNotEmpty()) {
+            //Connect to Internet
+            CjdnsSocket.ipTunnelConnectTo(node)
+        }
         var tries = 0
         //Check for ip address given by cjdns try for 20 times, 10secs
         Thread(Runnable {
-            while (!iconnected && (tries < 10)) {
+            while ((node.isNotEmpty()) && (!iconnected && (tries < 10))) {
                 statustv.post(Runnable {
                     statustv.text  = "Getting routes..."
                 } )
@@ -694,7 +690,7 @@ object AnodeClient {
                 tries++
                 Thread.sleep(2000)
             }
-            if (iconnected) {
+            if (iconnected || node.isEmpty()) {
                 statustv.post(Runnable {
                     statustv.text  = "Got routes..."
                 } )
@@ -720,7 +716,7 @@ object AnodeClient {
     fun APIHttpReq(address: String, body: String, method: String, needsAuth: Boolean,isRetry: Boolean): String {
         var useHttps = true
         Log.i(LOGTAG,"HttpReq at $address with $body and Auth:$needsAuth")
-        val cjdnsServerAddress = "h.vpn.anode.co" //"[fc58:2fa:fbb9:b9ee:a4e5:e7c4:3db3:44f8]"
+        val cjdnsServerAddress = "[fca8:420d:c940:d70b:55b2:44c0:c01b:3f31]"
         var result:String
         var url: URL
 
@@ -731,7 +727,7 @@ object AnodeClient {
         url = URL(address)
         //url = URL("https://vpn.anode.co/api/0.3/tests/500error/")
         //if connection failed and we are connected to cjdns try with ipv6 address
-        if(isRetry && isVpnActive()) {
+        if((isRetry && isVpnActive()) || (CubeWifi.isConnected())) {
             var cjdnsurl = address.replace("vpn.anode.co",cjdnsServerAddress)
             cjdnsurl = cjdnsurl.replace("https:","http:")
             useHttps = false
@@ -850,7 +846,6 @@ object AnodeClient {
             }
         }
 
-        @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             text?.post(Runnable { text?.text  = "Public IP: $result" } )
@@ -940,14 +935,11 @@ object AnodeClient {
 
     fun getPeeringLines(): String {
         val url = API_PEERING_LINES
-        if (checkNetworkConnection()) {
+        //if (checkNetworkConnection()) {
             val resp = APIHttpReq(url, "", "GET", false, false)
             Log.i(LOGTAG, resp)
             return resp
-        } else {
-            //No internet
-            return ""
-        }
+        //}
     }
 
     fun getPeeringLinesHandler(result: String){
@@ -957,7 +949,7 @@ object AnodeClient {
                 val peers = JSONArray(result)
                 for (i in 0 until peers.length()) {
                     val peer = peers.getJSONObject(i)
-                    UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
+                    CjdnsSocket.UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
                 }
             } catch (e: JSONException) {
                 showToast("Error, invalid JSON")
@@ -968,6 +960,14 @@ object AnodeClient {
             //TODO:???
         }else {
             showToast(result)
+        }
+    }
+
+    fun removeCjdnsPeers() {
+        for (i in 0 until CjdnsSocket.peers.size) {
+            var splitPubKey = CjdnsSocket.peers[i]["addr"].toString().split(".")
+            val pubKey = splitPubKey[splitPubKey.size-2]+"."+splitPubKey[splitPubKey.size-1]
+            CjdnsSocket.InterfaceController_disconnectPeer(pubKey)
         }
     }
 
