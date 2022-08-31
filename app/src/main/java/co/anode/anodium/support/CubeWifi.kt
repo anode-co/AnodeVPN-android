@@ -15,7 +15,6 @@ import android.net.nsd.NsdServiceInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
 import android.net.wifi.WifiNetworkSuggestion
-import android.net.wifi.hotspot2.PasspointConfiguration
 import android.os.Build
 import android.util.Log
 import android.widget.TextView
@@ -49,7 +48,6 @@ object CubeWifi {
 
     fun init(c: Context) {
         context = c
-
         nsdManager = context.getSystemService(NSD_SERVICE) as NsdManager
     }
 
@@ -91,9 +89,15 @@ object CubeWifi {
 
     }
     fun connect() {
+        //Get cjdns filedescriptor
         if (CjdnsSocket.cjdnsFd == null) {
             CjdnsSocket.cjdnsFd = CjdnsSocket.Admin_exportFd(CjdnsSocket.UDPInterface_getFd(0))
         }
+        //get peers
+        CjdnsSocket.InterfaceController_peerStats()
+        //remove All peers
+        AnodeClient.removeCjdnsPeers()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Thread({
                 connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -109,16 +113,11 @@ object CubeWifi {
                 networkCallback = object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
                         super.onAvailable(network)
-
                         network.bindSocket(CjdnsSocket.cjdnsFd)
-                        //connManager.bindProcessToNetwork(network)
-                        //connManager.reportNetworkConnectivity(network,true)
-                        //connManager.bindProcessToNetwork(network)
-                        //network.bindSocket(CjdnsSocket.ls.fileDescriptor)
-                        //network.bindSocket(udpSocket)
                         udpSocket = DatagramSocket()
                         pktNetwork = network
                         discoverService()
+                        //AnodeUtil.addCjdnsPeers()
                         statusbar.post { statusbar.text = "Connected to $wifiSSID" }
                     }
 
