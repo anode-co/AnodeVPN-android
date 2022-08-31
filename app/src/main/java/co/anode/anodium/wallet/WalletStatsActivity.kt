@@ -15,8 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -25,12 +23,10 @@ import java.util.*
 
 class WalletStatsActivity : AppCompatActivity() {
     private var updating = true
-    private lateinit var apiController: APIController
     private lateinit var pinPasswordAlert: AlertDialog
     @Volatile
     private var walletUnlocked = false
     private var balanceLastTimeUpdated: Long = 0
-    private var passwordPromptActive = false
     private lateinit var myBalance: TextView
     val peersListDetails = mutableListOf<String>()
     private var wrongPinAttempts= 0
@@ -48,9 +44,6 @@ class WalletStatsActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
 
-        //Initialize handlers
-        val service = ServiceVolley()
-        apiController = APIController(service)
         val param = intent.extras
         if (param?.get("walletName").toString() != "null") {
             activeWallet = param?.get("walletName").toString()
@@ -148,7 +141,7 @@ class WalletStatsActivity : AppCompatActivity() {
         val bannedListView = findViewById<ListView>(R.id.banned_list)
         val queriesListView = findViewById<ListView>(R.id.queries_list)
 
-        apiController.get(apiController.getInfoURL) { response ->
+        AnodeUtil.apiController.get(AnodeUtil.apiController.getInfoURL) { response ->
             if (response != null) {
                 walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
                 if (!walletUnlocked) {
@@ -223,7 +216,7 @@ class WalletStatsActivity : AppCompatActivity() {
 
     private fun getBalance() {
         //Get Balance
-        apiController.get(apiController.getBalanceURL) { response ->
+        AnodeUtil.apiController.get(AnodeUtil.apiController.getBalanceURL) { response ->
             if (response != null) {
                 val json = JSONObject(response.toString())
                 if (json.has("totalBalance")) {
@@ -333,7 +326,7 @@ class WalletStatsActivity : AppCompatActivity() {
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
         jsonRequest.put("wallet_name", "$activeWallet.db")
-        apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.unlockWalletURL,jsonRequest) { response ->
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet")
             } else if ((response.has("error")) &&
@@ -383,18 +376,18 @@ class WalletStatsActivity : AppCompatActivity() {
     private fun getCurrentPKTAddress() {
         val jsonData = JSONObject()
         jsonData.put("showzerobalance", true)
-        apiController.post(apiController.getAddressBalancesURL, jsonData) {
+        AnodeUtil.apiController.post(AnodeUtil.apiController.getAddressBalancesURL, jsonData) {
                 response ->
             if (response == null) {
                 Log.e(LOGTAG, "unexpected null response from wallet/address/balances")
                 return@post
             }
             if (response.has("addrs")) {
-                var myPKTAddress = ""
+                var myPKTAddress: String
                 //Parse response
                 val addresses = response.getJSONArray("addrs")
                 if (addresses.length() == 1) {
-                    myPKTAddress = addresses.getJSONObject(0).getString("address")
+                    //myPKTAddress = addresses.getJSONObject(0).getString("address")
                     return@post
                 } else if (addresses.length() == 0) {
                     getNewPKTAddress(1)
@@ -422,7 +415,7 @@ class WalletStatsActivity : AppCompatActivity() {
 
     private fun getNewPKTAddress(numberOfAddresses: Int) {
         for (i in 0 until numberOfAddresses) {
-            apiController.post(apiController.getNewAddressURL, JSONObject("{}")) { response ->
+            AnodeUtil.apiController.post(AnodeUtil.apiController.getNewAddressURL, JSONObject("{}")) { response ->
                 if ((response != null) && (response.has("address"))) {
                     i.inc()
                 }
