@@ -17,8 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
+import co.anode.anodium.support.AnodeUtil
 import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import com.ybs.passwordstrengthmeter.PasswordStrength
@@ -27,7 +26,6 @@ import org.json.JSONObject
 
 class PasswordPrompt : AppCompatActivity() {
     private val LOGTAG = "co.anode.anodium"
-    private lateinit var apiController: APIController
     private var currentPasswordValidated = true
     private var currentPassword = ""
     private var changePassphrase = false
@@ -49,8 +47,7 @@ class PasswordPrompt : AppCompatActivity() {
         }
         val noWallet = param?.get("noWallet").toString().toBoolean()
         val recoverWallet = param?.get("recoverWallet").toString().toBoolean()
-        val service = ServiceVolley()
-        apiController = APIController(service)
+
         val nextButton = findViewById<Button>(R.id.button_passwordprompt_next)
         if (changePassphrase) {
             currentPasswordValidated = false
@@ -145,7 +142,7 @@ class PasswordPrompt : AppCompatActivity() {
         showLoading()
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
-        apiController.post(apiController.checkPassphraseURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.checkPassphraseURL,jsonRequest) { response ->
             hideLoading()
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet/checkpassphrase")
@@ -177,7 +174,7 @@ class PasswordPrompt : AppCompatActivity() {
         val jsonRequest = JSONObject()
         jsonRequest.put("current_passphrase", currentPassword)
         jsonRequest.put("new_passphrase", newPassword)
-        apiController.post(apiController.changePassphraseURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.changePassphraseURL,jsonRequest) { response ->
             hideLoading()
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet/checkpassphrase")

@@ -14,14 +14,11 @@ import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 
 class PinPrompt : AppCompatActivity() {
-    private lateinit var apiController: APIController
     private var currentPasswordValidated = true
     private var validPassword: String? = null
 
@@ -51,8 +48,7 @@ class PinPrompt : AppCompatActivity() {
         val changePassphrase = param?.get("changepassphrase").toString().toBoolean()
         val noNext = param?.get("noNext").toString().toBoolean()
         val confirmPinLayout = findViewById<TextInputLayout>(R.id.confirmwalletpinLayout)
-        val service = ServiceVolley()
-        apiController = APIController(service)
+
         if (changePassphrase) {
             currentPasswordValidated = false
             checkCurrentPassphrase(false)
@@ -161,7 +157,7 @@ class PinPrompt : AppCompatActivity() {
     private fun validateWalletPassphrase(password: String) {
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
-        apiController.post(apiController.checkPassphraseURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.checkPassphraseURL,jsonRequest) { response ->
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet/checkpassphrase")
             } else if ((response.has("error")) &&
