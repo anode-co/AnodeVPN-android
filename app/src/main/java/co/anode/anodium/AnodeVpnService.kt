@@ -5,7 +5,6 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import co.anode.anodium.support.CjdnsSocket
-import co.anode.anodium.support.LOGTAG
 import java.io.FileDescriptor
 import java.lang.Exception
 
@@ -66,18 +65,21 @@ class AnodeVpnService : VpnService() {
 }
 
 class VpnThread(private val avpn: AnodeVpnService) : Runnable {
-
-    private var myIp6: String = ""
+    private val LOGTAG = "co.anode.anodium"
+    private var myIp6: String = "fc00::1"
 
     private fun configVpn() {
+        /* Remove check because we want to allow creating the VPN tun with empty addresses
+         * for when trying to connect cjdns to Pkt.cube */
+        /*
         if (CjdnsSocket.ipv4Address.isEmpty() && CjdnsSocket.ipv6Address.isEmpty()) {
             Log.i(LOGTAG, "AnodeVPNService: At least one address must be specified")
             return
-        }
+        }*/
 
         val b = avpn.builder().setSession("AnodeVpnService")
-                //.addAddress(myIp6, 128)
-                //.addRoute("fc00::",8)
+                .addAddress("fc00::", 128)
+                .addRoute("fc00::",8)
                 //.allowFamily(AF_INET)
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
