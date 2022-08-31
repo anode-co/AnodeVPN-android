@@ -2,13 +2,11 @@ package co.anode.anodium.wallet
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import java.io.File
 
 
@@ -24,9 +22,7 @@ class WalletInfoActivity : AppCompatActivity() {
         actionbar!!.title = "Wallet Info Details"
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-        //Initialize handlers
-        val service = ServiceVolley()
-        apiController = APIController(service)
+
         val buttonReload = findViewById<Button>(R.id.buttonRefreshWalletInfo)
         buttonReload.setOnClickListener {
             getInfo()
