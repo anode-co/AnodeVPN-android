@@ -16,18 +16,14 @@ import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import kotlin.random.Random
 
 class RecoverySeed : AppCompatActivity() {
     private lateinit var statusbar: TextView
-    private lateinit var apiController: APIController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,10 +41,6 @@ class RecoverySeed : AppCompatActivity() {
         if (walletName.isEmpty())
             walletName = "wallet"
         statusbar = findViewById(R.id.textview_status)
-
-        //Initialize Volley Service
-        val service = ServiceVolley()
-        apiController = APIController(service)
 
         val createButton = findViewById<Button>(R.id.button_wallet_create)
         createButton.setOnClickListener {
@@ -195,7 +187,7 @@ class RecoverySeed : AppCompatActivity() {
         val jsonData = JSONObject()
         jsonData.put("seed_passphrase", password)
         Log.i(LOGTAG, "generating wallet seed...")
-        apiController.post(apiController.createSeedURL, jsonData)
+        AnodeUtil.apiController.post(AnodeUtil.apiController.createSeedURL, jsonData)
         { response ->
             hideLoading()
             if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
@@ -247,7 +239,7 @@ class RecoverySeed : AppCompatActivity() {
 
     private fun initWallet( jsonData: JSONObject, isRecovery:Boolean) {
         showLoading()
-        apiController.post(apiController.walletCreateURL, jsonData)
+        AnodeUtil.apiController.post(AnodeUtil.apiController.walletCreateURL, jsonData)
         { response ->
             hideLoading()
             if ((response != null) &&
@@ -284,7 +276,7 @@ class RecoverySeed : AppCompatActivity() {
 
     private fun getSecret(resetCjdns: Boolean) {
         val jsonRequest = JSONObject()
-        apiController.post(apiController.getSecretURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.getSecretURL,jsonRequest) { response ->
             if ((response != null) && (response.has("secret") && !response.isNull("secret"))) {
                 Log.i(LOGTAG, "wallet secret retrieved")
                 val secret = response.getString("secret")
