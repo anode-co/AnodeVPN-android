@@ -30,11 +30,11 @@ import co.anode.anodium.databinding.FragmentVpnBinding
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
+import co.anode.anodium.support.CubeWifi
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.concurrent.Executors
 
 class VPNFragment : Fragment() {
     private val LOGTAG = "co.anode.anodium"
@@ -99,6 +99,24 @@ class VPNFragment : Fragment() {
         startVPNService()
         //Initialize VPN connecting waiting dialog
         VpnConnectionWaitingDialog.init(h, mycontext)
+
+        //Pkt.cube wifi connection
+        val buttonCube = root.findViewById<Button>(R.id.buttonConnectCube)
+        CubeWifi.statusbar = root.findViewById(R.id.textview_status)
+        CubeWifi.context = mycontext
+        buttonCube.setOnClickListener {
+            if (buttonCube.text.equals(getString(R.string.button_connect_pktcube))) {
+                //AnodeClient.cjdnsConnectVPN("")
+                CjdnsSocket.Core_stopTun()
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
+                mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.START"))
+                CubeWifi.connect()
+                buttonCube.text = getString(R.string.button_disconnect_pktcube)
+            } else {
+                buttonCube.text = getString(R.string.button_connect_pktcube)
+                CubeWifi.disconnect()
+            }
+        }
         return root
     }
 
