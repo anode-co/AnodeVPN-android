@@ -40,6 +40,7 @@ object CubeWifi {
     var mServicePort = 0
     lateinit var udpSocket: DatagramSocket
     lateinit var pktNetwork: Network
+    private var connected = false
     private var nsdListenerActive = false
     private var usemDNS = false
 
@@ -53,6 +54,7 @@ object CubeWifi {
 
     fun disconnect() {
         statusbar.post{ statusbar.text = "Disconnect $wifiSSID" }
+        connected = false
         if (this::connManager.isInitialized) {
             connManager.unregisterNetworkCallback(networkCallback)
         }
@@ -116,6 +118,7 @@ object CubeWifi {
                         network.bindSocket(CjdnsSocket.cjdnsFd)
                         udpSocket = DatagramSocket()
                         pktNetwork = network
+                        connected = true
                         discoverService()
                         //AnodeUtil.addCjdnsPeers()
                         statusbar.post { statusbar.text = "Connected to $wifiSSID" }
@@ -124,6 +127,7 @@ object CubeWifi {
                     override fun onUnavailable() {
                         super.onUnavailable()
                         statusbar.post { statusbar.text = "$wifiSSID unavailable" }
+                        connected = false
                         Thread.sleep(10000)
                         connect()
                     }
@@ -131,6 +135,7 @@ object CubeWifi {
                     override fun onLost(network: Network) {
                         super.onLost(network)
                         statusbar.post { statusbar.text = "Lost $wifiSSID" }
+                        connected = false
                         Thread.sleep(10000)
                         connect()
                     }
@@ -147,7 +152,7 @@ object CubeWifi {
     }
 
     fun isConnected() :Boolean {
-        return this::connManager.isInitialized && this::pktNetwork.isInitialized
+        return connected
     }
 
     fun discoverService() {
