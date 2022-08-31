@@ -16,15 +16,12 @@ import androidx.constraintlayout.widget.ConstraintSet
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.R
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
 class TransactionHistoryActivity : AppCompatActivity() {
-    lateinit var apiController: APIController
     private var transactionsLastTimeUpdated: Long = 0
     lateinit var h: Handler
     private var prevTransactions = 0
@@ -41,9 +38,6 @@ class TransactionHistoryActivity : AppCompatActivity() {
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
 
-        //Initialize handlers
-        val service = ServiceVolley()
-        apiController = APIController(service)
         h = Handler(Looper.getMainLooper())
         val extras = intent.extras
         if (extras != null) {
@@ -74,7 +68,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
         params.put("txnsLimit", 51)
         params.put("reversed", true)
         val textSize = 15.0f
-        apiController.post(apiController.getTransactionsURL, params) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
                 response.has("transactions") &&
