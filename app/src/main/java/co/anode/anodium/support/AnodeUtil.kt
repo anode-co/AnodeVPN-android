@@ -20,6 +20,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import co.anode.anodium.R
+import co.anode.anodium.volley.APIController
+import co.anode.anodium.volley.ServiceVolley
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -56,11 +58,14 @@ object AnodeUtil {
     private var walletBalance = ""
     private var walletTransactions: JSONArray = JSONArray()
     private var walletAddress = ""
+    lateinit var apiController: APIController
 
     fun init(c: Context) {
         context = c
         if (context != null)
             filesDirectory = context!!.filesDir.toString()
+        val service = ServiceVolley()
+        apiController = APIController(service)
     }
 
     fun isCjdnsAlive(): Boolean {
@@ -724,8 +729,8 @@ object AnodeUtil {
                 } else if (AnodeClient.downloadingUpdate) {
                     Thread.sleep((20 * 60000).toLong())
                 } else {
-                    //check for new version every 5min
-                    Thread.sleep((5 * 60000).toLong())
+                    //check for new version every 1h
+                    Thread.sleep((60 * 60000).toLong())
                 }
             }
         }, "AnodeUtil.CheckUpdates").start()
