@@ -52,8 +52,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initializeApp() {
-        AnodeClient.init(applicationContext, this)
+        //Initialize Util before Client
         AnodeUtil.init(applicationContext)
+        AnodeClient.init(applicationContext, this)
         AnodeUtil.initializeApp()
         AnodeUtil.launchPld()
         AnodeUtil.launchCJDNS()
