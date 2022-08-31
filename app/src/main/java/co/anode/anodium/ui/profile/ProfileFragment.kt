@@ -23,8 +23,6 @@ import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.support.CubeWifi
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.PinPrompt
 import co.anode.anodium.wallet.WalletStatsActivity
@@ -38,9 +36,8 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val LOGTAG = "co.anode.anodium"
     private val binding get() = _binding!!
-    private lateinit var apiController: APIController
     private var activeWallet = ""
-    private var walletNames: ArrayList<String> = ArrayList<String>()
+    private var walletNames: ArrayList<String> = ArrayList()
     private lateinit var walletsSpinner: Spinner
     private lateinit var prefs: SharedPreferences
 
@@ -54,9 +51,6 @@ class ProfileFragment : Fragment() {
         mycontext = requireContext()
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        val service = ServiceVolley()
-        apiController = APIController(service)
-
         val idTextview = root.findViewById<TextView>(R.id.user_id)
         val versionTextview = root.findViewById<TextView>(R.id.version_number)
         prefs = mycontext.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
@@ -134,7 +128,8 @@ class ProfileFragment : Fragment() {
 
         walletsSpinner = root.findViewById(R.id.wallet_selector)
         walletNames = AnodeUtil.getWalletFiles()
-        val dataAdapter = ArrayAdapter(mycontext,android.R.layout.simple_spinner_dropdown_item, walletNames)
+        val dataAdapter = ArrayAdapter(mycontext, android.R.layout.simple_spinner_dropdown_item, walletNames)
+
         walletsSpinner.adapter = dataAdapter
         activeWallet = prefs.getString("activeWallet", "wallet").toString()
         var activeWalletId = 0
@@ -250,7 +245,7 @@ class ProfileFragment : Fragment() {
 
     private fun getSecret(resetCjdns: Boolean) {
         val jsonRequest = JSONObject()
-        apiController.post(apiController.getSecretURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.getSecretURL,jsonRequest) { response ->
             if ((response != null) && (response.has("secret") && !response.isNull("secret"))) {
                 Log.i(LOGTAG, "wallet secret retrieved")
                 val secret = response.getString("secret")
@@ -267,7 +262,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun getWalletSeed(showDialog:Boolean) {
-        apiController.get(apiController.getSeedURL) { response ->
+        AnodeUtil.apiController.get(AnodeUtil.apiController.getSeedURL) { response ->
             if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
                 Log.i(LOGTAG, "wallet seed retrieved")
                 //Get seed
@@ -446,7 +441,7 @@ class ProfileFragment : Fragment() {
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
         jsonRequest.put("wallet_name", "$activeWallet.db")
-        apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.unlockWalletURL,jsonRequest) { response ->
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet")
             } else if ((response.has("error")) &&
