@@ -24,8 +24,6 @@ import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import co.anode.anodium.wallet.*
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONArray
@@ -39,7 +37,7 @@ class WalletFragment : Fragment() {
     private var _binding: FragmentWalletBinding? = null
     lateinit var statusBar: TextView
     private lateinit var statusIcon: ImageView
-    private lateinit var apiController: APIController
+
     @Volatile
     private var walletUnlocked = false
     private var neutrinoSynced = false
@@ -71,8 +69,6 @@ class WalletFragment : Fragment() {
         super.onCreate(savedInstanceState)
         AnodeClient.eventLog("Activity: WalletFragment created")
 
-        val service = ServiceVolley()
-        apiController = APIController(service)
         h = Handler(Looper.getMainLooper())
     }
 
@@ -192,7 +188,7 @@ class WalletFragment : Fragment() {
      */
     @SuppressLint("SimpleDateFormat")
     private fun getInfo() {
-        apiController.get(apiController.getInfoURL) { response ->
+        AnodeUtil.apiController.get(AnodeUtil.apiController.getInfoURL) { response ->
             if ((response != null) && (!response.has("error"))) {
                 var chainHeight = 0
                 var walletHeight = 0
@@ -275,7 +271,7 @@ class WalletFragment : Fragment() {
         jsonRequest.put("wallet_passphrase", password)
         jsonRequest.put("wallet_name", "$activeWallet.db")
         showLoading()
-        apiController.post(apiController.unlockWalletURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.unlockWalletURL,jsonRequest) { response ->
             hideLoading()
             if (response == null) {
                 Log.i(LOGTAG, "unknown status for wallet")
@@ -302,7 +298,7 @@ class WalletFragment : Fragment() {
 
     private fun getNewPKTAddress(numberOfAddresses: Int) {
         for (i in 0 until numberOfAddresses) {
-            apiController.post(apiController.getNewAddressURL, JSONObject("{}")) { response ->
+            AnodeUtil.apiController.post(AnodeUtil.apiController.getNewAddressURL, JSONObject("{}")) { response ->
                 if ((response != null) && (response.has("address"))) {
                     i.inc()
                 }
@@ -313,7 +309,7 @@ class WalletFragment : Fragment() {
     private fun getCurrentPKTAddress() {
         val jsonData = JSONObject()
         jsonData.put("showzerobalance", true)
-        apiController.post(apiController.getAddressBalancesURL, jsonData) {
+        AnodeUtil.apiController.post(AnodeUtil.apiController.getAddressBalancesURL, jsonData) {
                 response ->
             if (response == null) {
                 Log.e(LOGTAG, "unexpected null response from wallet/address/balances")
@@ -589,7 +585,7 @@ class WalletFragment : Fragment() {
         params.put("reversed", false)
         params.put("txnsSkip", 0)
         params.put("txnsLimit", txnsLimit)
-        apiController.post(apiController.getTransactionsURL, params) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.getTransactionsURL, params) { response ->
             if ((response != null) &&
                 !response.has("error") &&
                 response.has("transactions") &&
@@ -633,7 +629,7 @@ class WalletFragment : Fragment() {
      * @param v View
      */
     private fun getBalance() {
-        apiController.get(apiController.getBalanceURL) { response ->
+        AnodeUtil.apiController.get(AnodeUtil.apiController.getBalanceURL) { response ->
             if (response != null) {
                 val json = JSONObject(response.toString())
                 val walletBalance = root.findViewById<TextView>(R.id.walletBalanceNumber)
