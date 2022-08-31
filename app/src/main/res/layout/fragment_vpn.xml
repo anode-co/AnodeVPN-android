@@ -66,4 +66,19 @@
         app:layout_constraintStart_toStartOf="parent"
         android:textColor="#C9DDE9"
         android:background="@drawable/buttonshape" />
+    <Button
+        android:id="@+id/buttonConnectCube"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_connect_pktcube"
+        android:fontFamily="@font/lato"
+        android:layout_marginStart="@dimen/button_margin"
+        android:layout_marginEnd="@dimen/button_margin"
+        android:layout_marginBottom="20dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/buttonVPNList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="#C9DDE9"
+        android:background="@drawable/buttonshape" />
 </androidx.constraintlayout.widget.ConstraintLayout>
