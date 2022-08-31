@@ -13,15 +13,13 @@ import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.R
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONObject
 
 class SendPaymentActivity : AppCompatActivity() {
     private val LOGTAG = "co.anode.anodium"
-    lateinit var apiController: APIController
+
     private var myPKTAddress = ""
     private var canSendCoins = false
     lateinit var statusBar: TextView
@@ -40,9 +38,6 @@ class SendPaymentActivity : AppCompatActivity() {
         val sendButton = findViewById<Button>(R.id.button_sendPKTPayment)
         val address = findViewById<EditText>(R.id.editTextReceiverAddress)
         var ignoreTextChanged = false
-        //Initialize handlers
-        val service = ServiceVolley()
-        apiController = APIController(service)
 
         statusBar = findViewById(R.id.textview_status)
         //Get our PKT wallet address
@@ -158,7 +153,7 @@ class SendPaymentActivity : AppCompatActivity() {
         val fromAddresses = JSONArray()
         fromAddresses.put(myPKTAddress)
         params.put("from_address", fromAddresses)
-        apiController.post(apiController.sendFromURL, params) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.sendFromURL, params) { response ->
             if ((response != null) && response.has("txHash") && !response.isNull("txHash")) {
                 statusBar.text = "Payment of $amount PKT send"
                 finish()
@@ -182,7 +177,7 @@ class SendPaymentActivity : AppCompatActivity() {
         sendButton.isEnabled = false
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
-        apiController.post(apiController.checkPassphraseURL,jsonRequest) { response ->
+        AnodeUtil.apiController.post(AnodeUtil.apiController.checkPassphraseURL,jsonRequest) { response ->
             //Reset UI elements
             loading.visibility = View.GONE
             statusBar.text = ""
