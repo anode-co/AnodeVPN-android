@@ -81,6 +81,7 @@ class VPNFragment : Fragment() {
                 if (!buttonConnectVPNs.isChecked) {
                     disconnectVPN(false)
                 } else {
+                    AnodeUtil.addCjdnsPeers()
                     AnodeClient.AuthorizeVPN().execute(prefs.getString("LastServerPubkey", defaultNode))
                     bigbuttonState(buttonStateConnecting)
                 }
@@ -102,6 +103,9 @@ class VPNFragment : Fragment() {
 
         //Pkt.cube wifi connection
         val buttonCube = root.findViewById<Button>(R.id.buttonConnectCube)
+        if (CubeWifi.isConnected()) {
+            buttonCube.text = getString(R.string.button_disconnect_pktcube)
+        }
         CubeWifi.statusbar = root.findViewById(R.id.textview_status)
         CubeWifi.context = mycontext
         buttonCube.setOnClickListener {
@@ -115,6 +119,7 @@ class VPNFragment : Fragment() {
             } else {
                 buttonCube.text = getString(R.string.button_connect_pktcube)
                 CubeWifi.disconnect()
+                disconnectVPN(showRatingBar = false)
             }
         }
         return root
