@@ -329,13 +329,13 @@ object CjdnsSocket {
         call("SwitchPinger_ping", Benc.dict("path",path))
     }
 
-    fun UDPInterface_beacon(interfaceNumber:Benc.Obj) {
+    fun UDPInterface_beacon(interfaceNumber: Benc.Obj) {
         val number = interfaceNumber["interfaceNumber"].num().toInt()
         call("UDPInterface_beacon", Benc.dict("interfaceNumber", number, "state", InterfaceController_beaconState_newState_SEND))
     }
 
-    fun UDPInterface_new(dscp:Int, address:String, port:Int) :Benc.Obj =
-        call("UDPInterface_new",Benc.dict("dscp",dscp,"bindAddress",address,"beaconPort",port))
+    fun UDPInterface_new(dscp:Int, address:String, port:Int) : Benc.Obj =
+        call("UDPInterface_new", Benc.dict("dscp",dscp,"bindAddress",address,"beaconPort",port))
 
 }
 

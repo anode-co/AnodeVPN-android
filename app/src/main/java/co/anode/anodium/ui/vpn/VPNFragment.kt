@@ -10,7 +10,6 @@ import android.net.NetworkInfo
 import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import android.text.Html
 import android.util.Log
@@ -27,6 +26,9 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentVpnBinding
+import co.anode.anodium.AnodeVpnService
+import co.anode.anodium.RatingFragment
+import co.anode.anodium.VpnListActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
@@ -358,7 +360,7 @@ class VPNFragment : Fragment() {
         override fun run() {
             h.removeCallbacks(VpnConnectionWaitingDialog)
             if (!AnodeClient.vpnConnected) {
-                if (c!=null) {
+                if (c !=null) {
                     val builder: AlertDialog.Builder = AlertDialog.Builder(c!!)
                     builder.setTitle(c?.getString(R.string.toast_no_internet))
                     builder.setMessage(c?.getString(R.string.msg_vpn_timeout))

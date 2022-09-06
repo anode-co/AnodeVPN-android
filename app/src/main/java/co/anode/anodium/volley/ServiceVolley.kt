@@ -1,7 +1,6 @@
 package co.anode.anodium.volley
 
 import android.util.Log
-import co.anode.anodium.support.AnodeUtil
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Response

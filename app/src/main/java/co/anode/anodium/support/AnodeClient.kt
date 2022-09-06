@@ -14,15 +14,14 @@ import android.os.Handler
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
-import co.anode.anodium.volley.APIController
-import co.anode.anodium.volley.ServiceVolley
+import co.anode.anodium.AccountNicknameActivity
+import co.anode.anodium.AnodeVpnService
+import co.anode.anodium.SignInActivity
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -949,7 +948,7 @@ object AnodeClient {
                 val peers = JSONArray(result)
                 for (i in 0 until peers.length()) {
                     val peer = peers.getJSONObject(i)
-                    CjdnsSocket.UDPInterface_beginConnection(peer.getString("publicKey"),peer.getString("ip"),peer.getInt("port"),peer.getString("password"),peer.getString("login"))
+                    CjdnsSocket.UDPInterface_beginConnection(peer.getString("publicKey"), peer.getString("ip"), peer.getInt("port"), peer.getString("password"), peer.getString("login"))
                 }
             } catch (e: JSONException) {
                 showToast("Error, invalid JSON")
@@ -1012,7 +1011,7 @@ object AnodeClient {
     }
 
     fun generateUsername():String {
-        val resp = AnodeClient.APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
+        val resp = APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)
         Log.i(LOGTAG, resp)
         return resp
     }

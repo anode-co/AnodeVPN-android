@@ -2,7 +2,6 @@ package co.anode.anodium.support
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.VpnService
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -38,7 +37,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import kotlin.system.exitProcess
 
 
 object AnodeUtil {
@@ -231,7 +229,7 @@ object AnodeUtil {
             cjdns_pb = processBuilder.start()
             cjdns_pb.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + cjdns_pb.exitValue())
-            CjdnsSocket.init(AnodeUtil.filesDirectory + "/" + AnodeUtil.CJDROUTE_SOCK)
+            CjdnsSocket.init(filesDirectory + "/" + CJDROUTE_SOCK)
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
@@ -651,7 +649,7 @@ object AnodeUtil {
                     if ((System.currentTimeMillis() - prefs!!.getLong("LastEventLogFileSubmitted", 0) > 86400000) or
                         (System.currentTimeMillis() - prefs.getLong("LastRatingSubmitted", 0) > 86400000)
                     ) {
-                        val bEvents = File ("$filesDirectory/anodium-events.log").exists()
+                        val bEvents = File("$filesDirectory/anodium-events.log").exists()
                         val bRatings = File("$filesDirectory/anodium-rating.json").exists()
                         var timetosleep: Long = 60000
                         if ((!bEvents) or (!bRatings)) {
@@ -677,7 +675,7 @@ object AnodeUtil {
                                     timetosleep = 60000
                                 } else {
                                     with(prefs.edit()) {
-                                        putLong("LastRatingSubmitted", java.lang.System.currentTimeMillis())
+                                        putLong("LastRatingSubmitted", System.currentTimeMillis())
                                         commit()
                                     }
                                     timetosleep = (60000 * 60 * 24).toLong()

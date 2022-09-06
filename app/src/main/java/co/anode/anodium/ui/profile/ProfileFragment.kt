@@ -19,6 +19,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentProfileBinding
+import co.anode.anodium.AboutDialog
+import co.anode.anodium.AnodeVpnService
+import co.anode.anodium.CjdnsStatsActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket

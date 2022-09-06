@@ -22,7 +22,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
+import co.anode.anodium.wallet.SendPaymentActivity
+import co.anode.anodium.wallet.TransactionHistoryActivity
 import co.anode.anodium.support.AnodeClient
+import co.anode.anodium.wallet.NewWalletActivity
+import co.anode.anodium.wallet.TransactionDetailsFragment
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.wallet.*
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

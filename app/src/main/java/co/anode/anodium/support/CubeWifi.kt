@@ -193,13 +193,13 @@ object CubeWifi {
         val buf = msg.toByteArray()
         if (this::mServiceHost.isInitialized) {
 
-            val packet = DatagramPacket(buf, buf.size, mServiceHost,mServicePort)
+            val packet = DatagramPacket(buf, buf.size, mServiceHost, mServicePort)
             udpSocket.send(packet)
             statusbar.post { statusbar.text = "Message $msg send." }
         } else {
             mServiceHost = InetAddress.getByName("172.31.242.254")
             mServicePort = 5555
-            val packet = DatagramPacket(buf, buf.size, mServiceHost,mServicePort)
+            val packet = DatagramPacket(buf, buf.size, mServiceHost, mServicePort)
             udpSocket.send(packet)
             statusbar.post { statusbar.text = "Message $msg send to default host." }
         }
