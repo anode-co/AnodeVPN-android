@@ -1,9 +1,7 @@
 package com.pkt.dummy.repository
 
 import android.content.Context
-import com.pkt.domain.dto.Addr
-import com.pkt.domain.dto.CjdnsInfo
-import com.pkt.domain.dto.WalletInfo
+import com.pkt.domain.dto.*
 import com.pkt.domain.repository.WalletRepository
 import com.pkt.dummy.AddrMapper
 import com.pkt.dummy.CjdnsInfoMapper
@@ -58,7 +56,7 @@ class WalletRepositoryDummy constructor(
             }
     }
 
-    override suspend fun getWalletInfo(address: String): Result<WalletInfo> = withContext(Dispatchers.IO) {
+    override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO) {
         runCatching {
             delay(1000L)
             val info = context.resources.openRawResource(R.raw.wallet_info_1).use {
@@ -76,5 +74,25 @@ class WalletRepositoryDummy constructor(
             }
             cjdnsInfoMapper.map(info)
         }
+    }
+
+    override suspend fun unlockWallet(passphrase: String, name: String?): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun createAddress(): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWalletBalances(): Result<WalletAddressBalances> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getCurrentAddress(): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWalletTransactions(): Result<WalletTransactions> {
+        TODO("Not yet implemented")
     }
 }

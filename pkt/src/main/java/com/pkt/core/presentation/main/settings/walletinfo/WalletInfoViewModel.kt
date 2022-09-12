@@ -23,7 +23,8 @@ class WalletInfoViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : StateViewModel<WalletInfoState>() {
 
-    private val address: String = savedStateHandle["address"] ?: throw IllegalArgumentException("address is required")
+    //private val address: String = savedStateHandle["address"] ?: throw IllegalArgumentException("address is required")
+    private var address: String = ""
 
     private val _timerUiState: MutableStateFlow<Int?> by lazy { MutableStateFlow(null) }
     val timerUiState: Flow<Int?> by lazy { _timerUiState }
@@ -38,8 +39,15 @@ class WalletInfoViewModel @Inject constructor(
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
         runCatching {
+            walletRepository.getCurrentAddress().getOrThrow()
+        }.onSuccess {
+            address = it
+        }.onFailure {
+
+        }
+        runCatching {
             val balance = walletRepository.getWalletBalance(address).getOrThrow()
-            val info = walletRepository.getWalletInfo(address).getOrThrow()
+            val info = walletRepository.getWalletInfo().getOrThrow()
             Pair(balance, info)
         }.onSuccess { (balance, info) ->
             val wallet = info.wallet

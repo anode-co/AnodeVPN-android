@@ -1,9 +1,13 @@
 package com.pkt.domain.dto
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class WalletAddressBalances(
     val addrs: List<Addr>,
 )
 
+@Serializable
 data class Addr(
     val address: String,
     val immaturereward: Int,

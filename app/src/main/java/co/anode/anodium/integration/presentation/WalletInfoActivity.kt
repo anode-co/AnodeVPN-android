@@ -27,9 +27,7 @@ class WalletInfoActivity : AppCompatActivity() {
     }
 
     companion object {
-
         private const val EXTRA_ADDRESS = "EXTRA_ADDRESS"
-
         fun getIntent(context: Context, address: String) = Intent(context, WalletInfoActivity::class.java).apply {
             putExtra(EXTRA_ADDRESS, address)
         }

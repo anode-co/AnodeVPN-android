@@ -28,8 +28,10 @@ import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.support.CubeWifi
 import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.PinPrompt
+import co.anode.anodium.integration.presentation.WalletInfoActivity
 import co.anode.anodium.wallet.WalletStatsActivity
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.File
 import java.net.NetworkInterface
 
@@ -84,14 +86,21 @@ class ProfileFragment : Fragment() {
         }
         val walletStatsButton = root.findViewById<LinearLayout>(R.id.button_wallet_stats)
         walletStatsButton.setOnClickListener {
-            Log.i(LOGTAG, "Start wallet stats activity")
-            val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
-            statsActivity.putExtra("walletName", activeWallet)
-            startActivity(statsActivity)
+            Timber.tag(LOGTAG).i("Start wallet stats activity")
+            //check for new UI
+            if (prefs.getBoolean("useNewUI", false)) {
+                val statsActivity = Intent(mycontext, WalletInfoActivity::class.java)
+                statsActivity.putExtra("walletName", activeWallet)
+                startActivity(statsActivity)
+            } else {
+                val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
+                statsActivity.putExtra("walletName", activeWallet)
+                startActivity(statsActivity)
+            }
         }
         val setPinButton = root.findViewById<LinearLayout>(R.id.button_set_pin)
         setPinButton.setOnClickListener {
-            Log.i(LOGTAG, "Open PasswordPin activity for setting PIN")
+            Timber.tag(LOGTAG).i("Open PasswordPin activity for setting PIN")
             val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
             promptPinActivity.putExtra("changepassphrase", true)
             promptPinActivity.putExtra("noNext", true)

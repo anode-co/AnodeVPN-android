@@ -5,7 +5,9 @@ import android.text.TextUtils
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class BackendVolley : Application() {
     private lateinit var mRequestQueue: RequestQueue
     override fun onCreate() {

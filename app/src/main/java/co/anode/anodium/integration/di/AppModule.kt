@@ -2,6 +2,7 @@ package co.anode.anodium.integration.di
 
 import android.content.Context
 import co.anode.anodium.BuildConfig
+import co.anode.anodium.integration.model.repository.WalletRepositoryImpl
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.domain.repository.WalletRepository
 import com.pkt.dummy.repository.WalletRepositoryDummy
@@ -19,10 +20,10 @@ object AppModule {
     @Provides
     fun providesVersionName(): String = BuildConfig.VERSION_NAME
 
-    @Provides
+/*    @Provides
     fun providesWalletRepository(@ApplicationContext context: Context): WalletRepository =
-        WalletRepositoryDummy(context)
+        WalletRepositoryDummy(context)*/
 
-//    @Provides
-//    fun providesWalletRepository(): WalletRepository = WalletRepositoryImpl()
+    @Provides
+    fun providesWalletRepository(): WalletRepository = WalletRepositoryImpl()
 }
