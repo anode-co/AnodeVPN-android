@@ -3,10 +3,13 @@ package co.anode.anodium
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -16,9 +19,12 @@ import androidx.navigation.ui.setupWithNavController
 import co.anode.anodium.databinding.ActivityMainBinding
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
+import co.anode.anodium.support.CubeWifi
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
+import timber.log.Timber.Forest.plant
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
@@ -32,8 +38,23 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.ACCESS_WIFI_STATE,
         Manifest.permission.INTERNET,
         Manifest.permission.CHANGE_NETWORK_STATE,
-        Manifest.permission.CHANGE_WIFI_STATE
+        Manifest.permission.CHANGE_WIFI_STATE,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
     )
+
+    private fun initTimber() {
+        if (BuildConfig.DEBUG) {
+            plant(Timber.DebugTree())
+        } else {
+            plant(object : Timber.Tree() {
+                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                    // TODO
+                }
+            })
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -49,6 +70,9 @@ class MainActivity : AppCompatActivity() {
         initializeApp()
         val navController = navHostFragment.navController
         navView.setupWithNavController(navController)
+
+        //start thread to look for Pkt.cube wifi
+        searchForInternetSharing()
     }
 
     private fun initializeApp() {
@@ -128,6 +152,24 @@ class MainActivity : AppCompatActivity() {
                     commit()
                 }
             }
+        }
+    }
+
+    private fun searchForInternetSharing() {
+        //Only for >Q versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            //Init CubeWifi
+            CubeWifi.init(applicationContext)
+            //Search for Pkt.cube wifi
+            Thread({
+                //wait for 1min before start searching
+                Thread.sleep(60000)
+                while (AnodeUtil.enablePktCubeConnection) {
+                    //search for available wifi ssid
+                    AnodeUtil.isInternetSharingAvailable = CubeWifi.isCubeNetworkAvailable()
+                    Thread.sleep(30000)
+                }
+            }, "VPNFragment.SearchForCubeWifi").start()
         }
     }
 

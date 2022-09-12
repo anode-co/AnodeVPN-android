@@ -12,6 +12,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
 import android.net.wifi.WifiNetworkSuggestion
@@ -48,6 +49,7 @@ object CubeWifi {
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
 
     fun init(c: Context) {
+
         context = c
         nsdManager = context.getSystemService(NSD_SERVICE) as NsdManager
     }
@@ -88,8 +90,27 @@ object CubeWifi {
             }
         };
         context.registerReceiver(broadcastReceiver, intentFilter);
-
     }
+
+
+    @SuppressLint("MissingPermission")//we have permission check on VPN fragment
+    fun getListofWifis(): MutableList<ScanResult>? {
+        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager
+        return wifiManager.scanResults
+    }
+
+    fun isCubeNetworkAvailable(): Boolean {
+        val list = getListofWifis()
+        if (list != null) {
+            for (scanResult in list) {
+                if (scanResult.SSID == wifiSSID) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     fun connect() {
         //Get cjdns filedescriptor
         if (CjdnsSocket.cjdnsFd == null) {

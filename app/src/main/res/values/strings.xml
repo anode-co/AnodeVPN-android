@@ -159,7 +159,7 @@
     <string name="button_wallet_stats">Wallet stats</string>
     <string name="button_set_pin">Set PIN</string>
     <string name="button_data_collection">Data collection</string>
-    <string name="button_connect_pktcube">Search for Pkt.cube</string>
+    <string name="button_connect_pktcube">Connect to Pkt.cube</string>
     <string name="button_disconnect_pktcube">Disconnect Pkt.cube</string>
     <!-- Wallet menu-->
     <string name="action_wallet_stats">Stats</string>

@@ -56,7 +56,9 @@ object AnodeUtil {
     private var walletBalance = ""
     private var walletTransactions: JSONArray = JSONArray()
     private var walletAddress = ""
+    var enablePktCubeConnection = true
     lateinit var apiController: APIController
+    var isInternetSharingAvailable = false
 
     fun init(c: Context) {
         context = c

@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
@@ -323,6 +324,7 @@ class VPNFragment : Fragment() {
             .registerReceiver(vpnStatusReceiver, IntentFilter(VPN_DISCONNECTED))
         val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
         bigbuttonState(prefs.getInt("vpnLastButtonState",0))
+        internetSharingStatus()
     }
 
     override fun onPause() {
@@ -344,6 +346,15 @@ class VPNFragment : Fragment() {
                 VPN_DISCONNECTED.getAction(0) -> bigbuttonState(buttonStateDisconnected)
                 VPN_CONNECTING.getAction(0) -> bigbuttonState(buttonStateConnecting)
             }
+        }
+    }
+
+    private fun internetSharingStatus() {
+        val cubeButton = root.findViewById<Button>(R.id.buttonConnectCube)
+        if (AnodeUtil.isInternetSharingAvailable) {
+            cubeButton.visibility = View.VISIBLE
+        } else {
+            cubeButton.visibility = View.GONE
         }
     }
 

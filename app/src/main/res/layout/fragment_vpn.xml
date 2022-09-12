@@ -70,6 +70,7 @@
         android:id="@+id/buttonConnectCube"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="@string/button_connect_pktcube"
         android:fontFamily="@font/lato"
         android:layout_marginStart="@dimen/button_margin"
