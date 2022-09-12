@@ -191,6 +191,11 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        val newUiCheckBox = root.findViewById<CheckBox>(R.id.use_newui_checkbox)
+        newUiCheckBox.isChecked = prefs.getBoolean("useNewUI", false)
+        newUiCheckBox.setOnClickListener {
+            prefs.edit().putBoolean("useNewUI", newUiCheckBox.isChecked).apply()
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             wifiCheckbox.visibility = View.GONE
