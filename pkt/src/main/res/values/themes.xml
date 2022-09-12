@@ -1,0 +1,56 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.App" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/color1</item>
+        <item name="colorPrimaryVariant">@color/color1</item>
+        <item name="colorOnPrimary">@color/text1</item>
+        <item name="colorSecondary">@color/color1</item>
+        <item name="colorSecondaryVariant">@color/color1</item>
+        <item name="colorOnSecondary">@color/text1</item>
+        <item name="android:colorBackground">@color/bg1</item>
+        <item name="colorOnBackground">@color/text1</item>
+        <item name="colorSurface">@color/bg3</item>
+        <item name="colorOnSurface">@color/text1</item>
+        <item name="colorError">@color/red</item>
+        <item name="colorOnError">@color/text1</item>
+        <item name="colorSuccess">@color/green</item>
+        <item name="colorOnSuccess">@color/text1</item>
+        <item name="colorProgress">@color/yellow</item>
+        <item name="colorOnProgress">@color/text1</item>
+
+        <item name="android:windowBackground">@color/bg1</item>
+        <item name="android:statusBarColor">?android:windowBackground</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">?android:windowBackground</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+
+        <item name="android:textColorPrimary">@color/text1</item>
+        <item name="android:textColorSecondary">@color/text1_50</item>
+
+        <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
+        <item name="android:textViewStyle">@style/Widget.App.TextView</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.App.Button.OutlinedButton</item>
+        <item name="borderlessButtonStyle">@style/Widget.App.Button.TextButton</item>
+        <item name="circularProgressIndicatorStyle">@style/Widget.App.CircularProgressIndicator</item>
+        <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
+        <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
+
+        <item name="textAppearance12Regular">@style/TextAppearance.App.12.Regular</item>
+        <item name="textAppearance14Regular">@style/TextAppearance.App.14.Regular</item>
+        <item name="textAppearance14Medium">@style/TextAppearance.App.14.Medium</item>
+        <item name="textAppearance14SemiBold">@style/TextAppearance.App.14.SemiBold</item>
+        <item name="textAppearance16Regular">@style/TextAppearance.App.16.Regular</item>
+        <item name="textAppearance16SemiBold">@style/TextAppearance.App.16.SemiBold</item>
+        <item name="textAppearance18SemiBold">@style/TextAppearance.App.18.SemiBold</item>
+        <item name="textAppearance20SemiBold">@style/TextAppearance.App.20.SemiBold</item>
+        <item name="textAppearance30SemiBold">@style/TextAppearance.App.30.SemiBold</item>
+
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.App.PopupMenu</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/TextAppearance.App.PopupMenu</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
+
+    </style>
+
+</resources>

@@ -1,2 +1,5 @@
 rootProject.name='AnodeVPN'
 include ':app'
+include ':pkt_domain'
+include ':pkt_dummy'
+include ':pkt'

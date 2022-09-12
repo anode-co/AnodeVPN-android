@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/subtitleLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="8dp"
+        android:drawablePadding="6dp"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:textAppearance="?textAppearance12Regular"
+        app:drawableStartCompat="@drawable/ic_dot"
+        app:drawableTint="?colorSuccess"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="7 Peers / Block: 1483428/1483429" />
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textAppearance="?textAppearance18SemiBold"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitleLabel"
+        tools:text="My Wallet 1" />
+
+    <TextView
+        android:id="@+id/balancePktLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:gravity="start|center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearance30SemiBold"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toTopOf="@id/balanceUsdLabel"
+        app:layout_constraintEnd_toStartOf="@id/sendButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/sendButton"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="98.00 PKT" />
+
+    <TextView
+        android:id="@+id/balanceUsdLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="10dp"
+        android:gravity="start|center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearance14Regular"
+        android:textColor="?android:textColorSecondary"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/sendButton"
+        app:layout_constraintEnd_toStartOf="@id/sendButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/balancePktLabel"
+        tools:text="1,960.02 USD" />
+
+    <ImageButton
+        android:id="@+id/sendButton"
+        android:layout_width="90dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:background="@drawable/bg_rounded_20dp"
+        android:backgroundTint="?colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleLabel"
+        app:srcCompat="@drawable/ic_sent"
+        tools:ignore="ContentDescription" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:background="@color/stroke2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/balanceUsdLabel" />
+
+    <TextView
+        android:id="@+id/addressLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:includeFontPadding="false"
+        android:text="@string/my_wallet_address"
+        android:textAppearance="?textAppearance14Regular"
+        android:textColor="?android:textColorSecondary"
+        app:layout_constraintEnd_toStartOf="@id/qrButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider" />
+
+    <TextView
+        android:id="@+id/addressValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="@id/addressLabel"
+        app:layout_constraintStart_toStartOf="@id/addressLabel"
+        app:layout_constraintTop_toBottomOf="@id/addressLabel"
+        tools:text="pkdfvdsv1kliblh5kihi3nn24inkklk5353kkjbl" />
+
+    <ImageButton
+        android:id="@+id/qrButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toStartOf="@id/shareButton"
+        app:layout_constraintTop_toTopOf="@id/shareButton"
+        app:srcCompat="@drawable/ic_qr"
+        tools:ignore="ContentDescription" />
+
+    <ImageButton
+        android:id="@+id/shareButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="38dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:srcCompat="@drawable/ic_share"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/transactionsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_horizontal"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="22dp"
+        android:text="@string/transactions"
+        android:textAppearance="?textAppearance20SemiBold"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@id/selectPeriodButton"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addressValue" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/selectPeriodButton"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="22dp"
+        android:text="@string/select_period"
+        app:layout_constraintBottom_toBottomOf="@id/transactionsLabel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/transactionsLabel" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        style="@style/Widget.App.RecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transactionsLabel" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="colorSuccess" format="color|reference" />
+    <attr name="colorOnSuccess" format="color|reference" />
+    <attr name="colorProgress" format="color|reference" />
+    <attr name="colorOnProgress" format="color|reference" />
+
+    <color name="color1">#4BA7C4</color>
+    <color name="bg1">#141528</color>
+    <color name="bg2">#192140</color>
+    <color name="bg3">#222439</color>
+    <color name="text1">#EAF7FA</color>
+    <color name="text1_50">#80EAF7FA</color>
+    <color name="stroke1">#454A5E</color>
+    <color name="stroke2">#333747</color>
+    <color name="red">#D42343</color>
+    <color name="green">#37B761</color>
+    <color name="yellow">#EED23B</color>
+
+</resources>

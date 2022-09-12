@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <plurals name="peers">
+        <item quantity="zero">%d Peers</item>
+        <item quantity="one">%d Peer</item>
+        <item quantity="two">%d Peers</item>
+        <item quantity="few">%d Peers</item>
+        <item quantity="many">%d Peers</item>
+        <item quantity="other">%d Peers</item>
+    </plurals>
+
+</resources>

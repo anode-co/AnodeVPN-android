@@ -1,0 +1,88 @@
+<resources>
+
+    <!--common-->
+    <string name="retry">Retry</string>
+
+    <!--error-->
+    <string name="error_common">Something goes wrong…</string>
+
+    <!--fragment_start-->
+    <string name="please_create_wallet">Please create your PKT Wallet. It is needed to launch the application.</string>
+    <string name="create_new_wallet">Create New Wallet</string>
+    <string name="recover_existing_wallet">Recover Existing Wallet</string>
+
+    <!--fragment_main-->
+    <string name="vpn">VPN</string>
+    <string name="wallet">Wallet</string>
+    <string name="settings">Settings</string>
+
+    <!--fragment_wallet-->
+    <string name="block">Block:</string>
+    <string name="my_wallet_address">My PKT Wallet address</string>
+    <string name="transactions">Transactions</string>
+    <string name="select_period">Select period</string>
+    <string name="received_pkt">Received PKT</string>
+    <string name="sent_pkt">Sent PKT</string>
+    <string name="these_are_all_your_transactions">These are all your transactions</string>
+    <string name="transactions_empty">There aren\'t any transactions on this address yet</string>
+
+    <!--fragment_settings-->
+    <string name="change_password">Change Password</string>
+    <string name="change_pin">Change PIN</string>
+    <string name="show_seed">Show Seed</string>
+    <string name="cjdns_info">Cjdns Info</string>
+    <string name="wallet_info">Wallet Info</string>
+    <string name="data_consent">Data Consent</string>
+    <string name="id">ID:</string>
+    <string name="version">Version:</string>
+    <string name="check_for_update">Check for update</string>
+    <string name="upgrade_from_pre_release">Upgrade from pre-release versions</string>
+    <string name="rename">Rename</string>
+    <string name="export">Export</string>
+    <string name="delete">Delete</string>
+    <string name="new_wallet">New Wallet</string>
+    <string name="wallet_recovery">Wallet recovery</string>
+
+    <!--fragment_wallet_info-->
+    <string name="settings_taken">Settings taken %s ago, pull to refresh</string>
+    <string name="address">Address</string>
+    <string name="balance">Balance</string>
+    <string name="wallet_sync">Wallet sync</string>
+    <string name="neutrino_sync">Neutrino sync</string>
+    <string name="connected_servers">Connected servers</string>
+    <string name="sync">Sync:</string>
+    <string name="details">Details</string>
+    <string name="debug_logs">Debug Logs</string>
+
+    <!--fragment_cjdns_info-->
+    <string name="app_version">App Version:</string>
+    <string name="ipv4">IPv4:</string>
+    <string name="internet_ipv6">Internet IPv6:</string>
+    <string name="cjdns_ipv6">Cjdns IPv6:</string>
+    <string name="public_key">Public Key:</string>
+    <string name="node_map">Node Map:</string>
+    <string name="find_your_self">Find Yourself on the map</string>
+    <string name="username">Username:</string>
+    <string name="vpn_exit_key">VPN exit key:</string>
+    <string name="submit_logs">Submit Logs</string>
+    <string name="peers">Peers</string>
+    <string name="no_communication_yet">No communication yet</string>
+    <string name="handshaking">Handshaking</string>
+    <string name="established">Established</string>
+    <string name="unresponsive">Unresponsive</string>
+    <string name="unauthenticated">Unauthenticated</string>
+    <string name="incompatible">Incompatible</string>
+    <string name="ip">IP:</string>
+    <string name="key">Key:</string>
+    <string name="status">Status:</string>
+    <string name="key_in">In:</string>
+    <string name="out">Out:</string>
+    <string name="loss">Loss:</string>
+    <string name="connection">Connection</string>
+    <string name="server">Server:</string>
+    <string name="ipv6">IPv6</string>
+    <string name="per_second">s</string>
+    <string name="kb">KB</string>
+    <string name="mb">MB</string>
+
+</resources>

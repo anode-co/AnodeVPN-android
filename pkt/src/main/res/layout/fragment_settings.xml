@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/walletButton"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="22dp"
+        android:layout_marginTop="36dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:minHeight="48dp"
+        android:textAppearance="?textAppearance20SemiBold"
+        android:textColor="?android:textColorPrimary"
+        app:icon="@drawable/ic_arrow_down"
+        app:iconGravity="textEnd"
+        app:iconPadding="8dp"
+        app:iconTint="?colorPrimary"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@id/moreButton"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="My Wallet 1" />
+
+    <ImageButton
+        android:id="@+id/moreButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ripple_mask_oval"
+        android:minWidth="36dp"
+        android:minHeight="36dp"
+        app:layout_constraintBottom_toBottomOf="@id/walletButton"
+        app:layout_constraintEnd_toStartOf="@id/addButton"
+        app:layout_constraintTop_toTopOf="@id/walletButton"
+        app:srcCompat="@drawable/ic_dots"
+        tools:ignore="ContentDescription" />
+
+    <ImageButton
+        android:id="@+id/addButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="23dp"
+        android:background="@drawable/ripple_mask_oval"
+        android:minWidth="36dp"
+        android:minHeight="36dp"
+        app:layout_constraintBottom_toBottomOf="@id/walletButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/walletButton"
+        app:srcCompat="@drawable/ic_add"
+        tools:ignore="ContentDescription" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        style="@style/Widget.App.ScrollView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingVertical="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/walletButton">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                style="@style/Widget.App.RecyclerView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="6"
+                tools:listitem="@layout/item_menu" />
+
+            <TextView
+                android:id="@+id/idLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:layout_marginTop="20dp"
+                android:includeFontPadding="false"
+                android:textAppearance="?textAppearance12Regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recyclerView"
+                tools:text="ID: another-stagbeetle" />
+
+            <TextView
+                android:id="@+id/versionLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:layout_marginTop="10dp"
+                android:includeFontPadding="false"
+                android:textAppearance="?textAppearance12Regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/idLabel"
+                tools:text="Version: 0.2.113" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

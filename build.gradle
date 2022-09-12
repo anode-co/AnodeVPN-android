@@ -10,10 +10,17 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.3'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-        //classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.13'
+
+        //New screens integration
+        classpath "com.google.dagger:hilt-android-gradle-plugin:2.43.2"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.5.2"
     }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
+    id "com.github.ben-manes.versions" version "0.42.0"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.0'
 }
 
 allprojects {

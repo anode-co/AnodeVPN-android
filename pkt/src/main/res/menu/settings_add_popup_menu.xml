@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/newWallet"
+        android:title="@string/new_wallet" />
+    <item
+        android:id="@+id/walletRecovery"
+        android:title="@string/wallet_recovery" />
+</menu>

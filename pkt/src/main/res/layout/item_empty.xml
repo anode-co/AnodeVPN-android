@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/spacing_horizontal"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/shape_rounded_10dp"
+    android:backgroundTint="?colorSurface"
+    android:gravity="center"
+    android:paddingHorizontal="40dp"
+    android:paddingVertical="52dp"
+    android:text="@string/transactions_empty"
+    android:textAppearance="?textAppearance14Regular"
+    android:textColor="?android:textColorSecondary" />

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="textAppearance12Regular" format="reference" />
+    <attr name="textAppearance14Regular" format="reference" />
+    <attr name="textAppearance14Medium" format="reference" />
+    <attr name="textAppearance14SemiBold" format="reference" />
+    <attr name="textAppearance16Regular" format="reference" />
+    <attr name="textAppearance16SemiBold" format="reference" />
+    <attr name="textAppearance18SemiBold" format="reference" />
+    <attr name="textAppearance20SemiBold" format="reference" />
+    <attr name="textAppearance30SemiBold" format="reference" />
+
+    <style name="TextAppearance.App" parent="" />
+
+    <style name="TextAppearance.App.12">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.App.12.Regular">
+        <item name="fontFamily">@font/font_regular</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+    </style>
+
+    <style name="TextAppearance.App.14">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.App.14.Regular">
+        <item name="fontFamily">@font/font_regular</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.App.14.Medium">
+        <item name="fontFamily">@font/font_medium</item>
+        <item name="android:fontFamily">@font/font_medium</item>
+    </style>
+
+    <style name="TextAppearance.App.14.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="TextAppearance.App.16">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.App.16.Regular">
+        <item name="fontFamily">@font/font_regular</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="lineHeight">22sp</item>
+    </style>
+
+    <style name="TextAppearance.App.16.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="TextAppearance.App.18">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.App.18.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="TextAppearance.App.20">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.App.20.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="TextAppearance.App.30">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.App.30.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="TextAppearance.App.PopupMenu" parent="TextAppearance.App.14.Regular">
+        <item name="android:textColor">@color/color1</item>
+    </style>
+
+</resources>

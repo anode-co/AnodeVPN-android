@@ -1,0 +1,50 @@
+{
+  "appVersion": "0.2.132",
+  "ipv4": "192.184.1.1",
+  "ipv6": "FE80::0202:B3FF:FE1E:8329",
+  "internetipv6": "FE80::0202:B3FF:FE1E:8329",
+  "key": "gbrtbrtntntntn345j,b343453hjvhjbfbdfbebebvervev",
+  "username": "happy-rodent",
+  "nodeUrl": "http://h.snode.cjd.li/#",
+  "vpnExit": "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+  "connection": {
+    "ip4Address": "10.66.93.233",
+    "ip6Address": "2607:5300:203:88b2:fc00:1fd8::",
+    "key": "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+    "ip4Alloc": 32,
+    "error": "none",
+    "ip6Alloc": 96,
+    "ip4Prefix": 4,
+    "ip6Prefix": 0,
+    "outgoing": 1
+  },
+  "peers": [
+    {
+      "ipv4": "10.101.10.1",
+      "port": 6545,
+      "key": "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+      "status": "established",
+      "bytesIn": 143823,
+      "bytesOut": 9843903,
+      "bytesLost": 1232
+    },
+    {
+      "ipv4": "10.121.20.23",
+      "port": 3335,
+      "key": "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+      "status": "established",
+      "bytesIn": 3823,
+      "bytesOut": 923903,
+      "bytesLost": 32
+    },
+    {
+      "ipv4": "54.121.40.2",
+      "port": 5555,
+      "key": "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+      "status": "established",
+      "bytesIn": 223823,
+      "bytesOut": 325923903,
+      "bytesLost": 432
+    }
+  ]
+}

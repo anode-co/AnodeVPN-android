@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="spacing_horizontal">30dp</dimen>
+    <dimen name="bottom_button_margin_bottom">24dp</dimen>
+
+</resources>

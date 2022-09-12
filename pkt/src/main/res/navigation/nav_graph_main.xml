@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainNavGraph"
+    app:startDestination="@id/wallet">
+
+    <fragment
+        android:id="@+id/vpn"
+        android:name="com.pkt.core.presentation.main.vpn.VpnFragment"
+        android:label="VPN"
+        tools:layout="@layout/fragment_vpn" />
+
+    <fragment
+        android:id="@+id/wallet"
+        android:name="com.pkt.core.presentation.main.wallet.WalletFragment"
+        android:label="Wallet"
+        tools:layout="@layout/fragment_wallet" />
+
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.pkt.core.presentation.main.settings.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>
