@@ -19,9 +19,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
-import co.anode.anodium.AccountNicknameActivity
 import co.anode.anodium.AnodeVpnService
-import co.anode.anodium.SignInActivity
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -904,7 +902,8 @@ object AnodeClient {
         return resp
     }
 
-    fun logoutUserHandler(result:String){
+    /*Removed account functionality */
+    /*fun logoutUserHandler(result:String){
         Log.i(LOGTAG,"Received from $API_LOGOUT_URL: $result")
         if ((!result.isNullOrBlank()) && (!result.contains("ERROR: "))) {
             try {
@@ -930,7 +929,7 @@ object AnodeClient {
         } else {
             showToast(result)
         }
-    }
+    }*/
 
     fun getPeeringLines(): String {
         val url = API_PEERING_LINES
@@ -970,6 +969,8 @@ object AnodeClient {
         }
     }
 
+    /*Removed account functionality */
+    /*
     class DeleteAccount() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
@@ -1008,7 +1009,7 @@ object AnodeClient {
                 showToast(result)
             }
         }
-    }
+    }*/
 
     fun generateUsername():String {
         val resp = APIHttpReq(apiUsernameGenerate, "", "GET", needsAuth = true, isRetry = false)

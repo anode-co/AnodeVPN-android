@@ -28,7 +28,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentVpnBinding
 import co.anode.anodium.AnodeVpnService
-import co.anode.anodium.RatingFragment
 import co.anode.anodium.VpnListActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
@@ -235,10 +234,11 @@ class VPNFragment : Fragment() {
         mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.STOP"))
         bigbuttonState(buttonStateDisconnected)
         //Rating bar
-        if (showRatingBar) {
+        /*Removed rating*/
+        /*if (showRatingBar) {
             val ratingFragment: BottomSheetDialogFragment = RatingFragment()
             activity?.let { ratingFragment.show(it.supportFragmentManager, "") }
-        }
+        }*/
     }
 
     private fun getPublicIPv4(): String {

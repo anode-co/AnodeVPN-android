@@ -296,7 +296,8 @@
             android:text="Submit logs"
             android:textColor="#C9DDE9"
             android:background="@drawable/buttonshape" />
-        <Button
+        <!--Removed account functionality-->
+        <!--<Button
             android:id="@+id/button_Deleteaccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -304,7 +305,7 @@
             android:layout_marginStart="10dp"
             android:text="Delete account"
             android:textColor="#C9DDE9"
-            android:background="@drawable/buttonshape" />
+            android:background="@drawable/buttonshape" />-->
     </LinearLayout>
 </RelativeLayout>
 

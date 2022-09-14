@@ -39,12 +39,13 @@ class CjdnsStatsActivity : AppCompatActivity() {
             AnodeClient.storeError(baseContext, "other", Throwable("User submitted logs"))
             AnodeClient.PostLogs()
         }
-        val buttonDeleteAccount = findViewById<Button>(R.id.button_Deleteaccount)
+        /*Removed account functionality */
+        /*val buttonDeleteAccount = findViewById<Button>(R.id.button_Deleteaccount)
         buttonDeleteAccount.setOnClickListener {
             Log.i(LOGTAG, "Delete account")
             AnodeClient.eventLog("Delete account selected")
             AnodeClient.DeleteAccount().execute()
-        }
+        }*/
         val text = findViewById<TextView>(R.id.text_errorfiles)
         val files = filesDir.listFiles { file -> file.name.startsWith("error-uploadme-") }
         if (files.isEmpty()) {

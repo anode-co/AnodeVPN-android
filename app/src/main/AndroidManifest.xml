@@ -60,26 +60,9 @@
             android:name=".wallet.SendPaymentActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".wallet.DebugWalletActivity" />
-        <activity android:name=".ForgotPasswordSuccessActivity" />
-        <activity
-            android:name=".ForgotPasswordActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ChangePasswordActivity"
-            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CjdnsStatsActivity"
             android:theme="@style/AppTheme" />
-        <activity android:name=".VerificationActivity" />
-        <activity
-            android:name=".SignInActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".SignUpActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".AccountNicknameActivity"
-            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".VpnListActivity"
             android:theme="@style/AppTheme.NoActionBar"
