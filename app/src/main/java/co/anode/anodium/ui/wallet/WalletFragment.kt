@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
+import co.anode.anodium.integration.presentation.WalletActivity
 import co.anode.anodium.wallet.SendPaymentActivity
 import co.anode.anodium.wallet.TransactionHistoryActivity
 import co.anode.anodium.support.AnodeClient
@@ -35,6 +36,7 @@ import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class WalletFragment : Fragment() {
     private val LOGTAG = "co.anode.anodium"
@@ -171,7 +173,13 @@ class WalletFragment : Fragment() {
         if(isAdded) {
             //Show cached info
             showCachedData()
-            h.postDelayed(getPldInfo, 0)
+            //Delay getinfo when we want to use the new ui to allow user to enter other screens
+            val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+            if (prefs.getBoolean("useNewUI",false)) {
+                h.postDelayed(getPldInfo, 5000)
+            } else {
+                h.postDelayed(getPldInfo, 0)
+            }
         }
     }
 
@@ -199,6 +207,7 @@ class WalletFragment : Fragment() {
                 var bHash = ""
                 var neutrinoPeers = 0
                 var bTimestamp: Long = 0
+                val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
                 //Check if wallet is unlocked
                 walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
                 if (!walletUnlocked) {
@@ -207,6 +216,9 @@ class WalletFragment : Fragment() {
                     } else {
                         pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
                     }
+                    return@get
+                } else if (prefs.getBoolean("useNewUI",false)){
+                    showNewWalletFragment()
                     return@get
                 } else {
                     h.postDelayed(getPldInfo, refreshPldInterval)
@@ -291,6 +303,7 @@ class WalletFragment : Fragment() {
             } else if (response.length() == 0) {
                 //empty response is success
                 Log.i(LOGTAG, "Wallet unlocked")
+
                 walletUnlocked = true
                 //Update screen
                 //TODO:???
@@ -298,6 +311,13 @@ class WalletFragment : Fragment() {
             }
             h.postDelayed(getPldInfo,100)
         }
+    }
+
+    @SuppressLint("ResourceType")
+    private fun showNewWalletFragment() {
+        val walletActivity = Intent(mycontext, WalletActivity::class.java)
+        walletActivity.putExtra("WALLET_NAME", activeWallet)
+        startActivity(walletActivity)
     }
 
     private fun getNewPKTAddress(numberOfAddresses: Int) {

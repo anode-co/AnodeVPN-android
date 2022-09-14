@@ -8,14 +8,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.STORAGE" />
-
-    <!-- Permissions for Pkt.Cube wifi connection-->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.STORAGE" /> <!-- Permissions for Pkt.Cube wifi connection -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".volley.BackendVolley"
@@ -26,7 +26,11 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:theme">
-        tools:targetApi="q">
+        <activity
+            android:name=".integration.presentation.WalletActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
             android:name=".wallet.NewWalletActivity"
             android:exported="false"
@@ -38,6 +42,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -65,20 +70,20 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".VpnListActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:label="@string/title_activity_vpn_servers_list" />
-        <!--New screens-->
+            android:label="@string/title_activity_vpn_servers_list"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <!-- New screens -->
         <activity
             android:name=".integration.presentation.settings.WalletInfoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.App"
             tools:ignore="LockedOrientationActivity,MissingClass" />
-
         <activity
             android:name=".integration.presentation.settings.CjdnsInfoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.App"
             tools:ignore="LockedOrientationActivity,MissingClass" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

@@ -52,7 +52,7 @@ android {
         includeInBundle true
     }
     buildFeatures {
-        viewBinding true
+        viewBinding = true
     }
 
     if (isRunningOnTravis) {

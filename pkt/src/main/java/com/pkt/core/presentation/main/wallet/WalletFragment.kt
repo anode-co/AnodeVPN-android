@@ -1,12 +1,13 @@
 package com.pkt.core.presentation.main.wallet
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
-import com.pkt.core.databinding.FragmentWalletBinding
+import com.pkt.core.databinding.FragmentWalletCoreBinding
 import com.pkt.core.extensions.applyGradient
 import com.pkt.core.extensions.formatPkt
 import com.pkt.core.extensions.formatUsd
@@ -16,9 +17,9 @@ import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
+class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
 
-    private val viewBinding by viewBinding(FragmentWalletBinding::bind)
+    private val viewBinding by viewBinding(FragmentWalletCoreBinding::bind)
 
     override val viewModel: WalletViewModel by viewModels()
 
@@ -57,6 +58,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
         }
     }
 
+    @SuppressLint("UseCompatTextViewDrawableApis", "SetTextI18n")
     override fun handleState(state: WalletState) {
         with(viewBinding) {
             subtitleLabel.apply {
@@ -80,7 +82,12 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
             }
 
             balancePktLabel.apply {
-                text = state.balancePkt.formatPkt(2)
+                text = if (state.balancePkt.isEmpty()) {
+                    "0.00"
+                } else {
+                    state.balancePkt.toLong().formatPkt()
+                }
+
                 applyGradient()
             }
 

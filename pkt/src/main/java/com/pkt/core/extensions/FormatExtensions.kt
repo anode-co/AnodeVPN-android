@@ -14,15 +14,15 @@ import java.util.*
 private val LOCALE = Locale.US
 
 private val PKT_UNITS = mapOf(
-    "PKT" to 1_000_000_000_000_000_000L,
-    "mPKT" to 1_000_000_000_000_000L,
-    "μPKT" to 1_000_000_000_000L,
-    "nPKT" to 1_000_000_000L,
+    "PKT" to 1_073_741_824L,
+    "mPKT" to 1_073_741L,
+    "μPKT" to 1_073L,
+    "nPKT" to 1L,
 )
 
 private const val USD = "USD"
 
-private const val PKT_DIGITS = 18
+private const val PKT_DIGITS = 9
 
 private val PKT_FORMATTER by lazy {
     (NumberFormat.getInstance(LOCALE) as DecimalFormat).apply {
@@ -71,7 +71,7 @@ fun String?.formatPkt(digits: Int = 0): String =
 fun Double?.formatPkt(): String {
     val amount = this.toBigDecimalSafety().movePointRight(PKT_DIGITS).toLong()
     val unit = PKT_UNITS.entries.find { amount >= it.value } ?: PKT_UNITS.entries.last()
-    val value = BigDecimal(amount).divide(BigDecimal(unit.value), 2, RoundingMode.FLOOR)
+    val value = BigDecimal(amount).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
     return (PKT_FORMATTER.clone() as DecimalFormat).apply {
         decimalFormatSymbols = decimalFormatSymbols.apply {
             positiveSuffix = " ${unit.key}"
@@ -79,6 +79,23 @@ fun Double?.formatPkt(): String {
         }
     }.format(value)
 }
+
+fun Long.formatPkt(): String {
+    val unit = PKT_UNITS.entries.find { this >= it.value } ?: PKT_UNITS.entries.last()
+    val value = BigDecimal(this).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
+    return (PKT_FORMATTER.clone() as DecimalFormat).apply {
+        decimalFormatSymbols = decimalFormatSymbols.apply {
+            positiveSuffix = " ${unit.key}"
+            negativeSuffix = " ${unit.key}"
+        }
+    }.format(value)
+}
+
+fun Long.toPKT(): BigDecimal {
+    val unit = PKT_UNITS.entries.find { this >= it.value } ?: PKT_UNITS.entries.last()
+    return BigDecimal(this).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
+}
+
 
 fun String?.formatUsd(): String = USD_FORMATTER.format(this.toBigDecimalSafety())
 

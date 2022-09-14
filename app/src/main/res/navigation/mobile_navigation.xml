@@ -14,7 +14,7 @@
         android:id="@+id/navigation_wallet"
         android:name="co.anode.anodium.ui.wallet.WalletFragment"
         android:label="@string/navigation_wallet"
-        tools:layout="@layout/fragment_wallet" />
+        tools:layout="@layout/fragment_wallet_core" />
     <fragment
         android:id="@+id/navigation_profile"
         android:name="co.anode.anodium.ui.profile.ProfileFragment"
