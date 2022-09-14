@@ -1,15 +1,15 @@
-package co.anode.anodium.integration.presentation
+package co.anode.anodium.integration.presentation.settings
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import com.pkt.core.presentation.main.settings.cjdnsinfo.CjdnsInfoFragment
+import com.pkt.core.presentation.main.settings.walletinfo.WalletInfoFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CjdnsInfoActivity : AppCompatActivity() {
+class WalletInfoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,7 +18,7 @@ class CjdnsInfoActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(
                     android.R.id.content,
-                    CjdnsInfoFragment().apply {
+                    WalletInfoFragment().apply {
                         arguments = bundleOf("address" to intent.getStringExtra(EXTRA_ADDRESS))
                     }
                 )
@@ -27,10 +27,8 @@ class CjdnsInfoActivity : AppCompatActivity() {
     }
 
     companion object {
-
         private const val EXTRA_ADDRESS = "EXTRA_ADDRESS"
-
-        fun getIntent(context: Context, address: String) = Intent(context, CjdnsInfoActivity::class.java).apply {
+        fun getIntent(context: Context, address: String) = Intent(context, WalletInfoActivity::class.java).apply {
             putExtra(EXTRA_ADDRESS, address)
         }
     }

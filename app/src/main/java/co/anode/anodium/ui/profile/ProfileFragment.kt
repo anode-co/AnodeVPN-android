@@ -28,7 +28,7 @@ import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.support.CubeWifi
 import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.PinPrompt
-import co.anode.anodium.integration.presentation.WalletInfoActivity
+import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import co.anode.anodium.wallet.WalletStatsActivity
 import org.json.JSONObject
 import timber.log.Timber

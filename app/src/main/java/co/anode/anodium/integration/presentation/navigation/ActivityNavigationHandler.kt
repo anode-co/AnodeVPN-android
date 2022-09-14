@@ -1,8 +1,8 @@
 package co.anode.anodium.integration.presentation.navigation
 
 import androidx.fragment.app.Fragment
-import co.anode.anodium.integration.presentation.CjdnsInfoActivity
-import co.anode.anodium.integration.presentation.WalletInfoActivity
+import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
+import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import com.pkt.core.presentation.navigation.AppNavigationHandler
 import javax.inject.Inject
 

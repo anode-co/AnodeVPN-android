@@ -86,13 +86,13 @@
             android:label="@string/title_activity_vpn_servers_list" />
         <!--New screens-->
         <activity
-            android:name=".integration.presentation.WalletInfoActivity"
+            android:name=".integration.presentation.settings.WalletInfoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.App"
             tools:ignore="LockedOrientationActivity,MissingClass" />
 
         <activity
-            android:name=".integration.presentation.CjdnsInfoActivity"
+            android:name=".integration.presentation.settings.CjdnsInfoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.App"
             tools:ignore="LockedOrientationActivity,MissingClass" />
