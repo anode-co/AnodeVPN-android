@@ -51,8 +51,8 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val notificationsViewModel =
-            ViewModelProvider(this).get(ProfileViewModel::class.java)
+/*        val notificationsViewModel =
+            ViewModelProvider(this).get(ProfileViewModel::class.java)*/
         mycontext = requireContext()
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -155,7 +155,7 @@ class ProfileFragment : Fragment() {
         }
         walletsSpinner.setSelection(activeWalletId)
         walletsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 if (activeWallet != walletNames[position]) {
                     activeWallet = walletNames[position]
                     prefs.edit().putString("activeWallet", activeWallet).apply()
