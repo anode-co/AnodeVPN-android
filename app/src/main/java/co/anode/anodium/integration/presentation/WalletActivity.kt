@@ -19,7 +19,10 @@ class WalletActivity : AppCompatActivity() {
                 .replace(
                     android.R.id.content,
                     WalletFragment().apply {
-                        arguments = bundleOf("walletName" to intent.getStringExtra(WALLET_NAME))
+                        arguments = bundleOf(
+                            "walletName" to intent.getStringExtra(WALLET_NAME),
+                            "PKTtoUSD" to intent.getStringExtra(PKT_TO_USD)
+                        )
                     }
                 )
                 .commit()
@@ -28,8 +31,10 @@ class WalletActivity : AppCompatActivity() {
 
     companion object {
         private const val WALLET_NAME = "WALLET_NAME"
-        fun getIntent(context: Context, walletName: String) = Intent(context, WalletFragment::class.java).apply {
+        private const val PKT_TO_USD = "PKT_TO_USD"
+        fun getIntent(context: Context, walletName: String, PKTtoUSD: String) = Intent(context, WalletFragment::class.java).apply {
             putExtra(WALLET_NAME, walletName)
+            putExtra(PKT_TO_USD, PKTtoUSD)
         }
     }
 }

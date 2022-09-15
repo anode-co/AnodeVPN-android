@@ -8,7 +8,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -19,15 +18,14 @@ class WalletViewModel @Inject constructor(
 ) : StateViewModel<WalletState>() {
 
     private val walletName: String = savedStateHandle["walletName"] ?: throw IllegalArgumentException("walletName is required")
+    private val PKTtoUSD: String = savedStateHandle["PKTtoUSD"] ?: throw IllegalArgumentException("PKTtoUSD is required")
 
-    private val toUSD = BigDecimal(0.001950)
 
     init {
         invokeLoadingAction()
     }
 
     override fun createInitialState(): WalletState {
-
         return WalletState(
             syncState = WalletState.SyncState.SUCCESS,
             peersCount = 0,
@@ -78,7 +76,7 @@ class WalletViewModel @Inject constructor(
                     block = "$neutrinoHeight/$neutrinoTop",
                     walletName = walletName,
                     balancePkt = balance.toString(),
-                    balanceUsd = balance.toPKT().multiply(toUSD).toString(),
+                    balanceUsd = balance.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
                     walletAddress = address,
                     items = listOf()
                 )
@@ -111,7 +109,7 @@ class WalletViewModel @Inject constructor(
                             type = type,
                             time = date,
                             amountPkt = amount.toString(),
-                            amountUsd = amount.toPKT().multiply(toUSD).toString(),
+                            amountUsd = amount.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
                         )
                     )
                 }

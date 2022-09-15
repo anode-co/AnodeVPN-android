@@ -6,6 +6,7 @@ import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -91,6 +92,30 @@ abstract class StateViewModel<S : UiState> : ViewModel() {
                     }
 
                 sendLoadingState { copy(isRefreshing = false) }
+            }
+        }
+    }
+
+    protected fun invokeSilentLoadingAction() {
+        loadingAction?.let { action ->
+            viewModelScope.launch {
+                action()
+                    .onSuccess {
+                        sendLoadingState { copy(isLoading = false) }
+                    }
+                    .onFailure {
+                        sendLoadingState { copy(loadingError = it, loadingAction = { invokeLoadingAction() }) }
+                    }
+            }
+        }
+    }
+
+    fun startTimer() {
+        //invokeRefreshingAction every minute
+        viewModelScope.launch {
+            while (true) {
+                delay(30_000)
+                invokeRefreshingAction()
             }
         }
     }

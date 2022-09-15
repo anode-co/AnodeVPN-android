@@ -36,6 +36,7 @@ import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executors
 
 
 class WalletFragment : Fragment() {
@@ -313,11 +314,28 @@ class WalletFragment : Fragment() {
         }
     }
 
-    @SuppressLint("ResourceType")
     private fun showNewWalletFragment() {
-        val walletActivity = Intent(mycontext, WalletActivity::class.java)
-        walletActivity.putExtra("WALLET_NAME", activeWallet)
-        startActivity(walletActivity)
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        executor.execute {
+            val result = AnodeClient.APIHttpReq("https://pkt.cash/api/cmc-price","", "GET", needsAuth = false, isRetry = false)
+            handler.post {
+                var price = "0"
+                if (result.isNotBlank()) {
+                    val json = JSONObject(result)
+                    price = try {
+                        json.getJSONObject("data").getJSONObject("PKT").getJSONObject("quote").getJSONObject("USD").getDouble("price").toString()
+                    } catch (e: Exception) {
+                        Log.e(LOGTAG, "Error parsing price: $e")
+                        "0.00"
+                    }
+                }
+                val walletActivity = Intent(mycontext, WalletActivity::class.java)
+                walletActivity.putExtra("WALLET_NAME", activeWallet)
+                walletActivity.putExtra("PKT_TO_USD", price)
+                startActivity(walletActivity)
+            }
+        }
     }
 
     private fun getNewPKTAddress(numberOfAddresses: Int) {

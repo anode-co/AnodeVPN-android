@@ -97,7 +97,11 @@ fun transactionAdapterDelegate() =
                         titleLabel.setText(R.string.sent_pkt)
                         amountPktLabel.setTextColor(context.getColorByAttribute(android.R.attr.textColorPrimary))
                         amountPktLabel.text = "-${item.amountPkt.toLong().formatPkt()}"
-                        amountUsdLabel.text = "-${item.amountUsd.formatUsd()}"
+                        if (item.amountUsd.formatUsd() != "") {
+                            amountUsdLabel.text = "-${item.amountUsd.formatUsd()}"
+                        } else {
+                            amountUsdLabel.text = ""
+                        }
                     }
 
                     TransactionItem.Type.RECEIVE -> {

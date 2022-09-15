@@ -97,7 +97,13 @@ fun Long.toPKT(): BigDecimal {
 }
 
 
-fun String?.formatUsd(): String = USD_FORMATTER.format(this.toBigDecimalSafety())
+fun String?.formatUsd(): String {
+    return if ((this?.isBlank() == true) || (this?.toDouble() == 0.0)) {
+        ""
+    } else {
+        USD_FORMATTER.format(this.toBigDecimalSafety())
+    }
+}
 
 fun LocalDateTime.formatDateTime(): String = DATE_TIME_FORMATTER.format(this.toDate())
 
