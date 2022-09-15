@@ -89,7 +89,7 @@ class WalletViewModel @Inject constructor(
             }.onSuccess { t ->
                 val transactions = t.transactions
                 val items: MutableList<DisplayableItem> = mutableListOf()
-                var prevDate: LocalDateTime = LocalDateTime.now()
+                var prevDate: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
                 for(i in transactions.indices) {
                     //Add date
                     val date = LocalDateTime.ofEpochSecond(transactions[i].timeStamp.toLong(), 0, ZonedDateTime.now().offset)
