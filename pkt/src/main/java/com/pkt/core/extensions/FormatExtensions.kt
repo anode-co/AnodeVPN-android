@@ -27,7 +27,7 @@ private const val PKT_DIGITS = 9
 private val PKT_FORMATTER by lazy {
     (NumberFormat.getInstance(LOCALE) as DecimalFormat).apply {
         isGroupingUsed = true
-        minimumFractionDigits = 0
+        minimumFractionDigits = 2
         maximumFractionDigits = 2
     }
 }
