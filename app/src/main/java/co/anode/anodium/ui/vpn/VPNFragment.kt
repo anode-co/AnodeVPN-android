@@ -43,7 +43,7 @@ class VPNFragment : Fragment() {
     val buttonStateDisconnected = 0
     val buttonStateConnecting = 1
     val buttonStateConnected = 2
-    private var vpnLastButtonState = 0
+
     private var publicIpThreadSleep: Long = 10
     private var uiInForeground = true
     private var previousPublicIPv4 = ""
@@ -284,7 +284,6 @@ class VPNFragment : Fragment() {
     fun bigbuttonState(state: Int) {
         val status = root.findViewById<TextView>(R.id.textview_status)
         val buttonconnectvpns = root.findViewById<ToggleButton>(R.id.buttonconnectvpns)
-        vpnLastButtonState = state
         when(state) {
             buttonStateDisconnected -> {
                 buttonconnectvpns.isChecked = false
@@ -322,15 +321,12 @@ class VPNFragment : Fragment() {
             .registerReceiver(vpnStatusReceiver, IntentFilter(VPN_CONNECTING))
         LocalBroadcastManager.getInstance(requireContext())
             .registerReceiver(vpnStatusReceiver, IntentFilter(VPN_DISCONNECTED))
-        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-        bigbuttonState(prefs.getInt("vpnLastButtonState",0))
+
         internetSharingStatus()
     }
 
     override fun onPause() {
         super.onPause()
-        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
-        prefs.edit().putInt("vpnLastButtonState", vpnLastButtonState).apply()
     }
 
     override fun onDestroy() {
