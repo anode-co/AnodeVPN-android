@@ -66,3 +66,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANODE_APIKEY: ${{ secrets.ANODE_APIKEY }}
+          
+      - name: Upload Android Release to Play Store
+        uses: r0adkll/upload-google-play@v1.0.18
+        with:
+          serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+          packageName: co.anode.anodium
+          releaseFiles: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.apk
+          track: internal
+          status: inProgress
+          inAppUpdatePriority: 3
+          userFraction: 1.0
+          whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
+          mappingFile: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/mapping/release/mapping.txt
+          debugSymbols: app/intermediates/merged_native_libs/release/out/lib
