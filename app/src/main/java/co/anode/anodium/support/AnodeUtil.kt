@@ -59,6 +59,7 @@ object AnodeUtil {
     var enablePktCubeConnection = true
     lateinit var apiController: APIController
     var isInternetSharingAvailable = false
+    const val CHANNEL_ID = "anodium_channel_01"
 
     fun init(c: Context) {
         context = c
@@ -405,7 +406,6 @@ object AnodeUtil {
     }
 
     fun pushNotification(title: String, text: String) {
-        val CHANNEL_ID = "anodium_channel_01"
         if (context != null) {
             var builder = NotificationCompat.Builder(context!!, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_logo_foreground)
