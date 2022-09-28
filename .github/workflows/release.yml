@@ -76,7 +76,7 @@ jobs:
       - name: Upload Android Release to Play Store
         uses: r0adkll/upload-google-play@v1.0.18
         with:
-          serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: co.anode.anodium
           releaseFiles: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.apk
           track: internal
