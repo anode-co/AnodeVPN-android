@@ -1,4 +1,10 @@
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: false
+        
   push:
     tags:
       - anodevpn-*.*.*
