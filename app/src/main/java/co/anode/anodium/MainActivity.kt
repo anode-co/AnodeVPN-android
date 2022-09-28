@@ -1,6 +1,8 @@
 package co.anode.anodium
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -99,6 +101,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         AnodeUtil.addCjdnsPeers()
+        createNotificationChannel()
     }
 
     private fun checkPermissions() {
@@ -171,6 +174,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }, "VPNFragment.SearchForCubeWifi").start()
         }
+    }
+
+    fun createNotificationChannel() {
+        // Create the NotificationChannel
+        val name = "anodium_channel_01"
+        val descriptionText = "anodium_channel_01"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val mChannel = NotificationChannel(AnodeUtil.CHANNEL_ID, name, importance)
+        mChannel.description = descriptionText
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(mChannel)
     }
 
     fun exception(paramThrowable: Throwable) {
