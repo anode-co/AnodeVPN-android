@@ -46,15 +46,24 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
-      - name: Build with Gradle
+      
+      #Building APK
+      - name: Build APK with Gradle
         run: ./gradlew assembleRelease
         env:
           CI: 'true'
           ANODE_CONFIDENTIAL_alias: ${{ secrets.ANODE_CONFIDENTIAL_ALIAS }}
           ANODE_CONFIDENTIAL_password0: ${{ secrets.ANODE_CONFIDENTIAL_PASSWORD0 }}
           ANODE_CONFIDENTIAL_password1: ${{ secrets.ANODE_CONFIDENTIAL_PASSWORD1 }}
-
+      
+      #Build signed AAB for Play store
+      - name: Build bundle (AAB) with Gradle
+        run: ./gradlew bundleRelease
+        env:
+          CI: 'true'
+          ANODE_CONFIDENTIAL_alias: ${{ secrets.ANODE_CONFIDENTIAL_ALIAS }}
+          ANODE_CONFIDENTIAL_password0: ${{ secrets.ANODE_CONFIDENTIAL_PASSWORD0 }}
+          ANODE_CONFIDENTIAL_password1: ${{ secrets.ANODE_CONFIDENTIAL_PASSWORD1 }}
       # See https://docs.github.com/en/actions/guides/building-and-testing-java-with-gradle#caching-dependencies
       - name: Clean up Gradle Cache
         run: |
@@ -78,7 +87,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: co.anode.anodium
-          releaseFiles: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.apk
+          releaseFiles: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.aab
           track: internal
           status: inProgress
           inAppUpdatePriority: 3
