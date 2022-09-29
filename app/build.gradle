@@ -62,6 +62,12 @@ android {
         signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
         signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
     }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 // Map for the version code that gives each ABI a value.
