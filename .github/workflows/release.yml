@@ -85,5 +85,3 @@ jobs:
           inAppUpdatePriority: 3
           userFraction: 0.99
           whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
-          mappingFile: app/build/outputs/mapping/release/mapping.txt
-          debugSymbols: app/intermediates/merged_native_libs/release/out/lib
