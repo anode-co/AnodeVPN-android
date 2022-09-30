@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Git pull tags
+        run: git fetch --tags    
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: build prod
