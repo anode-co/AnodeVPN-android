@@ -25,6 +25,7 @@ jobs:
       - name: build prod
         run: ./gradlew app:bundleRelease
         env:
+          PLAYSTORE_BUILD: true
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}

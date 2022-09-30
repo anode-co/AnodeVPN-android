@@ -28,19 +28,7 @@ android {
     }
 
     signingConfigs {
-        release {
-            def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
-            def allFilesFromDir = new File(tmpFilePath).listFiles()
-
-            if (allFilesFromDir != null) {
-                def keystoreFile = allFilesFromDir.first()
-                keystoreFile.renameTo("keystore/your_keystore.jks")
-            }
-            storeFile = file("keystore/your_keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
-        }
+        release
     }
 
     buildTypes {
@@ -73,6 +61,19 @@ android {
         signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
         signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
         signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
+        if (System.getenv("PLAYSTORE_BUILD") == null) {
+            def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
+            def allFilesFromDir = new File(tmpFilePath).listFiles()
+
+            if (allFilesFromDir != null) {
+                def keystoreFile = allFilesFromDir.first()
+                keystoreFile.renameTo("keystore/your_keystore.jks")
+            }
+            storeFile = file("keystore/your_keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
     }
 
     packagingOptions {
@@ -80,6 +81,7 @@ android {
             useLegacyPackaging = true
         }
     }
+    namespace 'co.anode.anodium'
 }
 
 // Map for the version code that gives each ABI a value.
