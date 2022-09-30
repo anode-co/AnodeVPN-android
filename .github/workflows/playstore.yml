@@ -34,18 +34,19 @@ jobs:
         with:
           name: Build Artifacts
           path: app/build/outputs/
+      
+      #Publish the AAB to Play store    
+      - name: Upload Android Release to Play Store
+        uses: r0adkll/upload-google-play@v1.0.18
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: co.anode.anodium
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: inProgress
+          inAppUpdatePriority: 3
+          userFraction: 0.99
+          whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
       - name: Debug with tmate on failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
-      #Publish the AAB to Play store    
-      # - name: Upload Android Release to Play Store
-      #   uses: r0adkll/upload-google-play@v1.0.18
-      #   with:
-      #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-      #     packageName: co.anode.anodium
-      #     releaseFiles: app/build/outputs/bundle/release/app-release.aab
-      #     track: internal
-      #     status: inProgress
-      #     inAppUpdatePriority: 3
-      #     userFraction: 0.99
-      #     whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
