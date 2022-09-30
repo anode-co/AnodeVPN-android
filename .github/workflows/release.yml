@@ -1,10 +1,4 @@
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version'
-        required: false
-        
   push:
     tags:
       - anodevpn-*.*.*
@@ -46,42 +40,14 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      
-      #Building APK
-      - name: Build APK with Gradle
+
+      - name: Build with Gradle
         run: ./gradlew assembleRelease
         env:
           CI: 'true'
           ANODE_CONFIDENTIAL_alias: ${{ secrets.ANODE_CONFIDENTIAL_ALIAS }}
           ANODE_CONFIDENTIAL_password0: ${{ secrets.ANODE_CONFIDENTIAL_PASSWORD0 }}
           ANODE_CONFIDENTIAL_password1: ${{ secrets.ANODE_CONFIDENTIAL_PASSWORD1 }}
-      
-      #Build signed AAB for Play store
-      # Decode the keystore file containing the signing key
-      - name: Decode Keystore
-        id: decode_keystore
-        uses: timheuer/base64-to-file@v1.1
-        with:
-          fileDir: './secrets'
-          fileName: 'android_key'
-          encodedString: ${{ secrets.KEYSTORE_FILE }}
-      # Decode the Google Play api key file
-      - name: Decode Google Play API key
-        id: decode_api_key
-        uses: timheuer/base64-to-file@v1.1
-        with:
-          fileDir: './secrets'
-          fileName: 'google-play-api-key.json'
-          encodedString: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-      # Build the AAB
-      - name: Build bundle (AAB) with Gradle
-        run: ./gradlew
-          -PgooglePlayApiKey="../${{ steps.decode_api_key.outputs.filePath }}"
-          -PKEYSTORE_FILE="../${{ steps.decode_keystore.outputs.filePath }}"
-          -PKEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
-          -PKEY_ALIAS=${{ secrets.KEY_ALIAS }}
-          -PKEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
-          bundleRelease
 
       # See https://docs.github.com/en/actions/guides/building-and-testing-java-with-gradle#caching-dependencies
       - name: Clean up Gradle Cache
@@ -94,21 +60,9 @@ jobs:
         with:
           name: release apk
           path: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/apk/release/app-release.apk
-      
+
       - name: Publish release
         run: /bin/bash -c 'source ./tools/publish.sh'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANODE_APIKEY: ${{ secrets.ANODE_APIKEY }}
-      #Publish the AAB to Play store    
-      - name: Upload Android Release to Play Store
-        uses: r0adkll/upload-google-play@v1.0.18
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: co.anode.anodium
-          releaseFiles: /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/build/outputs/bundle/release/app-release.aab
-          track: internal
-          status: inProgress
-          inAppUpdatePriority: 3
-          userFraction: 0.99
-          whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
