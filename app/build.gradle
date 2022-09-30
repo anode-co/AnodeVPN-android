@@ -68,7 +68,7 @@ android {
                 keystoreFile.renameTo("keystore/your_keystore.jks")
             }
             println("PLAYSTORE build")
-            signingConfigs.release.storeFile = file("keystore/your_keystore.jks")
+            signingConfigs.release.storeFile = file("../../../_temp/keystore/your_keystore.jks")
             signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
             signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
             signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
