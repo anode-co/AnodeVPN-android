@@ -23,7 +23,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: build prod
-        run: ./gradlew app:bundleRelease
+        run: ./gradlew app:bundleRelease --stacktrace --debug
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
