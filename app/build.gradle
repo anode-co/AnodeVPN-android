@@ -14,7 +14,6 @@ ext.minimumSdkVersion = 26
 
 android {
     compileSdkVersion 33
-
     defaultConfig {
         buildPld()
         setVersionNumberByTag()
@@ -38,7 +37,6 @@ android {
             signingConfig signingConfigs.release
         }
     }
-
     def isRunningOnTravis = System.getenv("CI") == "true"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -56,13 +54,12 @@ android {
     }
 
     if (isRunningOnTravis) {
-        // configure keystore
         println("APK build")
         signingConfigs.release.storeFile = file("../tools/android_key")
         signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
         signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
         signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
-        if (System.getenv("PLAYSTORE_BUILD") == null) {
+        if (System.getenv("PLAYSTORE_BUILD") == "true") {
             def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
             def allFilesFromDir = new File(tmpFilePath).listFiles()
 
@@ -79,11 +76,10 @@ android {
     } else {
         signingConfigs.release.storeFile = file("../tools/android_key")
         signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
-        signingConfigs.release.keyAlias = System.env.getenv("KEY_ALIAS")
+        signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
         signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
         println("Local build")
     }
-
     packagingOptions {
         jniLibs {
             useLegacyPackaging = true
