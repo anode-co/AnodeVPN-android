@@ -57,6 +57,7 @@ android {
 
     if (isRunningOnTravis) {
         // configure keystore
+        println("APK build")
         signingConfigs.release.storeFile = file("../tools/android_key")
         signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
         signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
@@ -69,11 +70,18 @@ android {
                 def keystoreFile = allFilesFromDir.first()
                 keystoreFile.renameTo("keystore/your_keystore.jks")
             }
-            storeFile = file("keystore/your_keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
+            println("PLAYSTORE build")
+            signingConfigs.release.storeFile = file("keystore/your_keystore.jks")
+            signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
+            signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
+            signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
         }
+    } else {
+        signingConfigs.release.storeFile = file("../tools/android_key")
+        signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
+        signingConfigs.release.keyAlias = System.env.getenv("KEY_ALIAS")
+        signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
+        println("Local build")
     }
 
     packagingOptions {
