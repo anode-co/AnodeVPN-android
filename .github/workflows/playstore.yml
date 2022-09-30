@@ -8,7 +8,6 @@ jobs:
       - name: Decode keystore
         uses: timheuer/base64-to-file@v1.1
         with:
-          fileDir: './secrets'
           fileName: 'keystore/your_signing_keystore.jks'
           encodedString: ${{ secrets.KEYSTORE_FILE }}
 
@@ -26,9 +25,9 @@ jobs:
       - name: build prod
         run: ./gradlew app:bundleRelease
         env:
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
