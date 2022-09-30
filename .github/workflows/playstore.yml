@@ -23,11 +23,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: build prod
-        run: ./gradlew app:bundleRelease --stacktrace --debug
+        run: ./gradlew app:bundleRelease
         env:
-          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
@@ -35,14 +35,14 @@ jobs:
           path: app/build/outputs/
 
       #Publish the AAB to Play store    
-      - name: Upload Android Release to Play Store
-        uses: r0adkll/upload-google-play@v1.0.18
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: co.anode.anodium
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: internal
-          status: inProgress
-          inAppUpdatePriority: 3
-          userFraction: 0.99
-          whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
+      # - name: Upload Android Release to Play Store
+      #   uses: r0adkll/upload-google-play@v1.0.18
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+      #     packageName: co.anode.anodium
+      #     releaseFiles: app/build/outputs/bundle/release/app-release.aab
+      #     track: internal
+      #     status: inProgress
+      #     inAppUpdatePriority: 3
+      #     userFraction: 0.99
+      #     whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew

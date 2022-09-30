@@ -48,9 +48,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-        }
+        }:app:signReleaseBundle FAILED
     }
-
+:app:signReleaseBundle FAILED
     def isRunningOnTravis = System.getenv("CI") == "true"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
