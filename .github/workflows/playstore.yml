@@ -23,6 +23,8 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+      - name: Git pull tags
+        run: git fetch --tags
 
       # See https://github.com/actions/cache/blob/main/examples.md#java---gradle
       - uses: actions/cache@v2

@@ -125,27 +125,18 @@ private Integer generateVersionCode() {
 
 private String generateVersionName() {
     String versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
-    /*
-    if (ext.versionClassifier == null) {
-        if (isSnapshot) {
-            versionClassifier = "SNAPSHOT"
-        }
-    }
-
-    if (ext.versionClassifier != null) {
-        versionName += "-" + versionClassifier
-    }
-     */
     return versionName;
 }
 
 private String setVersionNumberByTag() {
-    /*
- * Gets the version name from the latest Git tag
- */
     def stdout = new ByteArrayOutputStream()
     exec {
-        commandLine 'git', 'describe', '--tags', 'HEAD'
+        commandLine 'git', 'rev-list', '--tags', '--max-count=1'
+        standardOutput = stdout
+    }
+    def tag = stdout.toString().trim()
+    exec {
+        commandLine 'git', 'describe', '--tags', tag
         standardOutput = stdout
     }
     def String verByGit = stdout.toString().tokenize("-")[1].trim()
