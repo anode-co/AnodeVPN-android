@@ -34,7 +34,9 @@ jobs:
         with:
           name: Build Artifacts
           path: app/build/outputs/
-
+      - name: Debug with tmate on failure
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
       #Publish the AAB to Play store    
       # - name: Upload Android Release to Play Store
       #   uses: r0adkll/upload-google-play@v1.0.18
