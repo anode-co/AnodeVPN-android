@@ -92,4 +92,8 @@ jobs:
           inAppUpdatePriority: 3
           userFraction: 0.99
           whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
+
+      - name: Setup tmate session
+        if: success() || failure()
+        uses: mxschmitt/action-tmate@v3
   
