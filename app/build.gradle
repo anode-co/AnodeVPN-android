@@ -28,7 +28,14 @@ android {
     }
 
     signingConfigs {
-        release
+        release {
+            /*def keystoreFile = layout.projectDirectory.file("tools/android_key")
+            keystoreFile.renameTo("your_keystore.jks")*/
+            storeFile = file("keystore/your_keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
     }
 
     buildTypes {
