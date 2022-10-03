@@ -108,8 +108,13 @@ class ProfileFragment : Fragment() {
             startActivity(promptPinActivity)
         }
         val checkUpdateButton = root.findViewById<LinearLayout>(R.id.button_check_update)
-        checkUpdateButton.setOnClickListener {
-            AnodeClient.checkNewVersion(true)
+        if (BuildConfig.BUILD_PLATFORM == "playstore") {
+            checkUpdateButton.visibility = View.GONE
+        } else {
+            checkUpdateButton.visibility = View.VISIBLE
+            checkUpdateButton.setOnClickListener {
+                AnodeClient.checkNewVersion(true)
+            }
         }
         val dataConsentButton = root.findViewById<LinearLayout>(R.id.button_data_collection)
         dataConsentButton.setOnClickListener {
