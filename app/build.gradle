@@ -32,9 +32,18 @@ android {
 
     buildTypes {
         release {
+            if (System.getenv("PLAYSTORE_BUILD") == "true")
+                buildConfigField "String", "BUILD_PLATFORM", "\"playstore\""
+            else if (System.getenv("CI") == "true")
+                buildConfigField "String", "BUILD_PLATFORM", "\"travis\""
+            else
+                buildConfigField "String", "BUILD_PLATFORM", "\"local\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+        }
+        debug {
+            buildConfigField "String", "BUILD_PLATFORM", "\"local\""
         }
     }
     def isRunningOnTravis = System.getenv("CI") == "true"
