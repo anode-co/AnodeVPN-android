@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
@@ -60,6 +61,7 @@ object AnodeUtil {
     lateinit var apiController: APIController
     var isInternetSharingAvailable = false
     const val CHANNEL_ID = "anodium_channel_01"
+    private var doUpdateCheck = false
 
     fun init(c: Context) {
         context = c
@@ -67,6 +69,9 @@ object AnodeUtil {
             filesDirectory = context!!.filesDir.toString()
         val service = ServiceVolley()
         apiController = APIController(service)
+        if (BuildConfig.BUILD_PLATFORM == "playstore") {
+            doUpdateCheck = true
+        }
     }
 
     fun isCjdnsAlive(): Boolean {
@@ -720,7 +725,7 @@ object AnodeUtil {
         //Check for updates every 5min
         Thread({
             Log.i(LOGTAG, "AnodeUtil.CheckUpdates")
-            while (true) {
+            while (doUpdateCheck) {
                 AnodeClient.checkNewVersion(false)
                 if (AnodeClient.downloadFails > 1) {
                     //In case of >1 failure delete old apk files and retry after 20min
