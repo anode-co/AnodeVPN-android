@@ -43,7 +43,7 @@ jobs:
           packageName: co.anode.anodium
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: internal
-          status: inProgress
+          status: completed
           inAppUpdatePriority: 3
           userFraction: 0.99
           whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
