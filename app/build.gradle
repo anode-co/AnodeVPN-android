@@ -15,7 +15,7 @@ ext.minimumSdkVersion = 26
 android {
     compileSdkVersion 33
     defaultConfig {
-        buildPld()
+        //buildPld()
         setVersionNumberByTag()
         applicationId 'co.anode.anodium'
         minSdkVersion 26
@@ -28,25 +28,62 @@ android {
 
     signingConfigs {
         release
+        debug
     }
 
     buildTypes {
         release {
-            if (System.getenv("PLAYSTORE_BUILD") == "true")
+            if (System.getenv("PLAYSTORE_BUILD") == "true") {
+                def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
+                def allFilesFromDir = new File(tmpFilePath).listFiles()
+
+                if (allFilesFromDir != null) {
+                    def keystoreFile = allFilesFromDir.first()
+                    keystoreFile.renameTo("keystore/your_keystore.jks")
+                }
+                println("PLAYSTORE build")
+                signingConfigs.release.storeFile = file("../../../_temp/keystore/your_keystore.jks")
+                signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
+                signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
+                signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
                 buildConfigField "String", "BUILD_PLATFORM", "\"playstore\""
-            else if (System.getenv("CI") == "true")
+                applicationIdSuffix ".playstore"
+                versionNameSuffix "-playstore"
+            } else if (System.getenv("CI") == "true") {
+                println("APK build")
+                signingConfigs.release.storeFile = file("../tools/android_key")
+                signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
+                signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
+                signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
                 buildConfigField "String", "BUILD_PLATFORM", "\"travis\""
-            else
+                applicationIdSuffix ".release"
+                versionNameSuffix "-release"
+            } else {
+                println("Local release build")
                 buildConfigField "String", "BUILD_PLATFORM", "\"local\""
-            minifyEnabled false
+                signingConfigs.release.storeFile = file("../tools/android_key")
+                signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
+                signingConfigs.release.keyAlias = "key0"
+                signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
+                println("Key: "+signingConfigs.release.keyAlias)
+            }
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
         debug {
+            signingConfigs.debug.storeFile = file("../tools/android_key")
+            signingConfigs.debug.storePassword = System.getenv("KEYSTORE_PASSWORD")
+            signingConfigs.debug.keyAlias = "key0"
+            signingConfigs.debug.keyPassword = System.getenv("KEY_PASSWORD")
+            println("Local debug build")
             buildConfigField "String", "BUILD_PLATFORM", "\"local\""
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            println("Key: "+signingConfigs.debug.keyAlias)
         }
     }
-    def isRunningOnTravis = System.getenv("CI") == "true"
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -62,38 +99,12 @@ android {
         viewBinding = true
     }
 
-    if (isRunningOnTravis) {
-        println("APK build")
-        signingConfigs.release.storeFile = file("../tools/android_key")
-        signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
-        signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
-        signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
-        if (System.getenv("PLAYSTORE_BUILD") == "true") {
-            def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
-            def allFilesFromDir = new File(tmpFilePath).listFiles()
-
-            if (allFilesFromDir != null) {
-                def keystoreFile = allFilesFromDir.first()
-                keystoreFile.renameTo("keystore/your_keystore.jks")
-            }
-            println("PLAYSTORE build")
-            signingConfigs.release.storeFile = file("../../../_temp/keystore/your_keystore.jks")
-            signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
-            signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
-            signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
-        }
-    } else {
-        signingConfigs.release.storeFile = file("../tools/android_key")
-        signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
-        signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
-        signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
-        println("Local build")
-    }
     packagingOptions {
         jniLibs {
             useLegacyPackaging = true
         }
     }
+
     namespace 'co.anode.anodium'
 }
 
@@ -175,7 +186,6 @@ private String setVersionNumberByTag() {
 
 private void buildPld() {
     def stdout = new ByteArrayOutputStream()
-
     exec {
         ignoreExitValue true
         commandLine 'sh', './pltd_build.sh'
