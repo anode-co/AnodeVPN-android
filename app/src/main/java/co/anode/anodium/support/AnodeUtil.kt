@@ -8,6 +8,7 @@ import android.os.Looper
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.system.Os
+import android.system.Os.socket
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -26,13 +27,16 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
+import java.net.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -839,22 +843,45 @@ object AnodeUtil {
     }
 
     fun isCjdnsAlreadyRunning():Boolean {
-        try {
-            Log.i(LOGTAG, "Checking if cjdns is already running")
-            val processBuilder = ProcessBuilder()
-            val pb = processBuilder.command("/system/bin/sh", "-c", "\"echo -n 'd1:q4:pinge' | nc -u 127.0.0.1 11234\"")
-                .start()
-            var output = pb.inputStream.bufferedReader().readText()
-            if (output.contains("ponge")) {
-                Log.i(LOGTAG, "Cjdns is already running")
-                return true
-            }
-            return false
-        } catch (e: Exception) {
-            return false
+        val sendExecutor = Executors.newFixedThreadPool(1)
+        val receiveExecutor = Executors.newFixedThreadPool(1)
+        val socket = DatagramSocket()
+        socket.soTimeout = 1000
+
+        sendExecutor.execute {
+            sendUdp(socket, "d1:q4:pinge")
         }
+        val result:Future<Boolean> = receiveExecutor.submit(Callable {
+            val message = ByteArray(1024)
+            val packet = DatagramPacket(message, message.size)
+            try {
+                socket.receive(packet)
+                val text = String(message, 0, packet.length)
+                if (text.contains("ponge")) {
+                    Log.i(LOGTAG, "Cjdns is already running")
+                    return@Callable true
+                } else {
+                    return@Callable false
+                }
+            } catch (e: IOException) {
+                return@Callable false
+            } catch (e: SocketTimeoutException) {
+                return@Callable false
+            } catch (e: SocketException) {
+                return@Callable false
+            }
+        })
+        val isRunning = result.get()
+        return isRunning
     }
 
+    private fun sendUdp(udpSocket: DatagramSocket, msg: String) {
+        val buf = msg.toByteArray()
+        val serviceHost = InetAddress.getByName("127.0.0.1")
+        val servicePort = 11234
+        val packet = DatagramPacket(buf, buf.size, serviceHost, servicePort)
+        udpSocket.send(packet)
+    }
 }
 
 class AnodeUtilException(message: String): Exception(message)

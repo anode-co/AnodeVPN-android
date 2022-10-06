@@ -58,11 +58,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //Refuse to start if another instance is already running
-        /*if(AnodeUtil.isCjdnsAlreadyRunning()) {
-            Toast.makeText(this, "Anode is already running", Toast.LENGTH_LONG).show()
+        if(AnodeUtil.isCjdnsAlreadyRunning()) {
+            Toast.makeText(this, "Can not launch Anode. Another instance is already running", Toast.LENGTH_LONG).show()
             finish()
             exitProcess(0)
-        }*/
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
