@@ -41,7 +41,7 @@ android {
                     def keystoreFile = allFilesFromDir.first()
                     keystoreFile.renameTo("keystore/your_keystore.jks")
                 }
-                println("PLAYSTORE build")
+                println("Building PLAYSTORE build")
                 signingConfigs.release.storeFile = file("../../../_temp/keystore/your_keystore.jks")
                 signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
                 signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
@@ -50,22 +50,21 @@ android {
                 applicationIdSuffix ".playstore"
                 versionNameSuffix "-playstore"
             } else if (System.getenv("CI") == "true") {
-                println("APK build")
+                println("Building AutoUpdate build")
                 signingConfigs.release.storeFile = file("../tools/android_key")
                 signingConfigs.release.storePassword = System.getenv("ANODE_CONFIDENTIAL_password0")
                 signingConfigs.release.keyAlias = System.getenv("ANODE_CONFIDENTIAL_alias")
                 signingConfigs.release.keyPassword = System.getenv("ANODE_CONFIDENTIAL_password1")
                 buildConfigField "String", "BUILD_PLATFORM", "\"travis\""
-                applicationIdSuffix ".release"
-                versionNameSuffix "-release"
             } else {
-                println("Local release build")
+                println("Building local release build")
                 buildConfigField "String", "BUILD_PLATFORM", "\"local\""
                 signingConfigs.release.storeFile = file("../tools/android_key")
                 signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
-                signingConfigs.release.keyAlias = "key0"
+                signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
                 signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
-                println("Key: "+signingConfigs.release.keyAlias)
+                applicationIdSuffix ".release"
+                versionNameSuffix "-release"
             }
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -74,13 +73,12 @@ android {
         debug {
             signingConfigs.debug.storeFile = file("../tools/android_key")
             signingConfigs.debug.storePassword = System.getenv("KEYSTORE_PASSWORD")
-            signingConfigs.debug.keyAlias = "key0"
+            signingConfigs.debug.keyAlias = System.getenv("KEY_ALIAS")
             signingConfigs.debug.keyPassword = System.getenv("KEY_PASSWORD")
-            println("Local debug build")
+            println("Building local debug build")
             buildConfigField "String", "BUILD_PLATFORM", "\"local\""
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
-            println("Key: "+signingConfigs.debug.keyAlias)
         }
     }
 

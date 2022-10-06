@@ -10,12 +10,12 @@ import co.anode.anodium.support.AnodeClient
 
 
 object AboutDialog {
-    private const val LOGTAG = "co.anode.anodium"
+    private const val LOGTAG = BuildConfig.APPLICATION_ID
 
     fun show(ctx: Context) {
         Log.i(LOGTAG, "Open About dialog")
         AnodeClient.eventLog("About dialog opened")
-        val prefs = ctx.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val prefs = ctx.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         val checkBoxView: View = View.inflate(ctx, R.layout.about_dialog, null)
         val checkBox = checkBoxView.findViewById<CheckBox>(R.id.about_checkbox)
         checkBox.setOnClickListener {

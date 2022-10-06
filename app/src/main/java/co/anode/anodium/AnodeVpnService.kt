@@ -65,7 +65,7 @@ class AnodeVpnService : VpnService() {
 }
 
 class VpnThread(private val avpn: AnodeVpnService) : Runnable {
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     private var myIp6: String = "fc00::1"
 
     private fun configVpn() {

@@ -10,10 +10,10 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.LOGTAG
 import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
@@ -159,13 +159,13 @@ class PinPrompt : AppCompatActivity() {
         jsonRequest.put("wallet_passphrase", password)
         AnodeUtil.apiController.post(AnodeUtil.apiController.checkPassphraseURL,jsonRequest) { response ->
             if (response == null) {
-                Log.i(LOGTAG, "unknown status for wallet/checkpassphrase")
+                Log.i(BuildConfig.APPLICATION_ID, "unknown status for wallet/checkpassphrase")
             } else if ((response.has("error")) &&
                 response.getString("error").contains("ErrWrongPassphrase")) {
-                Log.d(LOGTAG, "Validating password, wrong password")
+                Log.d(BuildConfig.APPLICATION_ID, "Validating password, wrong password")
                 currentPasswordValidated = false
             } else if (response.has("error")) {
-                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+                Log.d(BuildConfig.APPLICATION_ID, "Error: "+response.getString("error").toString())
                 currentPasswordValidated = false
             } else if (response.has("validPassphrase")) {
                 currentPasswordValidated = response.getBoolean("validPassphrase")
@@ -174,9 +174,9 @@ class PinPrompt : AppCompatActivity() {
                 } else {
                     validPassword = null
                 }
-                Log.i(LOGTAG, "validPassphrase: $currentPasswordValidated")
+                Log.i(BuildConfig.APPLICATION_ID, "validPassphrase: $currentPasswordValidated")
             } else {
-                Log.e(LOGTAG, "UNEXPECTED response: $response")
+                Log.e(BuildConfig.APPLICATION_ID, "UNEXPECTED response: $response")
                 //Something unexpected has happened, close activity
                 finish()
             }

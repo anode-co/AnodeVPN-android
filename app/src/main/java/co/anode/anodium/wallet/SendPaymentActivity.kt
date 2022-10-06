@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.R
 import com.google.android.material.textfield.TextInputLayout
@@ -18,7 +19,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class SendPaymentActivity : AppCompatActivity() {
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
 
     private var myPKTAddress = ""
     private var canSendCoins = false

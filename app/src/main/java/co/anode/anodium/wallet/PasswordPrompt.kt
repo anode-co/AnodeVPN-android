@@ -15,6 +15,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
@@ -25,7 +26,7 @@ import org.json.JSONObject
 
 
 class PasswordPrompt : AppCompatActivity() {
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     private var currentPasswordValidated = true
     private var currentPassword = ""
     private var changePassphrase = false
@@ -93,7 +94,7 @@ class PasswordPrompt : AppCompatActivity() {
             if (passwordsMatch()) {
                 confirmPassLayout.error = null
                 //Reset stored encrypted password and PIN
-                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
                 prefs.edit().remove("encrypted_wallet_password").apply()
                 prefs.edit().remove("wallet_pin").apply()
 
@@ -187,7 +188,7 @@ class PasswordPrompt : AppCompatActivity() {
                 Toast.makeText(this,"Error trying to change wallet password.", Toast.LENGTH_LONG).show()
             } else if (response.length() == 0) {
                 Log.d(LOGTAG, "Wallet password changed")
-                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
                 prefs.edit().remove("wallet_pin").apply()
                 prefs.edit().remove("encrypted_wallet_password")
                 Toast.makeText(this, "Wallet password changed!", Toast.LENGTH_LONG).show()

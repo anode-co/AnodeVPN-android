@@ -31,6 +31,7 @@ import java.nio.file.Paths
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
@@ -41,7 +42,7 @@ import javax.crypto.spec.SecretKeySpec
 
 
 object AnodeUtil {
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     var context: Context? = null
     var filesDirectory = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
@@ -69,7 +70,7 @@ object AnodeUtil {
             filesDirectory = context!!.filesDir.toString()
         val service = ServiceVolley()
         apiController = APIController(service)
-        if (BuildConfig.BUILD_PLATFORM == "playstore") {
+        if (BuildConfig.APPLICATION_ID == "co.anode.anodium") {
             doUpdateCheck = true
         }
     }
@@ -81,10 +82,10 @@ object AnodeUtil {
 
     fun initializeApp() {
         //Create files folder
-        Log.i(LOGTAG, "Creating files directory")
+        Log.i(BuildConfig.APPLICATION_ID, "Creating files directory")
         context!!.filesDir.mkdir()
         //Create symbolic link for cjdroute
-        val filesdir = "data/data/co.anode.anodium/files"
+        val filesdir = "data/data/${BuildConfig.APPLICATION_ID}/files"
         val nativelibdir = context!!.applicationInfo.nativeLibraryDir.toString()
         val cjdrouteFile = File("$filesdir/cjdroute")
         cjdrouteFile.delete()
@@ -112,7 +113,7 @@ object AnodeUtil {
     }
 
     fun generateUsername(textview:TextView) {
-        val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         //If there is no username stored
         if (prefs?.getString("username", "").isNullOrEmpty()) {
             //Generate a username
@@ -129,7 +130,7 @@ object AnodeUtil {
     }
 
     private fun generateUsernameHandler(result: String, textview:TextView) {
-        Log.i(co.anode.anodium.support.LOGTAG,"Received from API: $result")
+        Log.i(BuildConfig.APPLICATION_ID,"Received from API: $result")
         if ((result.isBlank())) {
             return
         } else if (result.contains("400") || result.contains("401")) {
@@ -148,7 +149,7 @@ object AnodeUtil {
             val jsonObj = JSONObject(result)
             if (jsonObj.has("username")) {
                 textview.text = jsonObj.getString("username")
-                val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
                 if (prefs != null) {
                     with (prefs.edit()) {
                         putString("username", jsonObj.getString("username"))
@@ -169,7 +170,7 @@ object AnodeUtil {
     }
 
     fun deleteNeutrino() {
-        val neutrinoDB = File("data/data/co.anode.anodium/files/pkt/neutrino.db")
+        val neutrinoDB = File("data/data/${BuildConfig.APPLICATION_ID}/files/pkt/neutrino.db")
         if (neutrinoDB.exists()) {
             neutrinoDB.delete()
         }
@@ -181,7 +182,7 @@ object AnodeUtil {
     }
 
     private fun generateCjdnsConfFile(secret: String) {
-        Log.i(LOGTAG, "Generating new conf file with cjdroute...")
+        Log.i(BuildConfig.APPLICATION_ID, "Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
             if (secret.isNotEmpty()) {
@@ -202,7 +203,7 @@ object AnodeUtil {
                     .waitFor(2, TimeUnit.SECONDS)
             }
             //Clean conf
-            Log.i(LOGTAG, "Clean conf file with cjdroute")
+            Log.i(BuildConfig.APPLICATION_ID, "Clean conf file with cjdroute")
             processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--cleanconf")
                     .redirectInput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
                     .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
@@ -213,14 +214,14 @@ object AnodeUtil {
             throw AnodeUtilException("Failed to generate new configuration file " + e.message)
         }
         //Delete temp file
-        Log.i(LOGTAG, "Delete temp conf file")
+        Log.i(BuildConfig.APPLICATION_ID, "Delete temp conf file")
         Files.delete(Paths.get("$filesDirectory/$CJDROUTE_TEMPCONFFILE"))
     }
 
     fun launchCJDNS() {
         val confFile = File("$filesDirectory/$CJDROUTE_CONFFILE")
         if (!confFile.exists()) {
-            val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+            val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
             initializeCjdrouteConfFile(prefs?.getString("wallet_secret","").toString())
         }
         try {
@@ -249,7 +250,7 @@ object AnodeUtil {
             Log.i(LOGTAG, "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
             val pldLogFile = File(filesDirectory + "/" + PLD_LOG)
             val processBuilder = ProcessBuilder()
-            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/co.anode.anodium/files/pkt/lnd","--pktdir=/data/data/co.anode.anodium/files/pkt")
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt")
                     .redirectOutput(File(filesDirectory, PLD_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = filesDirectory
@@ -330,7 +331,7 @@ object AnodeUtil {
         val filename: String = "$filesDirectory/anodium.log"
         if (File("$filesDirectory/last_anodium.log").exists())  Files.delete(Paths.get("$filesDirectory/last_anodium.log"))
         if (File(filename).exists()) Files.move(Paths.get(filename), Paths.get("$filesDirectory/last_anodium.log"))
-        val command = "logcat -f $filename -v time co.anode.anodium:V"
+        val command = "logcat -f $filename -v time ${BuildConfig.APPLICATION_ID}:V"
         try {
             Runtime.getRuntime().exec(command)
         } catch (e: IOException) {
@@ -453,7 +454,7 @@ object AnodeUtil {
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
                 context!!,
-                "co.anode.anodium-encrypted-sharedPreferences",
+                "${BuildConfig.APPLICATION_ID}-encrypted-sharedPreferences",
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -469,7 +470,7 @@ object AnodeUtil {
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
                 context!!,
-                "co.anode.anodium-encrypted-sharedPreferences",
+                "${BuildConfig.APPLICATION_ID}-encrypted-sharedPreferences",
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -520,7 +521,7 @@ object AnodeUtil {
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
                 context!!,
-                "co.anode.anodium-encrypted-sharedPreferences",
+                "${BuildConfig.APPLICATION_ID}-encrypted-sharedPreferences",
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -538,7 +539,7 @@ object AnodeUtil {
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
                 context!!,
-                "co.anode.anodium-encrypted-sharedPreferences",
+                "${BuildConfig.APPLICATION_ID}-encrypted-sharedPreferences",
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -648,7 +649,7 @@ object AnodeUtil {
     fun serviceThreads() {
         //Check for event log files daily
         Thread({
-            val prefs = context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+            val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
             Log.i(LOGTAG, "AnodeUtil.UploadEventsThread startup")
             while (true) {
                 AnodeClient.ignoreErr {
@@ -834,6 +835,23 @@ object AnodeUtil {
             handler.post {
                 AnodeClient.getPeeringLinesHandler(response)
             }
+        }
+    }
+
+    fun isCjdnsAlreadyRunning():Boolean {
+        try {
+            Log.i(LOGTAG, "Checking if cjdns is already running")
+            val processBuilder = ProcessBuilder()
+            val pb = processBuilder.command("/system/bin/sh", "-c", "\"echo -n 'd1:q4:pinge' | nc -u 127.0.0.1 11234\"")
+                .start()
+            var output = pb.inputStream.bufferedReader().readText()
+            if (output.contains("ponge")) {
+                Log.i(LOGTAG, "Cjdns is already running")
+                return true
+            }
+            return false
+        } catch (e: Exception) {
+            return false
         }
     }
 

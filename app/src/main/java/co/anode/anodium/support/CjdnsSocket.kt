@@ -3,14 +3,13 @@ package co.anode.anodium.support
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
+import co.anode.anodium.BuildConfig
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.InetAddress
 import java.net.Socket
 import kotlin.concurrent.thread
 import kotlin.experimental.and
-
-val LOGTAG = "co.anode.anodiumvpn"
 
 object CjdnsSocket {
     val ls: LocalSocket = LocalSocket()
@@ -27,7 +26,7 @@ object CjdnsSocket {
     var ipv6AddressPrefix: Int = 0
     var logpeerStats: String = ""
     var logshowConnections: String = ""
-    val cjdnsPath = "data/data/co.anode.anodium/files/cjdroute.sock"
+    val cjdnsPath = "data/data/${BuildConfig.APPLICATION_ID}/files/cjdroute.sock"
     const val InterfaceController_beaconState_newState_SEND = 2
     var cjdnsFd: FileDescriptor? = null
     var peers:ArrayList<Benc.Bdict> = ArrayList()
@@ -36,7 +35,7 @@ object CjdnsSocket {
         var tries = 0
         while (tries < 10) {
             try {
-                Log.i(LOGTAG, "Connecting to socket...")
+                Log.i(BuildConfig.APPLICATION_ID, "Connecting to socket...")
                 ls.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
             } catch (e: java.lang.Exception) {
                 if (tries > 100) {
@@ -77,7 +76,7 @@ object CjdnsSocket {
                 } else {
                     Benc.dict("q", name)
                 }
-        Log.i(LOGTAG,benc.toString())
+        Log.i(BuildConfig.APPLICATION_ID,benc.toString())
         //Check if socket has connected, in case cjdns has not been initialized yet
         while (!ls.isConnected) {
             init(cjdnsPath)
@@ -115,7 +114,7 @@ object CjdnsSocket {
     }
 
     fun UDPInterface_getFd(ifNum: Int): Int {
-        Log.i(LOGTAG, "getUdpFd")
+        Log.i(BuildConfig.APPLICATION_ID, "getUdpFd")
         val dec = call("UDPInterface_getFd", Benc.dict("interfaceNumber", ifNum))
         val fd = dec["fd"]
         if (fd !is Benc.Bint) {
@@ -125,7 +124,7 @@ object CjdnsSocket {
     }
 
     fun Admin_exportFd(fd: Int): FileDescriptor {
-        Log.i(LOGTAG, "Admin_exportFd $fd")
+        Log.i(BuildConfig.APPLICATION_ID, "Admin_exportFd $fd")
         call("Admin_exportFd", Benc.dict("fd", fd))
         val fds = ls.ancillaryFileDescriptors
         if (fds == null || fds.isEmpty()) {
@@ -135,7 +134,7 @@ object CjdnsSocket {
     }
 
     fun Admin_importFd(fd: FileDescriptor): Int {
-        Log.i(LOGTAG, "Admin_importFd $fd")
+        Log.i(BuildConfig.APPLICATION_ID, "Admin_importFd $fd")
         ls.setFileDescriptorsForSend(arrayOf(fd))
         val result = call("Admin_importFd", null)["fd"].num().toInt()
         ls.setFileDescriptorsForSend(null)
@@ -221,7 +220,7 @@ object CjdnsSocket {
     }
 
     fun ipTunnelConnectTo(node: String) {
-        Log.i(LOGTAG,"ipTunnelConnectTo: $node")
+        Log.i(BuildConfig.APPLICATION_ID,"ipTunnelConnectTo: $node")
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
@@ -233,7 +232,7 @@ object CjdnsSocket {
     }
 
     fun IpTunnel_removeConnection(num: Int) {
-        Log.i(LOGTAG,"IpTunnel_removeConnection: $num")
+        Log.i(BuildConfig.APPLICATION_ID,"IpTunnel_removeConnection: $num")
         call("IpTunnel_removeConnection", Benc.dict("connection", num))
     }
 
@@ -279,7 +278,7 @@ object CjdnsSocket {
     }
 
     fun clearRoutes() {
-        Log.i(LOGTAG, "clear routes")
+        Log.i(BuildConfig.APPLICATION_ID, "clear routes")
         ipv4Address = ""
         ipv4Route = ""
         ipv4RoutePrefix = 0
@@ -325,7 +324,7 @@ object CjdnsSocket {
     }
 
     fun SwitchPinger_ping(path:String) {
-        Log.i(LOGTAG, "SwitchPinger_ping for path: "+path)
+        Log.i(BuildConfig.APPLICATION_ID, "SwitchPinger_ping for path: "+path)
         call("SwitchPinger_ping", Benc.dict("path",path))
     }
 
@@ -336,7 +335,6 @@ object CjdnsSocket {
 
     fun UDPInterface_new(dscp:Int, address:String, port:Int) : Benc.Obj =
         call("UDPInterface_new", Benc.dict("dscp",dscp,"bindAddress",address,"beaconPort",port))
-
 }
 
 class CjdnsException(message:String): Exception(message)

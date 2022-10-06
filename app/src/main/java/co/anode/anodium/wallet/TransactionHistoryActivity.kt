@@ -13,8 +13,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.LOGTAG
 import co.anode.anodium.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
@@ -222,7 +222,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
             } else if ((response != null) &&
                 response.has("message") &&
                 !response.isNull("message")) {
-                Log.d(LOGTAG, response.getString("message"))
+                Log.d(BuildConfig.APPLICATION_ID, response.getString("message"))
             }
         }
     }

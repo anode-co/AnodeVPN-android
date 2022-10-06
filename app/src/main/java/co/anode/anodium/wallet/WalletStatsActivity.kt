@@ -12,9 +12,9 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.LOGTAG
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -95,12 +95,12 @@ class WalletStatsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean { // Handle action bar item clicks here. The action bar will
         val id = item.itemId
         if (id == R.id.action_wallet_info) {
-            Log.i(LOGTAG, "Open wallet info activity")
+            Log.i(BuildConfig.APPLICATION_ID, "Open wallet info activity")
             val walletInfo = Intent(applicationContext, WalletInfoActivity::class.java)
             startActivity(walletInfo)
             return true
         } else if (id == R.id.action_wallet_debug) {
-            Log.i(LOGTAG, "Open wallet debug logs activity")
+            Log.i(BuildConfig.APPLICATION_ID, "Open wallet debug logs activity")
             val debugWalletActivity = Intent(this, DebugWalletActivity::class.java)
             startActivity(debugWalletActivity)
             return true
@@ -322,24 +322,24 @@ class WalletStatsActivity : AppCompatActivity() {
      * then will call getNewAddress, getBalance and getTransactions
      */
     private fun unlockWallet(password: String) {
-        Log.i(LOGTAG, "Trying to unlock wallet")
+        Log.i(BuildConfig.APPLICATION_ID, "Trying to unlock wallet")
         val jsonRequest = JSONObject()
         jsonRequest.put("wallet_passphrase", password)
         jsonRequest.put("wallet_name", "$activeWallet.db")
         AnodeUtil.apiController.post(AnodeUtil.apiController.unlockWalletURL,jsonRequest) { response ->
             if (response == null) {
-                Log.i(LOGTAG, "unknown status for wallet")
+                Log.i(BuildConfig.APPLICATION_ID, "unknown status for wallet")
             } else if ((response.has("error")) &&
                 response.getString("error").contains("ErrWrongPassphrase")) {
-                Log.d(LOGTAG, "Error unlocking wallet, wrong password")
+                Log.d(BuildConfig.APPLICATION_ID, "Error unlocking wallet, wrong password")
                 pinOrPasswordPrompt(wrongPass = true, forcePassword = false)
                 walletUnlocked = false
             } else if (response.has("error")) {
-                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+                Log.d(BuildConfig.APPLICATION_ID, "Error: "+response.getString("error").toString())
                 walletUnlocked = false
             } else if (response.length() == 0) {
                 //empty response is success
-                Log.i(LOGTAG, "Wallet unlocked")
+                Log.i(BuildConfig.APPLICATION_ID, "Wallet unlocked")
                 walletUnlocked = true
             }
         }
@@ -379,7 +379,7 @@ class WalletStatsActivity : AppCompatActivity() {
         AnodeUtil.apiController.post(AnodeUtil.apiController.getAddressBalancesURL, jsonData) {
                 response ->
             if (response == null) {
-                Log.e(LOGTAG, "unexpected null response from wallet/address/balances")
+                Log.e(BuildConfig.APPLICATION_ID, "unexpected null response from wallet/address/balances")
                 return@post
             }
             if (response.has("addrs")) {
@@ -408,7 +408,7 @@ class WalletStatsActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.wstats_address).text = myPKTAddress
             } else if (response.has("error")) {
                 //Parse error
-                Log.d(LOGTAG, "Error: "+response.getString("error").toString())
+                Log.d(BuildConfig.APPLICATION_ID, "Error: "+response.getString("error").toString())
             }
         }
     }

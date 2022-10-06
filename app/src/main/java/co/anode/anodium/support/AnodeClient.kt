@@ -37,6 +37,7 @@ import javax.net.ssl.SSLProtocolException
 
 
 object AnodeClient {
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     lateinit var mycontext: Context
     lateinit var statustv: TextView
     lateinit var mainActivity: AppCompatActivity
@@ -96,7 +97,7 @@ object AnodeClient {
             if (arch.contains("x86") || arch.contains("i686")) { return ""}
         }
         //Do not post without consent
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
         try {
             if (!dir.exists()) { return "No log files to be submitted" }
@@ -136,7 +137,7 @@ object AnodeClient {
             if (arch.contains("x86") || arch.contains("i686")) { return ""}
         }
         //Do not post without consent
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         val bforce = force.toBoolean()
         if (!bforce && !prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
 
@@ -175,7 +176,7 @@ object AnodeClient {
 
     fun httpPostEvent(dir: File): String {
         //Do not post without consent
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         if (!prefs.getBoolean("DataConsent", false)) { return "No user consent to submit data" }
         try {
             if (!dir.exists()) { return "No event log files to be submitted" }
@@ -304,7 +305,7 @@ object AnodeClient {
         ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
         ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", "0") }
         ignoreErr{ jsonObject.accumulate("availableMemoryBytes", AnodeUtil.readMemUsage()) }
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
 
@@ -364,7 +365,7 @@ object AnodeClient {
         ignoreErr{ jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
         ignoreErr{ jsonObject.accumulate("cpuUtilizationPercent", "0") }
         ignoreErr{ jsonObject.accumulate("availableMemoryBytes", AnodeUtil.readMemUsage()) }
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr{ jsonObject.accumulate("username", username) }
         jsonObject.accumulate("message", "postmessage")
@@ -388,7 +389,7 @@ object AnodeClient {
         ignoreErr { jsonObject.accumulate("ip6Address", CjdnsSocket.ipv6Route) }
         ignoreErr { jsonObject.accumulate("cpuUtilizationPercent", "0") }
         ignoreErr { jsonObject.accumulate("availableMemoryBytes", AnodeUtil.readMemUsage()) }
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         val username = prefs!!.getString("username","")
         ignoreErr { jsonObject.accumulate("username", username) }
         jsonObject.accumulate("message", "Events log")
@@ -411,7 +412,7 @@ object AnodeClient {
     }
 
     fun getLatestRelease(userInitiated: Boolean) {
-        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
         AnodeUtil.apiController.getArray(API_GET_ALL_RELEASES) {
             response ->
             if (response != null) {
@@ -586,7 +587,7 @@ object AnodeClient {
     class AuthorizeVPN() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
             val pubkey = params[0]
-            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
             with (prefs.edit()) {
                 putString("LastServerPubkey", pubkey)
                 commit()
@@ -616,7 +617,7 @@ object AnodeClient {
                     statustv.text  = mycontext.resources.getString(R.string.status_authorization_failed)
                 } )
                 //Sign user out
-                val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                 with (prefs.edit()) {
                     putBoolean("SignedIn", false)
                     commit()
@@ -630,7 +631,7 @@ object AnodeClient {
                                 statustv.text = mycontext.resources.getString(R.string.status_authorized)
                             })
                             //do not try to reconnect while re-authorization
-                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             val node = prefs.getString("LastServerPubkey", defaultNode)
                             val connectedNode = prefs.getString("ServerPublicKey","")
                             if ((!node.isNullOrEmpty()) && ((!isVpnActive()) || (node != connectedNode))) {
@@ -645,7 +646,7 @@ object AnodeClient {
                             statustv.post(Runnable {
                                 statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
                             })
-                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putLong("LastAuthorized", 0)
                                 commit()
@@ -822,7 +823,7 @@ object AnodeClient {
                 //mainButtonState(BUTTON_STATE_CONNECTED)
             }
             //Check for needed authorization call
-            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
             val Authtimestamp = prefs.getLong("LastAuthorized",0)
             if ((System.currentTimeMillis() - Authtimestamp) > Auth_TIMEOUT) {
                 AuthorizeVPN().execute(prefs.getString("LastServerPubkey", defaultNode))
@@ -912,7 +913,7 @@ object AnodeClient {
                     if (jsonObj.getString("status") == "success") {
                         showToast("User logged out")
                         //Sign user out
-                        val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                        val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                         with(prefs.edit()) {
                             putBoolean("SignedIn", false)
                             putBoolean("Registered", false)
@@ -973,7 +974,7 @@ object AnodeClient {
     /*
     class DeleteAccount() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
             val username = prefs.getString("username", "")
             val url = API_DELETE_ACCOUNT.replace("<email_or_username>", username!!)
             val resp = APIHttpReq( url, "","DELETE", true , false)
@@ -990,7 +991,7 @@ object AnodeClient {
                     if (jsonObj.has("status")) {
                         if (jsonObj.getString("status") == "success") {
                             showToast(jsonObj.getString("message"))
-                            val prefs = mycontext.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                            val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putBoolean("SignedIn", false)
                                 putBoolean("Registered", false)

@@ -29,7 +29,7 @@ class CjdnsStatsActivity : AppCompatActivity() {
         actionbar!!.title = "Cjdns Stats"
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-        val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
 
         val buttonSubmitLogs = findViewById<Button>(R.id.button_SubmitLogs)
         buttonSubmitLogs.setOnClickListener {
@@ -54,7 +54,7 @@ class CjdnsStatsActivity : AppCompatActivity() {
             text.text = files.size.toString()
         }
         Thread({
-            Log.i(LOGTAG, "DebugActivity.RefreshValues startup")
+            Log.i(BuildConfig.APPLICATION_ID, "DebugActivity.RefreshValues startup")
             while (true) {
                 if (AnodeUtil.isCjdnsAlive()) {
                     this.runOnUiThread {

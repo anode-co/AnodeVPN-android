@@ -1,6 +1,7 @@
 package co.anode.anodium
 
 import android.Manifest
+import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -19,9 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.anode.anodium.databinding.ActivityMainBinding
-import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.CubeWifi
+import co.anode.anodium.support.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,7 +32,6 @@ import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
-    private val LOGTAG = "co.anode.anodium"
     private lateinit var binding: ActivityMainBinding
     private val REQUIRED_SDK_PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_NETWORK_STATE,
@@ -59,6 +57,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Refuse to start if another instance is already running
+        /*if(AnodeUtil.isCjdnsAlreadyRunning()) {
+            Toast.makeText(this, "Anode is already running", Toast.LENGTH_LONG).show()
+            finish()
+            exitProcess(0)
+        }*/
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -82,11 +86,11 @@ class MainActivity : AppCompatActivity() {
         AnodeUtil.init(applicationContext)
         AnodeClient.init(applicationContext, this)
         AnodeUtil.initializeApp()
-        AnodeUtil.launchPld()
         AnodeUtil.launchCJDNS()
+        AnodeUtil.launchPld()
         AnodeUtil.serviceThreads()
         checkPermissions()
-        val prefs = getSharedPreferences("co.anode.anodium", MODE_PRIVATE)
+        val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
             //Generate a username
@@ -130,7 +134,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateUsernameHandler(result: String) {
-        Log.i(co.anode.anodium.support.LOGTAG,"Received from API: $result")
+        Log.i(BuildConfig.APPLICATION_ID,"Received from API: $result")
         if ((result.isBlank())) {
             return
         } else if (result.contains("400") || result.contains("401")) {
@@ -148,7 +152,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             val jsonObj = JSONObject(result)
             if (jsonObj.has("username")) {
-                val prefs = getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+                val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
                 with (prefs.edit()) {
                     putString("username", jsonObj.getString("username"))
                     putBoolean("SignedIn", false)
@@ -197,7 +201,7 @@ class MainActivity : AppCompatActivity() {
         else if (paramThrowable.toString().contains("AnodeVPNException") ) type = "vpnService"
         else if (paramThrowable.toString().contains("LndRPCException") ) {
             type = "lnd"
-            AnodeClient.storeFileAsError(AnodeUtil.context!!, type, "data/data/co.anode.anodium/files/pld.log")
+            AnodeClient.storeFileAsError(AnodeUtil.context!!, type, "data/data/${BuildConfig.APPLICATION_ID}/files/pld.log")
         }
         // we'll post the error on next startup
         AnodeClient.storeError(AnodeUtil.context!!, type, paramThrowable)

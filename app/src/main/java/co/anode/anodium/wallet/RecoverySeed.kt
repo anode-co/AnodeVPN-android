@@ -11,11 +11,11 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.MainActivity
 import co.anode.anodium.R
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
-import co.anode.anodium.support.LOGTAG
 import com.anton46.stepsview.StepsView
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
@@ -180,18 +180,18 @@ class RecoverySeed : AppCompatActivity() {
 
     private fun generateSeed(password: String) {
         AnodeClient.eventLog("Button: Create PKT wallet clicked")
-        Log.i(LOGTAG, "RecoverySeed Activity creating wallet")
+        Log.i(BuildConfig.APPLICATION_ID, "RecoverySeed Activity creating wallet")
         //Set up UI
         statusbar.text = getString(R.string.generating_wallet_seed)
         showLoading()
         val jsonData = JSONObject()
         jsonData.put("seed_passphrase", password)
-        Log.i(LOGTAG, "generating wallet seed...")
+        Log.i(BuildConfig.APPLICATION_ID, "generating wallet seed...")
         AnodeUtil.apiController.post(AnodeUtil.apiController.createSeedURL, jsonData)
         { response ->
             hideLoading()
             if ((response != null) && (response.has("seed") && !response.isNull("seed"))) {
-                Log.i(LOGTAG, "wallet seed created")
+                Log.i(BuildConfig.APPLICATION_ID, "wallet seed created")
                 //Get seed
                 val seedText = findViewById<TextView>(R.id.seed_column)
                 val seedArray = response.getJSONArray("seed")
@@ -205,7 +205,7 @@ class RecoverySeed : AppCompatActivity() {
                 val createButton = findViewById<Button>(R.id.button_wallet_create)
                 createButton.visibility = View.VISIBLE
             } else {
-                Log.e(LOGTAG, "Error in generating wallet seed")
+                Log.e(BuildConfig.APPLICATION_ID, "Error in generating wallet seed")
                 Toast.makeText(this, "Failed to generate wallet seed.", Toast.LENGTH_LONG).show()
                 //TODO: update UI, do we need to change layout?
             }
@@ -213,7 +213,7 @@ class RecoverySeed : AppCompatActivity() {
     }
 
     private fun recoverWallet( password: String, seedPass:String, seedArray: JSONArray, walletName:String) {
-        Log.i(LOGTAG, "recovering PKT wallet...")
+        Log.i(BuildConfig.APPLICATION_ID, "recovering PKT wallet...")
         statusbar.text = getString(R.string.recovering_wallet)
         val jsonData = JSONObject()
         if (seedPass.isNotEmpty()) {
@@ -226,7 +226,7 @@ class RecoverySeed : AppCompatActivity() {
     }
 
     private fun createWallet( password: String, seedArray: JSONArray, walletName:String) {
-        Log.i(LOGTAG, "creating PKT wallet...")
+        Log.i(BuildConfig.APPLICATION_ID, "creating PKT wallet...")
         statusbar.text = getString(R.string.creating_wallet)
         val jsonData = JSONObject()
         jsonData.put("wallet_passphrase", password)
@@ -248,14 +248,14 @@ class RecoverySeed : AppCompatActivity() {
                 //Update UI
                 statusbar.text = ""
                 //Set activeWallet
-                val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
                 var activeWallet = jsonData.getString("wallet_name")
                 activeWallet = activeWallet.replace(".db","", false)
                 prefs.edit().putString("activeWallet", activeWallet).apply()
                 getSecret(true)
                 confirmWalletLayout(isRecovery)
             } else {
-                Log.i(LOGTAG, "PKT create wallet failed")
+                Log.i(BuildConfig.APPLICATION_ID, "PKT create wallet failed")
                 statusbar.text = "Error in creating wallet..."
                 //Wallet creation failed, parse error, log and notify user
                 var errorString = response?.getString("error")
@@ -263,7 +263,7 @@ class RecoverySeed : AppCompatActivity() {
                     val seedPassLayout = findViewById<TextInputLayout>(R.id.walletseedpassLayout)
                     seedPassLayout.error = getString(R.string.seed_wrong_password)
                 } else  if (errorString != null) {
-                    Log.e(LOGTAG, errorString)
+                    Log.e(BuildConfig.APPLICATION_ID, errorString)
                     //Get user friendly message
                     //errorString = errorString.substring(errorString.indexOf(" "), errorString.indexOf("\n\n"))
                     Toast.makeText(this, "Error: $errorString", Toast.LENGTH_LONG).show()
@@ -278,7 +278,7 @@ class RecoverySeed : AppCompatActivity() {
         val jsonRequest = JSONObject()
         AnodeUtil.apiController.post(AnodeUtil.apiController.getSecretURL,jsonRequest) { response ->
             if ((response != null) && (response.has("secret") && !response.isNull("secret"))) {
-                Log.i(LOGTAG, "wallet secret retrieved")
+                Log.i(BuildConfig.APPLICATION_ID, "wallet secret retrieved")
                 val secret = response.getString("secret")
                 if (resetCjdns) {
                     //cjdns seed genconf

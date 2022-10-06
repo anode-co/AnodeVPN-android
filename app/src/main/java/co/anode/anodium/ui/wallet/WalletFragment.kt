@@ -20,6 +20,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
 import co.anode.anodium.integration.presentation.WalletActivity
@@ -40,7 +41,7 @@ import java.util.concurrent.Executors
 
 
 class WalletFragment : Fragment() {
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     private var _binding: FragmentWalletBinding? = null
     lateinit var statusBar: TextView
     private lateinit var statusIcon: ImageView
@@ -94,7 +95,7 @@ class WalletFragment : Fragment() {
         statusIcon = root.findViewById(R.id.status_icon)
         val fileDir = mycontext.filesDir
 
-        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
 
         activeWallet = prefs.getString("activeWallet","wallet").toString()
 
@@ -175,7 +176,7 @@ class WalletFragment : Fragment() {
             //Show cached info
             showCachedData()
             //Delay getinfo when we want to use the new ui to allow user to enter other screens
-            val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+            val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
             if (prefs.getBoolean("useNewUI",false)) {
                 h.postDelayed(getPldInfo, 5000)
             } else {
@@ -208,7 +209,7 @@ class WalletFragment : Fragment() {
                 var bHash = ""
                 var neutrinoPeers = 0
                 var bTimestamp: Long = 0
-                val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
                 //Check if wallet is unlocked
                 walletUnlocked = response.has("wallet") && !response.isNull("wallet") && response.getJSONObject("wallet").has("currentHeight")
                 if (!walletUnlocked) {

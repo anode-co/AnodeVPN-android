@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.support.LOGTAG
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 private const val ARG_PARAM1 = "param1"
@@ -49,7 +48,7 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
         ratingbar.rating = arguments?.getFloat("averageRating")!!
         currentView.findViewById<TextView>(R.id.text_load).text = context?.resources?.getString(R.string.text_load) + arguments?.getString("load") + "%"
 
-        val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
         val favoriteButton = currentView.findViewById<Button>(R.id.button_favorite)
         if (prefs != null) {
             if ((arguments?.getBoolean("isFavorite") == true) || (prefs.getBoolean("favorite_" + arguments?.getString("name"), false))){
@@ -98,7 +97,7 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
 
     inner class toggleFavorite : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String {
-            val prefs = context?.getSharedPreferences("co.anode.anodium", Context.MODE_PRIVATE)
+            val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
             val url = apiFavoriteUrl.replace("<server_public_key>", prefs?.getString("ServerPublicKey", "")!!, true)
             return if (params[0]=="ADD") {
                 AnodeClient.APIHttpReq(url, "", "POST", needsAuth = true, isRetry = false)
@@ -109,14 +108,14 @@ class VPNDetailsFragment : BottomSheetDialogFragment() {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.i(LOGTAG, "Received from $apiFavoriteUrl: $result")
+            Log.i(BuildConfig.APPLICATION_ID, "Received from $apiFavoriteUrl: $result")
             if ((result.isNullOrBlank())) {
                 //
             } else {
                 try {
                     //
                 } catch (e: Exception) {
-                    Log.i(LOGTAG, e.toString())
+                    Log.i(BuildConfig.APPLICATION_ID, e.toString())
                 }
             }
         }

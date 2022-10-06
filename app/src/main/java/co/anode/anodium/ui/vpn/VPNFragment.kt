@@ -39,7 +39,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class VPNFragment : Fragment() {
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     val buttonStateDisconnected = 0
     val buttonStateConnecting = 1
     val buttonStateConnected = 2
@@ -72,7 +72,7 @@ class VPNFragment : Fragment() {
 
         val buttonConnectVPNs = root.findViewById<ToggleButton>(R.id.buttonconnectvpns)
 
-        val prefs = requireActivity().getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         val minClickInterval: Long = 1000
         var mLastClickTime: Long = 0
         buttonConnectVPNs.setOnClickListener() {

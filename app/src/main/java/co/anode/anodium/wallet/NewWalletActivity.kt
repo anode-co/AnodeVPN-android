@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import co.anode.anodium.AboutDialog
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 
 class NewWalletActivity : AppCompatActivity() {
@@ -25,7 +26,7 @@ class NewWalletActivity : AppCompatActivity() {
             passwordActivity.putExtra("recoverWallet", true)
             startActivity(passwordActivity)
         }
-        val prefs = getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         //On first run show data consent
         if (prefs.getBoolean("FirstRun", true)) {
             AboutDialog.show(this)

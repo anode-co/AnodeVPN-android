@@ -39,7 +39,7 @@ import java.net.NetworkInterface
 class ProfileFragment : Fragment() {
     private lateinit var mycontext: Context
     private var _binding: FragmentProfileBinding? = null
-    private val LOGTAG = "co.anode.anodium"
+    private val LOGTAG = BuildConfig.APPLICATION_ID
     private val binding get() = _binding!!
     private var activeWallet = ""
     private var walletNames: ArrayList<String> = ArrayList()
@@ -58,7 +58,7 @@ class ProfileFragment : Fragment() {
         val root: View = binding.root
         val idTextview = root.findViewById<TextView>(R.id.user_id)
         val versionTextview = root.findViewById<TextView>(R.id.version_number)
-        prefs = mycontext.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+        prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
             AnodeUtil.generateUsername(idTextview)
@@ -108,7 +108,8 @@ class ProfileFragment : Fragment() {
             startActivity(promptPinActivity)
         }
         val checkUpdateButton = root.findViewById<LinearLayout>(R.id.button_check_update)
-        if (BuildConfig.BUILD_PLATFORM == "playstore") {
+        //Disable update option for other builds
+        if (BuildConfig.APPLICATION_ID != "co.anode.anodium") {
             checkUpdateButton.visibility = View.GONE
         } else {
             checkUpdateButton.visibility = View.VISIBLE
@@ -271,7 +272,7 @@ class ProfileFragment : Fragment() {
             if ((response != null) && (response.has("secret") && !response.isNull("secret"))) {
                 Log.i(LOGTAG, "wallet secret retrieved")
                 val secret = response.getString("secret")
-                val prefs = mycontext.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)
+                val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
                 prefs.edit().putString("wallet_secret", secret).apply()
                 if (resetCjdns) {
                     //cjdns seed genconf
@@ -299,10 +300,10 @@ class ProfileFragment : Fragment() {
             } else if ((response != null) &&
                     response.has("error") &&
                     response.getString("error").contains("[LightningServer] is not yet ready")) {
-                Log.e(co.anode.anodium.support.LOGTAG, "Wallet is not unlocked")
+                Log.e(BuildConfig.APPLICATION_ID, "Wallet is not unlocked")
                 Toast.makeText(requireContext(), "Wallet is not unlocked.", Toast.LENGTH_LONG).show()
             } else {
-                Log.e(co.anode.anodium.support.LOGTAG, "Error in generating wallet seed")
+                Log.e(BuildConfig.APPLICATION_ID, "Error in generating wallet seed")
                 Toast.makeText(requireContext(), "Failed to get wallet seed.", Toast.LENGTH_LONG).show()
             }
         }
