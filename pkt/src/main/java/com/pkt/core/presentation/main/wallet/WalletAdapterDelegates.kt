@@ -114,6 +114,7 @@ fun transactionAdapterDelegate() =
                 }
 
                 timeLabel.text = item.time.formatTime()
+                amountUsdLabel.text = item.amountUsd.formatUsd()
             }
         }
     }

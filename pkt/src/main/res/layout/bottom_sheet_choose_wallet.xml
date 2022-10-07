@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_rounded_top_20dp"
+    android:backgroundTint="@color/bg3"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/choose_wallet"
+        android:textAppearance="?textAppearance20SemiBold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        style="@style/Widget.App.RecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_wallet" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

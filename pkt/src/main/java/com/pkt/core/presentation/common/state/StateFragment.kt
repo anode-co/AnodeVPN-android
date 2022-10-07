@@ -3,6 +3,7 @@ package com.pkt.core.presentation.common.state
 import android.os.Bundle
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.pkt.core.R
 import com.pkt.core.extensions.applyGradient
 import com.pkt.core.extensions.getColorByAttribute
+import com.pkt.core.extensions.scrollWhenOpenKeyboard
 import com.pkt.core.presentation.common.state.event.CommonEventHandler
 import com.pkt.core.presentation.common.state.navigation.NavigationHandler
 import com.pkt.core.presentation.common.state.state.CommonState
@@ -27,6 +29,7 @@ abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(conte
 
     private var toolbar: MaterialToolbar? = null
     private var swipeRefreshLayout: SwipeRefreshLayout? = null
+    private var scrollView: NestedScrollView? = null
 
     protected abstract val viewModel: StateViewModel<S>
 
@@ -35,6 +38,7 @@ abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(conte
 
         toolbar = view.findViewById(R.id.toolbar)
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+        scrollView = view.findViewById(R.id.scrollView)
 
         toolbar?.apply {
             applyGradient()
@@ -51,11 +55,16 @@ abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(conte
             }
         }
 
+        scrollView?.let {
+            scrollWhenOpenKeyboard(it)
+        }
+
         with(viewModel) {
             collectLatestRepeatOnLifecycle(uiState) { handleState(it) }
             collectLatestRepeatOnLifecycle(uiEvent) { handleEvent(it) }
             collectLatestRepeatOnLifecycle(uiNavigation) { handleNavigation(it) }
             collectLatestRepeatOnLifecycle(loadingState) { handleLoadingState(it) }
+            collectLatestRepeatOnLifecycle(actionState) { handleActionState(it) }
         }
     }
 
@@ -84,12 +93,18 @@ abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(conte
 
     private fun handleLoadingState(state: CommonState.LoadingState) {
         (view as? ConstraintLayout)?.apply {
-            setProgress(state.isLoading)
+            setLoadingProgress(state.isLoading)
             setError(state.loadingError != null) {
                 state.loadingAction?.invoke()
             }
         }
 
         swipeRefreshLayout?.isRefreshing = state.isRefreshing
+    }
+
+    private fun handleActionState(state: CommonState.ActionState) {
+        (view as? ConstraintLayout)?.apply {
+            setActionProgress(state.isLoading)
+        }
     }
 }

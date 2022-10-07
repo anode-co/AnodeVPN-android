@@ -47,6 +47,7 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:1.5.2"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation "androidx.browser:browser:1.4.0"
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
 
@@ -77,8 +78,12 @@ dependencies {
     implementation "com.hannesdorfmann:adapterdelegates4-kotlin-dsl:$adapter_delegates_version"
     implementation "com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding:$adapter_delegates_version"
 
-    implementation "androidx.browser:browser:1.4.0"
-
     // Timber
     api 'com.jakewharton.timber:timber:5.0.1'
+
+    // Util
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
+    implementation('com.github.yesterselga:password-strength-checker-android:v1.0') {
+        exclude group: 'com.android.support', module: 'appcompat-v7'
+    }
 }

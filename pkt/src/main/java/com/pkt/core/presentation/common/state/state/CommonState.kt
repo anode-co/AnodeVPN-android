@@ -12,4 +12,8 @@ sealed class CommonState : UiState {
         val loadingError: Throwable? = null,
         val loadingAction: (() -> Unit)? = null,
     ) : CommonState()
+
+    data class ActionState(
+        val isLoading: Boolean = false,
+    ) : CommonState()
 }

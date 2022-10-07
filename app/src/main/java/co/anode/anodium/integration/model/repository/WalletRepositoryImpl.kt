@@ -17,6 +17,26 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getWalletName(address: String): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getCurrentWallet(): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isPinAvailable(address: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun checkPin(address: String, pin: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun checkPassword(address: String, password: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
     //Get wallet balance, if address is empty then return total balance of all addresses
     override suspend fun getWalletBalance(address: String): Result<Double> = withContext(Dispatchers.IO){
         runCatching {
@@ -49,6 +69,18 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun generateSeed(password: String, pin: String): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun createWallet(password: String, pin: String, seed: String): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun recoverWallet(password: String, seed: String): Result<Unit> {
         TODO("Not yet implemented")
     }
 

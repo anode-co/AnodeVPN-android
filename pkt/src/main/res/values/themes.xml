@@ -35,14 +35,20 @@
         <item name="circularProgressIndicatorStyle">@style/Widget.App.CircularProgressIndicator</item>
         <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
         <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
+        <item name="checkboxStyle">@style/Widget.App.CheckBox</item>
+        <item name="radioButtonStyle">@style/Widget.App.RadioButton</item>
 
         <item name="textAppearance12Regular">@style/TextAppearance.App.12.Regular</item>
+        <item name="textAppearance12Medium">@style/TextAppearance.App.12.Medium</item>
         <item name="textAppearance14Regular">@style/TextAppearance.App.14.Regular</item>
         <item name="textAppearance14Medium">@style/TextAppearance.App.14.Medium</item>
         <item name="textAppearance14SemiBold">@style/TextAppearance.App.14.SemiBold</item>
         <item name="textAppearance16Regular">@style/TextAppearance.App.16.Regular</item>
         <item name="textAppearance16SemiBold">@style/TextAppearance.App.16.SemiBold</item>
+        <item name="textAppearance16Bold">@style/TextAppearance.App.16.Bold</item>
         <item name="textAppearance18SemiBold">@style/TextAppearance.App.18.SemiBold</item>
+        <item name="textAppearance20Medium">@style/TextAppearance.App.20.Medium</item>
         <item name="textAppearance20SemiBold">@style/TextAppearance.App.20.SemiBold</item>
         <item name="textAppearance30SemiBold">@style/TextAppearance.App.30.SemiBold</item>
 
@@ -51,6 +57,15 @@
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
         <item name="android:textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
 
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
+
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="bottomSheetStyle">@style/Widget.App.BottomSheet</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
     </style>
 
 </resources>

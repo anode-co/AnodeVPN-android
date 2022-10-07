@@ -1,6 +1,5 @@
 package com.pkt.core.presentation.main.wallet
 
-import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
@@ -56,11 +55,10 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             recyclerView.itemAnimator = null
             recyclerView.adapter = adapter
 
-            viewModel.startTimer()
+            //viewModel.startTimer()
         }
     }
 
-    @SuppressLint("UseCompatTextViewDrawableApis", "SetTextI18n")
     override fun handleState(state: WalletState) {
         with(viewBinding) {
             subtitleLabel.apply {
@@ -68,7 +66,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                     when (state.syncState) {
                         WalletState.SyncState.PROGRESS -> R.attr.colorProgress
                         WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
-                        WalletState.SyncState.FAILED -> android.R.attr.colorError
+                        WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
                     }))
 
                 text = "${
@@ -89,7 +87,6 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 } else {
                     state.balancePkt.toLong().formatPkt()
                 }
-
                 applyGradient()
             }
 

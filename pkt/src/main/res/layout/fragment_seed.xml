@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="@dimen/spacing_horizontal"
+    android:paddingVertical="@dimen/bottom_button_margin_bottom">
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="10dp"
+        android:text="@string/your_seed_phrase"
+        android:textAppearance="?textAppearance16Bold"
+        app:drawableStartCompat="@drawable/ic_error"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/descriptionLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/seed_phrase_description"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleLabel" />
+
+    <TextView
+        android:id="@+id/seedLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_rounded_10dp"
+        android:backgroundTint="?colorSurface"
+        android:lineSpacingExtra="6sp"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="32dp"
+        android:textAppearance="?textAppearance20Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/descriptionLabel"
+        tools:text="Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim" />
+
+    <ImageButton
+        android:id="@+id/copyButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ripple_mask_oval"
+        app:layout_constraintEnd_toEndOf="@id/seedLabel"
+        app:layout_constraintTop_toTopOf="@id/seedLabel"
+        app:srcCompat="@drawable/ic_copy"
+        tools:ignore="ContentDescription" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/nextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

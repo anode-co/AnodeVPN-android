@@ -6,7 +6,6 @@ import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -57,6 +56,9 @@ abstract class StateViewModel<S : UiState> : ViewModel() {
     private val _loadingState: MutableStateFlow<CommonState.LoadingState> by lazy { MutableStateFlow(CommonState.LoadingState()) }
     val loadingState: Flow<CommonState.LoadingState> by lazy { _loadingState }
 
+    protected val currentLoadingState: CommonState.LoadingState
+        get() = _loadingState.value
+
     private val loadingAction: (suspend () -> Result<*>)? by lazy { createLoadingAction() }
 
     protected open fun createLoadingAction(): (suspend () -> Result<*>)? = null
@@ -96,27 +98,21 @@ abstract class StateViewModel<S : UiState> : ViewModel() {
         }
     }
 
-    protected fun invokeSilentLoadingAction() {
-        loadingAction?.let { action ->
-            viewModelScope.launch {
-                action()
-                    .onSuccess {
-                        sendLoadingState { copy(isLoading = false) }
-                    }
-                    .onFailure {
-                        sendLoadingState { copy(loadingError = it, loadingAction = { invokeLoadingAction() }) }
-                    }
-            }
-        }
+    // Action section
+    private val _actionState: MutableStateFlow<CommonState.ActionState> by lazy { MutableStateFlow(CommonState.ActionState()) }
+    val actionState: Flow<CommonState.ActionState> by lazy { _actionState }
+
+    private fun sendActionState(reduce: CommonState.ActionState.() -> CommonState.ActionState) {
+        _actionState.tryEmit(_actionState.value.reduce())
     }
 
-    fun startTimer() {
-        //invokeRefreshingAction every minute
+    protected fun invokeAction(action: suspend () -> Result<*>) {
         viewModelScope.launch {
-            while (true) {
-                delay(30_000)
-                invokeRefreshingAction()
-            }
+            sendActionState { copy(isLoading = true) }
+
+            action()
+
+            sendActionState { copy(isLoading = false) }
         }
     }
 }

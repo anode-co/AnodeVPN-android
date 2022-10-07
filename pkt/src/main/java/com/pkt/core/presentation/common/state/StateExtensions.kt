@@ -9,13 +9,25 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.pkt.core.R
 
-fun ConstraintLayout.setProgress(isProgress: Boolean) {
+fun ConstraintLayout.setLoadingProgress(isProgress: Boolean) {
+    setProgress(isProgress, R.id.loading_progress_id, 1f)
+}
+
+fun ConstraintLayout.setActionProgress(isProgress: Boolean) {
+    setProgress(isProgress, R.id.action_progress_id, 0.4f)
+}
+
+private fun ConstraintLayout.setProgress(isProgress: Boolean, viewId: Int, alpha: Float) {
     if (isProgress) {
-        if (findViewById<View>(R.id.progressView) != null) {
+        if (findViewById<View>(viewId) != null) {
             return
         }
 
-        val progressView = LayoutInflater.from(context).inflate(R.layout.layout_progress, null)
+        val progressView = LayoutInflater.from(context).inflate(R.layout.layout_progress, null).apply {
+            this.id = viewId
+            
+            findViewById<View>(R.id.background).alpha = alpha
+        }
 
         addView(progressView, ConstraintLayout.LayoutParams(0, 0))
 
@@ -36,7 +48,7 @@ fun ConstraintLayout.setProgress(isProgress: Boolean) {
             applyTo(this@setProgress)
         }
     } else {
-        findViewById<View>(R.id.progressView)?.let { removeView(it) }
+        findViewById<View>(viewId)?.let { removeView(it) }
     }
 }
 

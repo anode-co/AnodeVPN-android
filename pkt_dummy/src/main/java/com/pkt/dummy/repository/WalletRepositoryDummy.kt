@@ -15,6 +15,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.mapstruct.factory.Mappers
+import kotlin.random.Random
 
 @OptIn(ExperimentalSerializationApi::class)
 class WalletRepositoryDummy constructor(
@@ -49,6 +50,39 @@ class WalletRepositoryDummy constructor(
         }
     }
 
+    override suspend fun getWalletName(address: String): Result<String> =
+        Result.success("My Wallet ${Random.nextInt(0, 10)}")
+
+    override suspend fun getCurrentWallet(): Result<String> =
+        Result.success("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
+
+    override suspend fun isPinAvailable(address: String): Result<Boolean> {
+        delay(1000)
+        return if (address == "pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm") {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
+    }
+
+    override suspend fun checkPin(address: String, pin: String): Result<Boolean> {
+        delay(1000L)
+        return if (pin == "1111") {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
+    }
+
+    override suspend fun checkPassword(address: String, password: String): Result<Boolean> {
+        delay(1000L)
+        return if (password == "qwerty") {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
+    }
+
     override suspend fun getWalletBalance(address: String): Result<Double> {
         return getWallets()
             .mapCatching { list ->
@@ -74,6 +108,20 @@ class WalletRepositoryDummy constructor(
             }
             cjdnsInfoMapper.map(info)
         }
+    }
+
+    override suspend fun generateSeed(password: String, pin: String) = withContext(Dispatchers.IO) {
+        Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
+    }
+
+    override suspend fun createWallet(password: String, pin: String, seed: String) = withContext(Dispatchers.IO) {
+        delay(5_000L)
+        Result.success(Unit)
+    }
+
+    override suspend fun recoverWallet(password: String, seed: String) = withContext(Dispatchers.IO) {
+        delay(1_000L)
+        Result.success(Unit)
     }
 
     override suspend fun unlockWallet(passphrase: String, name: String?): Boolean {
