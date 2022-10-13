@@ -31,6 +31,11 @@
             android:theme="@style/Theme.App"
             tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
+            android:name=".integration.presentation.EnterWalletActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
             android:name=".wallet.NewWalletActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -70,8 +75,7 @@
         <activity
             android:name=".VpnListActivity"
             android:label="@string/title_activity_vpn_servers_list"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <!-- New screens -->
+            android:theme="@style/AppTheme.NoActionBar" /> <!-- New screens -->
         <activity
             android:name=".integration.presentation.settings.WalletInfoActivity"
             android:screenOrientation="portrait"
