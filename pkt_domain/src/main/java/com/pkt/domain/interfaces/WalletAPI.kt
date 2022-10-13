@@ -10,7 +10,7 @@ interface WalletAPI {
     @GET("meta/getinfo")
     suspend fun getWalletInfo(): WalletInfo
     @POST("wallet/unlock")
-    suspend fun unlockWallet(@Body unlockWalletRequest: UnlockWalletRequest)
+    suspend fun unlockWallet(@Body unlockWalletRequest: UnlockWalletRequest): String
     @POST("wallet/address/create")
     suspend fun createAddress(): String
     @POST("wallet/address/balances")

@@ -1,5 +1,6 @@
 package co.anode.anodium.integration.model.repository
 
+import co.anode.anodium.support.AnodeUtil
 import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
 import com.pkt.domain.repository.WalletRepository
@@ -12,29 +13,37 @@ import javax.inject.Singleton
 @Singleton
 class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     private val walletAPI = WalletAPIService()
+    private var activeWallet = "wallet.db"
 
-    override suspend fun getWallets(): Result<List<Addr>> {
+    override suspend fun getAllWalletNames(): Result<List<String>> {
+        return Result.success(AnodeUtil.getWalletFiles())
+    }
+
+    override suspend fun getActiveWallet(): Result<String> {
+        TODO("Not yet implemented")
+        //get activeWallet from sharedPreferences or DataStore
+    }
+
+    override suspend fun setActiveWallet(walletName: String) {
+        TODO("Not yet implemented")
+        //set activeWallet to sharedPreferences or DataStore
+    }
+
+    override suspend fun getWalletAddress(): Result<String> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getWalletName(address: String): Result<String> {
-        TODO("Not yet implemented")
+    override suspend fun isPinAvailable(): Result<Boolean> {
+        return if (AnodeUtil.getWalletPin(activeWallet).isNotEmpty()) {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
     }
 
-    override suspend fun getCurrentWallet(): Result<String> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun isPinAvailable(address: String): Result<Boolean> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun checkPin(address: String, pin: String): Result<Boolean> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun checkPassword(address: String, password: String): Result<Boolean> {
-        TODO("Not yet implemented")
+    override suspend fun checkPin(pin: String): Result<Boolean> {
+        val storedPin = AnodeUtil.getWalletPin(activeWallet)
+        return Result.success(pin == storedPin)
     }
 
     //Get wallet balance, if address is empty then return total balance of all addresses
@@ -84,14 +93,23 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun unlockWallet(passphrase: String, name: String?): Boolean {
-        var walletName = ""
-        if (!name.isNullOrEmpty()) {
-            walletName = name
+    override suspend fun unlockWallet(passphrase: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        runCatching {
+            val request = UnlockWalletRequest(passphrase, activeWallet)
+            walletAPI.unlockWalletAPI(request)
+        }.onSuccess {
+            Timber.d("unlockWalletAPI: success")
+        }.onFailure {
+            Timber.e(it, "unlockWalletAPI : failure")
         }
-        val request = UnlockWalletRequest(passphrase, walletName)
+    }
+
+    override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
+        val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
+        val passphrase = AnodeUtil.decrypt(encryptedPassword, pin).toString()
+        val request = UnlockWalletRequest(passphrase, activeWallet)
         walletAPI.unlockWalletAPI(request)
-        return false
+        return Result.success(false)
     }
 
     override suspend fun createAddress(): String {

@@ -11,8 +11,10 @@ data class EnterWalletState(
     val loginButtonEnabled: Boolean = false,
 ) : UiState {
 
+    /*val currentWalletName: String
+        get() = wallets[currentWallet].orEmpty()*/
     val currentWalletName: String
-        get() = wallets[currentWallet].orEmpty()
+        get() = "wallet.db"
 }
 
 sealed class EnterWalletEvent : UiEvent {

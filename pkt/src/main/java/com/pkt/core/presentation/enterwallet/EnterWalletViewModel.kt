@@ -39,20 +39,22 @@ class EnterWalletViewModel @Inject constructor(
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
         runCatching {
-            val currentWallet = walletRepository.getCurrentWallet().getOrThrow()
-            val isPinAvailable = walletRepository.isPinAvailable(currentWallet).getOrThrow()
+            val walletAddress = "something"
+            //val walletAddress = walletRepository.getCurrentAddress().getOrThrow()
+            //val currentWallet = walletRepository.getCurrentWallet().getOrThrow()
+            val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
 
-            val wallets = walletRepository.getWallets().getOrThrow()
-            Triple(
-                currentWallet,
+            //val wallets = walletRepository.getWallets().getOrThrow()
+            Pair(
+                walletAddress,
                 isPinAvailable,
-                wallets.associate { it.address to walletRepository.getWalletName(it.address).getOrThrow() }
+                //wallets.associate { it.address to walletRepository.getWalletName().getOrThrow() }
             )
-        }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
+        }.onSuccess { (walletAddress, isPinAvailable) ->//, wallets) ->
             sendState {
                 copy(
-                    wallets = wallets,
-                    currentWallet = currentWallet,
+                    //wallets = wallets,
+                    currentWallet = walletAddress,
                     isPinAvailable = isPinAvailable
                 )
             }
@@ -92,7 +94,7 @@ class EnterWalletViewModel @Inject constructor(
 
     private fun checkPin() {
         invokeAction {
-            walletRepository.checkPin(currentState.currentWallet, currentState.pin)
+            walletRepository.checkPin(currentState.pin)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
                         sendNavigation(AppNavigation.OpenMain)
@@ -110,7 +112,7 @@ class EnterWalletViewModel @Inject constructor(
 
     fun onLoginClick() {
         invokeAction {
-            walletRepository.checkPassword(currentState.currentWallet, password)
+            walletRepository.unlockWallet(password)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
                         sendNavigation(AppNavigation.OpenMain)
@@ -141,7 +143,7 @@ class EnterWalletViewModel @Inject constructor(
             ?.takeIf { it != currentState.currentWallet }
             ?.let { wallet ->
                 invokeAction {
-                    walletRepository.isPinAvailable(wallet)
+                    walletRepository.isPinAvailable()
                         .onSuccess { isPinAvailable ->
                             sendState { copy(currentWallet = wallet, pin = "", isPinAvailable = isPinAvailable) }
                             sendEvent(EnterWalletEvent.ClearPassword)

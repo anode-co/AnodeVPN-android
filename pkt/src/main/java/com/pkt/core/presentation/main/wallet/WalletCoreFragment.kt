@@ -16,7 +16,7 @@ import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
+class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
 
     private val viewBinding by viewBinding(FragmentWalletCoreBinding::bind)
 
