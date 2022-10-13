@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/createWalletNavGraph"
+    app:startDestination="@id/createPassword">
+
+    <fragment
+        android:id="@+id/createPassword"
+        android:name="com.pkt.core.presentation.createwallet.createpassword.CreatePasswordFragment"
+        android:label="CreatePassword"
+        tools:layout="@layout/fragment_create_password">
+
+        <action
+            android:id="@+id/toConfirmPassword"
+            app:destination="@id/confirmPassword" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/confirmPassword"
+        android:name="com.pkt.core.presentation.createwallet.confirmpassword.ConfirmPasswordFragment"
+        android:label="ConfirmPassword"
+        tools:layout="@layout/fragment_confirm_password">
+
+        <argument
+            android:name="password"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/toSetPin"
+            app:destination="@id/setPin" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/setPin"
+        android:name="com.pkt.core.presentation.createwallet.setpin.SetPinFragment"
+        android:label="SetPin"
+        tools:layout="@layout/fragment_set_pin">
+
+        <argument
+            android:name="password"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/toSeed"
+            app:destination="@id/seed" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/seed"
+        android:name="com.pkt.core.presentation.createwallet.seed.SeedFragment"
+        android:label="Seed"
+        tools:layout="@layout/fragment_seed">
+
+        <argument
+            android:name="password"
+            app:argType="string" />
+
+        <argument
+            android:name="pin"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/toConfirmSeed"
+            app:destination="@id/confirmSeed" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/confirmSeed"
+        android:name="com.pkt.core.presentation.createwallet.confirmseed.ConfirmSeedFragment"
+        android:label="ConfirmSeed"
+        tools:layout="@layout/fragment_confirm_seed">
+
+        <argument
+            android:name="password"
+            app:argType="string" />
+
+        <argument
+            android:name="pin"
+            app:argType="string" />
+
+        <argument
+            android:name="seed"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/toCreatingWallet"
+            app:destination="@id/creatingWallet"
+            app:popUpTo="@id/createWalletNavGraph"
+            app:popUpToInclusive="true" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/creatingWallet"
+        android:name="com.pkt.core.presentation.createwallet.creatingwallet.CreatingWalletFragment"
+        android:label="CreatingWallet"
+        tools:layout="@layout/fragment_creating_wallet">
+
+        <argument
+            android:name="password"
+            app:argType="string" />
+
+        <argument
+            android:name="pin"
+            app:argType="string" />
+
+        <argument
+            android:name="seed"
+            app:argType="string" />
+
+    </fragment>
+
+</navigation>

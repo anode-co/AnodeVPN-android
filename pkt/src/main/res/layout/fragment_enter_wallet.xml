@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@null">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/walletButton"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:icon="@drawable/ic_arrow_down"
+            app:iconGravity="textEnd"
+            tools:text="My Wallet 1" />
+
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.2" />
+
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="142dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline"
+        app:srcCompat="@drawable/img_logo"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/pinInputLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="80dp"
+        android:gravity="center"
+        android:text="@string/enter_your_pin"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoImage" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/pinInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/shape_rounded_stroke_8dp"
+        android:gravity="center"
+        android:minHeight="48dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pinInputLabel">
+
+        <TextView
+            android:id="@+id/pinValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingHorizontal="16dp"
+            android:textAllCaps="true"
+            android:textAppearance="?textAppearance16Regular" />
+
+        <ImageButton
+            android:id="@+id/pinDeleteButton"
+            style="@style/Widget.App.ImageButton.Oval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:backgroundTint="?android:colorBackground"
+            app:backgroundTint="?android:colorBackground"
+            app:srcCompat="@drawable/ic_backspace"
+            tools:ignore="ContentDescription" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <com.pkt.core.presentation.common.widget.PinKeyboardView
+        android:id="@+id/pinKeyboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/passwordInputLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="80dp"
+        android:gravity="center"
+        android:text="@string/enter_your_password"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoImage" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/passwordInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="10dp"
+        android:minHeight="48dp"
+        app:endIconDrawable="@drawable/ic_password_toggle"
+        app:endIconMode="password_toggle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordInputLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/passwordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:imeOptions="actionDone"
+            android:inputType="textPassword"
+            android:paddingVertical="13dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/bottom_button_margin_bottom"
+        android:text="@string/log_in"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

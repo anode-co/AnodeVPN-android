@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key1Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        app:layout_constraintEnd_toStartOf="@id/key2Button"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key2Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="2"
+        app:layout_constraintEnd_toStartOf="@id/key3Button"
+        app:layout_constraintStart_toEndOf="@id/key1Button"
+        app:layout_constraintTop_toTopOf="@id/key1Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key3Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/key2Button"
+        app:layout_constraintTop_toTopOf="@id/key2Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key4Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="4"
+        app:layout_constraintEnd_toStartOf="@id/key5Button"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/key1Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key5Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="5"
+        app:layout_constraintEnd_toStartOf="@id/key6Button"
+        app:layout_constraintStart_toEndOf="@id/key4Button"
+        app:layout_constraintTop_toTopOf="@id/key4Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key6Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/key5Button"
+        app:layout_constraintTop_toTopOf="@id/key5Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key7Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="7"
+        app:layout_constraintEnd_toStartOf="@id/key8Button"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/key4Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key8Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="8"
+        app:layout_constraintEnd_toStartOf="@id/key9Button"
+        app:layout_constraintStart_toEndOf="@id/key7Button"
+        app:layout_constraintTop_toTopOf="@id/key7Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key9Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/key8Button"
+        app:layout_constraintTop_toTopOf="@id/key8Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/keyLogoutButton"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/logout"
+        android:textAppearance="?textAppearance14Regular"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/key0Button"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/key7Button"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/key0Button"
+        style="@style/Widget.App.Button.PinKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="0"
+        app:layout_constraintEnd_toStartOf="@id/keyApplyButton"
+        app:layout_constraintStart_toEndOf="@id/keyLogoutButton"
+        app:layout_constraintTop_toTopOf="@id/keyLogoutButton"
+        tools:ignore="HardcodedText" />
+
+    <ImageButton
+        android:id="@+id/keyApplyButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:backgroundTint="?android:colorBackground"
+        android:minWidth="60dp"
+        android:minHeight="60dp"
+        app:backgroundTint="?android:colorBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/key0Button"
+        app:layout_constraintTop_toTopOf="@id/key0Button"
+        app:srcCompat="@drawable/ic_apply"
+        tools:ignore="ContentDescription,HardcodedText" />
+
+</merge>

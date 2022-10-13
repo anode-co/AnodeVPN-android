@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.pkt.core.presentation.main.wallet.WalletFragment
+import com.pkt.core.presentation.main.wallet.WalletCoreFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,7 +18,7 @@ class WalletActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(
                     android.R.id.content,
-                    WalletFragment().apply {
+                    WalletCoreFragment().apply {
                         arguments = bundleOf(
                             "walletName" to intent.getStringExtra(WALLET_NAME),
                             "PKTtoUSD" to intent.getStringExtra(PKT_TO_USD)
@@ -32,7 +32,7 @@ class WalletActivity : AppCompatActivity() {
     companion object {
         private const val WALLET_NAME = "WALLET_NAME"
         private const val PKT_TO_USD = "PKT_TO_USD"
-        fun getIntent(context: Context, walletName: String, PKTtoUSD: String) = Intent(context, WalletFragment::class.java).apply {
+        fun getIntent(context: Context, walletName: String, PKTtoUSD: String) = Intent(context, WalletCoreFragment::class.java).apply {
             putExtra(WALLET_NAME, walletName)
             putExtra(PKT_TO_USD, PKTtoUSD)
         }

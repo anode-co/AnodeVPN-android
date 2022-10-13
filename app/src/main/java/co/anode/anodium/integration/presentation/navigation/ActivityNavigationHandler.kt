@@ -19,4 +19,16 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openWalletInfo(fragment: Fragment, address: String) {
         fragment.startActivity(WalletInfoActivity.getIntent(fragment.requireContext(), address))
     }
+
+    override fun openCreateWallet(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openRecoverWallet(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openMain(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
 }

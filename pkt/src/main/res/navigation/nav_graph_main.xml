@@ -15,7 +15,7 @@
         android:id="@+id/wallet"
         android:name="com.pkt.core.presentation.main.wallet.WalletFragment"
         android:label="Wallet"
-        tools:layout="@layout/fragment_wallet_core" />
+        tools:layout="@layout/fragment_wallet" />
 
     <fragment
         android:id="@+id/settings"

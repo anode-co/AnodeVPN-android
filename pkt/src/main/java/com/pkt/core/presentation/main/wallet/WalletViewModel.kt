@@ -41,7 +41,6 @@ class WalletViewModel @Inject constructor(
     }
 
 
-
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
         runCatching {
             val info = walletRepository.getWalletInfo().getOrThrow()
@@ -125,7 +124,7 @@ class WalletViewModel @Inject constructor(
             }
         }.onFailure {
             //TODO: identify error, check for unlock
-            walletRepository.unlockWallet("password","wallet.db")
+            walletRepository.unlockWallet("password")
         }
     }
 

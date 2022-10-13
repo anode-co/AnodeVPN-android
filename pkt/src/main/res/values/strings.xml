@@ -11,6 +11,60 @@
     <string name="create_new_wallet">Create New Wallet</string>
     <string name="recover_existing_wallet">Recover Existing Wallet</string>
 
+    <!--fragment_create_password-->
+    <string name="create_password">Create Password</string>
+    <string name="weak">Weak</string>
+    <string name="medium">Medium</string>
+    <string name="good">Good</string>
+    <string name="perfect">Perfect</string>
+    <string name="enter_password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="create_password_checkbox_1">I understand that Anode cannot recover my password for me</string>
+    <string name="create_password_checkbox_2">I consent to Anode\'s privacy policy and data collection</string>
+    <string name="privacy_policy">privacy policy</string>
+    <string name="next">Next</string>
+    <string name="error_passwords_do_not_match">Passwords doesn\'t match, try again</string>
+
+    <!--fragment_confirm_password-->
+    <string name="password_confirmation">Password Confirmation</string>
+    <string name="password_confirmation_description">Your password is required to recover your wallet. You must save your password in a safe place. If you lose your password, you\'ll lose access to your funds permanently.</string>
+    <string name="i_wrote_password">I wrote down my password</string>
+
+    <!--fragment_set_pin-->
+    <string name="set_pin">Set PIN</string>
+    <string name="enter_pin">PIN</string>
+    <string name="confirm_pin">Confirm PIN</string>
+    <string name="pin_description_1">The PIN code can be used for quick access and is secured with your phone\'s Hardware Security Module</string>
+    <string name="pin_description_2">To protect your security, the PIN is revoked after 3 failed attempts</string>
+    <string name="error_pins_do_not_match">Pins doesn\'t match, try again</string>
+
+    <!--fragment_seed-->
+    <string name="your_seed_phrase">This is your seed phrase</string>
+    <string name="seed_phrase_description">You must write this down and keep it in a safe place. You will need these words and your password if you ever need to recover your wallet. You will only see these words once.</string>
+    <string name="seed_phrase_copied">Secret Seed Phrase copied</string>
+
+    <!--fragment_confirm_seed-->
+    <string name="type_word">Type the %s word from the seed phrase</string>
+    <string name="st">st</string>
+    <string name="nd">nd</string>
+    <string name="rd">rd</string>
+    <string name="th">th</string>
+    <string name="word">Word</string>
+    <string name="create_wallet">Create Wallet</string>
+    <string name="error_word_incorrect">Wrong word. Can you try again?</string>
+
+    <!--fragment_creating_wallet-->
+    <string name="congratulations">Congratulations!</string>
+    <string name="congratulations_description_1">You\'ve successfully set up your wallet. Remember to keep your seed phrase and password safe.</string>
+    <string name="congratulations_description_2">Anode cannot recover your wallet if you lose your seed phrase or password. You can\'t find your password in settings, but you can change your password is settings.</string>
+    <string name="go_to_your_wallet">Go to your wallet</string>
+
+    <!--fragment_recover_wallet-->
+    <string name="recover_title">Enter your 15 word seed phrase and  the wallet password you created below</string>
+    <string name="seed">Seed</string>
+    <string name="password">Password</string>
+    <string name="recover_wallet">Recover Wallet</string>
+
     <!--fragment_main-->
     <string name="vpn">VPN</string>
     <string name="wallet">Wallet</string>
@@ -84,5 +138,12 @@
     <string name="per_second">s</string>
     <string name="kb">KB</string>
     <string name="mb">MB</string>
+    <string name="logout">Log\nOut</string>
+    <string name="enter_your_pin">Enter Your PIN</string>
+    <string name="error_pin_incorrect">Incorrect PIN</string>
+    <string name="error_password_incorrect">Incorrect Password</string>
+    <string name="enter_your_password">Enter Your Password</string>
+    <string name="log_in">Log In</string>
+    <string name="choose_wallet">Choose wallet</string>
 
 </resources>

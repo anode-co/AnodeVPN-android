@@ -24,8 +24,8 @@ class WalletAPIService {
         return api.getWalletInfo()
     }
 
-    suspend fun unlockWalletAPI(@Body unlockWalletRequest: UnlockWalletRequest) {
-        return api.unlockWallet(unlockWalletRequest)
+    suspend fun unlockWalletAPI(@Body unlockWalletRequest: UnlockWalletRequest): Boolean {
+        return api.unlockWallet(unlockWalletRequest) == "{}"
     }
 
     suspend fun createAddress(): String {

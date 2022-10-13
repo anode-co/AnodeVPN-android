@@ -29,6 +29,8 @@
         <item name="maxLines">1</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/btn_text_color_selector</item>
+        <item name="backgroundTint">@color/btn_bg_color_selector</item>
     </style>
 
     <style name="Widget.App.Button.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
@@ -68,6 +70,29 @@
         <item name="android:paddingStart">8dp</item>
         <item name="paddingEnd">8dp</item>
         <item name="android:paddingEnd">8dp</item>
+    </style>
+
+    <style name="Widget.App.Button.PinKey" parent="Widget.App.Button.TextButton">
+        <item name="minHeight">60dp</item>
+        <item name="android:minHeight">60dp</item>
+        <item name="minWidth">60dp</item>
+        <item name="android:minWidth">60dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.App.Round</item>
+        <item name="android:textAppearance">?textAppearance30SemiBold</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">?colorOnPrimary</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="paddingStart">0dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="paddingEnd">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="maxLines">2</item>
+        <item name="android:maxLines">2</item>
     </style>
 
     <style name="Widget.App.CircularProgressIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
@@ -118,6 +143,48 @@
     <style name="Widget.App.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_popup_menu</item>
         <item name="android:dropDownHorizontalOffset">-8dp</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/outlined_stroke_color</item>
+        <item name="boxStrokeErrorColor">?colorError</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.App.8</item>
+        <item name="android:textColorHint">@color/indicator_text_color</item>
+        <item name="hintTextColor">@color/indicator_text_color</item>
+        <item name="hintTextAppearance">?textAppearance16Regular</item>
+        <item name="editTextStyle">@style/Widget.App.TextInputEditText</item>
+        <item name="hintEnabled">false</item>
+        <item name="endIconTint">?android:textColorPrimary</item>
+        <item name="endIconDrawable">@null</item>
+        <item name="errorTextColor">?colorError</item>
+        <item name="errorTextAppearance">?textAppearance12Regular</item>
+        <item name="errorIconDrawable">@null</item>
+    </style>
+
+    <style name="Widget.App.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textAppearance">?textAppearance16Regular</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="Widget.App.CheckBox" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
+        <item name="useMaterialThemeColors">false</item>
+        <item name="android:button">@drawable/ic_checkbox</item>
+        <item name="android:textAppearance">?textAppearance14Regular</item>
+        <item name="android:lineSpacingExtra">4sp</item>
+        <item name="paddingStart">12dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:gravity">start|top</item>
+    </style>
+
+    <style name="Widget.App.BottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
+    <style name="Widget.App.RadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="useMaterialThemeColors">false</item>
+        <item name="android:button">@drawable/rbtn_button</item>
+        <item name="buttonTint">@null</item>
+        <item name="android:buttonTint">@null</item>
     </style>
 
 </resources>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
+    style="@style/Widget.App.ScrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:paddingHorizontal="@dimen/spacing_horizontal"
+        android:paddingVertical="@dimen/bottom_button_margin_bottom">
+
+        <TextView
+            android:id="@+id/titleLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/set_pin"
+            android:textAppearance="?textAppearance16Regular"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/enterPinInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:endIconDrawable="@drawable/ic_password_toggle"
+            app:endIconMode="password_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleLabel">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/enterPinInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/enter_pin"
+                android:imeOptions="actionNext"
+                android:inputType="textPassword"
+                android:paddingVertical="13dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/confirmPinInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:endIconDrawable="@drawable/ic_password_toggle"
+            app:endIconMode="password_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/enterPinInputLayout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/confirmPinInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/confirm_pin"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:paddingVertical="13dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/dot1Image"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/description1Label"
+            app:srcCompat="@drawable/shape_oval"
+            app:tint="?android:textColorSecondary"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/description1Label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/pin_description_1"
+            android:textAppearance="?textAppearance14Regular"
+            android:textColor="?android:textColorSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/dot1Image"
+            app:layout_constraintTop_toBottomOf="@id/confirmPinInputLayout" />
+
+        <ImageView
+            android:id="@+id/dot2Image"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/description2Label"
+            app:srcCompat="@drawable/shape_oval"
+            app:tint="?android:textColorSecondary"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/description2Label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/pin_description_2"
+            android:textAppearance="?textAppearance14Regular"
+            android:textColor="?android:textColorSecondary"
+            app:layout_constraintBottom_toTopOf="@id/nextButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/dot2Image"
+            app:layout_constraintTop_toBottomOf="@id/description1Label"
+            app:layout_constraintVertical_bias="0" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,62 @@
+package com.pkt.core.presentation.createwallet.createpassword
+
+import com.pkt.core.presentation.common.state.StateViewModel
+import com.ybs.passwordstrengthmeter.PasswordStrength
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class CreatePasswordViewModel @Inject constructor(
+
+) : StateViewModel<CreatePasswordState>() {
+
+    var enterPassword: String = ""
+        set(value) {
+            field = value
+            sendState { copy(strength = PasswordStrength.calculateStrength(value)) }
+            invalidateNextButtonEnabled()
+        }
+
+    var confirmPassword: String = ""
+        set(value) {
+            field = value
+            invalidateNextButtonEnabled()
+        }
+
+    var checkbox1Checked: Boolean = false
+        set(value) {
+            field = value
+            invalidateNextButtonEnabled()
+        }
+
+    var checkbox2Checked: Boolean = false
+        set(value) {
+            field = value
+            invalidateNextButtonEnabled()
+        }
+
+    override fun createInitialState() = CreatePasswordState()
+
+    private fun invalidateNextButtonEnabled() {
+        sendState {
+            copy(
+                nextButtonEnabled =
+                enterPassword.isNotBlank() && confirmPassword.isNotBlank()
+                        && checkbox1Checked && checkbox2Checked
+                        && currentState.strength > PasswordStrength.MEDIUM
+            )
+        }
+    }
+
+    fun onNextClick() {
+        when {
+            enterPassword != confirmPassword -> {
+                sendEvent(CreatePasswordEvent.ConfirmPasswordError)
+            }
+
+            else -> {
+                sendNavigation(CreatePasswordNavigation.ToConfirmPassword(enterPassword))
+            }
+        }
+    }
+}

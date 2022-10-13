@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:paddingHorizontal="@dimen/spacing_horizontal"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <View
+        android:id="@+id/weakView"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="@drawable/shape_rounded_start_2dp"
+        android:backgroundTint="@color/stroke1"
+        app:layout_constraintEnd_toStartOf="@id/mediumView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:backgroundTint="?colorProgress" />
+
+    <View
+        android:id="@+id/mediumView"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/shape_rectangle"
+        android:backgroundTint="@color/stroke1"
+        app:layout_constraintEnd_toStartOf="@id/goodView"
+        app:layout_constraintStart_toEndOf="@id/weakView"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:backgroundTint="?colorProgress" />
+
+    <View
+        android:id="@+id/goodView"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/shape_rectangle"
+        android:backgroundTint="@color/stroke1"
+        app:layout_constraintEnd_toStartOf="@id/perfectView"
+        app:layout_constraintStart_toEndOf="@id/mediumView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/perfectView"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/shape_rounded_end_2dp"
+        android:backgroundTint="@color/stroke1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/goodView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/valueLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textAppearance="?textAppearance12Medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weakView"
+        tools:text="@string/medium"
+        tools:textColor="?colorProgress" />
+
+</merge>

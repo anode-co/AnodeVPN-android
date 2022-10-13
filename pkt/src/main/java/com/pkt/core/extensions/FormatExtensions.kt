@@ -131,6 +131,18 @@ fun Int?.formatSeconds(): String {
     return "%d:%02d".format(minutes, seconds)
 }
 
+fun Int.formatPosition(context: Context): String {
+    val suffix = context.getString(
+        when (this) {
+            1 -> R.string.st
+            2 -> R.string.nd
+            3 -> R.string.rd
+            else -> R.string.th
+        }
+    )
+    return "$this$suffix"
+}
+
 private fun String?.toBigDecimalSafety(): BigDecimal = this?.toBigDecimalOrNull() ?: BigDecimal.ZERO
 
 private fun Double?.toBigDecimalSafety(): BigDecimal = this?.toBigDecimal() ?: BigDecimal.ZERO

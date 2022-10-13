@@ -15,6 +15,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.mapstruct.factory.Mappers
+import kotlin.random.Random
 
 @OptIn(ExperimentalSerializationApi::class)
 class WalletRepositoryDummy constructor(
@@ -40,20 +41,38 @@ class WalletRepositoryDummy constructor(
         Mappers.getMapper(CjdnsInfoMapper::class.java)
     }
 
-    override suspend fun getWallets(): Result<List<Addr>> = withContext(Dispatchers.IO) {
-        runCatching {
-            delay(1000L)
-            context.resources.openRawResource(R.raw.wallets).use {
-                json.decodeFromStream<WalletAddressBalancesDummy>(it)
-            }.addrs.map { addrMapper.map(it) }
+    override suspend fun getAllWalletNames(): Result<List<String>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getActiveWallet(): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setActiveWallet(walletName: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWalletAddress(): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isPinAvailable(): Result<Boolean> {
+        delay(1000)
+        return Result.success(true)
+    }
+
+    override suspend fun checkPin(pin: String): Result<Boolean> {
+        delay(1000L)
+        return if (pin == "1111") {
+            Result.success(true)
+        } else {
+            Result.success(false)
         }
     }
 
     override suspend fun getWalletBalance(address: String): Result<Double> {
-        return getWallets()
-            .mapCatching { list ->
-                list.find { it.address == address }!!.total
-            }
+        return Result.success(0.0)
     }
 
     override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO) {
@@ -76,7 +95,25 @@ class WalletRepositoryDummy constructor(
         }
     }
 
-    override suspend fun unlockWallet(passphrase: String, name: String?): Boolean {
+    override suspend fun generateSeed(password: String, pin: String) = withContext(Dispatchers.IO) {
+        Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
+    }
+
+    override suspend fun createWallet(password: String, pin: String, seed: String) = withContext(Dispatchers.IO) {
+        delay(5_000L)
+        Result.success(Unit)
+    }
+
+    override suspend fun recoverWallet(password: String, seed: String) = withContext(Dispatchers.IO) {
+        delay(1_000L)
+        Result.success(Unit)
+    }
+
+    override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
         TODO("Not yet implemented")
     }
 

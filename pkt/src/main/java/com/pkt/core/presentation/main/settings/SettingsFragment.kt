@@ -63,7 +63,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
             menu.getItem(menu.size() - 1).apply {
                 title = SpannableString(title).apply {
-                    setSpan(ForegroundColorSpan(requireContext().getColorByAttribute(android.R.attr.colorError)),
+                    setSpan(ForegroundColorSpan(requireContext().getColorByAttribute(androidx.appcompat.R.attr.colorError)),
                         0,
                         length,
                         Spannable.SPAN_INCLUSIVE_EXCLUSIVE)

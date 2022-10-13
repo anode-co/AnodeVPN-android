@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.databinding.FragmentWalletBinding
+import co.anode.anodium.integration.presentation.EnterWalletActivity
 import co.anode.anodium.integration.presentation.WalletActivity
 import co.anode.anodium.wallet.SendPaymentActivity
 import co.anode.anodium.wallet.TransactionHistoryActivity
@@ -157,8 +158,13 @@ class WalletFragment : Fragment() {
         val walletFiles = AnodeUtil.getWalletFiles()
         if (walletFiles.size < 1) {
             Log.i(LOGTAG, "Open password prompt activity, no wallet file found")
-            val newWalletActivity = Intent(context, NewWalletActivity::class.java)
-            startActivity(newWalletActivity)
+            val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+            if (prefs.getBoolean("useNewUI", false)) {
+               //TODO: launch new screens
+            } else {
+                val newWalletActivity = Intent(context, NewWalletActivity::class.java)
+                startActivity(newWalletActivity)
+            }
         } else if (!activeWalletFile.exists()){
             activeWallet = walletFiles[0]
             Log.i(LOGTAG, "Active wallet file not found, will try to open $activeWallet.")
@@ -216,6 +222,12 @@ class WalletFragment : Fragment() {
                     if (walletPasswordQuickRetry != null){
                         unlockWallet(walletPasswordQuickRetry!!)
                     } else {
+                        //new unlock screen not ready yet
+/*                        if (prefs.getBoolean("useNewUI",false)) {
+                            showNewWalletUnlockFragment()
+                        } else {
+                            pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+                        }*/
                         pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
                     }
                     return@get
@@ -335,6 +347,18 @@ class WalletFragment : Fragment() {
                 walletActivity.putExtra("WALLET_NAME", activeWallet)
                 walletActivity.putExtra("PKT_TO_USD", price)
                 startActivity(walletActivity)
+            }
+        }
+    }
+
+    private fun showNewWalletUnlockFragment() {
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        executor.execute {
+            handler.post {
+                val enterWalletActivity = Intent(mycontext, EnterWalletActivity::class.java)
+                enterWalletActivity.putExtra("WALLET_NAME", activeWallet)
+                startActivity(enterWalletActivity)
             }
         }
     }

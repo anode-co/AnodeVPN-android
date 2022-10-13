@@ -2,12 +2,15 @@
 <resources>
 
     <attr name="textAppearance12Regular" format="reference" />
+    <attr name="textAppearance12Medium" format="reference" />
     <attr name="textAppearance14Regular" format="reference" />
     <attr name="textAppearance14Medium" format="reference" />
     <attr name="textAppearance14SemiBold" format="reference" />
     <attr name="textAppearance16Regular" format="reference" />
     <attr name="textAppearance16SemiBold" format="reference" />
+    <attr name="textAppearance16Bold" format="reference" />
     <attr name="textAppearance18SemiBold" format="reference" />
+    <attr name="textAppearance20Medium" format="reference" />
     <attr name="textAppearance20SemiBold" format="reference" />
     <attr name="textAppearance30SemiBold" format="reference" />
 
@@ -21,6 +24,11 @@
     <style name="TextAppearance.App.12.Regular">
         <item name="fontFamily">@font/font_regular</item>
         <item name="android:fontFamily">@font/font_regular</item>
+    </style>
+
+    <style name="TextAppearance.App.12.Medium">
+        <item name="fontFamily">@font/font_medium</item>
+        <item name="android:fontFamily">@font/font_medium</item>
     </style>
 
     <style name="TextAppearance.App.14">
@@ -60,6 +68,11 @@
         <item name="android:fontFamily">@font/font_semibold</item>
     </style>
 
+    <style name="TextAppearance.App.16.Bold">
+        <item name="fontFamily">@font/font_bold</item>
+        <item name="android:fontFamily">@font/font_bold</item>
+    </style>
+
     <style name="TextAppearance.App.18">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">?android:textColorPrimary</item>
@@ -73,6 +86,11 @@
     <style name="TextAppearance.App.20">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.App.20.Medium">
+        <item name="fontFamily">@font/font_medium</item>
+        <item name="android:fontFamily">@font/font_medium</item>
     </style>
 
     <style name="TextAppearance.App.20.SemiBold">
