@@ -222,13 +222,12 @@ class WalletFragment : Fragment() {
                     if (walletPasswordQuickRetry != null){
                         unlockWallet(walletPasswordQuickRetry!!)
                     } else {
-                        //new unlock screen not ready yet
-/*                        if (prefs.getBoolean("useNewUI",false)) {
+                        if (prefs.getBoolean("useNewUI",false)) {
                             showNewWalletUnlockFragment()
                         } else {
                             pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
-                        }*/
-                        pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+                        }
+//                        pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
                     }
                     return@get
                 } else if (prefs.getBoolean("useNewUI",false)){

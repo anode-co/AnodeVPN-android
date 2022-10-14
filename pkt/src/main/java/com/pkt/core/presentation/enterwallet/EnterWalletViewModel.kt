@@ -43,7 +43,6 @@ class EnterWalletViewModel @Inject constructor(
             //val walletAddress = walletRepository.getCurrentAddress().getOrThrow()
             //val currentWallet = walletRepository.getCurrentWallet().getOrThrow()
             val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
-
             //val wallets = walletRepository.getWallets().getOrThrow()
             Pair(
                 walletAddress,
@@ -97,7 +96,15 @@ class EnterWalletViewModel @Inject constructor(
             walletRepository.checkPin(currentState.pin)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
-                        sendNavigation(AppNavigation.OpenMain)
+                        walletRepository.unlockWalletWithPIN(currentState.pin)
+                            .onSuccess {
+                                sendNavigation(AppNavigation.OpenMain)
+                            }
+                            .onFailure {
+                                //TODO: correct pin but wrongly decoded password? go directly to password
+                                sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
+                            }
+
                     } else {
                         pinAttempts++
                         sendState { copy(pin = "") }

@@ -25,7 +25,13 @@ class WalletAPIService {
     }
 
     suspend fun unlockWalletAPI(@Body unlockWalletRequest: UnlockWalletRequest): Boolean {
-        return api.unlockWallet(unlockWalletRequest) == "{}"
+        val response = api.unlockWallet(unlockWalletRequest)
+        if (response.toString().equals("{\n\n}")) {
+            return true
+        } else {
+            //TODO: parse error
+            return false
+        }
     }
 
     suspend fun createAddress(): String {

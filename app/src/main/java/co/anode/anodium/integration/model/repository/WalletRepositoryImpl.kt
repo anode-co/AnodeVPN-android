@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     private val walletAPI = WalletAPIService()
-    private var activeWallet = "wallet.db"
+    private var activeWallet = "wallet"
 
     override suspend fun getAllWalletNames(): Result<List<String>> {
         return Result.success(AnodeUtil.getWalletFiles())
@@ -107,9 +107,8 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
         val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
         val passphrase = AnodeUtil.decrypt(encryptedPassword, pin).toString()
-        val request = UnlockWalletRequest(passphrase, activeWallet)
-        walletAPI.unlockWalletAPI(request)
-        return Result.success(false)
+        val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
+        return Result.success(walletAPI.unlockWalletAPI(request))
     }
 
     override suspend fun createAddress(): String {
