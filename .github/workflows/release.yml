@@ -30,7 +30,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Add Install packages permissions to AndroidManifest
-        run: cp /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/src/main/Release_AndroidManifest.xml /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/src/main/AndroidManifest.xml
+        run: sed -i 's/<!-- NO INSTALL PACKAGE PERMISSION -->/<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"\/><uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"\/>/' /home/runner/work/AnodeVPN-android/AnodeVPN-android/app/src/main/AndroidManifest.xml
 
       # See https://github.com/actions/cache/blob/main/examples.md#java---gradle
       - uses: actions/cache@v2
