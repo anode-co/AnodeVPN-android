@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_rounded_top_20dp"
+    android:backgroundTint="@color/bg3"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="40dp"
+        android:drawablePadding="22dp"
+        android:gravity="center"
+        android:text="@string/pkt_successfully_sent"
+        android:textAppearance="?textAppearance20SemiBold"
+        app:drawableTopCompat="@drawable/ic_send_success"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:background="@color/bg1"
+        android:paddingVertical="24dp">
+
+        <TextView
+            android:id="@+id/transactionIdLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_horizontal"
+            android:text="@string/transaction_id"
+            android:textAppearance="?textAppearance14Regular"
+            android:textColor="?android:textColorSecondary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/transactionIdValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?textAppearance16Regular"
+            app:layout_constraintEnd_toStartOf="@id/copyButton"
+            app:layout_constraintStart_toStartOf="@id/transactionIdLabel"
+            app:layout_constraintTop_toBottomOf="@id/transactionIdLabel"
+            tools:text="0bd1574c52a1621e4b522e9a45226eff2" />
+
+        <ImageView
+            android:id="@+id/overlayImage"
+            android:layout_width="152dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/transactionIdValue"
+            app:layout_constraintEnd_toEndOf="@id/transactionIdValue"
+            app:layout_constraintTop_toTopOf="@id/transactionIdValue"
+            app:srcCompat="@drawable/ic_overlay_address"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/copyButton"
+            style="@style/Widget.App.ImageButton.Oval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="26dp"
+            android:background="@drawable/ripple_mask_oval"
+            android:minWidth="30dp"
+            android:minHeight="30dp"
+            app:layout_constraintBottom_toBottomOf="@id/transactionIdValue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/transactionIdValue"
+            app:srcCompat="@drawable/ic_copy"
+            app:tint="?colorPrimary"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/viewButton"
+            style="@style/Widget.App.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:text="@string/view_transaction"
+            app:layout_constraintEnd_toStartOf="@id/doneButton"
+            app:layout_constraintStart_toStartOf="@id/transactionIdValue"
+            app:layout_constraintTop_toBottomOf="@id/transactionIdValue" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/doneButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="@dimen/spacing_horizontal"
+            android:text="@string/done"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/viewButton"
+            app:layout_constraintTop_toTopOf="@id/viewButton" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

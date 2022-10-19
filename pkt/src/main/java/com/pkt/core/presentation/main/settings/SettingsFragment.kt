@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -18,6 +19,9 @@ import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.main.MainViewModel
+import com.pkt.core.presentation.main.common.consent.ConsentBottomSheet
+import com.pkt.core.presentation.main.settings.renamewallet.RenameWalletBottomSheet
+import com.pkt.core.presentation.main.settings.showseed.ShowSeedBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,6 +44,10 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setFragmentResultListener(ConsentBottomSheet.REQUEST_KEY) { _, bundle ->
+            viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
+        }
 
         with(viewBinding) {
             walletButton.setOnClickListener {
@@ -121,6 +129,18 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
         when (event) {
             is SettingsEvent.OpenWalletInfo -> mainViewModel.openWalletInfo(event.address)
             is SettingsEvent.OpenCjdnsInfo -> mainViewModel.openCjdnsInfo(event.address)
+
+            is SettingsEvent.OpenShowSeed -> {
+                ShowSeedBottomSheet().show(childFragmentManager, ShowSeedBottomSheet.TAG)
+            }
+
+            is SettingsEvent.OpenConsent -> {
+                ConsentBottomSheet().show(parentFragmentManager, ConsentBottomSheet.TAG)
+            }
+
+            is SettingsEvent.OpenRenameWallet -> {
+                RenameWalletBottomSheet().show(parentFragmentManager, RenameWalletBottomSheet.TAG)
+            }
         }
     }
 }

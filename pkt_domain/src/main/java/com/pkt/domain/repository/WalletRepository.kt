@@ -1,6 +1,5 @@
 package com.pkt.domain.repository
 
-import android.content.Context
 import com.pkt.domain.dto.*
 
 interface WalletRepository {
@@ -10,6 +9,7 @@ interface WalletRepository {
     suspend fun getWalletAddress(): Result<String>
     suspend fun isPinAvailable(): Result<Boolean>
     suspend fun checkPin(pin: String): Result<Boolean>
+    suspend fun getTotalWalletBalance(): Result<Double>
     suspend fun getWalletBalance(address: String): Result<Double>
     suspend fun getWalletInfo(): Result<WalletInfo>
     suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo>
@@ -22,4 +22,7 @@ interface WalletRepository {
     suspend fun getWalletBalances(): Result<WalletAddressBalances>
     suspend fun getCurrentAddress(): Result<String>
     suspend fun getWalletTransactions(): Result<WalletTransactions>
+    suspend fun send(address: String, amount: Double): Result<SendResponse>
+    suspend fun getSeed(): Result<String>
+    suspend fun renameWallet(name: String): Result<String?>
 }

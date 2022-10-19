@@ -7,7 +7,9 @@ import com.pkt.dummy.AddrMapper
 import com.pkt.dummy.CjdnsInfoMapper
 import com.pkt.dummy.R
 import com.pkt.dummy.WalletInfoMapper
-import com.pkt.dummy.dto.*
+import com.pkt.dummy.dto.CjdnsInfoDummy
+import com.pkt.dummy.dto.WalletAddressBalancesDummy
+import com.pkt.dummy.dto.WalletInfoDummy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -15,7 +17,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.mapstruct.factory.Mappers
-import kotlin.random.Random
 
 @OptIn(ExperimentalSerializationApi::class)
 class WalletRepositoryDummy constructor(
@@ -41,28 +42,40 @@ class WalletRepositoryDummy constructor(
         Mappers.getMapper(CjdnsInfoMapper::class.java)
     }
 
-    override suspend fun getAllWalletNames(): Result<List<String>> {
-        TODO("Not yet implemented")
-    }
+    private var activeWallet = "My Wallet 1"
 
-    override suspend fun getActiveWallet(): Result<String> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getAllWalletNames(): Result<List<String>> =
+        Result.success(listOf("My Wallet 1", "My Wallet 2", "My Wallet 3"))
+
+    override suspend fun getActiveWallet(): Result<String> = Result.success(activeWallet)
 
     override suspend fun setActiveWallet(walletName: String) {
-        TODO("Not yet implemented")
+        activeWallet = walletName
     }
 
     override suspend fun getWalletAddress(): Result<String> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun isPinAvailable(): Result<Boolean> {
-        delay(1000)
-        return Result.success(true)
+    private suspend fun getWallets(): Result<List<Addr>> = withContext(Dispatchers.IO) {
+        runCatching {
+            delay(1000L)
+            context.resources.openRawResource(R.raw.wallets).use {
+                json.decodeFromStream<WalletAddressBalancesDummy>(it)
+            }.addrs.map { addrMapper.map(it) }
+        }
     }
 
-    override suspend fun checkPin(pin: String): Result<Boolean> {
+    override suspend fun isPinAvailable(): Result<Boolean> {
+        delay(1000)
+        return if (activeWallet != "My Wallet 3") {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
+    }
+
+    override suspend fun checkPin(pin: String): Result<Boolean> = runCatching {
         delay(1000L)
         return if (pin == "1111") {
             Result.success(true)
@@ -72,8 +85,14 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun getWalletBalance(address: String): Result<Double> {
-        return Result.success(0.0)
+        return getWallets()
+            .mapCatching { list ->
+                list.find { it.address == address }!!.total
+            }
     }
+
+    override suspend fun getTotalWalletBalance(): Result<Double> =
+        getWalletBalance("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
     override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO) {
         runCatching {
@@ -110,11 +129,21 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
-        TODO("Not yet implemented")
+        delay(1000L)
+        return if (passphrase == "qwerty") {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
     }
 
     override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
-        TODO("Not yet implemented")
+        delay(1000L)
+        return if (pin == "1111") {
+            Result.success(true)
+        } else {
+            Result.success(false)
+        }
     }
 
     override suspend fun createAddress(): String {
@@ -131,5 +160,32 @@ class WalletRepositoryDummy constructor(
 
     override suspend fun getWalletTransactions(): Result<WalletTransactions> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun send(address: String, amount: Double): Result<SendResponse> = withContext(Dispatchers.IO) {
+        delay(1000L)
+        Result.success(
+            SendResponse(
+                transactionId = "0bd1574c52a1621e4b522e9a45226eff2",
+                address = address,
+                blockNumber = 1234567,
+                amount = amount,
+                timestamp = "2022-07-06 11:19:06 +0300 EEST"
+            )
+        )
+    }
+
+    override suspend fun getSeed(): Result<String> =
+        Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
+
+    override suspend fun renameWallet(name: String): Result<String?> {
+        delay(1000)
+        return Result.success(
+            if (name.any { !it.isLetterOrDigit() && !it.isWhitespace() }) {
+                "Name contains invalid characters"
+            } else {
+                null
+            }
+        )
     }
 }

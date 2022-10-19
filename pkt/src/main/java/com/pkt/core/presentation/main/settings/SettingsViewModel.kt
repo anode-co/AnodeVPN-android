@@ -29,7 +29,7 @@ class SettingsViewModel @Inject constructor(
                 // TODO
             }
             MenuItem.Type.SHOW_SEED -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenShowSeed)
             }
             MenuItem.Type.CJDNS_INFO -> {
                 sendEvent(SettingsEvent.OpenCjdnsInfo("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm"))
@@ -38,13 +38,13 @@ class SettingsViewModel @Inject constructor(
                 sendEvent(SettingsEvent.OpenWalletInfo("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm"))
             }
             MenuItem.Type.DATA_CONSENT -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenConsent)
             }
         }
     }
 
     fun onRenameClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenRenameWallet)
     }
 
     fun onExportClick() {
@@ -61,5 +61,9 @@ class SettingsViewModel @Inject constructor(
 
     fun onWalletRecoveryClick() {
         // TODO
+    }
+
+    fun onConsentResult(success: Boolean) {
+        // TODO("Not yet implemented")
     }
 }

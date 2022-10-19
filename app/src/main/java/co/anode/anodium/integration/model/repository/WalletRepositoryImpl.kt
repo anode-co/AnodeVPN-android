@@ -46,6 +46,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return Result.success(pin == storedPin)
     }
 
+    override suspend fun getTotalWalletBalance(): Result<Double> {
+        TODO("Not yet implemented")
+    }
+
     //Get wallet balance, if address is empty then return total balance of all addresses
     override suspend fun getWalletBalance(address: String): Result<Double> = withContext(Dispatchers.IO){
         runCatching {
@@ -153,6 +157,18 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }.onFailure {
             Timber.e(it, "getWalletTransactions: failure")
         }
+    }
+
+    override suspend fun send(address: String, amount: Double): Result<SendResponse> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSeed(): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun renameWallet(name: String): Result<String?> {
+        TODO("Not yet implemented")
     }
 
 }

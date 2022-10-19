@@ -4,18 +4,12 @@ import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.UiState
 
 data class EnterWalletState(
-    val wallets: Map<String, String> = emptyMap(),
+    val wallets: List<String> = emptyList(),
     val currentWallet: String = "",
     val pin: String = "",
     val isPinAvailable: Boolean = false,
     val loginButtonEnabled: Boolean = false,
-) : UiState {
-
-    /*val currentWalletName: String
-        get() = wallets[currentWallet].orEmpty()*/
-    val currentWalletName: String
-        get() = "wallet.db"
-}
+) : UiState
 
 sealed class EnterWalletEvent : UiEvent {
     object ShowKeyboard : EnterWalletEvent()

@@ -1,0 +1,19 @@
+package com.pkt.domain.repository
+
+import com.pkt.domain.dto.Vpn
+import com.pkt.domain.dto.VpnState
+import kotlinx.coroutines.flow.Flow
+
+interface VpnRepository {
+
+    val vpnListFlow: Flow<List<Vpn>>
+    val currentVpnFlow: Flow<Vpn?>
+    val vpnStateFlow: Flow<VpnState>
+
+    val startConnectionTime: Long
+
+    suspend fun fetchVpnList(force: Boolean = false): Result<Unit>
+    suspend fun setCurrentVpn(name: String): Result<Unit>
+    suspend fun connect(): Result<Boolean>
+    suspend fun disconnect(): Result<Boolean>
+}

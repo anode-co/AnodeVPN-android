@@ -145,5 +145,35 @@
     <string name="enter_your_password">Enter Your Password</string>
     <string name="log_in">Log In</string>
     <string name="choose_wallet">Choose wallet</string>
+    <string name="send_transaction">Send Transaction</string>
+    <string name="max">Max</string>
+    <string name="amount">Amount</string>
+    <string name="send_pkt">Send PKT</string>
+    <string name="send_as_much_pkt_as_possible">Send as much PKT as possible</string>
+    <string name="please_confirm_pin">Please confirm PIN</string>
+    <string name="recipient_address">Recipient Address</string>
+    <string name="pin">PIN</string>
+    <string name="pkt_successfully_sent">PKT successfully sent</string>
+    <string name="transaction_id">Transaction ID</string>
+    <string name="view_transaction">View Transaction</string>
+    <string name="done">Done</string>
+    <string name="transaction_id_copied">Transaction Id copied</string>
+    <string name="consent">Consent</string>
+    <string name="consent_description">Anode collects data to optimize the app and improve the experience. We would like to ask your consent.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="vpn_exits">VPN Exits</string>
+    <string name="search">Search</string>
+    <string name="not_connected">Not connected</string>
+    <string name="connecting">Connecting</string>
+    <string name="connected">Connected</string>
+    <string name="public_ipv4">Public IPv4: %s</string>
+    <string name="public_ipv6">IPv6: %s</string>
+    <string name="your_seed_phrase_2">Your seed phrase</string>
+    <string name="you_seed_phrase_description">You need your 15 word seed phrase and your password to recover this wallet</string>
+    <string name="copy">Copy</string>
+    <string name="seed_phrase_copied_2">Seed phrase copied</string>
+    <string name="rename_wallet">Rename Wallet</string>
+    <string name="save">Save</string>
 
 </resources>

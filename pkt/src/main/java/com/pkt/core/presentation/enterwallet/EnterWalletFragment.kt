@@ -61,7 +61,7 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
     override fun handleState(state: EnterWalletState) {
         with(viewBinding) {
             walletButton.apply {
-                text = state.currentWalletName
+                text = state.currentWallet
                 isVisible = state.wallets.size > 1
             }
 

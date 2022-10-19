@@ -39,21 +39,20 @@ class EnterWalletViewModel @Inject constructor(
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
         runCatching {
-            val walletAddress = "something"
-            //val walletAddress = walletRepository.getCurrentAddress().getOrThrow()
-            //val currentWallet = walletRepository.getCurrentWallet().getOrThrow()
+            val currentWallet = walletRepository.getActiveWallet().getOrThrow()
             val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
-            //val wallets = walletRepository.getWallets().getOrThrow()
-            Pair(
-                walletAddress,
+
+            val wallets = walletRepository.getAllWalletNames().getOrThrow()
+            Triple(
+                currentWallet,
                 isPinAvailable,
-                //wallets.associate { it.address to walletRepository.getWalletName().getOrThrow() }
+                wallets
             )
-        }.onSuccess { (walletAddress, isPinAvailable) ->//, wallets) ->
+        }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
             sendState {
                 copy(
-                    //wallets = wallets,
-                    currentWallet = walletAddress,
+                    wallets = wallets,
+                    currentWallet = currentWallet,
                     isPinAvailable = isPinAvailable
                 )
             }
@@ -93,18 +92,10 @@ class EnterWalletViewModel @Inject constructor(
 
     private fun checkPin() {
         invokeAction {
-            walletRepository.checkPin(currentState.pin)
+            walletRepository.unlockWalletWithPIN(currentState.pin)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
-                        walletRepository.unlockWalletWithPIN(currentState.pin)
-                            .onSuccess {
-                                sendNavigation(AppNavigation.OpenMain)
-                            }
-                            .onFailure {
-                                //TODO: correct pin but wrongly decoded password? go directly to password
-                                sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
-                            }
-
+                        sendNavigation(AppNavigation.OpenMain)
                     } else {
                         pinAttempts++
                         sendState { copy(pin = "") }
@@ -138,29 +129,29 @@ class EnterWalletViewModel @Inject constructor(
     fun onChooseWalletClick() {
         sendEvent(
             EnterWalletEvent.OpenChooseWallet(
-                currentState.wallets.values.toList(),
-                currentState.wallets[currentState.currentWallet]!!
+                currentState.wallets,
+                currentState.currentWallet
             )
         )
     }
 
     fun onWalletChanged(walletName: String?) {
-        currentState.wallets.entries
-            .find { it.value == walletName }?.key
+        walletName
             ?.takeIf { it != currentState.currentWallet }
             ?.let { wallet ->
                 invokeAction {
-                    walletRepository.isPinAvailable()
-                        .onSuccess { isPinAvailable ->
-                            sendState { copy(currentWallet = wallet, pin = "", isPinAvailable = isPinAvailable) }
-                            sendEvent(EnterWalletEvent.ClearPassword)
-                            if (!isPinAvailable) {
-                                sendEvent(EnterWalletEvent.ShowKeyboard)
-                            }
+                    runCatching {
+                        walletRepository.setActiveWallet(wallet)
+                        walletRepository.isPinAvailable().getOrElse { false }
+                    }.onSuccess { isPinAvailable ->
+                        sendState { copy(currentWallet = wallet, pin = "", isPinAvailable = isPinAvailable) }
+                        sendEvent(EnterWalletEvent.ClearPassword)
+                        if (!isPinAvailable) {
+                            sendEvent(EnterWalletEvent.ShowKeyboard)
                         }
-                        .onFailure {
-                            sendError(it)
-                        }
+                    }.onFailure {
+                        sendError(it)
+                    }
                 }
             }
     }

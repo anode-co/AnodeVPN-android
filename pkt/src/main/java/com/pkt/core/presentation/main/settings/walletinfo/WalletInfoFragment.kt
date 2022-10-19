@@ -10,6 +10,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentWalletInfoBinding
 import com.pkt.core.extensions.applyGradient
+import com.pkt.core.extensions.collectLatestRepeatOnLifecycle
 import com.pkt.core.extensions.formatSeconds
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment

@@ -1,6 +1,7 @@
 package com.pkt.core.extensions
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.res.ColorStateList
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +14,15 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputEditText
 import com.pkt.core.R
 import com.pkt.core.presentation.common.state.event.CommonEvent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import java.lang.ref.WeakReference
@@ -75,21 +82,32 @@ fun Fragment.showNotification(@StringRes titleResId: Int, type: CommonEvent.Noti
 
     val rootViewWeakRef = WeakReference(rootView)
     val notificationViewWeakRef = WeakReference(notificationView)
+    val activity = activity
     rootView.postDelayed({
         if ((rootViewWeakRef.get()?.indexOfChild(notificationViewWeakRef.get()) ?: -1) > -1) {
             rootViewWeakRef.get()?.removeView(notificationViewWeakRef.get())
 
             rootViewWeakRef.get()?.context?.getColorByAttribute(android.R.attr.windowBackground)?.let { color ->
-                setStatusBarColor(color)
+                activity?.setStatusBarColor(color)
             }
         }
     }, 2000)
 
-    setStatusBarColor(backgroundColor)
+    activity?.setStatusBarColor(backgroundColor)
 }
 
-fun Fragment.setStatusBarColor(@ColorInt color: Int) {
-    val window = requireActivity().window
+fun Activity.setStatusBarColor(@ColorInt color: Int) {
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
     window.statusBarColor = color
+}
+
+inline fun <T> Fragment.collectLatestRepeatOnLifecycle(
+    flow: Flow<T>,
+    crossinline onCollect: (t: T) -> Unit,
+) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            flow.collectLatest { onCollect(it) }
+        }
+    }
 }

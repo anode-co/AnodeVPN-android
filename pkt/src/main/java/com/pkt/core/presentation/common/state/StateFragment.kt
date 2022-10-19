@@ -5,21 +5,16 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.pkt.core.R
 import com.pkt.core.extensions.applyGradient
+import com.pkt.core.extensions.collectLatestRepeatOnLifecycle
 import com.pkt.core.extensions.getColorByAttribute
 import com.pkt.core.extensions.scrollWhenOpenKeyboard
 import com.pkt.core.presentation.common.state.event.CommonEventHandler
 import com.pkt.core.presentation.common.state.navigation.NavigationHandler
 import com.pkt.core.presentation.common.state.state.CommonState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(contentLayoutId) {
@@ -65,17 +60,6 @@ abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(conte
             collectLatestRepeatOnLifecycle(uiNavigation) { handleNavigation(it) }
             collectLatestRepeatOnLifecycle(loadingState) { handleLoadingState(it) }
             collectLatestRepeatOnLifecycle(actionState) { handleActionState(it) }
-        }
-    }
-
-    protected inline fun <T> Fragment.collectLatestRepeatOnLifecycle(
-        flow: Flow<T>,
-        crossinline onCollect: (t: T) -> Unit,
-    ) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                flow.collectLatest { onCollect(it) }
-            }
         }
     }
 

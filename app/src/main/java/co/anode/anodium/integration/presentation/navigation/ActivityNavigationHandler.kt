@@ -37,4 +37,20 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         walletActivity.putExtra("PKT_TO_USD", "0.1")
         fragment.startActivity(walletActivity)
     }
+
+    override fun openSendTransaction(fragment: Fragment) {
+        fragment
+    }
+
+    override fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openSendSuccess(fragment: Fragment, transactionId: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openVpnExits(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
 }

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="@drawable/ripple_mask_rectangle"
+    android:paddingStart="@dimen/spacing_horizontal"
+    android:paddingEnd="27dp">
+
+    <TextView
+        android:id="@+id/flagImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginVertical="24dp"
+        android:gravity="center"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="🇨🇦" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/nameLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearance20Medium"
+        android:textSize="16sp"
+        app:autoSizeMaxTextSize="16sp"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toTopOf="@id/countryLabel"
+        app:layout_constraintEnd_toStartOf="@id/connectedImage"
+        app:layout_constraintStart_toEndOf="@id/flagImage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="PKT Pal" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/countryLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearance14Regular"
+        android:textColor="?android:textColorSecondary"
+        app:autoSizeMaxTextSize="14sp"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/nameLabel"
+        app:layout_constraintStart_toStartOf="@id/nameLabel"
+        app:layout_constraintTop_toBottomOf="@id/nameLabel"
+        tools:text="Sweden" />
+
+    <ImageView
+        android:id="@+id/connectedImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_connected"
+        tools:ignore="ContentDescription" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/stroke1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

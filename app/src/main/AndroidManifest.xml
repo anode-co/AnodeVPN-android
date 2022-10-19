@@ -36,6 +36,11 @@
             android:theme="@style/Theme.App"
             tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
+            android:name=".integration.presentation.CreateWalletActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
             android:name=".wallet.NewWalletActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />

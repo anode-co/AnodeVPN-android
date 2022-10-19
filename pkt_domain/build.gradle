@@ -40,4 +40,6 @@ dependencies {
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
     //Serialization
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0'
+    //Flows
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
 }

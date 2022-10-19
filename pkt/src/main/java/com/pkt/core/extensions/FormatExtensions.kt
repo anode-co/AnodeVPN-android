@@ -131,6 +131,17 @@ fun Int?.formatSeconds(): String {
     return "%d:%02d".format(minutes, seconds)
 }
 
+fun Int?.formatSecondsLong(): String {
+    var seconds = this ?: 0
+    var minutes = seconds / 60
+    seconds %= 60
+    val hours = minutes / 60
+    if (hours > 0) {
+        minutes %= 60
+    }
+    return "%02d:%02d:%02d".format(hours, minutes, seconds)
+}
+
 fun Int.formatPosition(context: Context): String {
     val suffix = context.getString(
         when (this) {

@@ -8,11 +8,14 @@ import android.widget.Button
 import co.anode.anodium.AboutDialog
 import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
+import co.anode.anodium.integration.presentation.CreateWalletActivity
+import co.anode.anodium.integration.presentation.EnterWalletActivity
 
 class NewWalletActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_wallet)
+
 
         val newWallet = findViewById<Button>(R.id.buttonCreateNewWallet)
         newWallet.setOnClickListener {
@@ -27,6 +30,13 @@ class NewWalletActivity : AppCompatActivity() {
             startActivity(passwordActivity)
         }
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        var useNewUI = prefs.getBoolean("useNewUI", false)
+        useNewUI = true
+        if (useNewUI) {
+            val createWalletActivity = Intent(applicationContext, CreateWalletActivity::class.java)
+            createWalletActivity.putExtra("WALLET_NAME", "wallet")//Default wallet name
+            startActivity(createWalletActivity)
+        }
         //On first run show data consent
         if (prefs.getBoolean("FirstRun", true)) {
             AboutDialog.show(this)
