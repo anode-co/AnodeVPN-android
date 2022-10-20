@@ -48,6 +48,7 @@ import javax.crypto.spec.SecretKeySpec
 object AnodeUtil {
     private val LOGTAG = BuildConfig.APPLICATION_ID
     var context: Context? = null
+    val ApplicationID = BuildConfig.APPLICATION_ID
     var filesDirectory = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"

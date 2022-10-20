@@ -9,6 +9,12 @@ data class UnlockWalletRequest (
 )
 
 @Serializable
+data class UnlockWalletResponse (
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Serializable
 data class WalletBalancesRequest (
     var showzerobalance: Boolean,
 )

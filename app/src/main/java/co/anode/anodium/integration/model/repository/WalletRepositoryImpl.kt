@@ -1,5 +1,6 @@
 package co.anode.anodium.integration.model.repository
 
+import android.content.Context
 import co.anode.anodium.support.AnodeUtil
 import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
@@ -20,13 +21,14 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun getActiveWallet(): Result<String> {
-        TODO("Not yet implemented")
-        //get activeWallet from sharedPreferences or DataStore
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("activeWallet", "wallet")?.let {
+            activeWallet = it
+        }
+        return Result.success(activeWallet)
     }
 
     override suspend fun setActiveWallet(walletName: String) {
-        TODO("Not yet implemented")
-        //set activeWallet to sharedPreferences or DataStore
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("activeWallet", walletName)?.apply()
     }
 
     override suspend fun getWalletAddress(): Result<String> {
@@ -97,22 +99,21 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun unlockWallet(passphrase: String): Result<Boolean> = withContext(Dispatchers.IO) {
-        runCatching {
-            val request = UnlockWalletRequest(passphrase, activeWallet)
-            walletAPI.unlockWalletAPI(request)
-        }.onSuccess {
-            Timber.d("unlockWalletAPI: success")
-        }.onFailure {
-            Timber.e(it, "unlockWalletAPI : failure")
-        }
+    override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
+        val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
+        val response = walletAPI.unlockWalletAPI(request)
+        return Result.success(response)
     }
 
     override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
         val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
-        val passphrase = AnodeUtil.decrypt(encryptedPassword, pin).toString()
-        val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
-        return Result.success(walletAPI.unlockWalletAPI(request))
+        val passphrase = AnodeUtil.decrypt(encryptedPassword, pin)
+        if (passphrase != null) {
+            val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
+            return Result.success(walletAPI.unlockWalletAPI(request))
+        } else {
+            return Result.failure(Exception("Wrong PIN. Cannot decrypt wallet password"))
+        }
     }
 
     override suspend fun createAddress(): String {

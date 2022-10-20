@@ -103,7 +103,9 @@ class EnterWalletViewModel @Inject constructor(
                     }
                 }
                 .onFailure {
-                    sendError(it)
+                    pinAttempts++
+                    sendState { copy(pin = "") }
+                    sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
                 }
         }
     }
