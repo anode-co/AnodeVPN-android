@@ -8,10 +8,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.VpnService
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.SystemClock
+import android.os.*
 import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
@@ -26,19 +23,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
-import co.anode.anodium.databinding.FragmentVpnBinding
+import co.anode.anodium.databinding.FragmentVpnMainBinding
 import co.anode.anodium.AnodeVpnService
 import co.anode.anodium.VpnListActivity
+import co.anode.anodium.integration.presentation.VpnActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.support.CubeWifi
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.Executors
 
-class VPNFragment : Fragment() {
+class VPNFragmentMain : Fragment() {
     private val LOGTAG = BuildConfig.APPLICATION_ID
     val buttonStateDisconnected = 0
     val buttonStateConnecting = 1
@@ -49,7 +47,7 @@ class VPNFragment : Fragment() {
     private var previousPublicIPv4 = ""
     private val vpnConnectionWaitingInterval = 30000L
     val h = Handler()
-    private var _binding: FragmentVpnBinding? = null
+    private var _binding: FragmentVpnMainBinding? = null
     private lateinit var mycontext: Context
     private lateinit var root: View
     private val VPN_CONNECTED = IntentFilter("co.anode.anodium.action.VPN.Connected")
@@ -65,7 +63,7 @@ class VPNFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentVpnBinding.inflate(inflater, container, false)
+        _binding = FragmentVpnMainBinding.inflate(inflater, container, false)
         root = binding.root
         mycontext = requireContext()
         AnodeClient.statustv = root.findViewById(R.id.textview_status)
@@ -124,6 +122,9 @@ class VPNFragment : Fragment() {
                 disconnectVPN(showRatingBar = false)
             }
         }
+        if (prefs.getBoolean("useNewUI",false)) {
+            showNewVPNFragment()
+        }
         return root
     }
 
@@ -145,6 +146,17 @@ class VPNFragment : Fragment() {
         }
     }
 
+    private fun showNewVPNFragment() {
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        executor.execute {
+            handler.post {
+                val vpnActivity = Intent(mycontext, VpnActivity::class.java)
+                startActivity(vpnActivity)
+            }
+        }
+    }
+
     private fun startBackgroundThreads() {
         //Check internet connectivity & public IP
         Thread({
@@ -156,7 +168,7 @@ class VPNFragment : Fragment() {
                 }
                 Thread.sleep(3000)
             }
-        }, "VPNFragment.CheckInternetConnectivity").start()
+        }, "VPNFragmentMain.CheckInternetConnectivity").start()
 
         //Get v4 public IP
         Thread({
@@ -179,7 +191,7 @@ class VPNFragment : Fragment() {
                 }
                 Thread.sleep(publicIpThreadSleep)
             }
-        }, "VPNFragment.GetPublicIPv4").start()
+        }, "VPNFragmentMain.GetPublicIPv4").start()
 
         //Get v6 public IP
         Thread({
@@ -199,7 +211,7 @@ class VPNFragment : Fragment() {
                 }
                 Thread.sleep(publicIpThreadSleep)
             }
-        }, "VPNFragment.GetPublicIPv4").start()
+        }, "VPNFragmentMain.GetPublicIPv4").start()
     }
 
     private fun startVPNService() {

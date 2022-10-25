@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
@@ -25,6 +26,12 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:theme">
+        <activity
+            android:name=".integration.presentation.VpnActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass">
+        </activity>
         <activity
             android:name=".integration.presentation.WalletActivity"
             android:exported="false"
