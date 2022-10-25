@@ -35,7 +35,7 @@ class CreatePasswordViewModel @Inject constructor(
     private fun invalidateNextButtonEnabled() {
         sendState {
             copy(
-                nextButtonEnabled = checkbox1Checked && checkbox2Checked
+                nextButtonEnabled = checkbox1Checked
             )
         }
     }
