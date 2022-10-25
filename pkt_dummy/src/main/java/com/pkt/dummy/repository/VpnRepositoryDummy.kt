@@ -1,6 +1,7 @@
 package com.pkt.dummy.repository
 
 import com.pkt.domain.dto.Vpn
+import com.pkt.domain.dto.VpnServer
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.delay
@@ -32,15 +33,15 @@ class VpnRepositoryDummy : VpnRepository {
     override val startConnectionTime: Long
         get() = _startConnectionTime
 
-    override suspend fun fetchVpnList(force: Boolean): Result<Unit> {
+    override suspend fun fetchVpnList(force: Boolean): Result<List<VpnServer>> {
         if (_vpnListFlow.value.isEmpty() || force) {
             delay(1000L)
             _vpnListFlow.tryEmit(VPN_LIST)
         }
-        return Result.success(Unit)
+        return Result.success(listOf())
     }
 
-    override suspend fun setCurrentVpn(name: String): Result<Unit> {
+    override suspend fun setCurrentVpn(name: String) :Result <Unit>{
         _currentVpnNameFlow.tryEmit(name)
         return Result.success(Unit)
     }
@@ -57,6 +58,14 @@ class VpnRepositoryDummy : VpnRepository {
         _startConnectionTime = 0L
         _vpnState.tryEmit(VpnState.DISCONNECTED)
         return Result.success(true)
+    }
+
+    override suspend fun getIPv4Address(): Result<String> {
+        return Result.success("192.168.1.1")
+    }
+
+    override suspend fun getIPv6Address(): Result<String> {
+        return Result.success("fc00::1")
     }
 
     private companion object {

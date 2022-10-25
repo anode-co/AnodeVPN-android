@@ -60,12 +60,13 @@ class VpnViewModel @Inject constructor(
     }
 
     override fun createInitialState() = VpnState(
-        ipV4 = "217.71.236.178",
-        ipV6 = "2607.5300.2038.fc00.1234.2038.fc00.1234"
+        ipV4 = "",
+        ipV6 = ""
     )
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        vpnRepository.fetchVpnList()
+        vpnRepository.getIPv4Address()
+        vpnRepository.getIPv6Address()
     }
 
     fun onConsentResult(success: Boolean) {
@@ -81,8 +82,9 @@ class VpnViewModel @Inject constructor(
             }
 
             com.pkt.domain.dto.VpnState.CONNECTING -> {
-                /*AnodeUtil.addCjdnsPeers()
-                AnodeClient.AuthorizeVPN().execute()*/
+                viewModelScope.launch {
+                    vpnRepository.disconnect()
+                }
             }
 
             com.pkt.domain.dto.VpnState.CONNECTED -> {

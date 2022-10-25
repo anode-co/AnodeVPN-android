@@ -1,5 +1,7 @@
 package co.anode.anodium.integration.presentation
 
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.pkt.core.presentation.main.vpn.VpnFragment
@@ -21,6 +23,6 @@ class VpnActivity : AppCompatActivity() {
     }
 
     companion object {
-
+        fun getIntent(context: Context) = Intent(context, VpnFragment::class.java).apply {}
     }
 }
