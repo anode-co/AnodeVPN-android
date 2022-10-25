@@ -47,11 +47,15 @@ class WalletInfoViewModel @Inject constructor(
         }
         runCatching {
             val balance = walletRepository.getWalletBalance(address).getOrThrow()
-            val info = walletRepository.getWalletInfo().getOrThrow()
-            Pair(balance, info)
-        }.onSuccess { (balance, info) ->
-            val wallet = info.wallet
-            val neutrino = info.neutrino
+            val walletInfo = walletRepository.getWalletInfo().getOrThrow()
+            if (walletInfo.wallet == null) {
+                //Wallet is locked
+                //TODO: unlock wallet
+            }
+            Pair(balance, walletInfo)
+        }.onSuccess { (balance, walletInfo) ->
+            val wallet = walletInfo.wallet
+            val neutrino = walletInfo.neutrino
             sendState {
                 copy(
                     items = mutableListOf<DisplayableItem>().apply {
@@ -61,7 +65,7 @@ class WalletInfoViewModel @Inject constructor(
                                 KeyValueVerticalItem(R.string.balance, listOf(balance), ValueFormatter.BALANCE),
                                 KeyValueVerticalItem(
                                     R.string.wallet_sync,
-                                    listOf(wallet.currentHeight, wallet.currentBlockTimestamp),
+                                    listOf(wallet!!.currentHeight, wallet.currentBlockTimestamp),
                                     ValueFormatter.SYNC
                                 ),
                                 KeyValueVerticalItem(

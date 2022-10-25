@@ -118,14 +118,14 @@ class WalletRepositoryDummy constructor(
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
     }
 
-    override suspend fun createWallet(password: String, pin: String, seed: String) = withContext(Dispatchers.IO) {
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName:String ) = withContext(Dispatchers.IO) {
         delay(5_000L)
-        Result.success(Unit)
+        Result.success(true)
     }
 
-    override suspend fun recoverWallet(password: String, seed: String) = withContext(Dispatchers.IO) {
+    override suspend fun recoverWallet(password: String, seed: String, seed_password: String, walletName: String): Result<Boolean> {
         delay(1_000L)
-        Result.success(Unit)
+        return Result.success(true)
     }
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {

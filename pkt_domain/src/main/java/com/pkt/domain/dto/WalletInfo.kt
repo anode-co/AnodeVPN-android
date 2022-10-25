@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class WalletInfo(
-    val lightning: Lightning,
+    val lightning: Lightning? = null,
     val neutrino: Neutrino,
-    val wallet: Wallet,
+    val wallet: Wallet? = null
 )
 
 @Serializable

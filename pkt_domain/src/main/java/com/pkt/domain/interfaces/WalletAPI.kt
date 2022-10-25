@@ -18,4 +18,15 @@ interface WalletAPI {
     suspend fun getWalletBalances(@Body walletBalancesRequest: WalletBalancesRequest): WalletAddressBalances
     @POST("wallet/transaction/query")
     suspend fun getWalletTransactions(@Body walletTransactionsRequest: WalletTransactionsRequest): WalletTransactions
+    @POST("util/seed/create")
+    suspend fun createSeed(@Body createSeedRequest: CreateSeedRequest): CreateSeedResponse
+    @POST("wallet/create")
+    suspend fun createWallet(@Body createWalletRequest: CreateWalletRequest): CreateWalletResponse
+    @POST("wallet/create")
+    suspend fun createWallet(@Body recoverWalletRequest: RecoverWalletRequest): CreateWalletResponse
+    //wallet/getsecret
+    //wallet/checkpassphrase
+    //wallet/changepassphrase
+    //wallet/transaction/sendfrom
+    //wallet/seed
 }

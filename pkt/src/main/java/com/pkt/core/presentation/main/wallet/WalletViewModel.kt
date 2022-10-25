@@ -43,9 +43,13 @@ class WalletViewModel @Inject constructor(
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
         runCatching {
-            val info = walletRepository.getWalletInfo().getOrThrow()
+            val walletInfo = walletRepository.getWalletInfo().getOrThrow()
+            if (walletInfo.wallet == null) {
+                //Wallet is locked
+                //TODO: bring up enterwallet fragment
+            }
             val addresses = walletRepository.getWalletBalances().getOrThrow()
-            Pair(info, addresses)
+            Pair(walletInfo, addresses)
         }.onSuccess { (info, addresses) ->
             val wallet = info.wallet
             val neutrino = info.neutrino
@@ -129,7 +133,7 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onSendClick() {
-        // TODO
+        //TODO launch sendtransactionbottomsheet
     }
 
     fun onQrClick() {
@@ -141,7 +145,7 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onSelectPeriodClick() {
-        // TODO
+        // TODO launch
     }
 
     fun onRetryClick() {

@@ -30,6 +30,8 @@ class SeedViewModel @Inject constructor(
 
     override fun createInitialState() = SeedState()
 
+
+
     fun onCopyClick() {
         currentState.seed?.let {
             sendEvent(CommonEvent.CopyToBuffer(R.string.your_seed_phrase, it))

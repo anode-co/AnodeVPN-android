@@ -23,6 +23,12 @@ class RecoverWalletViewModel @Inject constructor(
             invalidateNextButtonEnabled()
         }
 
+    var seed_password: String = ""
+        set(value) {
+            field = value
+            invalidateNextButtonEnabled()
+        }
+
     override fun createInitialState() = RecoverWalletState()
 
     private fun invalidateNextButtonEnabled() {
@@ -37,7 +43,7 @@ class RecoverWalletViewModel @Inject constructor(
 
     fun onNextClick() {
         invokeAction {
-            walletRepository.recoverWallet(password, seed)
+            walletRepository.recoverWallet(password, seed, seed_password, "wallet")
                 .onSuccess {
                     sendNavigation(AppNavigation.OpenMain)
                 }

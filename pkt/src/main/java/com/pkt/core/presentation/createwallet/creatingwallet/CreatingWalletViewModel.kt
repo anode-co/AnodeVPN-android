@@ -24,7 +24,7 @@ class CreatingWalletViewModel @Inject constructor(
     override fun createInitialState() = CommonState.Empty
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        walletRepository.createWallet(password, pin, seed)
+        walletRepository.createWallet(password, pin, seed, "wallet")
     }
 
     fun onNextClick() {

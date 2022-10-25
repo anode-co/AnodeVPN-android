@@ -31,7 +31,7 @@ class NewWalletActivity : AppCompatActivity() {
         }
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         var useNewUI = prefs.getBoolean("useNewUI", false)
-        useNewUI = true
+        useNewUI = true //DEBUG
         if (useNewUI) {
             val createWalletActivity = Intent(applicationContext, CreateWalletActivity::class.java)
             createWalletActivity.putExtra("WALLET_NAME", "wallet")//Default wallet name

@@ -73,14 +73,12 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun getWalletInfo(): Result<WalletInfo>  = withContext(Dispatchers.IO)  {
-        kotlin.runCatching {
-            walletAPI.getWalletInfo()
-        }.onSuccess {
-            Timber.d("getWalletIfo: success")
-        }.onFailure {
-            Timber.e(it, "getWalletInfo : failure")
+    override suspend fun getWalletInfo(): Result<WalletInfo> {
+        val walletInfo = walletAPI.getWalletInfo()
+        if (walletInfo.wallet == null) {
+
         }
+        return Result.success(walletInfo)
     }
 
     override suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo> {
@@ -88,15 +86,47 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun generateSeed(password: String, pin: String): Result<String> {
-        TODO("Not yet implemented")
+        val response = walletAPI.createSeed(password)
+
+        if (response.seed.isNotEmpty()) {
+            return Result.success(response.seed.joinToString(" "))
+        } else {
+            return Result.failure(Exception("Failed to generate seed: ${response.message}"))
+        }
     }
 
-    override suspend fun createWallet(password: String, pin: String, seed: String): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String): Result<Boolean> {
+        var wallet = "wallet" //Default wallet name
+        if (walletName.isNotEmpty()) {
+            wallet = walletName
+        }
+        setActiveWallet(wallet)
+        val response = walletAPI.createWallet(password, password, seed.split(" "), "$activeWallet.db")
+
+        return if (response.message.isNotEmpty()) {
+            Result.failure(Exception("Failed to create wallet: ${response.message}"))
+        } else {
+            val encryptedPassword = AnodeUtil.encrypt(password, pin)
+            AnodeUtil.storeWalletPassword(encryptedPassword,walletName)
+            if (pin.isNotEmpty()) {
+                AnodeUtil.storeWalletPin(pin, walletName)
+            }
+            Result.success(true)
+        }
     }
 
-    override suspend fun recoverWallet(password: String, seed: String): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun recoverWallet(password: String, seed: String, seed_password: String, walletName: String): Result<Boolean> {
+        var wallet = "wallet" //Default wallet name
+        if (walletName.isNotEmpty()) {
+            wallet = walletName
+        }
+        setActiveWallet(wallet)
+        val response = walletAPI.recoverWallet(password, password, seed.split(" "), "$activeWallet.db")
+        return if (response.message.isNotEmpty()) {
+            Result.failure(Exception("Failed to recover wallet: ${response.message}"))
+        } else {
+            Result.success(true)
+        }
     }
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {

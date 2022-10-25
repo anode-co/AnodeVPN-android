@@ -47,6 +47,6 @@ class SetPinViewModel @Inject constructor(
     }
 
     private companion object {
-        const val PIN_MIN_LENGTH = 4
+        const val PIN_MIN_LENGTH = 0
     }
 }

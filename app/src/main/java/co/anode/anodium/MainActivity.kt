@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                     AnodeUtil.isInternetSharingAvailable = CubeWifi.isCubeNetworkAvailable()
                     Thread.sleep(30000)
                 }
-            }, "VPNFragment.SearchForCubeWifi").start()
+            }, "MainActivity.SearchForCubeWifi").start()
         }
     }
 

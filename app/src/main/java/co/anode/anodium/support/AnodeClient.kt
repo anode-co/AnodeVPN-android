@@ -586,8 +586,11 @@ object AnodeClient {
 
     class AuthorizeVPN() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val pubkey = params[0]
+            var pubkey = params[0]
             val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
+            if (pubkey.isNullOrEmpty()) {
+                pubkey = prefs.getString("LastServerPubkey", defaultNode)
+            }
             with (prefs.edit()) {
                 putString("LastServerPubkey", pubkey)
                 commit()
@@ -718,9 +721,7 @@ object AnodeClient {
         var result:String
         var url: URL
 
-        statustv.post(Runnable {
-            statustv.text  = "Waiting for network..."
-        } )
+        statustv.post(Runnable { statustv.text  = "Waiting for network..." } )
 
         url = URL(address)
         //url = URL("https://vpn.anode.co/api/0.3/tests/500error/")
