@@ -14,14 +14,9 @@ class CreatePasswordViewModel @Inject constructor(
         set(value) {
             field = value
             sendState { copy(strength = PasswordStrength.calculateStrength(value)) }
-            invalidateNextButtonEnabled()
         }
 
     var confirmPassword: String = ""
-        set(value) {
-            field = value
-            invalidateNextButtonEnabled()
-        }
 
     var checkbox1Checked: Boolean = false
         set(value) {
@@ -40,10 +35,7 @@ class CreatePasswordViewModel @Inject constructor(
     private fun invalidateNextButtonEnabled() {
         sendState {
             copy(
-                nextButtonEnabled =
-                enterPassword.isNotBlank() && confirmPassword.isNotBlank()
-                        && checkbox1Checked && checkbox2Checked
-                        && currentState.strength > PasswordStrength.MEDIUM
+                nextButtonEnabled = checkbox1Checked && checkbox2Checked
             )
         }
     }
