@@ -8,8 +8,7 @@ import android.widget.Button
 import co.anode.anodium.AboutDialog
 import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
-import co.anode.anodium.integration.presentation.CreateWalletActivity
-import co.anode.anodium.integration.presentation.EnterWalletActivity
+import co.anode.anodium.integration.presentation.StartWalletActivity
 
 class NewWalletActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,9 +32,9 @@ class NewWalletActivity : AppCompatActivity() {
         var useNewUI = prefs.getBoolean("useNewUI", false)
         useNewUI = true //DEBUG
         if (useNewUI) {
-            val createWalletActivity = Intent(applicationContext, CreateWalletActivity::class.java)
-            createWalletActivity.putExtra("WALLET_NAME", "wallet")//Default wallet name
-            startActivity(createWalletActivity)
+            val startWalletActivity = Intent(applicationContext, StartWalletActivity::class.java)
+            startWalletActivity.putExtra("WALLET_NAME", "wallet")//Default wallet name
+            startActivity(startWalletActivity)
         }
         //On first run show data consent
         if (prefs.getBoolean("FirstRun", true)) {

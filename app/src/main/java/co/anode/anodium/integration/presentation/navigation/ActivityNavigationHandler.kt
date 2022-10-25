@@ -2,6 +2,7 @@ package co.anode.anodium.integration.presentation.navigation
 
 import android.content.Intent
 import androidx.fragment.app.Fragment
+import co.anode.anodium.integration.presentation.CreateWalletActivity
 import co.anode.anodium.integration.presentation.WalletActivity
 import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
 import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
@@ -23,15 +24,16 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openCreateWallet(fragment: Fragment) {
-        TODO("Not yet implemented")
+        val createWalletActivity = Intent(fragment.requireContext(), CreateWalletActivity::class.java)
+        fragment.startActivity(createWalletActivity)
     }
 
     override fun openRecoverWallet(fragment: Fragment) {
-        TODO("Not yet implemented")
+        val createWalletActivity = Intent(fragment.requireContext(), CreateWalletActivity::class.java)
+        fragment.startActivity(createWalletActivity)
     }
 
     override fun openMain(fragment: Fragment) {
-        //fragment.startActivity(WalletActivity.getIntent(fragment.requireContext(), "wallet", "0.0"))
         val walletActivity = Intent(fragment.requireContext(), WalletActivity::class.java)
         walletActivity.putExtra("WALLET_NAME", "wallet")
         walletActivity.putExtra("PKT_TO_USD", "0.1")

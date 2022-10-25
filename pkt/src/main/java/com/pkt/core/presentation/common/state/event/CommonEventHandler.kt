@@ -22,6 +22,7 @@ object CommonEventHandler {
             }
 
             is CommonEvent.Notification -> {
+                //TODO: handle custom errors to the user here
                 fragment.showNotification(event.textResId, event.type)
             }
         }

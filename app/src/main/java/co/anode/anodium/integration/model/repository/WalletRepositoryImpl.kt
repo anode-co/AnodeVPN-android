@@ -48,8 +48,21 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return Result.success(pin == storedPin)
     }
 
-    override suspend fun getTotalWalletBalance(): Result<Double> {
-        TODO("Not yet implemented")
+    //Get the wallet balance from all available addresses
+    override suspend fun getTotalWalletBalance(): Result<Double> = withContext(Dispatchers.IO){
+        runCatching {
+            val addresses = walletAPI.getWalletBalances(true)
+            //Return the balance of address
+            var balance = 0.0
+            for(i in 0 until addresses.addrs.size) {
+                balance = addresses.addrs[i].total
+            }
+            return@runCatching balance
+        }.onSuccess {
+            Timber.d("getCurrentAddress: success")
+        }.onFailure {
+            Timber.e(it, "getCurrentAddress: failure")
+        }
     }
 
     //Get wallet balance, if address is empty then return total balance of all addresses

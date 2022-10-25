@@ -11,8 +11,8 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class BindsModule {
 
-//    @Binds
-//    abstract fun bindsNavigationHandler(navigationHandler: FragmentNavigationHandler): NavigationHandler
+    //@Binds
+    //abstract fun bindsNavigationHandler(navigationHandler: FragmentNavigationHandler): NavigationHandler
 
     @Binds
     abstract fun bindsNavigationHandler(navigationHandler: ActivityNavigationHandler): NavigationHandler

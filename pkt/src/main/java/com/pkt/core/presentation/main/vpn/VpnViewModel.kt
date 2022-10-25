@@ -1,8 +1,6 @@
 package com.pkt.core.presentation.main.vpn
 
 import androidx.lifecycle.viewModelScope
-import co.anode.anodium.support.AnodeClient
-import co.anode.anodium.support.AnodeUtil
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -83,8 +81,8 @@ class VpnViewModel @Inject constructor(
             }
 
             com.pkt.domain.dto.VpnState.CONNECTING -> {
-                AnodeUtil.addCjdnsPeers()
-                AnodeClient.AuthorizeVPN().execute()
+                /*AnodeUtil.addCjdnsPeers()
+                AnodeClient.AuthorizeVPN().execute()*/
             }
 
             com.pkt.domain.dto.VpnState.CONNECTED -> {

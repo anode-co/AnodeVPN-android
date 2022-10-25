@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
+import com.pkt.core.presentation.navigation.AppNavigation
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -133,7 +134,7 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onSendClick() {
-        //TODO launch sendtransactionbottomsheet
+        sendNavigation(AppNavigation.OpenSendTransaction)
     }
 
     fun onQrClick() {
