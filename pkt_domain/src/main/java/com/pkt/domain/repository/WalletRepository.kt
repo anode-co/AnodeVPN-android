@@ -25,4 +25,5 @@ interface WalletRepository {
     suspend fun send(address: String, amount: Double): Result<SendResponse>
     suspend fun getSeed(): Result<String>
     suspend fun renameWallet(name: String): Result<String?>
+    suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit>
 }

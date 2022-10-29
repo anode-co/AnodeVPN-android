@@ -141,6 +141,8 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             is SettingsEvent.OpenRenameWallet -> {
                 RenameWalletBottomSheet().show(parentFragmentManager, RenameWalletBottomSheet.TAG)
             }
+
+            is SettingsEvent.OpenChangePassword -> mainViewModel.openChangePassword()
         }
     }
 }
