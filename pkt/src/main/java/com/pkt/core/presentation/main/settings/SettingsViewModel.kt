@@ -52,7 +52,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onDeleteClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenDeleteWallet)
     }
 
     fun onNewWalletClick() {
