@@ -57,4 +57,8 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openChangePassword(fragment: Fragment) {
         TODO("Not yet implemented")
     }
+
+    override fun openChangePin(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
 }

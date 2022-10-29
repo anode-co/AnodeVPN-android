@@ -178,6 +178,6 @@
     <string name="enter_current_wallet_password">Enter current wallet password</string>
     <string name="type_your_new_password">Type your new password</string>
     <string name="success">Success!</string>
-
+    <string name="type_your_new_pin">Type your new PIN</string>
 
 </resources>

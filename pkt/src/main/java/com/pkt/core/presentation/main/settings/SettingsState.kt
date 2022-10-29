@@ -20,4 +20,5 @@ sealed class SettingsEvent : UiEvent {
     object OpenConsent : SettingsEvent()
     object OpenRenameWallet : SettingsEvent()
     object OpenChangePassword : SettingsEvent()
+    object OpenChangePin : SettingsEvent()
 }

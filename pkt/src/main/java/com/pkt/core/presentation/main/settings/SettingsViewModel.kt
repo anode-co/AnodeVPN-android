@@ -26,7 +26,7 @@ class SettingsViewModel @Inject constructor(
                 sendEvent(SettingsEvent.OpenChangePassword)
             }
             MenuItem.Type.CHANGE_PIN -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenChangePin)
             }
             MenuItem.Type.SHOW_SEED -> {
                 sendEvent(SettingsEvent.OpenShowSeed)

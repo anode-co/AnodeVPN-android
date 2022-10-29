@@ -32,4 +32,8 @@ class MainViewModel @Inject constructor(
     fun openChangePassword() {
         sendNavigation(AppNavigation.OpenChangePassword)
     }
+
+    fun openChangePin() {
+        sendNavigation(AppNavigation.OpenChangePin)
+    }
 }

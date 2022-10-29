@@ -30,6 +30,7 @@ abstract class AppNavigationHandler : NavigationHandler {
                     is AppNavigation.OpenSendSuccess -> openSendSuccess(fragment, navigation.transactionId)
                     AppNavigation.OpenVpnExits -> openVpnExits(fragment)
                     AppNavigation.OpenChangePassword -> openChangePassword(fragment)
+                    AppNavigation.OpenChangePin -> openChangePin(fragment)
                 }
             }
 
@@ -60,4 +61,5 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openSendSuccess(fragment: Fragment, transactionId: String)
     abstract fun openVpnExits(fragment: Fragment)
     abstract fun openChangePassword(fragment: Fragment)
+    abstract fun openChangePin(fragment: Fragment)
 }

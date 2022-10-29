@@ -221,4 +221,8 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun changePin(password: String, pin: String): Result<Unit> {
+        TODO("Not yet implemented")
+    }
 }

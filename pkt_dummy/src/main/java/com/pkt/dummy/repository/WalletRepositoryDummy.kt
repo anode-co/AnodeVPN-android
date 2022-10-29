@@ -195,4 +195,9 @@ class WalletRepositoryDummy constructor(
         delay(1000L)
         return Result.success(Unit)
     }
+
+    override suspend fun changePin(password: String, pin: String): Result<Unit> {
+        delay(1000L)
+        return Result.success(Unit)
+    }
 }

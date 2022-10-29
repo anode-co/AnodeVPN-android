@@ -17,6 +17,7 @@ sealed class AppNavigation : UiNavigation {
     data class OpenSendSuccess(val transactionId: String) : AppNavigation()
     object OpenVpnExits : AppNavigation()
     object OpenChangePassword : AppNavigation()
+    object OpenChangePin : AppNavigation()
 }
 
 interface InternalNavigation : UiNavigation {

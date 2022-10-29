@@ -143,6 +143,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             }
 
             is SettingsEvent.OpenChangePassword -> mainViewModel.openChangePassword()
+            is SettingsEvent.OpenChangePin -> mainViewModel.openChangePin()
         }
     }
 }
