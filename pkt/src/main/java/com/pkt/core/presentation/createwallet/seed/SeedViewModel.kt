@@ -1,13 +1,11 @@
 package com.pkt.core.presentation.createwallet.seed
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,7 +18,7 @@ class SeedViewModel @Inject constructor(
     private val pin: String = savedStateHandle["pin"] ?: throw IllegalArgumentException("pin required")
 
     init {
-        viewModelScope.launch {
+        invokeLoadingAction {
             walletRepository.generateSeed(password, pin)
                 .onSuccess {
                     sendState { copy(seed = it) }
@@ -29,8 +27,6 @@ class SeedViewModel @Inject constructor(
     }
 
     override fun createInitialState() = SeedState()
-
-
 
     fun onCopyClick() {
         currentState.seed?.let {
