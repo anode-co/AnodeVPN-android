@@ -16,6 +16,7 @@ class SeedViewModel @Inject constructor(
 
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
     private val pin: String = savedStateHandle["pin"] ?: throw IllegalArgumentException("pin required")
+    private val name: String? = savedStateHandle["name"]
 
     init {
         invokeLoadingAction {
@@ -36,6 +37,6 @@ class SeedViewModel @Inject constructor(
     }
 
     fun onNextClick() {
-        sendNavigation(SeedNavigation.ToConfirmSeed(password, pin, currentState.seed!!))
+        sendNavigation(SeedNavigation.ToConfirmSeed(password, pin, currentState.seed!!, name))
     }
 }

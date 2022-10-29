@@ -13,6 +13,7 @@ class CreatePasswordViewModel @Inject constructor(
 ) : StateViewModel<CreatePasswordState>() {
 
     private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
+    private val name: String? = savedStateHandle["name"]
 
     var enterPassword: String = ""
         set(value) {
@@ -47,7 +48,7 @@ class CreatePasswordViewModel @Inject constructor(
             }
 
             else -> {
-                sendNavigation(CreatePasswordNavigation.ToConfirmPassword(mode, enterPassword))
+                sendNavigation(CreatePasswordNavigation.ToConfirmPassword(mode, enterPassword, name))
             }
         }
     }

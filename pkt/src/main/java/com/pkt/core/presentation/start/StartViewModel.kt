@@ -14,7 +14,7 @@ class StartViewModel @Inject constructor(
     override fun createInitialState() = CommonState.Empty
 
     fun onCreateClick() {
-        sendNavigation(AppNavigation.OpenCreateWallet)
+        sendNavigation(AppNavigation.OpenCreateWallet())
     }
 
     fun onRecoverClick() {

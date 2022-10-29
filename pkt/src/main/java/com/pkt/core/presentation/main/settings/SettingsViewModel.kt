@@ -56,14 +56,20 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onNewWalletClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenNewWallet)
     }
 
     fun onWalletRecoveryClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenRecoverWallet)
     }
 
     fun onConsentResult(success: Boolean) {
         // TODO("Not yet implemented")
+    }
+
+    fun onNewWallet(name: String?) {
+        name ?: return
+
+        sendEvent(SettingsEvent.OpenCreateWallet(name))
     }
 }

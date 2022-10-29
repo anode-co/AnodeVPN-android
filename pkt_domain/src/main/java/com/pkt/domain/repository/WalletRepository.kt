@@ -14,7 +14,7 @@ interface WalletRepository {
     suspend fun getWalletInfo(): Result<WalletInfo>
     suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo>
     suspend fun generateSeed(password: String, pin: String): Result<String>
-    suspend fun createWallet(password: String, pin: String, seed: String, walletName: String): Result<Boolean>
+    suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?): Result<Boolean>
     suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean>
     suspend fun unlockWallet(passphrase: String): Result<Boolean>
     suspend fun unlockWalletWithPIN(pin: String): Result<Boolean>
@@ -25,6 +25,7 @@ interface WalletRepository {
     suspend fun send(address: String, amount: Double): Result<SendResponse>
     suspend fun getSeed(): Result<String>
     suspend fun renameWallet(name: String): Result<String?>
+    suspend fun checkWalletName(name: String): Result<String?>
     suspend fun deleteWallet(name: String): Result<String?>
     suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit>
     suspend fun changePin(password: String, pin: String): Result<Unit>

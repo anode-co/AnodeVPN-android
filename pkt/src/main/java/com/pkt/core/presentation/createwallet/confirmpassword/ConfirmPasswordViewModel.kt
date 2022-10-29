@@ -13,6 +13,7 @@ class ConfirmPasswordViewModel @Inject constructor(
 
     private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
+    private val name: String? = savedStateHandle["name"]
 
     var checkboxChecked: Boolean = false
         set(value) {
@@ -24,6 +25,6 @@ class ConfirmPasswordViewModel @Inject constructor(
     override fun createInitialState() = ConfirmPasswordState()
 
     fun onNextClick() {
-        sendNavigation(ConfirmPasswordNavigation.ToSetPin(mode, password))
+        sendNavigation(ConfirmPasswordNavigation.ToSetPin(mode, password, name))
     }
 }

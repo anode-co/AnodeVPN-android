@@ -21,6 +21,7 @@ import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.common.consent.ConsentBottomSheet
 import com.pkt.core.presentation.main.settings.deletewallet.DeleteWalletBottomSheet
+import com.pkt.core.presentation.main.settings.newwallet.NewWalletBottomSheet
 import com.pkt.core.presentation.main.settings.renamewallet.RenameWalletBottomSheet
 import com.pkt.core.presentation.main.settings.showseed.ShowSeedBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,6 +49,10 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
         setFragmentResultListener(ConsentBottomSheet.REQUEST_KEY) { _, bundle ->
             viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
+        }
+
+        setFragmentResultListener(NewWalletBottomSheet.REQUEST_KEY) { _, bundle ->
+            viewModel.onNewWallet(bundle.getString(NewWalletBottomSheet.WALLET_KEY))
         }
 
         with(viewBinding) {
@@ -149,8 +154,14 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
                 DeleteWalletBottomSheet().show(parentFragmentManager, DeleteWalletBottomSheet.TAG)
             }
 
+            is SettingsEvent.OpenNewWallet -> {
+                NewWalletBottomSheet().show(parentFragmentManager, NewWalletBottomSheet.TAG)
+            }
+
             is SettingsEvent.OpenChangePassword -> mainViewModel.openChangePassword()
             is SettingsEvent.OpenChangePin -> mainViewModel.openChangePin()
+            is SettingsEvent.OpenCreateWallet -> mainViewModel.openCreateWallet(event.name)
+            is SettingsEvent.OpenRecoverWallet -> mainViewModel.openRecoverWallet()
         }
     }
 }
