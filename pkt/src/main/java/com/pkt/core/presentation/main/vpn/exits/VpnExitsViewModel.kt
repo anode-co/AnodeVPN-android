@@ -52,14 +52,12 @@ class VpnExitsViewModel @Inject constructor(
             }.collect()
         }
 
-        invokeLoadingAction()
+        invokeLoadingAction {
+            vpnRepository.fetchVpnList(force = true)
+        }
     }
 
     override fun createInitialState() = VpnExitsState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        vpnRepository.fetchVpnList(force = true)
-    }
 
     fun onVpnExitItemClick(item: VpnExitItem) {
         invokeAction {

@@ -18,14 +18,12 @@ class CreatingWalletViewModel @Inject constructor(
     private val seed: String = savedStateHandle["seed"] ?: throw IllegalArgumentException("seed required")
 
     init {
-        invokeLoadingAction()
+        invokeLoadingAction {
+            walletRepository.createWallet(password, pin, seed, "wallet")
+        }
     }
 
     override fun createInitialState() = CommonState.Empty
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        walletRepository.createWallet(password, pin, seed, "wallet")
-    }
 
     fun onNextClick() {
         sendEvent(CreatingWalletEvent.ToMain)
