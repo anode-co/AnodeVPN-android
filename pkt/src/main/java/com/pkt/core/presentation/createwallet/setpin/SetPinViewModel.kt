@@ -2,37 +2,24 @@ package com.pkt.core.presentation.createwallet.setpin
 
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.state.CommonState
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class SetPinViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-) : StateViewModel<SetPinState>() {
+) : StateViewModel<CommonState.Empty>() {
 
+    private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
 
     var enterPin: String = ""
-        set(value) {
-            field = value
-            invalidateNextButtonEnabled()
-        }
 
     var confirmPin: String = ""
-        set(value) {
-            field = value
-            invalidateNextButtonEnabled()
-        }
 
-    override fun createInitialState() = SetPinState()
-
-    private fun invalidateNextButtonEnabled() {
-        sendState {
-            copy(
-                nextButtonEnabled = enterPin.length >= PIN_MIN_LENGTH && confirmPin.length >= PIN_MIN_LENGTH
-            )
-        }
-    }
+    override fun createInitialState() = CommonState.Empty
 
     fun onNextClick() {
         when {
@@ -40,13 +27,13 @@ class SetPinViewModel @Inject constructor(
                 sendEvent(SetPinEvent.ConfirmPinError)
             }
 
-            else -> {
+            mode == CreateWalletMode.CREATE -> {
                 sendNavigation(SetPinNavigation.ToSeed(password, enterPin))
             }
-        }
-    }
 
-    private companion object {
-        const val PIN_MIN_LENGTH = 0
+            else -> {
+                sendNavigation(SetPinNavigation.ToRecoverWallet(password, enterPin))
+            }
+        }
     }
 }

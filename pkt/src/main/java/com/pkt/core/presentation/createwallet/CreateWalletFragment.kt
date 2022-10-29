@@ -2,6 +2,7 @@ package com.pkt.core.presentation.createwallet
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.NavHostFragment
@@ -28,6 +29,8 @@ class CreateWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragment_
             val navHostFragment = childFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
             val navController = navHostFragment.navController
 
+            navController.setGraph(R.navigation.nav_graph_create_wallet, arguments)
+
             navController.addOnDestinationChangedListener { _, destination, _ ->
                 stepsView.currentStep =
                     when (destination.id) {
@@ -39,8 +42,18 @@ class CreateWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragment_
                         else -> 4
                     }
 
-                toolbar.post { toolbar.isVisible = destination.id != R.id.creatingWallet }
+                toolbar.post { toolbar.isVisible = destination.id != R.id.congratulations }
             }
+
+            stepsView.mode = arguments?.getSerializable("mode") as? CreateWalletMode ?: CreateWalletMode.CREATE
+        }
+    }
+
+    companion object {
+        private const val KEY_MODE = "mode"
+
+        fun newInstance(mode: CreateWalletMode?) = CreateWalletFragment().apply {
+            arguments = bundleOf(KEY_MODE to mode)
         }
     }
 }

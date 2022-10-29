@@ -125,7 +125,7 @@ class WalletRepositoryDummy constructor(
             Result.success(true)
         }
 
-    override suspend fun recoverWallet(password: String, seed: String, seed_password: String, walletName: String): Result<Boolean> {
+    override suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> {
         delay(1_000L)
         return Result.success(true)
     }
