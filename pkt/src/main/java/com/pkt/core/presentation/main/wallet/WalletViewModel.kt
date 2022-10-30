@@ -133,10 +133,6 @@ class WalletViewModel @Inject constructor(
         )
     }
 
-    fun onSendClick() {
-        sendNavigation(AppNavigation.OpenSendTransaction)
-    }
-
     fun onShareClick() {
         // TODO
     }

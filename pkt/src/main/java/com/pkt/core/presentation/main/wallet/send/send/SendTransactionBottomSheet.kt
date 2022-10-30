@@ -2,9 +2,11 @@ package com.pkt.core.presentation.main.wallet.send.send
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -103,7 +105,27 @@ class SendTransactionBottomSheet : StateBottomSheet<SendTransactionState>(R.layo
                 viewBinding.amountInput.showKeyboardDelayed()
             }
 
+            is SendTransactionEvent.OpenSendConfirm -> {
+                setFragmentResult(
+                    REQUEST_KEY,
+                    bundleOf(
+                        KEY_ADDRESS to event.address,
+                        KEY_AMOUNT to event.amount,
+                        KEY_MAX_AMOUNT to event.maxAmount
+                    )
+                )
+                dismiss()
+            }
+
             else -> super.handleEvent(event)
         }
+    }
+
+    companion object {
+        const val TAG = "send_transaction_dialog"
+        const val REQUEST_KEY = "send_transaction_request"
+        const val KEY_ADDRESS = "address"
+        const val KEY_AMOUNT = "amount"
+        const val KEY_MAX_AMOUNT = "max_amount"
     }
 }

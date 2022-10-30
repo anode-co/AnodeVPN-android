@@ -10,4 +10,6 @@ data class SendTransactionState(
 
 sealed class SendTransactionEvent : UiEvent {
     object OpenKeyboard : SendTransactionEvent()
+
+    data class OpenSendConfirm(val address: String, val amount: Double, val maxAmount: Boolean) : SendTransactionEvent()
 }

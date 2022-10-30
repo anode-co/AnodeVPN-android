@@ -18,7 +18,6 @@ abstract class AppNavigationHandler : NavigationHandler {
                     is AppNavigation.OpenCreateWallet -> openCreateWallet(fragment, navigation.name)
                     AppNavigation.OpenRecoverWallet -> openRecoverWallet(fragment)
                     AppNavigation.OpenMain -> openMain(fragment)
-                    AppNavigation.OpenSendTransaction -> openSendTransaction(fragment)
 
                     is AppNavigation.OpenSendConfirm -> openSendConfirm(
                         fragment,
@@ -56,7 +55,6 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openCreateWallet(fragment: Fragment, name: String?)
     abstract fun openRecoverWallet(fragment: Fragment)
     abstract fun openMain(fragment: Fragment)
-    abstract fun openSendTransaction(fragment: Fragment)
     abstract fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean)
     abstract fun openSendSuccess(fragment: Fragment, transactionId: String)
     abstract fun openVpnExits(fragment: Fragment)
