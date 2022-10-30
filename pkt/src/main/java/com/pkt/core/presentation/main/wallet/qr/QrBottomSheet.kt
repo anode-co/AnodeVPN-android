@@ -24,7 +24,7 @@ class QrBottomSheet : StateBottomSheet<QrState>(R.layout.bottom_sheet_qr) {
 
         with(viewBinding) {
             titleLabel.applyGradient()
-            
+
             qrImage.clipToOutline = true
 
             saveButton.doOnClick {
