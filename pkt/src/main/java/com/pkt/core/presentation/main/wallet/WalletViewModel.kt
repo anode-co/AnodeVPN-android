@@ -137,10 +137,6 @@ class WalletViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenSendTransaction)
     }
 
-    fun onQrClick() {
-        // TODO
-    }
-
     fun onShareClick() {
         // TODO
     }

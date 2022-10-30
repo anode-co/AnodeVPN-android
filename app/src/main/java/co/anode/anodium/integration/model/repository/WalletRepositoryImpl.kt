@@ -1,6 +1,7 @@
 package co.anode.anodium.integration.model.repository
 
 import android.content.Context
+import android.graphics.Bitmap
 import co.anode.anodium.support.AnodeUtil
 import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
@@ -231,6 +232,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun changePin(password: String, pin: String): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun generateQr(): Result<Bitmap> {
         TODO("Not yet implemented")
     }
 }

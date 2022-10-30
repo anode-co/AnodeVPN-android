@@ -1,6 +1,8 @@
 package com.pkt.dummy.repository
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.pkt.domain.dto.*
 import com.pkt.domain.repository.WalletRepository
 import com.pkt.dummy.AddrMapper
@@ -53,9 +55,8 @@ class WalletRepositoryDummy constructor(
         activeWallet = walletName
     }
 
-    override suspend fun getWalletAddress(): Result<String> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getWalletAddress(): Result<String> =
+        Result.success("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
     private suspend fun getWallets(): Result<List<Addr>> = withContext(Dispatchers.IO) {
         runCatching {
@@ -221,5 +222,10 @@ class WalletRepositoryDummy constructor(
     override suspend fun changePin(password: String, pin: String): Result<Unit> {
         delay(1000L)
         return Result.success(Unit)
+    }
+
+    override suspend fun generateQr(): Result<Bitmap> = withContext(Dispatchers.IO) {
+        delay(1000L)
+        Result.success(BitmapFactory.decodeResource(context.resources, R.drawable.qr_code))
     }
 }
