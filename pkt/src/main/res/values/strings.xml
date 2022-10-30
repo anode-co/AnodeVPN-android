@@ -185,5 +185,7 @@
     <string name="delete_3">You can recover the wallet using the seed phrase and password</string>
     <string name="enter_the_name_wallet_to_confirm">Enter the name wallet to confirm</string>
     <string name="i_know_this_is_not_reversible">I know this is not reversible</string>
+    <string name="enter_with_password">Enter with password</string>
+    <string name="enter_with_pin">Enter with PIN</string>
 
 </resources>

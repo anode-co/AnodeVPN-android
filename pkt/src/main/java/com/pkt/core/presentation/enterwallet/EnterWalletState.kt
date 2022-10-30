@@ -7,8 +7,10 @@ data class EnterWalletState(
     val wallets: List<String> = emptyList(),
     val currentWallet: String = "",
     val pin: String = "",
-    val isPinAvailable: Boolean = false,
+    val isPinVisible: Boolean = false,
     val loginButtonEnabled: Boolean = false,
+    val enterPasswordButtonVisible: Boolean = false,
+    val enterPinButtonVisible: Boolean = false,
 ) : UiState
 
 sealed class EnterWalletEvent : UiEvent {
