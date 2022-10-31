@@ -28,4 +28,12 @@ class MainViewModel @Inject constructor(
     fun openVpnExits() {
         sendNavigation(AppNavigation.OpenVpnExits)
     }
+
+    fun openChangePassword() {
+        sendNavigation(AppNavigation.OpenChangePassword)
+    }
+
+    fun openChangePin() {
+        sendNavigation(AppNavigation.OpenChangePin)
+    }
 }

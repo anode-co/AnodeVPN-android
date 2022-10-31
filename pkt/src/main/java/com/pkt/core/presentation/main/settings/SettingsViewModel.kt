@@ -23,10 +23,10 @@ class SettingsViewModel @Inject constructor(
     fun onMenuItemClick(item: MenuItem) {
         when (item.type) {
             MenuItem.Type.CHANGE_PASSWORD -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenChangePassword)
             }
             MenuItem.Type.CHANGE_PIN -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenChangePin)
             }
             MenuItem.Type.SHOW_SEED -> {
                 sendEvent(SettingsEvent.OpenShowSeed)
