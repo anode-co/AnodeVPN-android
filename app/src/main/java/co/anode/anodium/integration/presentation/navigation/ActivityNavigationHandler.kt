@@ -38,10 +38,6 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(walletActivity)
     }
 
-    override fun openSendTransaction(fragment: Fragment) {
-        fragment
-    }
-
     override fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean) {
         TODO("Not yet implemented")
     }

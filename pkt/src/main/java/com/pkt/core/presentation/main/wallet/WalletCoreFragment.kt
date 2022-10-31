@@ -13,6 +13,8 @@ import com.pkt.core.extensions.formatUsd
 import com.pkt.core.extensions.getColorByAttribute
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
+import com.pkt.core.presentation.main.wallet.qr.QrBottomSheet
+import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -38,10 +40,10 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
 
         with(viewBinding) {
             sendButton.setOnClickListener {
-                viewModel.onSendClick()
+                showSendTransactionDialog()
             }
             qrButton.setOnClickListener {
-                viewModel.onQrClick()
+                showQrDialog()
             }
             shareButton.setOnClickListener {
                 viewModel.onShareClick()
@@ -59,20 +61,33 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
         }
     }
 
+    private fun showSendTransactionDialog() {
+        SendTransactionBottomSheet().show(parentFragmentManager, SendTransactionBottomSheet.TAG)
+    }
+
+    private fun showQrDialog() {
+        QrBottomSheet().show(childFragmentManager, QrBottomSheet.TAG)
+    }
+
     override fun handleState(state: WalletState) {
         with(viewBinding) {
             subtitleLabel.apply {
-                compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(
-                    when (state.syncState) {
-                        WalletState.SyncState.PROGRESS -> R.attr.colorProgress
-                        WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
-                        WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
-                    }))
+                compoundDrawableTintList = ColorStateList.valueOf(
+                    context.getColorByAttribute(
+                        when (state.syncState) {
+                            WalletState.SyncState.PROGRESS -> R.attr.colorProgress
+                            WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
+                            WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
+                        }
+                    )
+                )
 
                 text = "${
-                    resources.getQuantityString(R.plurals.peers,
+                    resources.getQuantityString(
+                        R.plurals.peers,
                         state.peersCount,
-                        state.peersCount)
+                        state.peersCount
+                    )
                 } / ${getString(R.string.block)} ${state.block}"
             }
 

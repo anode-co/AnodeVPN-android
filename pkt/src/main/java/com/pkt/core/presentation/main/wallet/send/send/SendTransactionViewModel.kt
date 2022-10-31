@@ -1,7 +1,6 @@
 package com.pkt.core.presentation.main.wallet.send.send
 
 import com.pkt.core.presentation.common.state.StateViewModel
-import com.pkt.core.presentation.navigation.AppNavigation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -32,8 +31,8 @@ class SendTransactionViewModel @Inject constructor() : StateViewModel<SendTransa
     }
 
     fun onSendClick() {
-        sendNavigation(
-            AppNavigation.OpenSendConfirm(
+        sendEvent(
+            SendTransactionEvent.OpenSendConfirm(
                 address = address,
                 amount = amount.toDoubleOrNull() ?: 0.0,
                 maxAmount = currentState.maxValueSelected
