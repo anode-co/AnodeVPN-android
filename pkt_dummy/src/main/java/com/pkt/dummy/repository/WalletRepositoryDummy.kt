@@ -191,6 +191,17 @@ class WalletRepositoryDummy constructor(
         )
     }
 
+    override suspend fun deleteWallet(name: String): Result<String?> {
+        delay(1000)
+        return Result.success(
+            if (name == "My Wallet 1") {
+                null
+            } else {
+                "Invalid name"
+            }
+        )
+    }
+
     override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit> {
         delay(1000L)
         return Result.success(Unit)

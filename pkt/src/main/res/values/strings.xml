@@ -179,5 +179,11 @@
     <string name="type_your_new_password">Type your new password</string>
     <string name="success">Success!</string>
     <string name="type_your_new_pin">Type your new PIN</string>
+    <string name="delete_wallet">Delete Wallet</string>
+    <string name="delete_1">This will delete "%s”</string>
+    <string name="delete_2">You will lose access to all funds on every address on this wallet</string>
+    <string name="delete_3">You can recover the wallet using the seed phrase and password</string>
+    <string name="enter_the_name_wallet_to_confirm">Enter the name wallet to confirm</string>
+    <string name="i_know_this_is_not_reversible">I know this is not reversible</string>
 
 </resources>
