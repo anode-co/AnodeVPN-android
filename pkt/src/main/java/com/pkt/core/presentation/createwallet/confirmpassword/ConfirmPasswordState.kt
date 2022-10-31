@@ -12,10 +12,11 @@ data class ConfirmPasswordState(
 sealed class ConfirmPasswordNavigation : InternalNavigation {
 
     data class ToSetPin(
-        val mode: CreateWalletMode,
+        private val mode: CreateWalletMode,
         private val password: String,
+        private val name: String?,
     ) : ConfirmPasswordNavigation() {
         override val navDirections: NavDirections
-            get() = ConfirmPasswordFragmentDirections.toSetPin(mode, password)
+            get() = ConfirmPasswordFragmentDirections.toSetPin(mode, password, name)
     }
 }

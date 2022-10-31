@@ -20,10 +20,11 @@ sealed class CreatePasswordEvent : UiEvent {
 sealed class CreatePasswordNavigation : InternalNavigation {
 
     data class ToConfirmPassword(
-        val mode: CreateWalletMode,
+        private val mode: CreateWalletMode,
         private val password: String,
+        private val name: String?,
     ) : CreatePasswordNavigation() {
         override val navDirections: NavDirections
-            get() = CreatePasswordFragmentDirections.toConfirmPassword(mode, password)
+            get() = CreatePasswordFragmentDirections.toConfirmPassword(mode, password, name)
     }
 }

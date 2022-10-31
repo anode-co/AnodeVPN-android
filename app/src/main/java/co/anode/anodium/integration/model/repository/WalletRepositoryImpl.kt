@@ -108,10 +108,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String): Result<Boolean> =
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?): Result<Boolean> =
         runCatching {
             var wallet = "wallet" // Default wallet name
-            if (walletName.isNotEmpty()) {
+            if (!walletName.isNullOrBlank()) {
                 wallet = walletName
             }
             setActiveWallet(wallet)
@@ -122,9 +122,9 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                 Result.failure(Exception("Failed to create wallet: ${response.message}"))
             } else {
                 val encryptedPassword = AnodeUtil.encrypt(password, pin)
-                AnodeUtil.storeWalletPassword(encryptedPassword, walletName)
+                AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
                 if (pin.isNotEmpty()) {
-                    AnodeUtil.storeWalletPin(pin, walletName)
+                    AnodeUtil.storeWalletPin(pin, wallet)
                 }
                 Result.success(true)
             }
@@ -215,6 +215,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun renameWallet(name: String): Result<String?> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun checkWalletName(name: String): Result<String?> {
         TODO("Not yet implemented")
     }
 

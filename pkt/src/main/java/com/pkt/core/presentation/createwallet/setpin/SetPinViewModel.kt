@@ -14,6 +14,7 @@ class SetPinViewModel @Inject constructor(
 
     private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
+    private val name: String? = savedStateHandle["name"]
 
     var enterPin: String = ""
 
@@ -28,7 +29,7 @@ class SetPinViewModel @Inject constructor(
             }
 
             mode == CreateWalletMode.CREATE -> {
-                sendNavigation(SetPinNavigation.ToSeed(password, enterPin))
+                sendNavigation(SetPinNavigation.ToSeed(password, enterPin, name))
             }
 
             else -> {

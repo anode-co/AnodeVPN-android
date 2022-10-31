@@ -21,6 +21,11 @@
             android:name="mode"
             app:argType="com.pkt.core.presentation.createwallet.CreateWalletMode" />
 
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
+
         <action
             android:id="@+id/toConfirmPassword"
             app:destination="@id/confirmPassword" />
@@ -41,6 +46,11 @@
             android:name="password"
             app:argType="string" />
 
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
+
         <action
             android:id="@+id/toSetPin"
             app:destination="@id/setPin" />
@@ -60,6 +70,11 @@
         <argument
             android:name="password"
             app:argType="string" />
+
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
         <action
             android:id="@+id/toSeed"
@@ -85,6 +100,11 @@
             android:name="pin"
             app:argType="string" />
 
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
+
         <action
             android:id="@+id/toConfirmSeed"
             app:destination="@id/confirmSeed" />
@@ -108,6 +128,11 @@
         <argument
             android:name="seed"
             app:argType="string" />
+
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
     </fragment>
 

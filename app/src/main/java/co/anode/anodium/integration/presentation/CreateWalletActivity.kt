@@ -26,9 +26,12 @@ class CreateWalletActivity : AppCompatActivity() {
 
     companion object {
         private const val EXTRA_MODE = "EXTRA_MODE"
+        private const val EXTRA_NAME = "EXTRA_NAME"
 
-        fun getCreateWalletIntent(context: Context) =
-            Intent(context, CreateWalletActivity::class.java).putExtra(EXTRA_MODE, CreateWalletMode.CREATE)
+        fun getCreateWalletIntent(context: Context, name: String?) =
+            Intent(context, CreateWalletActivity::class.java)
+                .putExtra(EXTRA_MODE, CreateWalletMode.CREATE)
+                .putExtra(EXTRA_NAME, name)
 
         fun getRecoverWalletIntent(context: Context) =
             Intent(context, CreateWalletActivity::class.java).putExtra(EXTRA_MODE, CreateWalletMode.RECOVER)

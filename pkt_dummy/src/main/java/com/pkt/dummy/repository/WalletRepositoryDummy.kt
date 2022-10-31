@@ -119,7 +119,7 @@ class WalletRepositoryDummy constructor(
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
     }
 
-    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String) =
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?) =
         withContext(Dispatchers.IO) {
             delay(5_000L)
             Result.success(true)
@@ -181,6 +181,17 @@ class WalletRepositoryDummy constructor(
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
 
     override suspend fun renameWallet(name: String): Result<String?> {
+        delay(1000)
+        return Result.success(
+            if (name.any { !it.isLetterOrDigit() && !it.isWhitespace() }) {
+                "Name contains invalid characters"
+            } else {
+                null
+            }
+        )
+    }
+
+    override suspend fun checkWalletName(name: String): Result<String?> {
         delay(1000)
         return Result.success(
             if (name.any { !it.isLetterOrDigit() && !it.isWhitespace() }) {

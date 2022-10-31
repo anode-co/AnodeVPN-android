@@ -36,4 +36,12 @@ class MainViewModel @Inject constructor(
     fun openChangePin() {
         sendNavigation(AppNavigation.OpenChangePin)
     }
+
+    fun openCreateWallet(name: String) {
+        sendNavigation(AppNavigation.OpenCreateWallet(name))
+    }
+
+    fun openRecoverWallet() {
+        sendNavigation(AppNavigation.OpenRecoverWallet)
+    }
 }

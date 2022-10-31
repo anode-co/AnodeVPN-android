@@ -15,6 +15,7 @@ class ConfirmSeedViewModel @Inject constructor(
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
     private val pin: String = savedStateHandle["pin"] ?: throw IllegalArgumentException("pin required")
     private val seed: String = savedStateHandle["seed"] ?: throw IllegalArgumentException("seed required")
+    private val name: String? = savedStateHandle["name"]
 
     private val wordToCheck: String
         get() = seed.split(" ")[currentState.wordPosition]
@@ -44,7 +45,7 @@ class ConfirmSeedViewModel @Inject constructor(
 
             else -> {
                 invokeAction {
-                    walletRepository.createWallet(password, pin, seed, "wallet")
+                    walletRepository.createWallet(password, pin, seed, name)
                         .onSuccess {
                             sendNavigation(ConfirmSeedNavigation.ToCongratulations)
                         }
