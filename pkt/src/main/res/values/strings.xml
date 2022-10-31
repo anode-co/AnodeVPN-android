@@ -187,5 +187,8 @@
     <string name="i_know_this_is_not_reversible">I know this is not reversible</string>
     <string name="enter_with_password">Enter with password</string>
     <string name="enter_with_pin">Enter with PIN</string>
+    <string name="qr_scan_code">QR Scan Code</string>
+    <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
+    <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
 
 </resources>
