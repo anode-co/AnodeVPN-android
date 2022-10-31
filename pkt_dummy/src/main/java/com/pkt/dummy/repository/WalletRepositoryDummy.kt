@@ -149,7 +149,7 @@ class WalletRepositoryDummy constructor(
         }
     }
 
-    override suspend fun createAddress(): String {
+    override suspend fun createAddress(): Result<WalletAddressCreateResponse> {
         TODO("Not yet implemented")
     }
 

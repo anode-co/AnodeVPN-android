@@ -5,11 +5,14 @@ import com.pkt.domain.dto.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import timber.log.Timber
 import java.lang.reflect.Type
@@ -24,7 +27,7 @@ class WalletAPIService {
     //OkhttpClient to introduce timeout
     val httpClient = OkHttpClient.Builder()
         .connectTimeout(2, TimeUnit.SECONDS)
-        .readTimeout(40, TimeUnit.SECONDS)//needed for creating wallet
+        .readTimeout(50, TimeUnit.SECONDS)//needed for creating wallet
         .writeTimeout(20, TimeUnit.SECONDS)
         .build()
     private val api = Retrofit.Builder()
@@ -32,6 +35,7 @@ class WalletAPIService {
         .baseUrl(baseUrl)
         .addConverterFactory(converter)
         .addConverterFactory(NullOnEmptyConverterFactory())
+        .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
         .create(WalletAPI::class.java)
@@ -50,12 +54,12 @@ class WalletAPIService {
         }
     }
 
-    suspend fun createAddress(): String {
-        return api.createAddress()
+    suspend fun createAddress(): WalletAddressCreateResponse {
+        return api.createAddress("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
     }
 
     suspend fun getWalletBalances(showzerobalances: Boolean): WalletAddressBalances {
-        val request: WalletBalancesRequest = WalletBalancesRequest(showzerobalances)
+        val request = WalletBalancesRequest(showzerobalances)
         return api.getWalletBalances(request)
     }
 
@@ -97,3 +101,8 @@ class NullOnEmptyConverterFactory : Converter.Factory() {
         }
     }
 }
+
+class EmptyRequest {
+    val INSTANCE: EmptyRequest = EmptyRequest()
+}
+

@@ -60,3 +60,10 @@ data class CreateWalletResponse (
     var message: String = "",
     val stack: String = ""
 )
+
+@Serializable
+data class WalletAddressCreateResponse (
+    val address: String,
+    val message: String = "",
+    val stack: String = ""
+)

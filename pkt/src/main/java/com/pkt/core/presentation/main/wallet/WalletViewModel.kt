@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
-import com.pkt.core.presentation.navigation.AppNavigation
+import com.pkt.domain.dto.WalletAddressBalances
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -28,11 +28,20 @@ class WalletViewModel @Inject constructor(
         invokeLoadingAction {
             runCatching {
                 val walletInfo = walletRepository.getWalletInfo().getOrThrow()
+                var addresses: WalletAddressBalances? = null
                 if (walletInfo.wallet == null) {
                     //Wallet is locked
                     //TODO: bring up enterwallet fragment
+                } else {
+                    addresses = walletRepository.getWalletBalances().getOrThrow()
+                    //If no address, then create one
+                    if (addresses.addrs.isEmpty()) {
+                        val addr = walletRepository.createAddress().getOrThrow()
+                        val d = addr
+                    }
+                    addresses = walletRepository.getWalletBalances().getOrThrow()
                 }
-                val addresses = walletRepository.getWalletBalances().getOrThrow()
+
                 Pair(walletInfo, addresses)
             }.onSuccess { (info, addresses) ->
                 val wallet = info.wallet
@@ -49,13 +58,15 @@ class WalletViewModel @Inject constructor(
                 var balanceString = ""
                 var balance: Long = -1
                 var address = ""
-                for (i in 0 until addresses.addrs.size) {
-                    if (addresses.addrs[i].total > balance) {
-                        balance = addresses.addrs[i].stotal.toLong()
-                        address = addresses.addrs[i].address
+
+                if (addresses != null) {
+                    for (i in 0 until addresses.addrs.size) {
+                        if (addresses.addrs[i].total > balance) {
+                            balance = addresses.addrs[i].stotal.toLong()
+                            address = addresses.addrs[i].address
+                        }
                     }
                 }
-
                 sendState {
                     copy(
                         syncState = WalletState.SyncState.SUCCESS,

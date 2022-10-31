@@ -138,7 +138,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                 wallet = walletName
             }
             setActiveWallet(wallet)
-            val response = walletAPI.recoverWallet(password, password, seed.split(" "), "$activeWallet.db")
+            val response = walletAPI.recoverWallet(password, seedPassword, seed.split(" "), "$activeWallet.db")
             return if (response.message.isNotEmpty()) {
                 Result.failure(Exception("Failed to recover wallet: ${response.message}"))
             } else {
@@ -163,8 +163,9 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun createAddress(): String {
-        return walletAPI.createAddress()
+    override suspend fun createAddress(): Result<WalletAddressCreateResponse> {
+        val address = walletAPI.createAddress()
+        return Result.success(address)
     }
 
     override suspend fun getWalletBalances(): Result<WalletAddressBalances> = withContext(Dispatchers.IO) {

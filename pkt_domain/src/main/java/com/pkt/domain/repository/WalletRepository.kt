@@ -19,7 +19,7 @@ interface WalletRepository {
     suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean>
     suspend fun unlockWallet(passphrase: String): Result<Boolean>
     suspend fun unlockWalletWithPIN(pin: String): Result<Boolean>
-    suspend fun createAddress(): String
+    suspend fun createAddress(): Result<WalletAddressCreateResponse>
     suspend fun getWalletBalances(): Result<WalletAddressBalances>
     suspend fun getCurrentAddress(): Result<String>
     suspend fun getWalletTransactions(): Result<WalletTransactions>
