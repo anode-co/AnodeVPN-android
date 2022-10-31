@@ -17,12 +17,8 @@ sealed class ConfirmSeedEvent : UiEvent {
 
 sealed class ConfirmSeedNavigation : InternalNavigation {
 
-    data class ToCreateWallet(
-        private val password: String,
-        private val pin: String,
-        private val seed: String,
-    ) : ConfirmSeedNavigation() {
+    object ToCongratulations : ConfirmSeedNavigation() {
         override val navDirections: NavDirections
-            get() = ConfirmSeedFragmentDirections.toCreatingWallet(password, pin, seed)
+            get() = ConfirmSeedFragmentDirections.toCongratulations()
     }
 }

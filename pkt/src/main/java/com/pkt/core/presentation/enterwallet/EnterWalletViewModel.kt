@@ -26,38 +26,42 @@ class EnterWalletViewModel @Inject constructor(
             field = value
 
             if (value >= Constants.MAX_PIN_ATTEMPTS) {
-                sendState { copy(isPinAvailable = false) }
+                sendState { copy(isPinVisible = false) }
                 sendEvent(EnterWalletEvent.ShowKeyboard)
             }
         }
 
+    private var isPinAvailable = false
+
     init {
-        invokeLoadingAction()
-    }
+        invokeLoadingAction {
+            runCatching {
+                val currentWallet = walletRepository.getActiveWallet().getOrThrow()
+                val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
 
-    override fun createInitialState() = EnterWalletState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        runCatching {
-            val currentWallet = walletRepository.getActiveWallet().getOrThrow()
-            val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
-
-            val wallets = walletRepository.getAllWalletNames().getOrThrow()
-            Triple(
-                currentWallet,
-                isPinAvailable,
-                wallets
-            )
-        }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
-            sendState {
-                copy(
-                    wallets = wallets,
-                    currentWallet = currentWallet,
-                    isPinAvailable = isPinAvailable
+                val wallets = walletRepository.getAllWalletNames().getOrThrow()
+                Triple(
+                    currentWallet,
+                    isPinAvailable,
+                    wallets
                 )
+            }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
+                this.isPinAvailable = isPinAvailable
+
+                sendState {
+                    copy(
+                        wallets = wallets,
+                        currentWallet = currentWallet,
+                        isPinVisible = isPinAvailable,
+                        enterPasswordButtonVisible = isPinAvailable,
+                        enterPinButtonVisible = false
+                    )
+                }
             }
         }
     }
+
+    override fun createInitialState() = EnterWalletState()
 
     private fun invalidateNextButtonEnabled() {
         sendState {
@@ -146,7 +150,18 @@ class EnterWalletViewModel @Inject constructor(
                         walletRepository.setActiveWallet(wallet)
                         walletRepository.isPinAvailable().getOrElse { false }
                     }.onSuccess { isPinAvailable ->
-                        sendState { copy(currentWallet = wallet, pin = "", isPinAvailable = isPinAvailable) }
+                        this.isPinAvailable = false
+
+                        sendState {
+                            copy(
+                                currentWallet = wallet,
+                                pin = "",
+                                isPinVisible = isPinAvailable,
+                                enterPasswordButtonVisible = isPinAvailable,
+                                enterPinButtonVisible = false
+                            )
+                        }
+
                         sendEvent(EnterWalletEvent.ClearPassword)
                         if (!isPinAvailable) {
                             sendEvent(EnterWalletEvent.ShowKeyboard)
@@ -156,5 +171,13 @@ class EnterWalletViewModel @Inject constructor(
                     }
                 }
             }
+    }
+
+    fun onEnterPasswordClick() {
+        sendState { copy(isPinVisible = false, enterPasswordButtonVisible = false, enterPinButtonVisible = true) }
+    }
+
+    fun onEnterPinClick() {
+        sendState { copy(isPinVisible = true, enterPasswordButtonVisible = true, enterPinButtonVisible = false) }
     }
 }

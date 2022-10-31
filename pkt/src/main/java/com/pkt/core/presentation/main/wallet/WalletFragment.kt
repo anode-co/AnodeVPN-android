@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -15,6 +16,8 @@ import com.pkt.core.extensions.getColorByAttribute
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.main.MainViewModel
+import com.pkt.core.presentation.main.wallet.qr.QrBottomSheet
+import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,12 +43,19 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setFragmentResultListener(SendTransactionBottomSheet.REQUEST_KEY) { _, bundle ->
+            val address = bundle.getString(SendTransactionBottomSheet.KEY_ADDRESS)!!
+            val amount = bundle.getDouble(SendTransactionBottomSheet.KEY_AMOUNT)
+            val maxAmount = bundle.getBoolean(SendTransactionBottomSheet.KEY_MAX_AMOUNT)
+            mainViewModel.openSendConfirm(address, amount, maxAmount)
+        }
+
         with(viewBinding) {
             sendButton.setOnClickListener {
-                mainViewModel.openSendTransaction()
+                showSendTransactionDialog()
             }
             qrButton.setOnClickListener {
-                viewModel.onQrClick()
+                showQrDialog()
             }
             shareButton.setOnClickListener {
                 viewModel.onShareClick()
@@ -61,20 +71,33 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
         }
     }
 
+    private fun showSendTransactionDialog() {
+        SendTransactionBottomSheet().show(parentFragmentManager, SendTransactionBottomSheet.TAG)
+    }
+
+    private fun showQrDialog() {
+        QrBottomSheet().show(childFragmentManager, QrBottomSheet.TAG)
+    }
+
     override fun handleState(state: WalletState) {
         with(viewBinding) {
             subtitleLabel.apply {
-                compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(
-                    when (state.syncState) {
-                        WalletState.SyncState.PROGRESS -> R.attr.colorProgress
-                        WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
-                        WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
-                    }))
+                compoundDrawableTintList = ColorStateList.valueOf(
+                    context.getColorByAttribute(
+                        when (state.syncState) {
+                            WalletState.SyncState.PROGRESS -> R.attr.colorProgress
+                            WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
+                            WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
+                        }
+                    )
+                )
 
                 text = "${
-                    resources.getQuantityString(R.plurals.peers,
+                    resources.getQuantityString(
+                        R.plurals.peers,
                         state.peersCount,
-                        state.peersCount)
+                        state.peersCount
+                    )
                 } / ${getString(R.string.block)} ${state.block}"
             }
 

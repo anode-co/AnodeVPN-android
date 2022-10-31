@@ -21,7 +21,13 @@ class SendConfirmViewModel @Inject constructor(
 
     init {
         if (maxAmount) {
-            invokeLoadingAction()
+            invokeLoadingAction {
+                walletRepository.getTotalWalletBalance()
+                    .onSuccess { amount ->
+                        sendState { copy(address = this@SendConfirmViewModel.address, amount = amount) }
+                        sendEvent(SendConfirmEvent.OpenKeyboard)
+                    }
+            }
         } else {
             sendState { copy(address = this@SendConfirmViewModel.address, amount = this@SendConfirmViewModel.amount) }
             sendEvent(SendConfirmEvent.OpenKeyboard)
@@ -29,14 +35,6 @@ class SendConfirmViewModel @Inject constructor(
     }
 
     override fun createInitialState() = SendConfirmState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        walletRepository.getTotalWalletBalance()
-            .onSuccess { amount ->
-                sendState { copy(address = this@SendConfirmViewModel.address, amount = amount) }
-                sendEvent(SendConfirmEvent.OpenKeyboard)
-            }
-    }
 
     fun onPinDone(pin: String) {
         pin.takeIf { it.isNotBlank() } ?: return

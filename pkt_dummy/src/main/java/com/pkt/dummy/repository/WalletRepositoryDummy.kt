@@ -1,6 +1,8 @@
 package com.pkt.dummy.repository
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.pkt.domain.dto.*
 import com.pkt.domain.repository.WalletRepository
 import com.pkt.dummy.AddrMapper
@@ -53,9 +55,8 @@ class WalletRepositoryDummy constructor(
         activeWallet = walletName
     }
 
-    override suspend fun getWalletAddress(): Result<String> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getWalletAddress(): Result<String> =
+        Result.success("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
     private suspend fun getWallets(): Result<List<Addr>> = withContext(Dispatchers.IO) {
         runCatching {
@@ -115,15 +116,17 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun generateSeed(password: String, pin: String) = withContext(Dispatchers.IO) {
+        delay(5000L)
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
     }
 
-    override suspend fun createWallet(password: String, pin: String, seed: String, walletName:String ) = withContext(Dispatchers.IO) {
-        delay(5_000L)
-        Result.success(true)
-    }
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?) =
+        withContext(Dispatchers.IO) {
+            delay(5_000L)
+            Result.success(true)
+        }
 
-    override suspend fun recoverWallet(password: String, seed: String, seed_password: String, walletName: String): Result<Boolean> {
+    override suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> {
         delay(1_000L)
         return Result.success(true)
     }
@@ -187,5 +190,42 @@ class WalletRepositoryDummy constructor(
                 null
             }
         )
+    }
+
+    override suspend fun checkWalletName(name: String): Result<String?> {
+        delay(1000)
+        return Result.success(
+            if (name.any { !it.isLetterOrDigit() && !it.isWhitespace() }) {
+                "Name contains invalid characters"
+            } else {
+                null
+            }
+        )
+    }
+
+    override suspend fun deleteWallet(name: String): Result<String?> {
+        delay(1000)
+        return Result.success(
+            if (name == "My Wallet 1") {
+                null
+            } else {
+                "Invalid name"
+            }
+        )
+    }
+
+    override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit> {
+        delay(1000L)
+        return Result.success(Unit)
+    }
+
+    override suspend fun changePin(password: String, pin: String): Result<Unit> {
+        delay(1000L)
+        return Result.success(Unit)
+    }
+
+    override suspend fun generateQr(): Result<Bitmap> = withContext(Dispatchers.IO) {
+        delay(1000L)
+        Result.success(BitmapFactory.decodeResource(context.resources, R.drawable.qr_code))
     }
 }

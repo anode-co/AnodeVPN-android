@@ -5,11 +5,26 @@
     android:id="@+id/createWalletNavGraph"
     app:startDestination="@id/createPassword">
 
+    <action
+        android:id="@+id/toCongratulations"
+        app:destination="@id/congratulations"
+        app:popUpTo="@id/createWalletNavGraph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/createPassword"
         android:name="com.pkt.core.presentation.createwallet.createpassword.CreatePasswordFragment"
         android:label="CreatePassword"
         tools:layout="@layout/fragment_create_password">
+
+        <argument
+            android:name="mode"
+            app:argType="com.pkt.core.presentation.createwallet.CreateWalletMode" />
+
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
         <action
             android:id="@+id/toConfirmPassword"
@@ -24,8 +39,17 @@
         tools:layout="@layout/fragment_confirm_password">
 
         <argument
+            android:name="mode"
+            app:argType="com.pkt.core.presentation.createwallet.CreateWalletMode" />
+
+        <argument
             android:name="password"
             app:argType="string" />
+
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
         <action
             android:id="@+id/toSetPin"
@@ -40,12 +64,25 @@
         tools:layout="@layout/fragment_set_pin">
 
         <argument
+            android:name="mode"
+            app:argType="com.pkt.core.presentation.createwallet.CreateWalletMode" />
+
+        <argument
             android:name="password"
             app:argType="string" />
+
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
         <action
             android:id="@+id/toSeed"
             app:destination="@id/seed" />
+
+        <action
+            android:id="@+id/toRecoverWallet"
+            app:destination="@id/recoverWallet" />
 
     </fragment>
 
@@ -62,6 +99,11 @@
         <argument
             android:name="pin"
             app:argType="string" />
+
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
         <action
             android:id="@+id/toConfirmSeed"
@@ -87,19 +129,18 @@
             android:name="seed"
             app:argType="string" />
 
-        <action
-            android:id="@+id/toCreatingWallet"
-            app:destination="@id/creatingWallet"
-            app:popUpTo="@id/createWalletNavGraph"
-            app:popUpToInclusive="true" />
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
 
     </fragment>
 
     <fragment
-        android:id="@+id/creatingWallet"
-        android:name="com.pkt.core.presentation.createwallet.creatingwallet.CreatingWalletFragment"
-        android:label="CreatingWallet"
-        tools:layout="@layout/fragment_creating_wallet">
+        android:id="@+id/recoverWallet"
+        android:name="com.pkt.core.presentation.createwallet.recoverwallet.RecoverWalletFragment"
+        android:label="RecoverWallet"
+        tools:layout="@layout/fragment_recover_wallet">
 
         <argument
             android:name="password"
@@ -109,10 +150,12 @@
             android:name="pin"
             app:argType="string" />
 
-        <argument
-            android:name="seed"
-            app:argType="string" />
-
     </fragment>
+
+    <fragment
+        android:id="@+id/congratulations"
+        android:name="com.pkt.core.presentation.createwallet.congratulations.CongratulationsFragment"
+        android:label="CreatingWallet"
+        tools:layout="@layout/fragment_congratulations" />
 
 </navigation>

@@ -20,6 +20,8 @@ import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.common.consent.ConsentBottomSheet
+import com.pkt.core.presentation.main.settings.deletewallet.DeleteWalletBottomSheet
+import com.pkt.core.presentation.main.settings.newwallet.NewWalletBottomSheet
 import com.pkt.core.presentation.main.settings.renamewallet.RenameWalletBottomSheet
 import com.pkt.core.presentation.main.settings.showseed.ShowSeedBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +51,10 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
         }
 
+        setFragmentResultListener(NewWalletBottomSheet.REQUEST_KEY) { _, bundle ->
+            viewModel.onNewWallet(bundle.getString(NewWalletBottomSheet.WALLET_KEY))
+        }
+
         with(viewBinding) {
             walletButton.setOnClickListener {
                 viewModel.onWalletClick()
@@ -71,10 +77,12 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
             menu.getItem(menu.size() - 1).apply {
                 title = SpannableString(title).apply {
-                    setSpan(ForegroundColorSpan(requireContext().getColorByAttribute(androidx.appcompat.R.attr.colorError)),
+                    setSpan(
+                        ForegroundColorSpan(requireContext().getColorByAttribute(androidx.appcompat.R.attr.colorError)),
                         0,
                         length,
-                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                    )
                 }
             }
 
@@ -141,6 +149,19 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             is SettingsEvent.OpenRenameWallet -> {
                 RenameWalletBottomSheet().show(parentFragmentManager, RenameWalletBottomSheet.TAG)
             }
+
+            is SettingsEvent.OpenDeleteWallet -> {
+                DeleteWalletBottomSheet().show(parentFragmentManager, DeleteWalletBottomSheet.TAG)
+            }
+
+            is SettingsEvent.OpenNewWallet -> {
+                NewWalletBottomSheet().show(parentFragmentManager, NewWalletBottomSheet.TAG)
+            }
+
+            is SettingsEvent.OpenChangePassword -> mainViewModel.openChangePassword()
+            is SettingsEvent.OpenChangePin -> mainViewModel.openChangePin()
+            is SettingsEvent.OpenCreateWallet -> mainViewModel.openCreateWallet(event.name)
+            is SettingsEvent.OpenRecoverWallet -> mainViewModel.openRecoverWallet()
         }
     }
 }

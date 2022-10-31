@@ -21,11 +21,27 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenCjdnsInfo(address))
     }
 
-    fun openSendTransaction() {
-        sendNavigation(AppNavigation.OpenSendTransaction)
-    }
-
     fun openVpnExits() {
         sendNavigation(AppNavigation.OpenVpnExits)
+    }
+
+    fun openChangePassword() {
+        sendNavigation(AppNavigation.OpenChangePassword)
+    }
+
+    fun openChangePin() {
+        sendNavigation(AppNavigation.OpenChangePin)
+    }
+
+    fun openCreateWallet(name: String) {
+        sendNavigation(AppNavigation.OpenCreateWallet(name))
+    }
+
+    fun openRecoverWallet() {
+        sendNavigation(AppNavigation.OpenRecoverWallet)
+    }
+
+    fun openSendConfirm(address: String, amount: Double, maxAmount: Boolean) {
+        sendNavigation(AppNavigation.OpenSendConfirm(address, amount, maxAmount))
     }
 }

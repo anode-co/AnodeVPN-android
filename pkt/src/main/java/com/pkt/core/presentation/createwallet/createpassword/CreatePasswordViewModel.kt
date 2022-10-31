@@ -1,14 +1,19 @@
 package com.pkt.core.presentation.createwallet.createpassword
 
+import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.ybs.passwordstrengthmeter.PasswordStrength
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class CreatePasswordViewModel @Inject constructor(
-
+    savedStateHandle: SavedStateHandle,
 ) : StateViewModel<CreatePasswordState>() {
+
+    private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
+    private val name: String? = savedStateHandle["name"]
 
     var enterPassword: String = ""
         set(value) {
@@ -25,10 +30,6 @@ class CreatePasswordViewModel @Inject constructor(
         }
 
     var checkbox2Checked: Boolean = false
-        set(value) {
-            field = value
-            invalidateNextButtonEnabled()
-        }
 
     override fun createInitialState() = CreatePasswordState()
 
@@ -47,7 +48,7 @@ class CreatePasswordViewModel @Inject constructor(
             }
 
             else -> {
-                sendNavigation(CreatePasswordNavigation.ToConfirmPassword(enterPassword))
+                sendNavigation(CreatePasswordNavigation.ToConfirmPassword(mode, enterPassword, name))
             }
         }
     }

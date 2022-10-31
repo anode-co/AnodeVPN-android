@@ -15,10 +15,9 @@ abstract class AppNavigationHandler : NavigationHandler {
                     AppNavigation.NavigateBack -> navigateBack(fragment)
                     is AppNavigation.OpenCjdnsInfo -> openCjdnsInfo(fragment, navigation.address)
                     is AppNavigation.OpenWalletInfo -> openWalletInfo(fragment, navigation.address)
-                    AppNavigation.OpenCreateWallet -> openCreateWallet(fragment)
+                    is AppNavigation.OpenCreateWallet -> openCreateWallet(fragment, navigation.name)
                     AppNavigation.OpenRecoverWallet -> openRecoverWallet(fragment)
                     AppNavigation.OpenMain -> openMain(fragment)
-                    AppNavigation.OpenSendTransaction -> openSendTransaction(fragment)
 
                     is AppNavigation.OpenSendConfirm -> openSendConfirm(
                         fragment,
@@ -29,6 +28,8 @@ abstract class AppNavigationHandler : NavigationHandler {
 
                     is AppNavigation.OpenSendSuccess -> openSendSuccess(fragment, navigation.transactionId)
                     AppNavigation.OpenVpnExits -> openVpnExits(fragment)
+                    AppNavigation.OpenChangePassword -> openChangePassword(fragment)
+                    AppNavigation.OpenChangePin -> openChangePin(fragment)
                 }
             }
 
@@ -51,11 +52,12 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun navigateBack(fragment: Fragment)
     abstract fun openCjdnsInfo(fragment: Fragment, address: String)
     abstract fun openWalletInfo(fragment: Fragment, address: String)
-    abstract fun openCreateWallet(fragment: Fragment)
+    abstract fun openCreateWallet(fragment: Fragment, name: String?)
     abstract fun openRecoverWallet(fragment: Fragment)
     abstract fun openMain(fragment: Fragment)
-    abstract fun openSendTransaction(fragment: Fragment)
     abstract fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean)
     abstract fun openSendSuccess(fragment: Fragment, transactionId: String)
     abstract fun openVpnExits(fragment: Fragment)
+    abstract fun openChangePassword(fragment: Fragment)
+    abstract fun openChangePin(fragment: Fragment)
 }

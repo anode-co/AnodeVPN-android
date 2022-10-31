@@ -1,15 +1,19 @@
-package com.pkt.core.presentation.recoverwallet
+package com.pkt.core.presentation.createwallet.recoverwallet
 
+import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.state.StateViewModel
-import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class RecoverWalletViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
 ) : StateViewModel<RecoverWalletState>() {
+
+    private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
+    private val pin: String = savedStateHandle["pin"] ?: throw IllegalArgumentException("pin required")
 
     var seed: String = ""
         set(value) {
@@ -17,13 +21,7 @@ class RecoverWalletViewModel @Inject constructor(
             invalidateNextButtonEnabled()
         }
 
-    var password: String = ""
-        set(value) {
-            field = value
-            invalidateNextButtonEnabled()
-        }
-
-    var seed_password: String = ""
+    var seedPassword: String = ""
         set(value) {
             field = value
             invalidateNextButtonEnabled()
@@ -34,7 +32,7 @@ class RecoverWalletViewModel @Inject constructor(
     private fun invalidateNextButtonEnabled() {
         sendState {
             copy(
-                nextButtonEnabled = seed.isSeedValid() && password.isNotBlank()
+                nextButtonEnabled = seed.isSeedValid() && seedPassword.isNotBlank()
             )
         }
     }
@@ -43,9 +41,9 @@ class RecoverWalletViewModel @Inject constructor(
 
     fun onNextClick() {
         invokeAction {
-            walletRepository.recoverWallet(password, seed, seed_password, "wallet")
+            walletRepository.recoverWallet(password, seed, seedPassword, "wallet")
                 .onSuccess {
-                    sendNavigation(AppNavigation.OpenMain)
+                    sendNavigation(RecoverWalletNavigation.ToCongratulations)
                 }
                 .onFailure {
                     sendError(it)

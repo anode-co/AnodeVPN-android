@@ -175,5 +175,20 @@
     <string name="seed_phrase_copied_2">Seed phrase copied</string>
     <string name="rename_wallet">Rename Wallet</string>
     <string name="save">Save</string>
+    <string name="enter_current_wallet_password">Enter current wallet password</string>
+    <string name="type_your_new_password">Type your new password</string>
+    <string name="success">Success!</string>
+    <string name="type_your_new_pin">Type your new PIN</string>
+    <string name="delete_wallet">Delete Wallet</string>
+    <string name="delete_1">This will delete "%s”</string>
+    <string name="delete_2">You will lose access to all funds on every address on this wallet</string>
+    <string name="delete_3">You can recover the wallet using the seed phrase and password</string>
+    <string name="enter_the_name_wallet_to_confirm">Enter the name wallet to confirm</string>
+    <string name="i_know_this_is_not_reversible">I know this is not reversible</string>
+    <string name="enter_with_password">Enter with password</string>
+    <string name="enter_with_pin">Enter with PIN</string>
+    <string name="qr_scan_code">QR Scan Code</string>
+    <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
+    <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
 
 </resources>

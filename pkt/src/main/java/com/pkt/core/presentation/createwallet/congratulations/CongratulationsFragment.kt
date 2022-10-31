@@ -1,4 +1,4 @@
-package com.pkt.core.presentation.createwallet.creatingwallet
+package com.pkt.core.presentation.createwallet.congratulations
 
 import android.os.Bundle
 import android.view.View
@@ -6,20 +6,20 @@ import androidx.activity.addCallback
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.pkt.core.presentation.createwallet.CreateWalletViewModel
 import com.pkt.core.R
-import com.pkt.core.databinding.FragmentCreatingWalletBinding
+import com.pkt.core.databinding.FragmentCongratulationsBinding
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.state.CommonState
+import com.pkt.core.presentation.createwallet.CreateWalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CreatingWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragment_creating_wallet) {
+class CongratulationsFragment : StateFragment<CommonState.Empty>(R.layout.fragment_congratulations) {
 
-    private val viewBinding by viewBinding(FragmentCreatingWalletBinding::bind)
+    private val viewBinding by viewBinding(FragmentCongratulationsBinding::bind)
 
-    override val viewModel: CreatingWalletViewModel by viewModels()
+    override val viewModel: CongratulationsViewModel by viewModels()
 
     private val navigationViewModel: CreateWalletViewModel by activityViewModels()
 
@@ -27,7 +27,7 @@ class CreatingWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragmen
         super.onCreate(savedInstanceState)
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            viewModel.onBackPressed()
+            requireActivity().finish()
         }
     }
 
@@ -42,16 +42,9 @@ class CreatingWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragmen
     }
 
     override fun handleEvent(event: UiEvent) {
-        super.handleEvent(event)
-
         when (event) {
-            is CreatingWalletEvent.Back -> {
-                navigationViewModel.navigateBack()
-            }
-
-            is CreatingWalletEvent.ToMain -> {
-                navigationViewModel.toMain()
-            }
+            is CreatingWalletEvent.ToMain -> navigationViewModel.toMain()
+            else -> super.handleEvent(event)
         }
     }
 }

@@ -9,13 +9,14 @@ sealed class AppNavigation : UiNavigation {
 
     data class OpenCjdnsInfo(val address: String) : AppNavigation()
     data class OpenWalletInfo(val address: String) : AppNavigation()
-    object OpenCreateWallet : AppNavigation()
+    data class OpenCreateWallet(val name: String? = null) : AppNavigation()
     object OpenRecoverWallet : AppNavigation()
     object OpenMain : AppNavigation()
-    object OpenSendTransaction : AppNavigation()
     data class OpenSendConfirm(val address: String, val amount: Double, val maxAmount: Boolean) : AppNavigation()
     data class OpenSendSuccess(val transactionId: String) : AppNavigation()
     object OpenVpnExits : AppNavigation()
+    object OpenChangePassword : AppNavigation()
+    object OpenChangePin : AppNavigation()
 }
 
 interface InternalNavigation : UiNavigation {

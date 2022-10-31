@@ -23,14 +23,12 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(WalletInfoActivity.getIntent(fragment.requireContext(), address))
     }
 
-    override fun openCreateWallet(fragment: Fragment) {
-        val createWalletActivity = Intent(fragment.requireContext(), CreateWalletActivity::class.java)
-        fragment.startActivity(createWalletActivity)
+    override fun openCreateWallet(fragment: Fragment, name: String?) {
+        fragment.startActivity(CreateWalletActivity.getCreateWalletIntent(fragment.requireContext(), name))
     }
 
     override fun openRecoverWallet(fragment: Fragment) {
-        val createWalletActivity = Intent(fragment.requireContext(), CreateWalletActivity::class.java)
-        fragment.startActivity(createWalletActivity)
+        fragment.startActivity(CreateWalletActivity.getRecoverWalletIntent(fragment.requireContext()))
     }
 
     override fun openMain(fragment: Fragment) {
@@ -38,10 +36,6 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         walletActivity.putExtra("WALLET_NAME", "wallet")
         walletActivity.putExtra("PKT_TO_USD", "0.1")
         fragment.startActivity(walletActivity)
-    }
-
-    override fun openSendTransaction(fragment: Fragment) {
-        fragment
     }
 
     override fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean) {
@@ -53,6 +47,14 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openVpnExits(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openChangePassword(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openChangePin(fragment: Fragment) {
         TODO("Not yet implemented")
     }
 }

@@ -1,4 +1,4 @@
-package com.pkt.core.presentation.recoverwallet
+package com.pkt.core.presentation.createwallet.recoverwallet
 
 import android.os.Bundle
 import android.text.InputType
@@ -40,7 +40,7 @@ class RecoverWalletFragment : StateFragment<RecoverWalletState>(R.layout.fragmen
                 clearFocusOnActionDone()
 
                 doOnTextChanged {
-                    viewModel.password = it
+                    viewModel.seedPassword = it
                 }
             }
 

@@ -23,10 +23,10 @@ class SettingsViewModel @Inject constructor(
     fun onMenuItemClick(item: MenuItem) {
         when (item.type) {
             MenuItem.Type.CHANGE_PASSWORD -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenChangePassword)
             }
             MenuItem.Type.CHANGE_PIN -> {
-                // TODO
+                sendEvent(SettingsEvent.OpenChangePin)
             }
             MenuItem.Type.SHOW_SEED -> {
                 sendEvent(SettingsEvent.OpenShowSeed)
@@ -52,18 +52,24 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onDeleteClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenDeleteWallet)
     }
 
     fun onNewWalletClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenNewWallet)
     }
 
     fun onWalletRecoveryClick() {
-        // TODO
+        sendEvent(SettingsEvent.OpenRecoverWallet)
     }
 
     fun onConsentResult(success: Boolean) {
         // TODO("Not yet implemented")
+    }
+
+    fun onNewWallet(name: String?) {
+        name ?: return
+
+        sendEvent(SettingsEvent.OpenCreateWallet(name))
     }
 }

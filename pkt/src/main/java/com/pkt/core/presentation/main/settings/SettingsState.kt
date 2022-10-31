@@ -2,7 +2,6 @@ package com.pkt.core.presentation.main.settings
 
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.UiState
-import com.pkt.core.presentation.main.vpn.VpnEvent
 
 data class SettingsState(
     val walletName: String,
@@ -19,4 +18,10 @@ sealed class SettingsEvent : UiEvent {
     object OpenShowSeed : SettingsEvent()
     object OpenConsent : SettingsEvent()
     object OpenRenameWallet : SettingsEvent()
+    object OpenDeleteWallet : SettingsEvent()
+    object OpenNewWallet : SettingsEvent()
+    object OpenChangePassword : SettingsEvent()
+    object OpenChangePin : SettingsEvent()
+    data class OpenCreateWallet(val name: String) : SettingsEvent()
+    object OpenRecoverWallet : SettingsEvent()
 }
