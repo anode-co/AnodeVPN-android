@@ -2,6 +2,7 @@ package com.pkt.core.presentation.createwallet.confirmpassword
 
 import androidx.navigation.NavDirections
 import com.pkt.core.presentation.common.state.UiState
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.navigation.InternalNavigation
 
 data class ConfirmPasswordState(
@@ -10,8 +11,11 @@ data class ConfirmPasswordState(
 
 sealed class ConfirmPasswordNavigation : InternalNavigation {
 
-    data class ToSetPin(private val password: String) : ConfirmPasswordNavigation() {
+    data class ToSetPin(
+        val mode: CreateWalletMode,
+        private val password: String,
+    ) : ConfirmPasswordNavigation() {
         override val navDirections: NavDirections
-            get() = ConfirmPasswordFragmentDirections.toSetPin(password)
+            get() = ConfirmPasswordFragmentDirections.toSetPin(mode, password)
     }
 }

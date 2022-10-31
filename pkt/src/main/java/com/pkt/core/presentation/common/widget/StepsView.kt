@@ -5,10 +5,12 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.ViewStepsBinding
 import com.pkt.core.extensions.getColorByAttribute
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 
 class StepsView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null,
@@ -45,6 +47,22 @@ class StepsView @JvmOverloads constructor(
             }
             lines.forEachIndexed { index, view ->
                 view.backgroundTintList = if (value > index) activeColor else normalColor
+            }
+        }
+
+    var mode: CreateWalletMode = CreateWalletMode.CREATE
+        set(value) {
+            field = value
+
+            when (value) {
+                CreateWalletMode.CREATE -> {
+                    dots.forEach { it.isVisible = true }
+                    lines.forEach { it.isVisible = true }
+                }
+                CreateWalletMode.RECOVER -> {
+                    dots.forEachIndexed { index, view -> view.isVisible = index < dots.size - 1 }
+                    lines.forEachIndexed { index, view -> view.isVisible = index < lines.size - 1 }
+                }
             }
         }
 

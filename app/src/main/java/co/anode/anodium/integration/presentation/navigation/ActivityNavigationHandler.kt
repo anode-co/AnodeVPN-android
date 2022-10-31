@@ -24,13 +24,11 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openCreateWallet(fragment: Fragment) {
-        val createWalletActivity = Intent(fragment.requireContext(), CreateWalletActivity::class.java)
-        fragment.startActivity(createWalletActivity)
+        fragment.startActivity(CreateWalletActivity.getCreateWalletIntent(fragment.requireContext()))
     }
 
     override fun openRecoverWallet(fragment: Fragment) {
-        val createWalletActivity = Intent(fragment.requireContext(), CreateWalletActivity::class.java)
-        fragment.startActivity(createWalletActivity)
+        fragment.startActivity(CreateWalletActivity.getRecoverWalletIntent(fragment.requireContext()))
     }
 
     override fun openMain(fragment: Fragment) {

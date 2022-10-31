@@ -49,12 +49,12 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     //Get the wallet balance from all available addresses
-    override suspend fun getTotalWalletBalance(): Result<Double> = withContext(Dispatchers.IO){
+    override suspend fun getTotalWalletBalance(): Result<Double> = withContext(Dispatchers.IO) {
         runCatching {
             val addresses = walletAPI.getWalletBalances(true)
             //Return the balance of address
             var balance = 0.0
-            for(i in 0 until addresses.addrs.size) {
+            for (i in 0 until addresses.addrs.size) {
                 balance = addresses.addrs[i].total
             }
             return@runCatching balance
@@ -66,12 +66,12 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     //Get wallet balance, if address is empty then return total balance of all addresses
-    override suspend fun getWalletBalance(address: String): Result<Double> = withContext(Dispatchers.IO){
+    override suspend fun getWalletBalance(address: String): Result<Double> = withContext(Dispatchers.IO) {
         runCatching {
             val addresses = walletAPI.getWalletBalances(true)
             //Return the balance of address
             var balance = 0.0
-            for(i in 0 until addresses.addrs.size) {
+            for (i in 0 until addresses.addrs.size) {
                 if (address.isEmpty()) {
                     balance += addresses.addrs[i].total
                 } else if (addresses.addrs[i].address == address) {
@@ -108,39 +108,42 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String): Result<Boolean> {
-        var wallet = "wallet" //Default wallet name
-        if (walletName.isNotEmpty()) {
-            wallet = walletName
-        }
-        setActiveWallet(wallet)
-        val response = walletAPI.createWallet(password, password, seed.split(" "), "$activeWallet.db")
-
-        return if (response.message.isNotEmpty()) {
-            Result.failure(Exception("Failed to create wallet: ${response.message}"))
-        } else {
-            val encryptedPassword = AnodeUtil.encrypt(password, pin)
-            AnodeUtil.storeWalletPassword(encryptedPassword,walletName)
-            if (pin.isNotEmpty()) {
-                AnodeUtil.storeWalletPin(pin, walletName)
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String): Result<Boolean> =
+        runCatching {
+            var wallet = "wallet" // Default wallet name
+            if (walletName.isNotEmpty()) {
+                wallet = walletName
             }
-            Result.success(true)
-        }
-    }
+            setActiveWallet(wallet)
 
-    override suspend fun recoverWallet(password: String, seed: String, seed_password: String, walletName: String): Result<Boolean> {
-        var wallet = "wallet" //Default wallet name
-        if (walletName.isNotEmpty()) {
-            wallet = walletName
+            val response = walletAPI.createWallet(password, password, seed.split(" "), "$activeWallet.db")
+
+            return if (response.message.isNotEmpty()) {
+                Result.failure(Exception("Failed to create wallet: ${response.message}"))
+            } else {
+                val encryptedPassword = AnodeUtil.encrypt(password, pin)
+                AnodeUtil.storeWalletPassword(encryptedPassword, walletName)
+                if (pin.isNotEmpty()) {
+                    AnodeUtil.storeWalletPin(pin, walletName)
+                }
+                Result.success(true)
+            }
         }
-        setActiveWallet(wallet)
-        val response = walletAPI.recoverWallet(password, password, seed.split(" "), "$activeWallet.db")
-        return if (response.message.isNotEmpty()) {
-            Result.failure(Exception("Failed to recover wallet: ${response.message}"))
-        } else {
-            Result.success(true)
+
+    override suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> =
+        runCatching {
+            var wallet = "wallet" //Default wallet name
+            if (walletName.isNotEmpty()) {
+                wallet = walletName
+            }
+            setActiveWallet(wallet)
+            val response = walletAPI.recoverWallet(password, password, seed.split(" "), "$activeWallet.db")
+            return if (response.message.isNotEmpty()) {
+                Result.failure(Exception("Failed to recover wallet: ${response.message}"))
+            } else {
+                Result.success(true)
+            }
         }
-    }
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
         val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
@@ -163,7 +166,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return walletAPI.createAddress()
     }
 
-    override suspend fun getWalletBalances(): Result<WalletAddressBalances> = withContext(Dispatchers.IO){
+    override suspend fun getWalletBalances(): Result<WalletAddressBalances> = withContext(Dispatchers.IO) {
         runCatching {
             walletAPI.getWalletBalances(true)
         }.onSuccess {
@@ -173,13 +176,13 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun getCurrentAddress(): Result<String> = withContext(Dispatchers.IO){
+    override suspend fun getCurrentAddress(): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             val addresses = walletAPI.getWalletBalances(true)
             //Get the address with the heighest balance
             var balance = -1.0
             var address = ""
-            for(i in 0 until addresses.addrs.size) {
+            for (i in 0 until addresses.addrs.size) {
                 if (addresses.addrs[i].total > balance) {
                     balance = addresses.addrs[i].total
                     address = addresses.addrs[i].address
@@ -193,7 +196,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun getWalletTransactions(): Result<WalletTransactions> = withContext(Dispatchers.IO){
+    override suspend fun getWalletTransactions(): Result<WalletTransactions> = withContext(Dispatchers.IO) {
         runCatching {
             walletAPI.getWalletTransactions(1, false, 0, 10)
         }.onSuccess {
