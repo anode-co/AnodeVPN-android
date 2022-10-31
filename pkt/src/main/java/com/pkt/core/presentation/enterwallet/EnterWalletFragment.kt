@@ -55,6 +55,14 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
             loginButton.doOnClick {
                 viewModel.onLoginClick()
             }
+
+            enterPasswordButton.doOnClick {
+                viewModel.onEnterPasswordClick()
+            }
+
+            enterPinButton.doOnClick {
+                viewModel.onEnterPinClick()
+            }
         }
     }
 
@@ -69,7 +77,10 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
 
             loginButton.isEnabled = state.loginButtonEnabled
 
-            if (state.isPinAvailable) {
+            enterPasswordButton.isVisible = state.enterPasswordButtonVisible
+            enterPinButton.isVisible = state.enterPinButtonVisible
+
+            if (state.isPinVisible) {
                 pinInputLabel.isVisible = true
                 pinInputLayout.isVisible = true
                 pinKeyboard.isVisible = true
