@@ -56,18 +56,16 @@ class VpnViewModel @Inject constructor(
             }.collect()
         }
 
-        invokeLoadingAction()
+        invokeLoadingAction {
+            vpnRepository.getIPv4Address()
+            vpnRepository.getIPv6Address()
+        }
     }
 
     override fun createInitialState() = VpnState(
         ipV4 = "",
         ipV6 = ""
     )
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        vpnRepository.getIPv4Address()
-        vpnRepository.getIPv6Address()
-    }
 
     fun onConsentResult(success: Boolean) {
         // TODO("Not yet implemented")

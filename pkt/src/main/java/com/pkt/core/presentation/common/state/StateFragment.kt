@@ -46,7 +46,7 @@ abstract class StateFragment<S : UiState>(contentLayoutId: Int) : Fragment(conte
             setColorSchemeColors(requireContext().getColorByAttribute(android.R.attr.colorPrimary))
 
             setOnRefreshListener {
-                viewModel.invokeRefreshingAction()
+                viewModel.onRefresh()
             }
         }
 

@@ -32,32 +32,30 @@ class EnterWalletViewModel @Inject constructor(
         }
 
     init {
-        invokeLoadingAction()
-    }
+        invokeLoadingAction {
+            runCatching {
+                val currentWallet = walletRepository.getActiveWallet().getOrThrow()
+                val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
 
-    override fun createInitialState() = EnterWalletState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        runCatching {
-            val currentWallet = walletRepository.getActiveWallet().getOrThrow()
-            val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
-
-            val wallets = walletRepository.getAllWalletNames().getOrThrow()
-            Triple(
-                currentWallet,
-                isPinAvailable,
-                wallets
-            )
-        }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
-            sendState {
-                copy(
-                    wallets = wallets,
-                    currentWallet = currentWallet,
-                    isPinAvailable = isPinAvailable
+                val wallets = walletRepository.getAllWalletNames().getOrThrow()
+                Triple(
+                    currentWallet,
+                    isPinAvailable,
+                    wallets
                 )
+            }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
+                sendState {
+                    copy(
+                        wallets = wallets,
+                        currentWallet = currentWallet,
+                        isPinAvailable = isPinAvailable
+                    )
+                }
             }
         }
     }
+
+    override fun createInitialState() = EnterWalletState()
 
     private fun invalidateNextButtonEnabled() {
         sendState {

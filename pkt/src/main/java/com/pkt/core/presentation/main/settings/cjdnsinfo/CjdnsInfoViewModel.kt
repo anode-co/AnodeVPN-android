@@ -21,17 +21,15 @@ class CjdnsInfoViewModel @Inject constructor(
     private val address: String = savedStateHandle["address"] ?: throw IllegalArgumentException("address is required")
 
     init {
-        invokeLoadingAction()
+        invokeLoadingAction {
+            walletRepository.getCjdnsInfo(address)
+                .onSuccess { info ->
+                    sendState { copy(info = info, items = info.toItems()) }
+                }
+        }
     }
 
     override fun createInitialState() = CjdnsInfoState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        walletRepository.getCjdnsInfo(address)
-            .onSuccess { info ->
-                sendState { copy(info = info, items = info.toItems()) }
-            }
-    }
 
     fun onFindYourselfClick() {
         currentState.info?.nodeUrl?.let { url ->
@@ -77,10 +75,14 @@ class CjdnsInfoViewModel @Inject constructor(
                 listOf(
                     TitleItem(R.string.connection),
                     KeyValueHorizontalItem(R.string.server, connection.key),
-                    KeyValueHorizontalItem(R.string.ipv4,
-                        "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"),
-                    KeyValueHorizontalItem(R.string.ipv6,
-                        "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"),
+                    KeyValueHorizontalItem(
+                        R.string.ipv4,
+                        "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"
+                    ),
+                    KeyValueHorizontalItem(
+                        R.string.ipv6,
+                        "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"
+                    ),
                 )
             )
         }

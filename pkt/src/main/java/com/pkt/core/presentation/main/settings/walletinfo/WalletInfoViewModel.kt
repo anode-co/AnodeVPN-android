@@ -32,74 +32,72 @@ class WalletInfoViewModel @Inject constructor(
     private var timerJob: Job? = null
 
     init {
-        invokeLoadingAction()
-    }
+        invokeLoadingAction {
+            runCatching {
+                walletRepository.getCurrentAddress().getOrThrow()
+            }.onSuccess {
+                address = it
+            }.onFailure {
 
-    override fun createInitialState() = WalletInfoState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        runCatching {
-            walletRepository.getCurrentAddress().getOrThrow()
-        }.onSuccess {
-            address = it
-        }.onFailure {
-
-        }
-        runCatching {
-            val balance = walletRepository.getWalletBalance(address).getOrThrow()
-            val walletInfo = walletRepository.getWalletInfo().getOrThrow()
-            if (walletInfo.wallet == null) {
-                //Wallet is locked
-                //TODO: unlock wallet
             }
-            Pair(balance, walletInfo)
-        }.onSuccess { (balance, walletInfo) ->
-            val wallet = walletInfo.wallet
-            val neutrino = walletInfo.neutrino
-            sendState {
-                copy(
-                    items = mutableListOf<DisplayableItem>().apply {
-                        addAll(
-                            listOf(
-                                KeyValueVerticalItem(R.string.address, address),
-                                KeyValueVerticalItem(R.string.balance, listOf(balance), ValueFormatter.BALANCE),
-                                KeyValueVerticalItem(
-                                    R.string.wallet_sync,
-                                    listOf(wallet!!.currentHeight, wallet.currentBlockTimestamp),
-                                    ValueFormatter.SYNC
-                                ),
-                                KeyValueVerticalItem(
-                                    R.string.neutrino_sync,
-                                    listOf(neutrino.height, neutrino.blockTimestamp),
-                                    ValueFormatter.SYNC
+            runCatching {
+                val balance = walletRepository.getWalletBalance(address).getOrThrow()
+                val walletInfo = walletRepository.getWalletInfo().getOrThrow()
+                if (walletInfo.wallet == null) {
+                    //Wallet is locked
+                    //TODO: unlock wallet
+                }
+                Pair(balance, walletInfo)
+            }.onSuccess { (balance, walletInfo) ->
+                val wallet = walletInfo.wallet
+                val neutrino = walletInfo.neutrino
+                sendState {
+                    copy(
+                        items = mutableListOf<DisplayableItem>().apply {
+                            addAll(
+                                listOf(
+                                    KeyValueVerticalItem(R.string.address, address),
+                                    KeyValueVerticalItem(R.string.balance, listOf(balance), ValueFormatter.BALANCE),
+                                    KeyValueVerticalItem(
+                                        R.string.wallet_sync,
+                                        listOf(wallet!!.currentHeight, wallet.currentBlockTimestamp),
+                                        ValueFormatter.SYNC
+                                    ),
+                                    KeyValueVerticalItem(
+                                        R.string.neutrino_sync,
+                                        listOf(neutrino.height, neutrino.blockTimestamp),
+                                        ValueFormatter.SYNC
+                                    )
                                 )
                             )
-                        )
 
-                        neutrino.peers.takeIf { it.isNotEmpty() }?.let { peers ->
-                            add(ConnectedServersItem(peers.size))
+                            neutrino.peers.takeIf { it.isNotEmpty() }?.let { peers ->
+                                add(ConnectedServersItem(peers.size))
 
-                            addAll(
-                                peers.mapIndexed { index, peer ->
-                                    ConnectedServerItem(peer.addr, peer.lastBlock, index < peers.size - 1)
-                                }
-                            )
+                                addAll(
+                                    peers.mapIndexed { index, peer ->
+                                        ConnectedServerItem(peer.addr, peer.lastBlock, index < peers.size - 1)
+                                    }
+                                )
+                            }
                         }
+                    )
+                }
+
+                _timerUiState.update { 0 }
+
+                timerJob?.cancel()
+                timerJob = viewModelScope.launch {
+                    while (isActive) {
+                        delay(1_000L)
+                        _timerUiState.update { (it ?: 0) + 1 }
                     }
-                )
-            }
-
-            _timerUiState.update { 0 }
-
-            timerJob?.cancel()
-            timerJob = viewModelScope.launch {
-                while (isActive) {
-                    delay(1_000L)
-                    _timerUiState.update { (it ?: 0) + 1 }
                 }
             }
         }
     }
+
+    override fun createInitialState() = WalletInfoState()
 
     fun onDetailsClick() {
         sendNavigation(AppNavigation.OpenCjdnsInfo(address))
