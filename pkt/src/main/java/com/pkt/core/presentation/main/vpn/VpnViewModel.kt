@@ -1,7 +1,9 @@
 package com.pkt.core.presentation.main.vpn
 
 import androidx.lifecycle.viewModelScope
+import com.pkt.core.extensions.toPKT
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.main.wallet.WalletState
 import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -65,8 +67,19 @@ class VpnViewModel @Inject constructor(
     )
 
     override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        vpnRepository.getIPv4Address()
-        vpnRepository.getIPv6Address()
+        runCatching {
+            val ipv4 = vpnRepository.getIPv4Address().getOrNull()
+            val ipv6 = vpnRepository.getIPv6Address().getOrNull()
+            val list = vpnRepository.fetchVpnList()
+            Triple(ipv4,ipv6, list)
+        }.onSuccess { (ipv4, ipv6, list) ->
+            sendState {
+                copy(
+                    ipV4 = ipv4,
+                    ipV6 = ipv6,
+                )
+            }
+        }
     }
 
     fun onConsentResult(success: Boolean) {
@@ -77,7 +90,7 @@ class VpnViewModel @Inject constructor(
         when (currentState.vpnState) {
             com.pkt.domain.dto.VpnState.DISCONNECTED -> {
                 viewModelScope.launch {
-                    vpnRepository.connect()
+                    vpnRepository.connect("929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
                 }
             }
 

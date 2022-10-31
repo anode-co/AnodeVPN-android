@@ -1,7 +1,8 @@
 package com.pkt.domain.interfaces
 
 import com.pkt.domain.dto.*
-import retrofit2.http.GET
+import org.json.JSONArray
+import retrofit2.http.*
 
 interface VpnAPI {
     @GET("vpn/servers/")
@@ -13,5 +14,7 @@ interface VpnAPI {
     //GenerateUsername
     //PostError
     //AuthorizeVPN
-
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @POST("authorize/")
+    suspend fun authorizeVPN(@Header("Authorization") signature: String, @Body requestAuthorizeVpn:RequestAuthorizeVpn): ResponseAuthorizeVpn
 }
