@@ -88,6 +88,14 @@ class WalletAPIService {
             return api.createWallet(request)
         }
     }
+
+    suspend fun sendTransaction(request: SendTransactionRequest): SendTransactionResponse {
+        return api.sendTransaction(request)
+    }
+
+    suspend fun checkPassphrase(request: CheckPassphraseRequest): CheckPassphraseResponse {
+        return api.checkPassphrase(request)
+    }
 }
 
 class NullOnEmptyConverterFactory : Converter.Factory() {

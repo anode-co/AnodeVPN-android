@@ -228,4 +228,12 @@ class WalletRepositoryDummy constructor(
         delay(1000L)
         Result.success(BitmapFactory.decodeResource(context.resources, R.drawable.qr_code))
     }
+
+    override suspend fun checkWalletPassphrase(passphrase: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun sendCoins(fromAddresses: List<String>, amount: Long, toAddress: String): Result<SendTransactionResponse> {
+        TODO("Not yet implemented")
+    }
 }

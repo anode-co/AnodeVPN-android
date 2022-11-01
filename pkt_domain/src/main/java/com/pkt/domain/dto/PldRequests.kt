@@ -4,6 +4,42 @@ import kotlinx.serialization.Serializable
 import org.json.JSONArray
 
 @Serializable
+data class ChangePassphraseRequest(
+    val current_passphrase: String,
+    val new_passphrase: String
+)
+
+@Serializable
+data class ChangePassphraseResponse(
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Serializable
+data class SendTransactionRequest(
+    val to_address: String,
+    val amount: Long,
+    val from_address: List<String>
+)
+
+@Serializable
+data class SendTransactionResponse(
+    val txHash: String,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Serializable
+data class CheckPassphraseRequest(
+    val wallet_passphrase: String
+)
+
+@Serializable
+data class CheckPassphraseResponse(
+    val validPassphrase: Boolean
+)
+
+@Serializable
 data class UnlockWalletRequest (
     var wallet_passphrase: String,
     val wallet_name: String,

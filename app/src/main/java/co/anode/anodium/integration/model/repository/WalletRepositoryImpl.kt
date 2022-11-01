@@ -2,6 +2,7 @@ package co.anode.anodium.integration.model.repository
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGEncoder
 import co.anode.anodium.support.AnodeUtil
@@ -262,7 +263,8 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
     override suspend fun generateQr(address: String): Result<Bitmap> {
         var qrgEncoder = QRGEncoder(address, null, QRGContents.Type.TEXT, 600)
-
+        qrgEncoder.colorBlack = Color.WHITE
+        qrgEncoder.colorWhite = Color.BLACK
         return try {
             // Getting QR-Code as Bitmap
             val bitmap = qrgEncoder.bitmap
@@ -272,4 +274,27 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             Result.failure(e)
         }
     }
+
+    override suspend fun checkWalletPassphrase(passphrase: String): Result<Boolean> {
+        val request = CheckPassphraseRequest(passphrase)
+        val response = walletAPI.checkPassphrase(request)
+        return if (response.validPassphrase) {
+            Result.success(true)
+        } else {
+            Result.failure(Exception("Invalid wallet passphrase"))
+        }
+    }
+
+    override suspend fun sendCoins(fromAddresses: List<String>, amount: Long, toAddress: String): Result<SendTransactionResponse> {
+        val request = SendTransactionRequest(toAddress, amount, fromAddresses)
+        val response = walletAPI.sendTransaction(request)
+        if (!response.message.isNullOrEmpty()) {
+            return Result.failure(Exception("Failed to send coins: ${response.message}"))
+        } else if (response.txHash.isNotEmpty()){
+            return Result.success(response)
+        } else {
+            return Result.failure(Exception("Failed to send coins"))
+        }
+    }
+
 }

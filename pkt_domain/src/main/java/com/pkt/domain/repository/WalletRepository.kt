@@ -31,4 +31,6 @@ interface WalletRepository {
     suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit>
     suspend fun changePin(password: String, pin: String): Result<Unit>
     suspend fun generateQr(address: String): Result<Bitmap>
+    suspend fun checkWalletPassphrase(passphrase: String): Result<Boolean>
+    suspend fun sendCoins(fromAddresses: List<String>, amount: Long, toAddress: String): Result<SendTransactionResponse>
 }
