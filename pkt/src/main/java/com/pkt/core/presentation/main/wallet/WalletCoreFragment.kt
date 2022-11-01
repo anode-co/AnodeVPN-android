@@ -1,8 +1,11 @@
 package com.pkt.core.presentation.main.wallet
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -13,6 +16,7 @@ import com.pkt.core.extensions.formatUsd
 import com.pkt.core.extensions.getColorByAttribute
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
+import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.wallet.qr.QrBottomSheet
 import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,6 +27,10 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
     private val viewBinding by viewBinding(FragmentWalletCoreBinding::bind)
 
     override val viewModel: WalletViewModel by viewModels()
+
+    private val mainViewModel: MainViewModel by activityViewModels()
+
+    private var walletAddress: String = ""
 
     private val adapter = AsyncListDifferAdapter(
         loadingAdapterDelegate(),
@@ -38,6 +46,13 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setFragmentResultListener(SendTransactionBottomSheet.REQUEST_KEY) { _, bundle ->
+            val address = bundle.getString(SendTransactionBottomSheet.KEY_ADDRESS)!!
+            val amount = bundle.getDouble(SendTransactionBottomSheet.KEY_AMOUNT)
+            val maxAmount = bundle.getBoolean(SendTransactionBottomSheet.KEY_MAX_AMOUNT)
+            mainViewModel.openSendConfirm(address, amount, maxAmount)
+        }
+
         with(viewBinding) {
             sendButton.setOnClickListener {
                 showSendTransactionDialog()
@@ -46,7 +61,7 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
                 showQrDialog()
             }
             shareButton.setOnClickListener {
-                viewModel.onShareClick()
+                showShareAddress()
             }
             selectPeriodButton.setOnClickListener {
                 viewModel.onSelectPeriodClick()
@@ -67,6 +82,16 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
 
     private fun showQrDialog() {
         QrBottomSheet().show(childFragmentManager, QrBottomSheet.TAG)
+    }
+
+    private fun showShareAddress() {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, "$walletAddress")
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     override fun handleState(state: WalletState) {
@@ -106,8 +131,8 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
             }
 
             balanceUsdLabel.text = state.balanceUsd.formatUsd()
-
-            addressValue.text = state.walletAddress
+            walletAddress = state.walletAddress
+            addressValue.text = walletAddress
 
             adapter.items = state.items
         }

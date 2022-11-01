@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.wallet
 
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.state.StateViewModel
@@ -8,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
-import com.pkt.domain.dto.WalletAddressBalances
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -28,22 +28,21 @@ class WalletViewModel @Inject constructor(
         invokeLoadingAction {
             runCatching {
                 val walletInfo = walletRepository.getWalletInfo().getOrThrow()
-                var addresses: WalletAddressBalances? = null
+                var address = ""
                 if (walletInfo.wallet == null) {
                     //Wallet is locked
                     //TODO: bring up enterwallet fragment
                 } else {
-                    addresses = walletRepository.getWalletBalances().getOrThrow()
+                    address = walletRepository.getWalletAddress().getOrThrow()
                     //If no address, then create one
-                    if (addresses.addrs.isEmpty()) {
-                        val addr = walletRepository.createAddress().getOrThrow()
-                        val d = addr
+                    if (address.isEmpty()) {
+                        val response = walletRepository.createAddress().getOrThrow()
+                        address = response.address
                     }
-                    addresses = walletRepository.getWalletBalances().getOrThrow()
                 }
-
-                Pair(walletInfo, addresses)
-            }.onSuccess { (info, addresses) ->
+                val balance = walletRepository.getTotalWalletBalance().getOrThrow()
+                Triple(walletInfo, address, balance)
+            }.onSuccess { (info, address, balance) ->
                 val wallet = info.wallet
                 val neutrino = info.neutrino
                 val peerCount = neutrino.peers.size
@@ -54,27 +53,14 @@ class WalletViewModel @Inject constructor(
                         neutrinoTop = neutrino.peers[i].lastBlock
                 }
 
-                //Get the address with the highest balance
-                var balanceString = ""
-                var balance: Long = -1
-                var address = ""
-
-                if (addresses != null) {
-                    for (i in 0 until addresses.addrs.size) {
-                        if (addresses.addrs[i].total > balance) {
-                            balance = addresses.addrs[i].stotal.toLong()
-                            address = addresses.addrs[i].address
-                        }
-                    }
-                }
                 sendState {
                     copy(
                         syncState = WalletState.SyncState.SUCCESS,
                         peersCount = peerCount,
                         block = "$neutrinoHeight/$neutrinoTop",
                         walletName = walletName,
-                        balancePkt = balance.toString(),
-                        balanceUsd = balance.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
+                        balancePkt = balance.toLong().toString(),
+                        balanceUsd = balance.toLong().toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
                         walletAddress = address,
                         items = listOf()
                     )
@@ -142,10 +128,6 @@ class WalletViewModel @Inject constructor(
                 FooterItem()
             )
         )
-    }
-
-    fun onShareClick() {
-        // TODO
     }
 
     fun onSelectPeriodClick() {

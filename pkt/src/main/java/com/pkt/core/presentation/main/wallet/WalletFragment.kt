@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.wallet
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
@@ -28,6 +29,8 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
     override val viewModel: WalletViewModel by viewModels()
 
     private val mainViewModel: MainViewModel by activityViewModels()
+
+    private var walletAddress: String = ""
 
     private val adapter = AsyncListDifferAdapter(
         loadingAdapterDelegate(),
@@ -58,7 +61,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
                 showQrDialog()
             }
             shareButton.setOnClickListener {
-                viewModel.onShareClick()
+                showShareAddress()
             }
             selectPeriodButton.setOnClickListener {
                 viewModel.onSelectPeriodClick()
@@ -77,6 +80,16 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
 
     private fun showQrDialog() {
         QrBottomSheet().show(childFragmentManager, QrBottomSheet.TAG)
+    }
+
+    private fun showShareAddress() {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, "$walletAddress")
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     override fun handleState(state: WalletState) {
