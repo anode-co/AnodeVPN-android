@@ -2,6 +2,8 @@ package co.anode.anodium.integration.model.repository
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidmads.library.qrgenearator.QRGContents
+import androidmads.library.qrgenearator.QRGEncoder
 import co.anode.anodium.support.AnodeUtil
 import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
@@ -32,8 +34,30 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("activeWallet", walletName)?.apply()
     }
 
-    override suspend fun getWalletAddress(): Result<String> {
-        TODO("Not yet implemented")
+    override suspend fun getWalletAddress(): Result<String> = withContext(Dispatchers.IO){
+        runCatching {
+            val addresses = walletAPI.getWalletBalances(true)
+            //Return the balance of address
+            var address = ""
+            if (addresses.addrs.size == 1) {
+                address = addresses.addrs[0].address
+            } else if (addresses.addrs.size > 1) {
+                //Find address with the biggest balance
+                var biggestBalance = 0.0
+                for (i in 0 until addresses.addrs.size) {
+                    val balance = addresses.addrs[i].total
+                    if (balance > biggestBalance) {
+                        biggestBalance = balance
+                        address = addresses.addrs[i].address
+                    }
+                }
+            }
+            return@runCatching address
+        }.onSuccess {
+            Timber.d("getWalletAddress: success")
+        }.onFailure {
+            Timber.e(it, "getWalletAddress: failure")
+        }
     }
 
     override suspend fun isPinAvailable(): Result<Boolean> {
@@ -236,7 +260,16 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun generateQr(): Result<Bitmap> {
-        TODO("Not yet implemented")
+    override suspend fun generateQr(address: String): Result<Bitmap> {
+        var qrgEncoder = QRGEncoder(address, null, QRGContents.Type.TEXT, 600)
+
+        return try {
+            // Getting QR-Code as Bitmap
+            val bitmap = qrgEncoder.bitmap
+            Result.success(bitmap)
+        } catch (e: Exception) {
+            Timber.e(e.toString(), "generateQr: failure")
+            Result.failure(e)
+        }
     }
 }

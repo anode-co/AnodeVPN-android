@@ -224,7 +224,7 @@ class WalletRepositoryDummy constructor(
         return Result.success(Unit)
     }
 
-    override suspend fun generateQr(): Result<Bitmap> = withContext(Dispatchers.IO) {
+    override suspend fun generateQr(address: String): Result<Bitmap> = withContext(Dispatchers.IO) {
         delay(1000L)
         Result.success(BitmapFactory.decodeResource(context.resources, R.drawable.qr_code))
     }

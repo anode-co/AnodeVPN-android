@@ -30,5 +30,5 @@ interface WalletRepository {
     suspend fun deleteWallet(name: String): Result<String?>
     suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit>
     suspend fun changePin(password: String, pin: String): Result<Unit>
-    suspend fun generateQr(): Result<Bitmap>
+    suspend fun generateQr(address: String): Result<Bitmap>
 }
