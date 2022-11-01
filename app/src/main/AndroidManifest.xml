@@ -27,16 +27,20 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:theme">
         <activity
+            android:name=".integration.presentation.SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass"/>
+        <activity
             android:name=".integration.presentation.StartWalletActivity"
             android:exported="false"
             android:theme="@style/Theme.App"
-            tools:ignore="LockedOrientationActivity,MissingClass">
-        </activity>
+            tools:ignore="LockedOrientationActivity,MissingClass"></activity>
         <activity
             android:name=".integration.presentation.VpnActivity"
             android:exported="false"
             android:theme="@style/Theme.App"
-            tools:ignore="LockedOrientationActivity,MissingClass"/>
+            tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
             android:name=".integration.presentation.WalletActivity"
             android:exported="false"

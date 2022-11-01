@@ -16,12 +16,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentProfileBinding
 import co.anode.anodium.AboutDialog
 import co.anode.anodium.AnodeVpnService
 import co.anode.anodium.CjdnsStatsActivity
+import co.anode.anodium.integration.presentation.SettingsActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
@@ -59,6 +59,8 @@ class ProfileFragment : Fragment() {
         val idTextview = root.findViewById<TextView>(R.id.user_id)
         val versionTextview = root.findViewById<TextView>(R.id.version_number)
         prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+
+
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
             AnodeUtil.generateUsername(idTextview)
@@ -142,6 +144,12 @@ class ProfileFragment : Fragment() {
             }
             val shareIntent = Intent.createChooser(sendIntent, null)
             startActivity(shareIntent)
+        }
+
+        //check for new UI
+        if (prefs.getBoolean("useNewUI", false)) {
+            val settingsActivity = Intent(mycontext, SettingsActivity::class.java)
+            startActivity(settingsActivity)
         }
 
         walletsSpinner = root.findViewById(R.id.wallet_selector)
