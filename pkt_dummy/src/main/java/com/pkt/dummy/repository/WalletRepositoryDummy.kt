@@ -105,16 +105,6 @@ class WalletRepositoryDummy constructor(
         }
     }
 
-    override suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo> = withContext(Dispatchers.IO) {
-        runCatching {
-            delay(1000L)
-            val info = context.resources.openRawResource(R.raw.cjdns_info).use {
-                json.decodeFromStream<CjdnsInfoDummy>(it)
-            }
-            cjdnsInfoMapper.map(info)
-        }
-    }
-
     override suspend fun generateSeed(password: String, pin: String) = withContext(Dispatchers.IO) {
         delay(5000L)
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
@@ -157,25 +147,8 @@ class WalletRepositoryDummy constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCurrentAddress(): Result<String> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getWalletTransactions(): Result<WalletTransactions> {
         TODO("Not yet implemented")
-    }
-
-    override suspend fun send(address: String, amount: Double): Result<SendResponse> = withContext(Dispatchers.IO) {
-        delay(1000L)
-        Result.success(
-            SendResponse(
-                transactionId = "0bd1574c52a1621e4b522e9a45226eff2",
-                address = address,
-                blockNumber = 1234567,
-                amount = amount,
-                timestamp = "2022-07-06 11:19:06 +0300 EEST"
-            )
-        )
     }
 
     override suspend fun getSeed(): Result<String> =
@@ -214,14 +187,13 @@ class WalletRepositoryDummy constructor(
         )
     }
 
-    override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit> {
+    override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean> {
         delay(1000L)
-        return Result.success(Unit)
+        return Result.success(true)
     }
 
-    override suspend fun changePin(password: String, pin: String): Result<Unit> {
+    override suspend fun changePin(password: String, pin: String) {
         delay(1000L)
-        return Result.success(Unit)
     }
 
     override suspend fun generateQr(address: String): Result<Bitmap> = withContext(Dispatchers.IO) {
@@ -234,6 +206,24 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun sendCoins(fromAddresses: List<String>, amount: Long, toAddress: String): Result<SendTransactionResponse> {
+        delay(1000L)
+        Result.success(
+            SendResponse(
+                transactionId = "0bd1574c52a1621e4b522e9a45226eff2",
+                address = toAddress,
+                blockNumber = 1234567,
+                amount = amount.toDouble(),
+                timestamp = "2022-07-06 11:19:06 +0300 EEST"
+            )
+        )
+        return Result.success(SendTransactionResponse("0x0x0x0x0x0x0x0","",""))
+    }
+
+    override suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSecret(): Result<String> {
         TODO("Not yet implemented")
     }
 }
