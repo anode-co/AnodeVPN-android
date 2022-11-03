@@ -60,4 +60,5 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openVpnExits(fragment: Fragment)
     abstract fun openChangePassword(fragment: Fragment)
     abstract fun openChangePin(fragment: Fragment)
+    abstract fun openSendTransaction(fragment: Fragment)
 }
