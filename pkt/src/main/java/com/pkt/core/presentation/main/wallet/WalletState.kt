@@ -5,8 +5,12 @@ import com.pkt.core.presentation.common.state.UiState
 
 data class WalletState(
     val syncState: SyncState,
+    val syncTimeDiff: Long,
     val peersCount: Int,
     val block: String,
+    val chainHeight: Int,
+    val walletHeight: Int,
+    val neutrinoTop: Int,
     val walletName: String,
     val balancePkt: String,
     val balanceUsd: String,
@@ -15,8 +19,10 @@ data class WalletState(
 ) : UiState {
 
     enum class SyncState {
-        PROGRESS,
+        DOWNLOADING,
+        SCANNING,
         SUCCESS,
+        WAITING,
         FAILED
     }
 }
