@@ -43,14 +43,14 @@ class SendConfirmViewModel @Inject constructor(
             runCatching {
                 val isPinCorrect = walletRepository.checkPin(pin).getOrThrow()
                 if (isPinCorrect) {
-                    walletRepository.send(currentState.address, currentState.amount).getOrThrow()
+                    walletRepository.sendCoins(listOf(""),currentState.amount.toLong(),currentState.address).getOrThrow()
                 } else {
                     null
                 }
             }.onSuccess { sendResponse ->
                 sendResponse?.let {
                     sendNavigation(AppNavigation.NavigateBack)
-                    sendNavigation(AppNavigation.OpenSendSuccess(it.transactionId))
+                    sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
                 } ?: run {
                     sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
                     sendEvent(SendConfirmEvent.ClearPin)
