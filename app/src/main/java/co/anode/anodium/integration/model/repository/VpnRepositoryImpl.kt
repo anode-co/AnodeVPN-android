@@ -69,7 +69,6 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
         if(authorizeVPN().isSuccess){
             _vpnState.tryEmit(VpnState.CONNECTED)
-            _startConnectionTime = System.currentTimeMillis()
             val connectedNode = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","")
             if ((!node.isNullOrEmpty()) && ((!AnodeClient.isVpnActive()) || (node != connectedNode))) {
                 AnodeClient.cjdnsConnectVPN(node)
@@ -88,7 +87,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override suspend fun authorizeVPN(): Result<Boolean> {
         val jsonObject = JSONObject()
-        val date = 1666793864285//System.currentTimeMillis()
+        val date = System.currentTimeMillis()
         jsonObject.accumulate("date", date)
         val bytes = jsonObject.toString().toByteArray()
         val md = MessageDigest.getInstance("SHA-256")
@@ -107,6 +106,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun disconnect(): Result<Boolean> {
+        _vpnState.tryEmit(VpnState.DISCONNECTED)
         AnodeClient.AuthorizeVPN().cancel(true)
         AnodeClient.stopThreads()
         CjdnsSocket.IpTunnel_removeAllConnections()
