@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navGraph"
+    app:startDestination="@id/enterWallet">
+
+    <action
+        android:id="@+id/toMain"
+        app:destination="@id/main"
+        app:popUpTo="@id/navGraph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/toWalletInfo"
+        app:destination="@id/walletInfo" />
+
+    <action
+        android:id="@+id/toCjdnsInfo"
+        app:destination="@id/cjdnsInfo" />
+
+    <action
+        android:id="@+id/toCreateWallet"
+        app:destination="@id/createWallet" />
+
+    <action
+        android:id="@+id/toRecoverWallet"
+        app:destination="@id/recoverWallet" />
+
+    <action
+        android:id="@+id/toSendTransaction"
+        app:destination="@id/sendTransaction" />
+
+    <action
+        android:id="@+id/toSendConfirm"
+        app:destination="@id/sendConfirm" />
+
+    <action
+        android:id="@+id/toSendSuccess"
+        app:destination="@id/sendSuccess" />
+
+    <action
+        android:id="@+id/toVpnExits"
+        app:destination="@id/vpnExits" />
+
+    <fragment
+        android:id="@+id/start"
+        android:name="com.pkt.core.presentation.start.StartFragment"
+        android:label="Start"
+        tools:layout="@layout/fragment_start" />
+
+    <fragment
+        android:id="@+id/createWallet"
+        android:name="com.pkt.core.presentation.createwallet.CreateWalletFragment"
+        android:label="CreateWallet"
+        tools:layout="@layout/fragment_create_wallet" />
+
+    <fragment
+        android:id="@+id/recoverWallet"
+        android:name="com.pkt.core.presentation.recoverwallet.RecoverWalletFragment"
+        android:label="RecoverWallet"
+        tools:layout="@layout/fragment_recover_wallet" />
+
+    <fragment
+        android:id="@+id/enterWallet"
+        android:name="com.pkt.core.presentation.enterwallet.EnterWalletFragment"
+        android:label="EnterWallet"
+        tools:layout="@layout/fragment_enter_wallet" />
+
+    <fragment
+        android:id="@+id/main"
+        android:name="com.pkt.core.presentation.main.MainFragment"
+        android:label="Main"
+        tools:layout="@layout/fragment_main" />
+
+    <fragment
+        android:id="@+id/walletInfo"
+        android:name="com.pkt.core.presentation.main.settings.walletinfo.WalletInfoFragment"
+        android:label="WalletInfo"
+        tools:layout="@layout/fragment_wallet_info">
+
+        <argument
+            android:name="address"
+            app:argType="string" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/cjdnsInfo"
+        android:name="com.pkt.core.presentation.main.settings.cjdnsinfo.CjdnsInfoFragment"
+        android:label="Cjdns Info"
+        tools:layout="@layout/fragment_cjdns_info">
+
+        <argument
+            android:name="address"
+            app:argType="string" />
+
+    </fragment>
+
+    <dialog
+        android:id="@+id/sendTransaction"
+        android:name="com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet"
+        android:label="SendTransaction"
+        tools:layout="@layout/bottom_sheet_send_transaction" />
+
+    <fragment
+        android:id="@+id/sendConfirm"
+        android:name="com.pkt.core.presentation.main.wallet.send.confirm.SendConfirmFragment"
+        android:label="SendConfirm"
+        tools:layout="@layout/fragment_send_confirm">
+
+        <argument
+            android:name="address"
+            app:argType="string" />
+
+        <argument
+            android:name="amount"
+            app:argType="float" />
+
+        <argument
+            android:name="maxAmount"
+            app:argType="boolean" />
+
+    </fragment>
+
+    <dialog
+        android:id="@+id/sendSuccess"
+        android:name="com.pkt.core.presentation.main.wallet.send.success.SendSuccessBottomSheet"
+        android:label="SendSuccess"
+        tools:layout="@layout/bottom_sheet_send_success">
+
+        <argument
+            android:name="transactionId"
+            app:argType="string" />
+
+    </dialog>
+
+    <fragment
+        android:id="@+id/vpnExits"
+        android:name="com.pkt.core.presentation.main.vpn.exits.VpnExitsFragment"
+        android:label="VpnExits"
+        tools:layout="@layout/fragment_vpn_exits" />
+
+</navigation>
