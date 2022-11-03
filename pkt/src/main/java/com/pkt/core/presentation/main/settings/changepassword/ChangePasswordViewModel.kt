@@ -7,6 +7,7 @@ import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import com.ybs.passwordstrengthmeter.PasswordStrength
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,7 +38,9 @@ class ChangePasswordViewModel @Inject constructor(
                     walletRepository.changePassword(enterCurrentPassword, enterPassword)
                         .onSuccess {
                             sendEvent(CommonEvent.Info(R.string.success))
+                            delay(1000)
                             sendNavigation(AppNavigation.NavigateBack)
+                            //TODO: reset PIN
                         }
                         .onFailure {
                             sendError(it)
