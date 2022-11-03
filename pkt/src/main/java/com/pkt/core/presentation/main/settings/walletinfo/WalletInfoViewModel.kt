@@ -34,7 +34,7 @@ class WalletInfoViewModel @Inject constructor(
     init {
         invokeLoadingAction {
             runCatching {
-                walletRepository.getCurrentAddress().getOrThrow()
+                walletRepository.getWalletAddress().getOrThrow()
             }.onSuccess {
                 address = it
             }.onFailure {
