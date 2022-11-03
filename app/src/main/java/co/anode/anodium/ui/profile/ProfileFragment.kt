@@ -21,7 +21,10 @@ import co.anode.anodium.databinding.FragmentProfileBinding
 import co.anode.anodium.AboutDialog
 import co.anode.anodium.AnodeVpnService
 import co.anode.anodium.CjdnsStatsActivity
+import co.anode.anodium.integration.presentation.ChangePINActivity
+import co.anode.anodium.integration.presentation.ChangePasswordActivity
 import co.anode.anodium.integration.presentation.SettingsActivity
+import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
@@ -72,10 +75,14 @@ class ProfileFragment : Fragment() {
         val changePasswordButton = root.findViewById<LinearLayout>(R.id.button_change_password)
         changePasswordButton.setOnClickListener {
             Log.i(LOGTAG, "Open PasswordPrompt activity for changing password")
-            val promptPasswordActivity = Intent(mycontext, PasswordPrompt::class.java)
-            promptPasswordActivity.putExtra("changepassphrase", true)
-            promptPasswordActivity.putExtra("walletName", activeWallet)
-            startActivity(promptPasswordActivity)
+            if (prefs.getBoolean("useNewUI", false)) {
+                startActivity(Intent(mycontext, ChangePasswordActivity::class.java))
+            } else {
+                val promptPasswordActivity = Intent(mycontext, PasswordPrompt::class.java)
+                promptPasswordActivity.putExtra("changepassphrase", true)
+                promptPasswordActivity.putExtra("walletName", activeWallet)
+                startActivity(promptPasswordActivity)
+            }
         }
         val showSeedButton = root.findViewById<LinearLayout>(R.id.button_show_seed)
         showSeedButton.setOnClickListener {
@@ -84,7 +91,11 @@ class ProfileFragment : Fragment() {
         val cjdnsStatsButton = root.findViewById<LinearLayout>(R.id.button_cjdns_stats)
         cjdnsStatsButton.setOnClickListener {
             Log.i(LOGTAG, "Start cjdns stats (debug) activity")
-            startActivity(Intent(mycontext, CjdnsStatsActivity::class.java))
+            if (prefs.getBoolean("useNewUI", false)) {
+                startActivity(Intent(mycontext, CjdnsInfoActivity::class.java))
+            } else {
+                startActivity(Intent(mycontext, CjdnsStatsActivity::class.java))
+            }
         }
         val walletStatsButton = root.findViewById<LinearLayout>(R.id.button_wallet_stats)
         walletStatsButton.setOnClickListener {
@@ -103,11 +114,15 @@ class ProfileFragment : Fragment() {
         val setPinButton = root.findViewById<LinearLayout>(R.id.button_set_pin)
         setPinButton.setOnClickListener {
             Timber.tag(LOGTAG).i("Open PasswordPin activity for setting PIN")
-            val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
-            promptPinActivity.putExtra("changepassphrase", true)
-            promptPinActivity.putExtra("noNext", true)
-            promptPinActivity.putExtra("walletName", activeWallet)
-            startActivity(promptPinActivity)
+            if (prefs.getBoolean("useNewUI", false)) {
+                startActivity(Intent(mycontext, ChangePINActivity::class.java))
+            } else {
+                val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
+                promptPinActivity.putExtra("changepassphrase", true)
+                promptPinActivity.putExtra("noNext", true)
+                promptPinActivity.putExtra("walletName", activeWallet)
+                startActivity(promptPinActivity)
+            }
         }
         val checkUpdateButton = root.findViewById<LinearLayout>(R.id.button_check_update)
         //Disable update option for other builds
@@ -147,10 +162,10 @@ class ProfileFragment : Fragment() {
         }
 
         //check for new UI
-        if (prefs.getBoolean("useNewUI", false)) {
+/*        if (prefs.getBoolean("useNewUI", false)) {
             val settingsActivity = Intent(mycontext, SettingsActivity::class.java)
             startActivity(settingsActivity)
-        }
+        }*/
 
         walletsSpinner = root.findViewById(R.id.wallet_selector)
         walletNames = AnodeUtil.getWalletFiles()
