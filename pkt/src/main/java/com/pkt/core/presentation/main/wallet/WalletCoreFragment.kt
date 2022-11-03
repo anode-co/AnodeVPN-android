@@ -100,20 +100,49 @@ class WalletCoreFragment : StateFragment<WalletState>(R.layout.fragment_wallet_c
                 compoundDrawableTintList = ColorStateList.valueOf(
                     context.getColorByAttribute(
                         when (state.syncState) {
-                            WalletState.SyncState.PROGRESS -> R.attr.colorProgress
+                            WalletState.SyncState.DOWNLOADING -> R.attr.colorProgress
+                            WalletState.SyncState.SCANNING -> R.attr.colorProgress
+                            WalletState.SyncState.WAITING -> R.attr.colorProgress
                             WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
                             WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
                         }
                     )
                 )
-
-                text = "${
-                    resources.getQuantityString(
-                        R.plurals.peers,
-                        state.peersCount,
-                        state.peersCount
-                    )
-                } / ${getString(R.string.block)} ${state.block}"
+                when (state.syncState) {
+                    WalletState.SyncState.SCANNING -> {
+                        text = "${
+                            resources.getQuantityString(
+                                R.plurals.peers,
+                                state.peersCount,
+                                state.peersCount
+                            )
+                        } | ${getString(R.string.wallet_status_syncing_headers)} ${state.chainHeight}/${state.neutrinoTop}"
+                    }
+                    WalletState.SyncState.DOWNLOADING -> {
+                        text = "${
+                            resources.getQuantityString(
+                                R.plurals.peers,
+                                state.peersCount,
+                                state.peersCount
+                            )
+                        } | ${getString(R.string.wallet_status_syncing_transactions)} ${state.walletHeight}/${state.neutrinoTop}"
+                    }
+                    WalletState.SyncState.SUCCESS -> {
+                        text = "${
+                            resources.getQuantityString(
+                                R.plurals.peers,
+                                state.peersCount,
+                                state.peersCount
+                            )
+                        } | ${getString(R.string.block)} ${state.block}"
+                    }
+                    WalletState.SyncState.WAITING -> {
+                        text = "${getString(R.string.wallet_status_syncing_waiting)}"
+                    }
+                    WalletState.SyncState.FAILED -> {
+                        text = "${getString(R.string.wallet_status_disconnected)}"
+                    }
+                }
             }
 
             titleLabel.apply {
