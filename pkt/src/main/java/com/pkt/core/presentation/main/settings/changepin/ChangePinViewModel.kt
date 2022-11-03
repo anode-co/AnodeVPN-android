@@ -7,6 +7,7 @@ import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,13 +31,14 @@ class ChangePinViewModel @Inject constructor(
 
             else -> {
                 invokeAction {
-                    walletRepository.changePin(enterPassword, enterPin)
+                    walletRepository.checkWalletPassphrase(enterPassword)
                         .onSuccess {
+                            walletRepository.changePin(enterPassword, enterPin)
                             sendEvent(CommonEvent.Info(R.string.success))
+                            delay(1000)
                             sendNavigation(AppNavigation.NavigateBack)
-                        }
-                        .onFailure {
-                            sendError(it)
+                        }.onFailure {
+                            sendError(Throwable("Wrong password"))
                         }
                 }
             }
