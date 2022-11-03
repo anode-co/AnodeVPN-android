@@ -18,20 +18,13 @@ class CjdnsInfoActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(
                     android.R.id.content,
-                    CjdnsInfoFragment().apply {
-                        arguments = bundleOf("address" to intent.getStringExtra(EXTRA_ADDRESS))
-                    }
+                    CjdnsInfoFragment().apply {}
                 )
                 .commit()
         }
     }
 
     companion object {
-
-        private const val EXTRA_ADDRESS = "EXTRA_ADDRESS"
-
-        fun getIntent(context: Context, address: String) = Intent(context, CjdnsInfoActivity::class.java).apply {
-            putExtra(EXTRA_ADDRESS, address)
-        }
+        fun getIntent(context: Context, address: String) = Intent(context, CjdnsInfoActivity::class.java).apply {}
     }
 }
