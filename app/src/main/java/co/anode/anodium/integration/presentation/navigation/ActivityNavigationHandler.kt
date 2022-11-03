@@ -2,8 +2,7 @@ package co.anode.anodium.integration.presentation.navigation
 
 import android.content.Intent
 import androidx.fragment.app.Fragment
-import co.anode.anodium.integration.presentation.CreateWalletActivity
-import co.anode.anodium.integration.presentation.WalletActivity
+import co.anode.anodium.integration.presentation.*
 import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
 import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import com.pkt.core.presentation.navigation.AppNavigationHandler
@@ -47,14 +46,18 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openVpnExits(fragment: Fragment) {
-        TODO("Not yet implemented")
+        fragment.startActivity(VPNExitsActivity.getIntent(fragment.requireContext()))
     }
 
     override fun openChangePassword(fragment: Fragment) {
-        TODO("Not yet implemented")
+        fragment.startActivity(ChangePasswordActivity.getIntent(fragment.requireContext()))
     }
 
     override fun openChangePin(fragment: Fragment) {
+        fragment.startActivity(ChangePINActivity.getIntent(fragment.requireContext()))
+    }
+
+    override fun openSendTransaction(fragment: Fragment) {
         TODO("Not yet implemented")
     }
 }
