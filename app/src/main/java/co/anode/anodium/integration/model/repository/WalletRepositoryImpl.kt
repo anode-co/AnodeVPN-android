@@ -12,6 +12,7 @@ import com.pkt.domain.repository.WalletRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -85,9 +86,9 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             }
             return@runCatching balance
         }.onSuccess {
-            Timber.d("getCurrentAddress: success")
+            Timber.d("getTotalWalletBalance: success")
         }.onFailure {
-            Timber.e(it, "getCurrentAddress: failure")
+            Timber.e(it, "getTotalWalletBalance: failure")
         }
     }
 
@@ -106,9 +107,9 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             }
             return@runCatching balance
         }.onSuccess {
-            Timber.d("getCurrentAddress: success")
+            Timber.d("getWalletBalance: success")
         }.onFailure {
-            Timber.e(it, "getCurrentAddress: failure")
+            Timber.e(it, "getWalletBalance: failure")
         }
     }
 
@@ -118,10 +119,6 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
         }
         return Result.success(walletInfo)
-    }
-
-    override suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo> {
-        TODO("Not yet implemented")
     }
 
     override suspend fun generateSeed(password: String, pin: String): Result<String> {
@@ -203,26 +200,6 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun getCurrentAddress(): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            val addresses = walletAPI.getWalletBalances(true)
-            //Get the address with the heighest balance
-            var balance = -1.0
-            var address = ""
-            for (i in 0 until addresses.addrs.size) {
-                if (addresses.addrs[i].total > balance) {
-                    balance = addresses.addrs[i].total
-                    address = addresses.addrs[i].address
-                }
-            }
-            return@runCatching address
-        }.onSuccess {
-            Timber.d("getCurrentAddress: success")
-        }.onFailure {
-            Timber.e(it, "getCurrentAddress: failure")
-        }
-    }
-
     override suspend fun getWalletTransactions(): Result<WalletTransactions> = withContext(Dispatchers.IO) {
         runCatching {
             walletAPI.getWalletTransactions(1, false, 0, 10)
@@ -233,32 +210,52 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun send(address: String, amount: Double): Result<SendResponse> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getSeed(): Result<String> {
-        TODO("Not yet implemented")
+        val response = walletAPI.getWalletSeed()
+        return if (response.seed.isNotEmpty()) {
+            Result.success(response.seed.joinToString(" "))
+        } else {
+            Result.failure(Exception("Failed to get seed: ${response.message}"))
+        }
     }
 
     override suspend fun renameWallet(name: String): Result<String?> {
-        TODO("Not yet implemented")
+        val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
+        walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
+        activeWallet = name
+        return Result.success(name)
     }
 
     override suspend fun checkWalletName(name: String): Result<String?> {
-        TODO("Not yet implemented")
+        val existingWallets = getAllWalletNames().getOrThrow()
+        if (existingWallets.contains(name)) {
+            return Result.failure(Exception("Wallet name already exists"))
+        } else {
+            return Result.success(name)
+        }
     }
 
     override suspend fun deleteWallet(name: String): Result<String?> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean> {
+        val request = ChangePassphraseRequest(oldPassword, newPassword)
+        val response = walletAPI.changePassphrase(request)
+        return if (response.message.isNotEmpty()) {
+            Result.failure(Exception("Failed to change password: ${response.message}"))
+        } else {
+            //TODO: remove store PIN and encrypted password
+            Result.success(true)
+        }
     }
 
-    override suspend fun changePin(password: String, pin: String): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun changePin(password: String, pin: String) {
+        //Encrypt password using PIN and save it in encrypted shared preferences
+        val encryptedPassword = AnodeUtil.encrypt(password, pin)
+        AnodeUtil.storeWalletPassword(encryptedPassword,activeWallet)
+        //Store PIN in encrypted shared preferences
+        AnodeUtil.storeWalletPin(pin,activeWallet)
     }
 
     override suspend fun generateQr(address: String): Result<Bitmap> {
@@ -294,6 +291,25 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             return Result.success(response)
         } else {
             return Result.failure(Exception("Failed to send coins"))
+        }
+    }
+
+    override suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean> {
+        val request = ChangePassphraseRequest(oldPassphrase, newPassphrase)
+        val response = walletAPI.changePassphrase(request)
+        if (!response.message.isNullOrEmpty()) {
+            return Result.failure(Exception("Failed to change passphrase: ${response.message}"))
+        } else {
+            return Result.success(true)
+        }
+    }
+
+    override suspend fun getSecret(): Result<String> {
+        val response = walletAPI.getSecret()
+        return if (response.secret.isNotEmpty()) {
+            Result.success(response.secret)
+        } else {
+            Result.failure(Exception("Failed to get secret: ${response.message}"))
         }
     }
 
