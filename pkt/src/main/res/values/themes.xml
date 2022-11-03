@@ -17,6 +17,7 @@
         <item name="colorOnSuccess">@color/text1</item>
         <item name="colorProgress">@color/yellow</item>
         <item name="colorOnProgress">@color/text1</item>
+        <item name="colorDownloading">@color/orange</item>
 
         <item name="android:windowBackground">@color/bg1</item>
         <item name="android:statusBarColor">?android:windowBackground</item>

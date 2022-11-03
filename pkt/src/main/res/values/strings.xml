@@ -190,5 +190,18 @@
     <string name="qr_scan_code">QR Scan Code</string>
     <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
     <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
-
+    <!--Wallet Status messages-->
+    <string name="wallet_status_disconnected">Connecting to peers</string>
+    <string name="wallet_status_syncing_headers">Downloading:</string>
+    <string name="wallet_status_syncing_transactions">Scanning:</string>
+    <string name="wallet_status_syncing_waiting">Waiting for data...</string>
+    <string name="wallet_status_synced">Block: </string>
+    <string name="wallet_status_unlocking">Unlocking wallet…</string>
+    <string name="wallet_status_unlock">Wallet unlocked</string>
+    <string name="minutes_ago">minutes old</string>
+    <string name="minute_ago">minute old</string>
+    <string name="seconds_ago">seconds old</string>
+    <string name="creating_wallet">Creating wallet please wait…</string>
+    <string name="generating_wallet_seed">Generating seed phrase…</string>
+    <string name="recovering_wallet">Recovering wallet please wait…</string>
 </resources>

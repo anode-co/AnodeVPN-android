@@ -4,6 +4,7 @@
     <attr name="colorSuccess" format="color|reference" />
     <attr name="colorOnSuccess" format="color|reference" />
     <attr name="colorProgress" format="color|reference" />
+    <attr name="colorDownloading" format="color|reference" />
     <attr name="colorOnProgress" format="color|reference" />
 
     <color name="color1">#4BA7C4</color>
@@ -18,5 +19,6 @@
     <color name="red">#D42343</color>
     <color name="green">#37B761</color>
     <color name="yellow">#EED23B</color>
+    <color name="orange">#FE5000</color>
 
 </resources>
