@@ -1,7 +1,6 @@
 package com.pkt.domain.interfaces
 
 import com.pkt.domain.dto.*
-import org.json.JSONArray
 import retrofit2.http.*
 
 interface VpnAPI {

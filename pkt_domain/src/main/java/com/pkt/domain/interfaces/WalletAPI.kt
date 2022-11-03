@@ -32,4 +32,8 @@ interface WalletAPI {
     suspend fun checkPassphrase(@Body checkPassphraseRequest: CheckPassphraseRequest): CheckPassphraseResponse
     @POST("wallet/changepassphrase")
     suspend fun changePassphrase(@Body changePassphraseRequest: ChangePassphraseRequest): ChangePassphraseResponse
+    @GET("wallet/seed")
+    suspend fun getWalletSeed(): GetSeedResponse
+    @POST
+    suspend fun getSecret(@Body empty: RequestBody): GetSecretResponse
 }

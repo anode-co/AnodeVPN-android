@@ -4,6 +4,20 @@ import kotlinx.serialization.Serializable
 import org.json.JSONArray
 
 @Serializable
+data class GetSecretResponse(
+    val secret: String,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Serializable
+data class GetSeedResponse(
+    val seed: List<String>,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Serializable
 data class ChangePassphraseRequest(
     val current_passphrase: String,
     val new_passphrase: String
@@ -36,7 +50,9 @@ data class CheckPassphraseRequest(
 
 @Serializable
 data class CheckPassphraseResponse(
-    val validPassphrase: Boolean
+    val validPassphrase: Boolean,
+    var message: String = "",
+    val stack: String = ""
 )
 
 @Serializable

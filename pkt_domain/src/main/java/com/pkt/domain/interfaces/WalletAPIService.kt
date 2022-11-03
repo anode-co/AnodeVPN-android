@@ -96,6 +96,18 @@ class WalletAPIService {
     suspend fun checkPassphrase(request: CheckPassphraseRequest): CheckPassphraseResponse {
         return api.checkPassphrase(request)
     }
+
+    suspend fun changePassphrase(request: ChangePassphraseRequest): ChangePassphraseResponse {
+        return api.changePassphrase(request)
+    }
+
+    suspend fun getWalletSeed(): GetSeedResponse {
+        return api.getWalletSeed()
+    }
+
+    suspend fun getSecret(): GetSecretResponse {
+        return api.getSecret("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+    }
 }
 
 class NullOnEmptyConverterFactory : Converter.Factory() {
