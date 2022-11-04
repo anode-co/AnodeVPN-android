@@ -100,7 +100,7 @@ class WalletInfoViewModel @Inject constructor(
     override fun createInitialState() = WalletInfoState()
 
     fun onDetailsClick() {
-        sendNavigation(AppNavigation.OpenCjdnsInfo(address))
+        sendNavigation(AppNavigation.OpenCjdnsInfo)
     }
 
     fun onDebugLogsClick() {

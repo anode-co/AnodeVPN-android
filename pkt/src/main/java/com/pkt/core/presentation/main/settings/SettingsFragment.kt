@@ -136,7 +136,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
         when (event) {
             is SettingsEvent.OpenWalletInfo -> mainViewModel.openWalletInfo(event.address)
-            is SettingsEvent.OpenCjdnsInfo -> mainViewModel.openCjdnsInfo(event.address)
+            is SettingsEvent.OpenCjdnsInfo -> mainViewModel.openCjdnsInfo()
 
             is SettingsEvent.OpenShowSeed -> {
                 ShowSeedBottomSheet().show(childFragmentManager, ShowSeedBottomSheet.TAG)

@@ -13,7 +13,7 @@ sealed class SettingsEvent : UiEvent {
 
     data class OpenWalletInfo(val address: String) : SettingsEvent()
 
-    data class OpenCjdnsInfo(val address: String) : SettingsEvent()
+    object OpenCjdnsInfo : SettingsEvent()
 
     object OpenShowSeed : SettingsEvent()
     object OpenConsent : SettingsEvent()

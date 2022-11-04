@@ -17,8 +17,8 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenWalletInfo(address))
     }
 
-    fun openCjdnsInfo(address: String) {
-        sendNavigation(AppNavigation.OpenCjdnsInfo(address))
+    fun openCjdnsInfo() {
+        sendNavigation(AppNavigation.OpenCjdnsInfo)
     }
 
     fun openVpnExits() {
