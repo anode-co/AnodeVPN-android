@@ -90,11 +90,6 @@
         android:name="com.pkt.core.presentation.main.settings.cjdnsinfo.CjdnsInfoFragment"
         android:label="Cjdns Info"
         tools:layout="@layout/fragment_cjdns_info">
-
-        <argument
-            android:name="address"
-            app:argType="string" />
-
     </fragment>
 
     <dialog

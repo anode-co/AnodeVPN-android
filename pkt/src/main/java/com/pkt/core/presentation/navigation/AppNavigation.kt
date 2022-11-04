@@ -7,7 +7,7 @@ sealed class AppNavigation : UiNavigation {
 
     object NavigateBack : AppNavigation()
 
-    data class OpenCjdnsInfo(val address: String) : AppNavigation()
+    object OpenCjdnsInfo : AppNavigation()
     data class OpenWalletInfo(val address: String) : AppNavigation()
     data class OpenCreateWallet(val name: String? = null) : AppNavigation()
     object OpenRecoverWallet : AppNavigation()

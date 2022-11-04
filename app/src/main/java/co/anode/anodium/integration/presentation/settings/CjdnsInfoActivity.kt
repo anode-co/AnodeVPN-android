@@ -25,6 +25,6 @@ class CjdnsInfoActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun getIntent(context: Context, address: String) = Intent(context, CjdnsInfoActivity::class.java).apply {}
+        fun getIntent(context: Context) = Intent(context, CjdnsInfoActivity::class.java).apply {}
     }
 }

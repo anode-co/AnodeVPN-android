@@ -14,8 +14,8 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.requireActivity().finish()
     }
 
-    override fun openCjdnsInfo(fragment: Fragment, address: String) {
-        fragment.startActivity(CjdnsInfoActivity.getIntent(fragment.requireContext(), address))
+    override fun openCjdnsInfo(fragment: Fragment) {
+        fragment.startActivity(CjdnsInfoActivity.getIntent(fragment.requireContext()))
     }
 
     override fun openWalletInfo(fragment: Fragment, address: String) {

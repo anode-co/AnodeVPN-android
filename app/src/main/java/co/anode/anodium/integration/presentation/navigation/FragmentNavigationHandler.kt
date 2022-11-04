@@ -15,8 +15,8 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         }
     }
 
-    override fun openCjdnsInfo(fragment: Fragment, address: String) {
-        navigate(fragment, NavGraphDirections.toCjdnsInfo(address))
+    override fun openCjdnsInfo(fragment: Fragment) {
+        navigate(fragment, NavGraphDirections.toCjdnsInfo())
     }
 
     override fun openWalletInfo(fragment: Fragment, address: String) {
