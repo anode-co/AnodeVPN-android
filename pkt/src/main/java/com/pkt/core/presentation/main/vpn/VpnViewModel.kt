@@ -2,6 +2,7 @@ package com.pkt.core.presentation.main.vpn
 
 import androidx.lifecycle.viewModelScope
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.domain.dto.Vpn
 import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -22,6 +23,33 @@ class VpnViewModel @Inject constructor(
     private var timerJob: Job? = null
 
     init {
+        invokeLoadingAction {
+            runCatching {
+                val ipv4 = vpnRepository.getIPv4Address().getOrNull()
+                val ipv6 = vpnRepository.getIPv6Address().getOrNull()
+                val list = vpnRepository.fetchVpnList().getOrThrow()
+                //Set default VPN
+                var vpn = Vpn("Anode","US","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
+                //Check list for default VPN name
+                if (list.isNotEmpty()) {
+                    for (item in list) {
+                        if (item.name == "2022-virtual.anode.co") {
+                            vpn = item
+                            break
+                        }
+                    }
+                }
+                Triple(ipv4,ipv6, vpn)
+            }.onSuccess { (ipv4, ipv6, vpn) ->
+                sendState {
+                    copy(
+                        vpn = vpn,
+                        ipV4 = ipv4,
+                        ipV6 = ipv6,
+                    )
+                }
+            }
+        }
 //        sendEvent(VpnEvent.OpenConsent)
 
         viewModelScope.launch {
@@ -56,29 +84,13 @@ class VpnViewModel @Inject constructor(
             }.collect()
         }
 
-        createLoadingAction()
+        //createLoadingAction()
     }
 
     override fun createInitialState() = VpnState(
         ipV4 = "",
         ipV6 = ""
     )
-
-    private fun createLoadingAction(): (suspend () -> Result<*>) = {
-        runCatching {
-            val ipv4 = vpnRepository.getIPv4Address().getOrNull()
-            val ipv6 = vpnRepository.getIPv6Address().getOrNull()
-            val list = vpnRepository.fetchVpnList()
-            Triple(ipv4,ipv6, list)
-        }.onSuccess { (ipv4, ipv6, list) ->
-            sendState {
-                copy(
-                    ipV4 = ipv4,
-                    ipV6 = ipv6,
-                )
-            }
-        }
-    }
 
     fun onConsentResult(success: Boolean) {
         // TODO("Not yet implemented")

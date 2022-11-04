@@ -46,7 +46,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
             vpnList.find { it.name == currentVpn } ?: vpnList.firstOrNull()
         }
 
-    override suspend fun fetchVpnList(force: Boolean): Result<Boolean> {
+    override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
         val list = vpnAPI.getVpnServersList()
 
         val vpnList: MutableList<Vpn> = mutableListOf()
@@ -55,7 +55,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
             vpnList.add(Vpn(server.name, server.countryCode, server.publicKey))
         }
         _vpnListFlow.tryEmit(vpnList)
-        return Result.success(true)
+        return Result.success(vpnList)
     }
 
     override suspend fun setCurrentVpn(name: String): Result<Unit> {

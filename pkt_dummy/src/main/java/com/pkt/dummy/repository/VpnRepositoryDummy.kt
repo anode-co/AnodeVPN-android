@@ -33,12 +33,12 @@ class VpnRepositoryDummy : VpnRepository {
     override val startConnectionTime: Long
         get() = _startConnectionTime
 
-    override suspend fun fetchVpnList(force: Boolean): Result<Boolean> {
+    override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
         if (_vpnListFlow.value.isEmpty() || force) {
             delay(1000L)
             _vpnListFlow.tryEmit(VPN_LIST)
         }
-        return Result.success(true)
+        return Result.success(listOf())
     }
 
     override suspend fun setCurrentVpn(name: String) :Result <Unit>{
