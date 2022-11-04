@@ -226,4 +226,8 @@ class WalletRepositoryDummy constructor(
     override suspend fun getSecret(): Result<String> {
         TODO("Not yet implemented")
     }
+
+    override fun isPKTAddressValid(address: String): Result<String> {
+        TODO("Not yet implemented")
+    }
 }

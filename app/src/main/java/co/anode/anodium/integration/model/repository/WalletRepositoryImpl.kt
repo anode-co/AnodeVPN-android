@@ -313,4 +313,20 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
+    override fun isPKTAddressValid(address: String): Result<String> {
+        val longRegex = "(pkt1)([a-zA-Z0-9]{59})".toRegex()
+        val shortRegex = "(pkt1)([a-zA-Z0-9]{39})".toRegex()
+        var trimmedAddress = longRegex.find(address,0)?.value
+        if (trimmedAddress.isNullOrEmpty()){
+            trimmedAddress = shortRegex.find(address,0)?.value
+            if (trimmedAddress.isNullOrEmpty()) {
+                return Result.failure(Exception("Invalid PKT address"))
+            } else {
+                return Result.success(trimmedAddress)
+            }
+        } else {
+            return Result.success(trimmedAddress)
+        }
+    }
+
 }

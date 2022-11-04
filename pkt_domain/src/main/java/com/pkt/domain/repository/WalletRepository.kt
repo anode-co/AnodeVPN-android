@@ -60,4 +60,6 @@ interface WalletRepository {
     suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean>
     //Get secret
     suspend fun getSecret(): Result<String>
+    //Validate PKT address
+    fun isPKTAddressValid(address: String): Result<String>
 }
