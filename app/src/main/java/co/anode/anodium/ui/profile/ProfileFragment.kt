@@ -136,7 +136,11 @@ class ProfileFragment : Fragment() {
         }
         val dataConsentButton = root.findViewById<LinearLayout>(R.id.button_data_collection)
         dataConsentButton.setOnClickListener {
-            AboutDialog.show(requireActivity())
+            if (prefs.getBoolean("useNewUI", false)) {
+                startActivity(Intent(mycontext, CjdnsInfoActivity::class.java))
+            } else {
+                AboutDialog.show(requireActivity())
+            }
         }
         val addWalletButton = root.findViewById<ImageButton>(R.id.button_add_wallet)
         addWalletButton.setOnClickListener {
@@ -162,10 +166,10 @@ class ProfileFragment : Fragment() {
         }
 
         //check for new UI
-/*        if (prefs.getBoolean("useNewUI", false)) {
+        if (prefs.getBoolean("useNewUI", false)) {
             val settingsActivity = Intent(mycontext, SettingsActivity::class.java)
             startActivity(settingsActivity)
-        }*/
+        }
 
         walletsSpinner = root.findViewById(R.id.wallet_selector)
         walletNames = AnodeUtil.getWalletFiles()
