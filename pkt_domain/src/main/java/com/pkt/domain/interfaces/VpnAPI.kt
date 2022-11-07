@@ -6,13 +6,12 @@ import retrofit2.http.*
 interface VpnAPI {
     @GET("vpn/servers/")
     suspend fun getVpnServersList(): List<VpnServer>
-    @GET("api/0.3/vpn/clients/ipaddress/")
+    @GET("vpn/clients/ipaddress/")
     suspend fun getIPv4Address(): IpAddress
-    @GET("api/0.3/vpn/clients/ipaddress/")
+    @GET("vpn/clients/ipaddress/")
     suspend fun getIPv6Address(): IpAddress
-    //GenerateUsername
-    //PostError
-    //AuthorizeVPN
+    @GET("vpn/cjdns/peeringlines/")
+    suspend fun getCjdnsPeeringLines(): List<CjdnsPeeringLine>
     @Headers("Content-Type: application/json; charset=utf-8")
     @POST("authorize/")
     suspend fun authorizeVPN(@Header("Authorization") signature: String, @Body requestAuthorizeVpn:RequestAuthorizeVpn): ResponseAuthorizeVpn

@@ -6,6 +6,7 @@ import co.anode.anodium.AnodeVpnService
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
+import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.interfaces.VpnAPIService
@@ -13,7 +14,6 @@ import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.security.MessageDigest
 import java.util.*
@@ -103,6 +103,10 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         }
 
         return Result.success(true)
+    }
+
+    override suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>> {
+        return Result.success(vpnAPI.getCjdnsPeeringLines())
     }
 
     override suspend fun disconnect(): Result<Boolean> {

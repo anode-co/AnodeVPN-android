@@ -1,6 +1,7 @@
 package com.pkt.domain.interfaces
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.RequestAuthorizeVpn
 import com.pkt.domain.dto.VpnServer
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -29,7 +30,7 @@ class VpnAPIService {
 
     suspend fun getIPv4Address(): String {
         val api = Retrofit.Builder()
-            .baseUrl("http://v4.vpn.anode.co/")
+            .baseUrl("http://v4.vpn.anode.co/api/$apiVersion/")
             .addConverterFactory(converter)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
@@ -39,7 +40,7 @@ class VpnAPIService {
 
     suspend fun getIPv6Address(): String {
         val api = Retrofit.Builder()
-            .baseUrl("http://v6.vpn.anode.co/")
+            .baseUrl("http://v6.vpn.anode.co/api/$apiVersion/")
             .addConverterFactory(converter)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
@@ -73,5 +74,9 @@ class VpnAPIService {
         } else {
             return Result.failure(Exception(response.message))
         }
+    }
+
+    suspend fun getCjdnsPeeringLines(): List<CjdnsPeeringLine> {
+        return vpnApi.getCjdnsPeeringLines()
     }
 }

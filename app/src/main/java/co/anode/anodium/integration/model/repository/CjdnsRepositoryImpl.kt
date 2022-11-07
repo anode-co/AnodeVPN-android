@@ -7,6 +7,7 @@ import co.anode.anodium.support.CjdnsSocket
 import com.pkt.domain.dto.CjdnsConnection
 import com.pkt.domain.dto.CjdnsInfo
 import com.pkt.domain.dto.CjdnsPeer
+import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.repository.CjdnsRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,6 +50,17 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
             result.add(CjdnsConnection(ipv4Address, ipv6Address, key, ipv4Alloc, error, ipv6Alloc, ipv4Prefix, ipv6Prefix, outgoing))
         }
         return result
+    }
+
+    override suspend fun addCjdnsPeers(peers: List<CjdnsPeeringLine>): Boolean {
+        try {
+            for (i in peers.indices) {
+                CjdnsSocket.UDPInterface_beginConnection(peers[i].publicKey, peers[i].ip, peers[i].port, peers[i].password, peers[i].login)
+            }
+            return true
+        }catch (e: Exception) {
+            return false
+        }
     }
 
     override suspend fun getCjdnsInfo(): Result<CjdnsInfo> {

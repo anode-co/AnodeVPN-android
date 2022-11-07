@@ -1,5 +1,6 @@
 package com.pkt.domain.repository
 
+import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnServer
 import com.pkt.domain.dto.VpnState
@@ -20,4 +21,5 @@ interface VpnRepository {
     suspend fun getIPv4Address(): Result<String>
     suspend fun getIPv6Address(): Result<String>
     suspend fun authorizeVPN(): Result<Boolean>
+    suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>>
 }
