@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
+import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.VpnRepository
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 import kotlin.math.absoluteValue
@@ -16,6 +18,8 @@ import kotlin.math.absoluteValue
 class WalletViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
+    private val vpnRepository: VpnRepository,
+    private val cjdnsRepository: CjdnsRepository,
 ) : StateViewModel<WalletState>() {
 
     //private val walletName: String = savedStateHandle["walletName"]
@@ -29,6 +33,14 @@ class WalletViewModel @Inject constructor(
 
     init {
         invokeLoadingAction {
+            /*val vpnRepository: VpnRepository = VpnRepositoryImpl()
+            val cjdnsRepository: CjdnsRepository = CjdnsRepositoryImpl()*/
+            val peers = vpnRepository.getCjdnsPeers().getOrNull()
+            if (peers != null) {
+                cjdnsRepository.addCjdnsPeers(peers)
+            } else {
+                //TODO: no peering lines
+            }
             runCatching {
                 loadWalletInfo()
             }.onSuccess {

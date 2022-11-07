@@ -84,19 +84,6 @@ class MainActivity : AppCompatActivity() {
         newUI = true//DEBUG
         if (newUI) {
             prefs.edit().putBoolean("useNewUI", false).apply()
-
-            CoroutineScope(newSingleThreadContext("VpnRepository")).launch {
-                val vpnRepository:VpnRepository = VpnRepositoryImpl()
-                val cjdnsRepository: CjdnsRepository = CjdnsRepositoryImpl()
-                val peers = vpnRepository.getCjdnsPeers().getOrNull()
-                if (peers != null) {
-                    cjdnsRepository.addCjdnsPeers(peers)
-                } else {
-                    //TODO: no peering lines
-                }
-            }
-
-
             startActivity(Intent(this, PktMainActivity::class.java))
         } else {
             AnodeUtil.addCjdnsPeers()
