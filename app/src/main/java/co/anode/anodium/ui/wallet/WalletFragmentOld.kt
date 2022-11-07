@@ -41,7 +41,7 @@ import java.util.*
 import java.util.concurrent.Executors
 
 
-class WalletFragment : Fragment() {
+class WalletFragmentOld : Fragment() {
     private val LOGTAG = BuildConfig.APPLICATION_ID
     private var _binding: FragmentWalletBinding? = null
     lateinit var statusBar: TextView
@@ -159,12 +159,8 @@ class WalletFragment : Fragment() {
         if (walletFiles.size < 1) {
             Log.i(LOGTAG, "Open password prompt activity, no wallet file found")
             val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
-            if (prefs.getBoolean("useNewUI", false)) {
-               //TODO: launch new screens
-            } else {
-                val newWalletActivity = Intent(context, NewWalletActivity::class.java)
-                startActivity(newWalletActivity)
-            }
+            val newWalletActivity = Intent(context, NewWalletActivity::class.java)
+            startActivity(newWalletActivity)
         } else if (!activeWalletFile.exists()){
             activeWallet = walletFiles[0]
             Log.i(LOGTAG, "Active wallet file not found, will try to open $activeWallet.")
@@ -181,13 +177,7 @@ class WalletFragment : Fragment() {
         if(isAdded) {
             //Show cached info
             showCachedData()
-            //Delay getinfo when we want to use the new ui to allow user to enter other screens
-            val prefs = requireActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
-            if (prefs.getBoolean("useNewUI",false)) {
-                h.postDelayed(getPldInfo, 5000)
-            } else {
-                h.postDelayed(getPldInfo, 0)
-            }
+            h.postDelayed(getPldInfo, 0)
         }
     }
 
@@ -222,16 +212,8 @@ class WalletFragment : Fragment() {
                     if (walletPasswordQuickRetry != null){
                         unlockWallet(walletPasswordQuickRetry!!)
                     } else {
-                        if (prefs.getBoolean("useNewUI",false)) {
-                            showNewWalletUnlockFragment()
-                        } else {
-                            pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
-                        }
-//                        pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
+                        pinOrPasswordPrompt(wrongPass = false, forcePassword = false)
                     }
-                    return@get
-                } else if (prefs.getBoolean("useNewUI",false)){
-                    showNewWalletFragment()
                     return@get
                 } else {
                     h.postDelayed(getPldInfo, refreshPldInterval)
@@ -346,18 +328,6 @@ class WalletFragment : Fragment() {
                 walletActivity.putExtra("WALLET_NAME", activeWallet)
                 walletActivity.putExtra("PKT_TO_USD", price)
                 startActivity(walletActivity)
-            }
-        }
-    }
-
-    private fun showNewWalletUnlockFragment() {
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-        executor.execute {
-            handler.post {
-                val enterWalletActivity = Intent(mycontext, EnterWalletActivity::class.java)
-                enterWalletActivity.putExtra("WALLET_NAME", activeWallet)
-                startActivity(enterWalletActivity)
             }
         }
     }

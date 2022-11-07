@@ -75,14 +75,10 @@ class ProfileFragment : Fragment() {
         val changePasswordButton = root.findViewById<LinearLayout>(R.id.button_change_password)
         changePasswordButton.setOnClickListener {
             Log.i(LOGTAG, "Open PasswordPrompt activity for changing password")
-            if (prefs.getBoolean("useNewUI", false)) {
-                startActivity(Intent(mycontext, ChangePasswordActivity::class.java))
-            } else {
-                val promptPasswordActivity = Intent(mycontext, PasswordPrompt::class.java)
-                promptPasswordActivity.putExtra("changepassphrase", true)
-                promptPasswordActivity.putExtra("walletName", activeWallet)
-                startActivity(promptPasswordActivity)
-            }
+            val promptPasswordActivity = Intent(mycontext, PasswordPrompt::class.java)
+            promptPasswordActivity.putExtra("changepassphrase", true)
+            promptPasswordActivity.putExtra("walletName", activeWallet)
+            startActivity(promptPasswordActivity)
         }
         val showSeedButton = root.findViewById<LinearLayout>(R.id.button_show_seed)
         showSeedButton.setOnClickListener {
@@ -91,38 +87,24 @@ class ProfileFragment : Fragment() {
         val cjdnsStatsButton = root.findViewById<LinearLayout>(R.id.button_cjdns_stats)
         cjdnsStatsButton.setOnClickListener {
             Log.i(LOGTAG, "Start cjdns stats (debug) activity")
-            if (prefs.getBoolean("useNewUI", false)) {
-                startActivity(Intent(mycontext, CjdnsInfoActivity::class.java))
-            } else {
-                startActivity(Intent(mycontext, CjdnsStatsActivity::class.java))
-            }
+            startActivity(Intent(mycontext, CjdnsStatsActivity::class.java))
         }
         val walletStatsButton = root.findViewById<LinearLayout>(R.id.button_wallet_stats)
         walletStatsButton.setOnClickListener {
             Timber.tag(LOGTAG).i("Start wallet stats activity")
-            //check for new UI
-            if (prefs.getBoolean("useNewUI", false)) {
-                val statsActivity = Intent(mycontext, WalletInfoActivity::class.java)
-                statsActivity.putExtra("walletName", activeWallet)
-                startActivity(statsActivity)
-            } else {
-                val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
-                statsActivity.putExtra("walletName", activeWallet)
-                startActivity(statsActivity)
-            }
+
+            val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
+            statsActivity.putExtra("walletName", activeWallet)
+            startActivity(statsActivity)
         }
         val setPinButton = root.findViewById<LinearLayout>(R.id.button_set_pin)
         setPinButton.setOnClickListener {
             Timber.tag(LOGTAG).i("Open PasswordPin activity for setting PIN")
-            if (prefs.getBoolean("useNewUI", false)) {
-                startActivity(Intent(mycontext, ChangePINActivity::class.java))
-            } else {
-                val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
-                promptPinActivity.putExtra("changepassphrase", true)
-                promptPinActivity.putExtra("noNext", true)
-                promptPinActivity.putExtra("walletName", activeWallet)
-                startActivity(promptPinActivity)
-            }
+            val promptPinActivity = Intent(mycontext, PinPrompt::class.java)
+            promptPinActivity.putExtra("changepassphrase", true)
+            promptPinActivity.putExtra("noNext", true)
+            promptPinActivity.putExtra("walletName", activeWallet)
+            startActivity(promptPinActivity)
         }
         val checkUpdateButton = root.findViewById<LinearLayout>(R.id.button_check_update)
         //Disable update option for other builds
@@ -136,11 +118,7 @@ class ProfileFragment : Fragment() {
         }
         val dataConsentButton = root.findViewById<LinearLayout>(R.id.button_data_collection)
         dataConsentButton.setOnClickListener {
-            if (prefs.getBoolean("useNewUI", false)) {
-                startActivity(Intent(mycontext, CjdnsInfoActivity::class.java))
-            } else {
-                AboutDialog.show(requireActivity())
-            }
+            AboutDialog.show(requireActivity())
         }
         val addWalletButton = root.findViewById<ImageButton>(R.id.button_add_wallet)
         addWalletButton.setOnClickListener {
@@ -163,12 +141,6 @@ class ProfileFragment : Fragment() {
             }
             val shareIntent = Intent.createChooser(sendIntent, null)
             startActivity(shareIntent)
-        }
-
-        //check for new UI
-        if (prefs.getBoolean("useNewUI", false)) {
-            val settingsActivity = Intent(mycontext, SettingsActivity::class.java)
-            startActivity(settingsActivity)
         }
 
         walletsSpinner = root.findViewById(R.id.wallet_selector)

@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -20,8 +21,16 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.anode.anodium.databinding.ActivityMainBinding
+import co.anode.anodium.integration.model.repository.CjdnsRepositoryImpl
+import co.anode.anodium.integration.model.repository.VpnRepositoryImpl
 import co.anode.anodium.support.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.VpnRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -30,7 +39,7 @@ import java.util.*
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val REQUIRED_SDK_PERMISSIONS = arrayOf(
@@ -63,20 +72,43 @@ class MainActivity : AppCompatActivity() {
             finish()
             exitProcess(0)
         }
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
         }
 
-        val navView: BottomNavigationView = binding.navView
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         initializeApp()
-        val navController = navHostFragment.navController
-        navView.setupWithNavController(navController)
 
+        val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
+        var newUI = prefs.getBoolean("useNewUI", false)
+        newUI = true//DEBUG
+        if (newUI) {
+            prefs.edit().putBoolean("useNewUI", false).apply()
+
+            CoroutineScope(newSingleThreadContext("VpnRepository")).launch {
+                val vpnRepository:VpnRepository = VpnRepositoryImpl()
+                val cjdnsRepository: CjdnsRepository = CjdnsRepositoryImpl()
+                val peers = vpnRepository.getCjdnsPeers().getOrNull()
+                if (peers != null) {
+                    cjdnsRepository.addCjdnsPeers(peers)
+                } else {
+                    //TODO: no peering lines
+                }
+            }
+
+
+            startActivity(Intent(this, PktMainActivity::class.java))
+        } else {
+            AnodeUtil.addCjdnsPeers()
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            val navView: BottomNavigationView = binding.navView
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
+
+            val navController = navHostFragment.navController
+            navView.setupWithNavController(navController)
+        }
         //start thread to look for Pkt.cube wifi
         searchForInternetSharing()
     }
@@ -104,7 +136,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        AnodeUtil.addCjdnsPeers()
         createNotificationChannel()
     }
 

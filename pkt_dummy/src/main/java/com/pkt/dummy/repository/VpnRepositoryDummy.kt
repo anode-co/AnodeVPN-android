@@ -1,5 +1,6 @@
 package com.pkt.dummy.repository
 
+import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnServer
 import com.pkt.domain.dto.VpnState
@@ -69,6 +70,10 @@ class VpnRepositoryDummy : VpnRepository {
     }
 
     override suspend fun authorizeVPN(): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>> {
         TODO("Not yet implemented")
     }
 

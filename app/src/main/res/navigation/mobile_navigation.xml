@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_vpn" />
     <fragment
         android:id="@+id/navigation_wallet"
-        android:name="co.anode.anodium.ui.wallet.WalletFragment"
+        android:name="co.anode.anodium.ui.wallet.WalletFragmentOld"
         android:label="@string/navigation_wallet"
         tools:layout="@layout/fragment_wallet_core" />
     <fragment

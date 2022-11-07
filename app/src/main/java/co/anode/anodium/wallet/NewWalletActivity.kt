@@ -29,13 +29,7 @@ class NewWalletActivity : AppCompatActivity() {
             startActivity(passwordActivity)
         }
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
-        var useNewUI = prefs.getBoolean("useNewUI", false)
-        useNewUI = true //DEBUG
-        if (useNewUI) {
-            val startWalletActivity = Intent(applicationContext, StartWalletActivity::class.java)
-            startWalletActivity.putExtra("WALLET_NAME", "wallet")//Default wallet name
-            startActivity(startWalletActivity)
-        }
+
         //On first run show data consent
         if (prefs.getBoolean("FirstRun", true)) {
             AboutDialog.show(this)

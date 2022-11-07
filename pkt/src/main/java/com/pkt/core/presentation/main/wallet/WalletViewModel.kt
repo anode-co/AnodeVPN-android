@@ -18,10 +18,12 @@ class WalletViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : StateViewModel<WalletState>() {
 
-    private val walletName: String = savedStateHandle["walletName"]
-        ?: throw IllegalArgumentException("walletName is required")
-    private val PKTtoUSD: String = savedStateHandle["PKTtoUSD"]
-        ?: throw IllegalArgumentException("PKTtoUSD is required")
+    //private val walletName: String = savedStateHandle["walletName"]
+    //    ?: throw IllegalArgumentException("walletName is required")
+    private val walletName: String = "wallet"
+    /*private val PKTtoUSD: String = savedStateHandle["PKTtoUSD"]
+        ?: throw IllegalArgumentException("PKTtoUSD is required")*/
+    private val PKTtoUSD: String = "0.001"
 
 
 

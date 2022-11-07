@@ -22,7 +22,7 @@ import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomShee
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
+class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
 
     private val viewBinding by viewBinding(FragmentWalletBinding::bind)
 
@@ -98,7 +98,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
                 compoundDrawableTintList = ColorStateList.valueOf(
                     context.getColorByAttribute(
                         when (state.syncState) {
-                            WalletState.SyncState.DOWNLOADING -> R.attr.colorProgress
+                            WalletState.SyncState.DOWNLOADING -> R.attr.colorDownloading
                             WalletState.SyncState.SCANNING -> R.attr.colorProgress
                             WalletState.SyncState.WAITING -> R.attr.colorProgress
                             WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
@@ -149,7 +149,11 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet) {
             }
 
             balancePktLabel.apply {
-                text = state.balancePkt.formatPkt(2)
+                text = if (state.balancePkt.isEmpty()) {
+                    "0.00"
+                } else {
+                    state.balancePkt.toLong().formatPkt()
+                }
                 applyGradient()
             }
 

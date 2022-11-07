@@ -122,9 +122,6 @@ class VPNFragmentMain : Fragment() {
                 disconnectVPN(showRatingBar = false)
             }
         }
-        if (prefs.getBoolean("useNewUI",false)) {
-            showNewVPNFragment()
-        }
         return root
     }
 
@@ -142,17 +139,6 @@ class VPNFragmentMain : Fragment() {
             } else {
                 //Initialize CJDNS socket
                 CjdnsSocket.init(AnodeUtil.filesDirectory + "/" + AnodeUtil.CJDROUTE_SOCK)
-            }
-        }
-    }
-
-    private fun showNewVPNFragment() {
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-        executor.execute {
-            handler.post {
-                val vpnActivity = Intent(mycontext, VpnActivity::class.java)
-                startActivity(vpnActivity)
             }
         }
     }
