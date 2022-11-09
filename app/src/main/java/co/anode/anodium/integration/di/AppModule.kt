@@ -4,6 +4,8 @@ import co.anode.anodium.BuildConfig
 import co.anode.anodium.integration.model.repository.CjdnsRepositoryImpl
 import co.anode.anodium.integration.model.repository.VpnRepositoryImpl
 import co.anode.anodium.integration.model.repository.WalletRepositoryImpl
+import co.anode.anodium.support.AnodeUtil
+import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.VpnRepository
@@ -21,6 +23,10 @@ object AppModule {
     @VersionName
     @Provides
     fun providesVersionName(): String = BuildConfig.VERSION_NAME
+
+    @Username
+    @Provides
+    fun providesUsername(): String = AnodeUtil.getUsername()
 
     @Provides
     @Singleton
