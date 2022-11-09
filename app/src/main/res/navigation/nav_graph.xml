@@ -18,7 +18,12 @@
     <action
         android:id="@+id/toCjdnsInfo"
         app:destination="@id/cjdnsInfo" />
-
+    <action
+        android:id="@+id/toChangePassword"
+        app:destination="@id/changePassword" />
+    <action
+        android:id="@+id/toChangePin"
+        app:destination="@id/changePin" />
     <action
         android:id="@+id/toCreateWallet"
         app:destination="@id/createWallet" />
@@ -57,7 +62,7 @@
 
     <fragment
         android:id="@+id/recoverWallet"
-        android:name="com.pkt.core.presentation.recoverwallet.RecoverWalletFragment"
+        android:name="com.pkt.core.presentation.createwallet.recoverwallet.RecoverWalletFragment"
         android:label="RecoverWallet"
         tools:layout="@layout/fragment_recover_wallet" />
 
@@ -86,6 +91,20 @@
     </fragment>
 
     <fragment
+        android:id="@+id/changePassword"
+        android:name="com.pkt.core.presentation.main.settings.changepassword.ChangePasswordFragment"
+        android:label="ChangePassword"
+        tools:layout="@layout/fragment_change_password">
+    </fragment>
+
+    <fragment
+        android:id="@+id/changePin"
+        android:name="com.pkt.core.presentation.main.settings.changepin.ChangePinFragment"
+        android:label="ChangePin"
+        tools:layout="@layout/fragment_change_pin">
+    </fragment>
+
+    <fragment
         android:id="@+id/cjdnsInfo"
         android:name="com.pkt.core.presentation.main.settings.cjdnsinfo.CjdnsInfoFragment"
         android:label="Cjdns Info"
@@ -96,7 +115,12 @@
         android:id="@+id/sendTransaction"
         android:name="com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet"
         android:label="SendTransaction"
-        tools:layout="@layout/bottom_sheet_send_transaction" />
+        tools:layout="@layout/bottom_sheet_send_transaction">
+        <argument
+            android:name="fromaddress"
+            app:argType="string" />
+
+    </dialog>
 
     <fragment
         android:id="@+id/sendConfirm"
@@ -105,7 +129,11 @@
         tools:layout="@layout/fragment_send_confirm">
 
         <argument
-            android:name="address"
+            android:name="fromaddress"
+            app:argType="string" />
+
+        <argument
+            android:name="toaddress"
             app:argType="string" />
 
         <argument

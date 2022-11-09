@@ -1,20 +1,20 @@
 package com.pkt.core.presentation.main.settings
 
-import androidx.appcompat.app.AppCompatActivity
+import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @VersionName private val versionName: String,
+    @Username private val id: String,
 ) : StateViewModel<SettingsState>() {
 
     override fun createInitialState() = SettingsState(
         walletName = "wallet",
-        id = "",
+        id = id,
         version = versionName
     )
 

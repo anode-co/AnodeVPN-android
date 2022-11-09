@@ -41,7 +41,11 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenRecoverWallet)
     }
 
-    fun openSendConfirm(address: String, amount: Double, maxAmount: Boolean) {
-        sendNavigation(AppNavigation.OpenSendConfirm(address, amount, maxAmount))
+    fun openSendTransaction(fromaddress: String) {
+        sendNavigation(AppNavigation.OpenSendTransaction(fromaddress))
+    }
+
+    fun openSendConfirm(fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean) {
+        sendNavigation(AppNavigation.OpenSendConfirm(fromaddress, toaddress, amount, maxAmount))
     }
 }

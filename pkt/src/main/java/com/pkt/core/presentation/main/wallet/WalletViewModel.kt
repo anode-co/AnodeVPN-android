@@ -28,8 +28,7 @@ class WalletViewModel @Inject constructor(
     /*private val PKTtoUSD: String = savedStateHandle["PKTtoUSD"]
         ?: throw IllegalArgumentException("PKTtoUSD is required")*/
     private val PKTtoUSD: String = "0.001"
-
-
+    var walletAddress = ""
 
     init {
         invokeLoadingAction {
@@ -56,20 +55,20 @@ class WalletViewModel @Inject constructor(
     private suspend fun loadWalletInfo(): Result<Boolean>{
         runCatching {
             val walletInfo = walletRepository.getWalletInfo().getOrThrow()
-            var address = ""
+
             if (walletInfo.wallet == null) {
                 //Wallet is locked
                 //TODO: bring up enterwallet fragment
             } else {
-                address = walletRepository.getWalletAddress().getOrThrow()
+                walletAddress = walletRepository.getWalletAddress().getOrThrow()
                 //If no address, then create one
-                if (address.isEmpty()) {
+                if (walletAddress.isEmpty()) {
                     val response = walletRepository.createAddress().getOrThrow()
-                    address = response.address
+                    walletAddress = response.address
                 }
             }
             val balance = walletRepository.getTotalWalletBalance().getOrThrow()
-            Triple(walletInfo, address, balance)
+            Triple(walletInfo, walletAddress, balance)
         }.onSuccess { (info, address, balance) ->
             val wallet = info.wallet
             val neutrino = info.neutrino

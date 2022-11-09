@@ -27,9 +27,9 @@ class QrBottomSheet : StateBottomSheet<QrState>(R.layout.bottom_sheet_qr) {
 
             qrImage.clipToOutline = true
 
-            saveButton.doOnClick {
+/*            saveButton.doOnClick {
                 viewModel.onSaveClick()
-            }
+            }*/
 
             doneButton.doOnClick {
                 dismiss()

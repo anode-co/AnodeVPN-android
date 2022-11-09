@@ -30,7 +30,7 @@ class SendTransactionBottomSheet : StateBottomSheet<SendTransactionState>(R.layo
 
         with(viewBinding) {
             addressInputLayout.doOnTextChanged {
-                viewModel.address = it
+                viewModel.toaddress = it
             }
 
             amountInputLayout.apply {
@@ -109,7 +109,8 @@ class SendTransactionBottomSheet : StateBottomSheet<SendTransactionState>(R.layo
                 setFragmentResult(
                     REQUEST_KEY,
                     bundleOf(
-                        KEY_ADDRESS to event.address,
+                        KEY_FROM_ADDRESS to event.fromaddress,
+                        KEY_TO_ADDRESS to event.toaddress,
                         KEY_AMOUNT to event.amount,
                         KEY_MAX_AMOUNT to event.maxAmount
                     )
@@ -124,7 +125,8 @@ class SendTransactionBottomSheet : StateBottomSheet<SendTransactionState>(R.layo
     companion object {
         const val TAG = "send_transaction_dialog"
         const val REQUEST_KEY = "send_transaction_request"
-        const val KEY_ADDRESS = "address"
+        const val KEY_TO_ADDRESS = "toaddress"
+        const val KEY_FROM_ADDRESS = "fromaddress"
         const val KEY_AMOUNT = "amount"
         const val KEY_MAX_AMOUNT = "max_amount"
     }

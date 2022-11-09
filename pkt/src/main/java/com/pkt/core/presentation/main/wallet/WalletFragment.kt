@@ -30,8 +30,6 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private var walletAddress: String = ""
-
     private val adapter = AsyncListDifferAdapter(
         loadingAdapterDelegate(),
         errorAdapterDelegate {
@@ -47,21 +45,22 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
         super.onViewCreated(view, savedInstanceState)
 
         setFragmentResultListener(SendTransactionBottomSheet.REQUEST_KEY) { _, bundle ->
-            val address = bundle.getString(SendTransactionBottomSheet.KEY_ADDRESS)!!
+            val toaddress = bundle.getString(SendTransactionBottomSheet.KEY_TO_ADDRESS)!!
+            val fromaddress = bundle.getString(SendTransactionBottomSheet.KEY_FROM_ADDRESS)!!
             val amount = bundle.getDouble(SendTransactionBottomSheet.KEY_AMOUNT)
             val maxAmount = bundle.getBoolean(SendTransactionBottomSheet.KEY_MAX_AMOUNT)
-            mainViewModel.openSendConfirm(address, amount, maxAmount)
+            mainViewModel.openSendConfirm(fromaddress, toaddress, amount, maxAmount)
         }
 
         with(viewBinding) {
             sendButton.setOnClickListener {
-                showSendTransactionDialog()
+                mainViewModel.openSendTransaction(viewModel.walletAddress)
             }
             qrButton.setOnClickListener {
                 showQrDialog()
             }
             shareButton.setOnClickListener {
-                showShareAddress()
+                showShareAddress(viewModel.walletAddress)
             }
             selectPeriodButton.setOnClickListener {
                 viewModel.onSelectPeriodClick()
@@ -74,18 +73,14 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
         }
     }
 
-    private fun showSendTransactionDialog() {
-        SendTransactionBottomSheet().show(parentFragmentManager, SendTransactionBottomSheet.TAG)
-    }
-
     private fun showQrDialog() {
         QrBottomSheet().show(childFragmentManager, QrBottomSheet.TAG)
     }
 
-    private fun showShareAddress() {
+    private fun showShareAddress(address: String) {
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, "$walletAddress")
+            putExtra(Intent.EXTRA_TEXT, address)
             type = "text/plain"
         }
         val shareIntent = Intent.createChooser(sendIntent, null)

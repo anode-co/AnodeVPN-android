@@ -21,7 +21,8 @@ abstract class AppNavigationHandler : NavigationHandler {
 
                     is AppNavigation.OpenSendConfirm -> openSendConfirm(
                         fragment,
-                        navigation.address,
+                        navigation.fromaddress,
+                        navigation.toaddress,
                         navigation.amount,
                         navigation.maxAmount
                     )
@@ -30,6 +31,7 @@ abstract class AppNavigationHandler : NavigationHandler {
                     AppNavigation.OpenVpnExits -> openVpnExits(fragment)
                     AppNavigation.OpenChangePassword -> openChangePassword(fragment)
                     AppNavigation.OpenChangePin -> openChangePin(fragment)
+                    is AppNavigation.OpenSendTransaction -> openSendTransaction(fragment, navigation.fromAddress)
                 }
             }
 
@@ -55,10 +57,10 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openCreateWallet(fragment: Fragment, name: String?)
     abstract fun openRecoverWallet(fragment: Fragment)
     abstract fun openMain(fragment: Fragment)
-    abstract fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean)
+    abstract fun openSendConfirm(fragment: Fragment, fromaddress: String, toaddress:String, amount: Double, maxAmount: Boolean)
     abstract fun openSendSuccess(fragment: Fragment, transactionId: String)
     abstract fun openVpnExits(fragment: Fragment)
     abstract fun openChangePassword(fragment: Fragment)
     abstract fun openChangePin(fragment: Fragment)
-    abstract fun openSendTransaction(fragment: Fragment)
+    abstract fun openSendTransaction(fragment: Fragment, fromaddress: String)
 }

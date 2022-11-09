@@ -15,7 +15,8 @@ class SendConfirmViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : StateViewModel<SendConfirmState>() {
 
-    private val address: String = savedStateHandle["address"] ?: error("address required")
+    private val fromaddress: String = savedStateHandle["fromaddress"] ?: error("fromaddress required")
+    private val toaddress: String = savedStateHandle["toaddress"] ?: error("toaddress required")
     private val amount: Double = savedStateHandle.get<Float>("amount")?.toDouble() ?: error("amount required")
     private val maxAmount: Boolean = savedStateHandle["maxAmount"] ?: error("maxAmount required")
 
@@ -24,12 +25,12 @@ class SendConfirmViewModel @Inject constructor(
             invokeLoadingAction {
                 walletRepository.getTotalWalletBalance()
                     .onSuccess { amount ->
-                        sendState { copy(address = this@SendConfirmViewModel.address, amount = amount) }
+                        sendState { copy(address = this@SendConfirmViewModel.toaddress, amount = amount) }
                         sendEvent(SendConfirmEvent.OpenKeyboard)
                     }
             }
         } else {
-            sendState { copy(address = this@SendConfirmViewModel.address, amount = this@SendConfirmViewModel.amount) }
+            sendState { copy(address = this@SendConfirmViewModel.toaddress, amount = this@SendConfirmViewModel.amount) }
             sendEvent(SendConfirmEvent.OpenKeyboard)
         }
     }
@@ -43,7 +44,7 @@ class SendConfirmViewModel @Inject constructor(
             runCatching {
                 val isPinCorrect = walletRepository.checkPin(pin).getOrThrow()
                 if (isPinCorrect) {
-                    walletRepository.sendCoins(listOf(""),currentState.amount.toLong(),currentState.address).getOrThrow()
+                    walletRepository.sendCoins(listOf(fromaddress),currentState.amount.toLong(),currentState.address).getOrThrow()
                 } else {
                     null
                 }

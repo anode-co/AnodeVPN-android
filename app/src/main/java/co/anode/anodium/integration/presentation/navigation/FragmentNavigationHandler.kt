@@ -35,12 +35,12 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toMain())
     }
 
-    override fun openSendTransaction(fragment: Fragment) {
-        navigate(fragment, NavGraphDirections.toSendTransaction())
+    override fun openSendTransaction(fragment: Fragment, fromAddress: String) {
+        navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress))
     }
 
-    override fun openSendConfirm(fragment: Fragment, address: String, amount: Double, maxAmount: Boolean) {
-        navigate(fragment, NavGraphDirections.toSendConfirm(address, amount.toFloat(), maxAmount))
+    override fun openSendConfirm(fragment: Fragment, fromAddress:String, toAddress: String, amount: Double, maxAmount: Boolean) {
+        navigate(fragment, NavGraphDirections.toSendConfirm(fromAddress, toAddress, amount.toFloat(), maxAmount))
     }
 
     override fun openSendSuccess(fragment: Fragment, transactionId: String) {
@@ -52,11 +52,11 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openChangePassword(fragment: Fragment) {
-        TODO("Not yet implemented")
+        navigate(fragment, NavGraphDirections.toChangePassword())
     }
 
     override fun openChangePin(fragment: Fragment) {
-        TODO("Not yet implemented")
+        navigate(fragment, NavGraphDirections.toChangePin())
     }
 
     private fun navigate(fragment: Fragment, navDirections: NavDirections) {

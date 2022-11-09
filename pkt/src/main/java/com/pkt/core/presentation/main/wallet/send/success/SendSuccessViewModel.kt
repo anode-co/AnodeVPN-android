@@ -7,6 +7,7 @@ import com.pkt.core.presentation.common.state.event.CommonEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+
 @HiltViewModel
 class SendSuccessViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -22,6 +23,6 @@ class SendSuccessViewModel @Inject constructor(
     }
 
     fun onViewClick() {
-        // TODO("Not yet implemented")
+        sendEvent(CommonEvent.WebUrl("https://explorer.pkt.cash/tx/$transactionId"))
     }
 }
