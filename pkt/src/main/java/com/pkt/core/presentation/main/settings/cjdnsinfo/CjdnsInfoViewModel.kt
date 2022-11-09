@@ -20,18 +20,23 @@ class CjdnsInfoViewModel @Inject constructor(
 
     init {
         invokeLoadingAction {
-            runCatching {
-                cjdnsRepository.getCjdnsInfo().getOrThrow()
-            }.onSuccess {info ->
-                sendState {
-                    copy(
-                        info = info,
-                        items = info.toItems())
-                }
-            }.onFailure {
-                //TODO: handle error
-            }
+            loadCjdnsInfo()
         }
+    }
+
+    private suspend fun loadCjdnsInfo() : Result<*> {
+        runCatching {
+            cjdnsRepository.getCjdnsInfo().getOrThrow()
+        }.onSuccess { info ->
+            sendState {
+                copy(
+                    info = info,
+                    items = info.toItems())
+            }
+        }.onFailure {
+            sendError(it)
+        }
+        return Result.success(Unit)
     }
 
     override fun createInitialState() = CjdnsInfoState()

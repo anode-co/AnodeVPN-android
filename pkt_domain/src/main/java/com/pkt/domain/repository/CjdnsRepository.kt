@@ -8,7 +8,7 @@ import com.pkt.domain.dto.CjdnsPeeringLine
 interface CjdnsRepository {
     suspend fun getCjdnsRoutes() : Boolean
     suspend fun getCjdnsInfo(): Result<CjdnsInfo>
-    suspend fun getCjdnsPeers(): List<CjdnsPeer>
-    suspend fun getCjdnsConnections(): List<CjdnsConnection>
+    suspend fun getCjdnsPeers(): Result<List<CjdnsPeer>>
+    suspend fun getCjdnsConnections(): Result<List<CjdnsConnection>>
     suspend fun addCjdnsPeers(peers:List<CjdnsPeeringLine>): Boolean
 }

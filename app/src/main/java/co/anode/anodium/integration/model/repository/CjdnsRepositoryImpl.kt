@@ -18,7 +18,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         return CjdnsSocket.getCjdnsRoutes()
     }
 
-    override suspend fun getCjdnsPeers(): List<CjdnsPeer> {
+    override suspend fun getCjdnsPeers(): Result<List<CjdnsPeer>> {
         val peers = CjdnsSocket.InterfaceController_peerStats()
         val result: MutableList<CjdnsPeer> = mutableListOf()
         for (i in 0 until peers.size) {
@@ -31,10 +31,10 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
             val bytesLost: Long = 0
             result.add(CjdnsPeer(ipv4,port,key,status,bytesIn,bytesOut,bytesLost))
         }
-        return result
+        return Result.success(result)
     }
 
-    override suspend fun getCjdnsConnections(): List<CjdnsConnection> {
+    override suspend fun getCjdnsConnections(): Result<List<CjdnsConnection>> {
         val list = CjdnsSocket.IpTunnel_listConnections()
         var result: MutableList<CjdnsConnection> = mutableListOf()
         for(i in 0 until list.size) {
@@ -49,7 +49,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
             val outgoing = list[i]["outgoing"].toString().trim('"').toInt()
             result.add(CjdnsConnection(ipv4Address, ipv6Address, key, ipv4Alloc, error, ipv6Alloc, ipv4Prefix, ipv6Prefix, outgoing))
         }
-        return result
+        return Result.success(result)
     }
 
     override suspend fun addCjdnsPeers(peers: List<CjdnsPeeringLine>): Boolean {
@@ -68,8 +68,21 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         val cjdnsNodeInfo = CjdnsSocket.Core_nodeInfo()
         val ipv6 = cjdnsNodeInfo["myIp6"].str()
         val internetipv6 = CjdnsSocket.ipv6Address
-        val cjdnsConnection = getCjdnsConnections()
-        val cjdnsPeers = getCjdnsPeers()
+        var cjdnsConnection = CjdnsConnection("","","",0,"",0,0,0,0)
+        var cjdnsPeers: MutableList<CjdnsPeer> = mutableListOf()
+        runCatching {
+            val connection = getCjdnsConnections().getOrThrow()
+            val peers = getCjdnsPeers().getOrThrow()
+            Pair(connection, peers)
+        }.onSuccess {(connection, peers) ->
+            if(connection.isNotEmpty()) {
+                cjdnsConnection = connection[0]
+            }
+            cjdnsPeers = peers.toMutableList()
+        }.onFailure {
+            cjdnsConnection = CjdnsConnection("","","",0,"",0,0,0,0)
+        }
+
         val key = AnodeUtil.getPubKey()
         var username = ""
         var vpnExit = ""
@@ -80,7 +93,8 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         }
 
         val nodeUrl = "http://h.snode.cjd.li/#" + cjdnsNodeInfo["myIp6"].str()
-        return Result.success(CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection[0],cjdnsPeers,key,username,nodeUrl,vpnExit))
+        val response = CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection,cjdnsPeers,key,username,nodeUrl,vpnExit)
+        return Result.success(response)
     }
 
 }
