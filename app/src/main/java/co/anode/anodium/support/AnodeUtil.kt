@@ -117,7 +117,7 @@ object AnodeUtil {
         //copyAssets()
     }
 
-    fun generateUsername(textview:TextView) {
+    fun generateUsername(textview:TextView?) {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         //If there is no username stored
         if (prefs?.getString("username", "").isNullOrEmpty()) {
@@ -134,7 +134,7 @@ object AnodeUtil {
         }
     }
 
-    private fun generateUsernameHandler(result: String, textview:TextView) {
+    private fun generateUsernameHandler(result: String, textview:TextView?) {
         Log.i(BuildConfig.APPLICATION_ID,"Received from API: $result")
         if ((result.isBlank())) {
             return
@@ -153,7 +153,10 @@ object AnodeUtil {
         } else {
             val jsonObj = JSONObject(result)
             if (jsonObj.has("username")) {
-                textview.text = jsonObj.getString("username")
+                val username = jsonObj.getString("username")
+                if (textview != null) {
+                    textview.text = username
+                }
                 val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
                 if (prefs != null) {
                     with (prefs.edit()) {
@@ -882,6 +885,20 @@ object AnodeUtil {
         val servicePort = 11234
         val packet = DatagramPacket(buf, buf.size, serviceHost, servicePort)
         udpSocket.send(packet)
+    }
+
+    fun getUsername(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            var tries = 0
+            while (prefs.getString("username", "").isNullOrEmpty() && (tries < 5)) {
+                AnodeUtil.generateUsername(null)
+                tries++
+                Thread.sleep(50)
+            }
+
+        }
+        return prefs?.getString("username", "") ?: ""
     }
 }
 
