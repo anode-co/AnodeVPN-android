@@ -21,14 +21,10 @@ class NewWalletViewModel @Inject constructor(
     fun onNextClick() {
         invokeAction {
             walletRepository.checkWalletName(name)
-                .onSuccess { error ->
-                    if (error == null) {
-                        sendEvent(NewWalletEvent.Success(name))
-                    } else {
-                        sendEvent(NewWalletEvent.ShowInputError(error))
-                    }
-                }.onFailure {
-                    sendError(it)
+                .onSuccess {
+                    sendEvent(NewWalletEvent.Success(name))
+                }.onFailure { error ->
+                    error.message?.let { sendEvent(NewWalletEvent.ShowInputError(error.message!!)) }
                 }
         }
     }

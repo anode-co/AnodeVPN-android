@@ -20,10 +20,8 @@ class RenameWalletViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            walletRepository.getActiveWallet()
-                .onSuccess {
-                    sendEvent(RenameWalletEvent.FillWalletName(it))
-                }
+            val activeWallet = walletRepository.getActiveWallet()
+            sendEvent(RenameWalletEvent.FillWalletName(activeWallet))
         }
     }
 

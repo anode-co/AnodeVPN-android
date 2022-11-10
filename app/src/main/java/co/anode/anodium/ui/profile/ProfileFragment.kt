@@ -148,7 +148,7 @@ class ProfileFragment : Fragment() {
         val dataAdapter = ArrayAdapter(mycontext, android.R.layout.simple_spinner_dropdown_item, walletNames)
 
         walletsSpinner.adapter = dataAdapter
-        activeWallet = prefs.getString("activeWallet", "wallet").toString()
+        activeWallet = prefs.getString("activeWallet", AnodeUtil.DEFAULT_WALLET_NAME).toString()
         var activeWalletId = 0
         var i = 0
         for (name in walletNames) {
@@ -247,7 +247,7 @@ class ProfileFragment : Fragment() {
         walletNames = AnodeUtil.getWalletFiles()
         val dataAdapter = ArrayAdapter(mycontext,android.R.layout.simple_spinner_dropdown_item, walletNames)
         walletsSpinner.adapter = dataAdapter
-        activeWallet = prefs.getString("activeWallet", "wallet").toString()
+        activeWallet = prefs.getString("activeWallet", AnodeUtil.DEFAULT_WALLET_NAME).toString()
         var activeWalletId = 0
         var i = 0
         for (name in walletNames) {

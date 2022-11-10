@@ -36,10 +36,10 @@ class EnterWalletViewModel @Inject constructor(
     init {
         invokeLoadingAction {
             runCatching {
-                val currentWallet = walletRepository.getActiveWallet().getOrThrow()
+                val currentWallet = walletRepository.getActiveWallet()
                 val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
 
-                val wallets = walletRepository.getAllWalletNames().getOrThrow()
+                val wallets = walletRepository.getAllWalletNames()
                 Triple(
                     currentWallet,
                     isPinAvailable,

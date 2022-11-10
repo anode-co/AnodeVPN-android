@@ -36,4 +36,6 @@ interface WalletAPI {
     suspend fun getWalletSeed(): GetSeedResponse
     @POST
     suspend fun getSecret(@Body empty: RequestBody): GetSecretResponse
+    @GET("api/cmc-price")
+    suspend fun getPktToUSD(): PktPrice
 }

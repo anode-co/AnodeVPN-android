@@ -161,7 +161,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             is SettingsEvent.OpenChangePassword -> mainViewModel.openChangePassword()
             is SettingsEvent.OpenChangePin -> mainViewModel.openChangePin()
             is SettingsEvent.OpenCreateWallet -> mainViewModel.openCreateWallet(event.name)
-            is SettingsEvent.OpenRecoverWallet -> mainViewModel.openRecoverWallet()
+            is SettingsEvent.OpenRecoverWallet -> mainViewModel.openRecoverWallet(event.name)
         }
     }
 }

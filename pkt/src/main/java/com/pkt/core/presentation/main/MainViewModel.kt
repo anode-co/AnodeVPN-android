@@ -37,8 +37,8 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenCreateWallet(name))
     }
 
-    fun openRecoverWallet() {
-        sendNavigation(AppNavigation.OpenRecoverWallet)
+    fun openRecoverWallet(name: String) {
+        sendNavigation(AppNavigation.OpenRecoverWallet(name))
     }
 
     fun openSendTransaction(fromaddress: String) {
