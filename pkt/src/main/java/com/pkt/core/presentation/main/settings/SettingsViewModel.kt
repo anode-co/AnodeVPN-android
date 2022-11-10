@@ -3,6 +3,8 @@ package com.pkt.core.presentation.main.settings
 import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.enterwallet.EnterWalletEvent
+import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -10,16 +12,22 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     @VersionName private val versionName: String,
     @Username private val id: String,
+    private val walletRepository: WalletRepository,
 ) : StateViewModel<SettingsState>() {
 
     override fun createInitialState() = SettingsState(
-        walletName = "wallet",
+        walletName = walletRepository.getActiveWallet(),
         id = id,
         version = versionName
     )
 
     fun onWalletClick() {
-        // TODO
+        val wallets = walletRepository.getAllWalletNames()
+        if (wallets.size > 1) {
+            sendEvent(
+                EnterWalletEvent.OpenChooseWallet(wallets, walletRepository.getActiveWallet())
+            )
+        }
     }
 
     fun onMenuItemClick(item: MenuItem) {

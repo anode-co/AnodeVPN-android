@@ -10,7 +10,7 @@ sealed class AppNavigation : UiNavigation {
     object OpenCjdnsInfo : AppNavigation()
     data class OpenWalletInfo(val address: String) : AppNavigation()
     data class OpenCreateWallet(val name: String? = null) : AppNavigation()
-    object OpenRecoverWallet : AppNavigation()
+    data class OpenRecoverWallet(val name: String? = null) : AppNavigation()
     object OpenMain : AppNavigation()
     data class OpenSendTransaction(val fromAddress: String) : AppNavigation()
     data class OpenSendConfirm(val fromaddress: String, val toaddress:String, val amount: Double, val maxAmount: Boolean) : AppNavigation()

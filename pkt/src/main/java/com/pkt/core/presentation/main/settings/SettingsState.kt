@@ -23,5 +23,5 @@ sealed class SettingsEvent : UiEvent {
     object OpenChangePassword : SettingsEvent()
     object OpenChangePin : SettingsEvent()
     data class OpenCreateWallet(val name: String) : SettingsEvent()
-    object OpenRecoverWallet : SettingsEvent()
+    data class OpenRecoverWallet(val name: String) : SettingsEvent()
 }

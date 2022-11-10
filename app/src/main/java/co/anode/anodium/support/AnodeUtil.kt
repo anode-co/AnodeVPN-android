@@ -49,6 +49,7 @@ object AnodeUtil {
     private val LOGTAG = BuildConfig.APPLICATION_ID
     var context: Context? = null
     val ApplicationID = BuildConfig.APPLICATION_ID
+    val DEFAULT_WALLET_NAME = "wallet"
     var filesDirectory = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
@@ -457,7 +458,7 @@ object AnodeUtil {
      */
     fun storeWalletPassword(password: String, walletName: String) {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -473,7 +474,7 @@ object AnodeUtil {
 
     fun storeWalletPin(pin: String, walletName: String) {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -507,14 +508,14 @@ object AnodeUtil {
 
     fun getWalletPin(walletName:String):String {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val prefKey = wallet+"_pin"
         return getValueFromEncSharedPreferences(prefKey)
     }
 
     fun getWalletPassword(walletName:String):String {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val prefKey = wallet+"_password"
         return getValueFromEncSharedPreferences(prefKey)
     }

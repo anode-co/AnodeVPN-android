@@ -10,6 +10,7 @@ import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
 import com.pkt.domain.repository.WalletRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
@@ -19,20 +20,21 @@ import javax.inject.Singleton
 @Singleton
 class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     private val walletAPI = WalletAPIService()
-    private var activeWallet = "wallet"
+    private var activeWallet = AnodeUtil.DEFAULT_WALLET_NAME
 
-    override suspend fun getAllWalletNames(): Result<List<String>> {
-        return Result.success(AnodeUtil.getWalletFiles())
+    override fun getAllWalletNames(): List<String> {
+        return AnodeUtil.getWalletFiles()
     }
 
-    override suspend fun getActiveWallet(): Result<String> {
+    override fun getActiveWallet(): String {
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("activeWallet", "wallet")?.let {
             activeWallet = it
         }
-        return Result.success(activeWallet)
+        return activeWallet
     }
 
     override suspend fun setActiveWallet(walletName: String) {
+        activeWallet = walletName
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("activeWallet", walletName)?.apply()
     }
 
@@ -133,13 +135,14 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
     override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?): Result<Boolean> =
         runCatching {
-            var wallet = "wallet" // Default wallet name
+            //We need to restart pld before creating a new wallet
+            stopPld()
+            var wallet = AnodeUtil.DEFAULT_WALLET_NAME
             if (!walletName.isNullOrBlank()) {
                 wallet = walletName
             }
-            setActiveWallet(wallet)
 
-            val response = walletAPI.createWallet(password, password, seed.split(" "), "$activeWallet.db")
+            val response = walletAPI.createWallet(password, password, seed.split(" "), "$wallet.db")
 
             return if (response.message.isNotEmpty()) {
                 Result.failure(Exception("Failed to create wallet: ${response.message}"))
@@ -149,21 +152,25 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                 if (pin.isNotEmpty()) {
                     AnodeUtil.storeWalletPin(pin, wallet)
                 }
+                setActiveWallet(wallet)
                 Result.success(true)
             }
         }
 
     override suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> =
         runCatching {
-            var wallet = "wallet" //Default wallet name
+            //We need to restart pld before creating a new wallet
+            stopPld()
+            var wallet = AnodeUtil.DEFAULT_WALLET_NAME
             if (walletName.isNotEmpty()) {
                 wallet = walletName
             }
-            setActiveWallet(wallet)
-            val response = walletAPI.recoverWallet(password, seedPassword, seed.split(" "), "$activeWallet.db")
+
+            val response = walletAPI.recoverWallet(password, seedPassword, seed.split(" "), "$wallet.db")
             return if (response.message.isNotEmpty()) {
                 Result.failure(Exception("Failed to recover wallet: ${response.message}"))
             } else {
+                setActiveWallet(wallet)
                 Result.success(true)
             }
         }
@@ -227,7 +234,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun checkWalletName(name: String): Result<String?> {
-        val existingWallets = getAllWalletNames().getOrThrow()
+        val existingWallets = getAllWalletNames()
         if (existingWallets.contains(name)) {
             return Result.failure(Exception("Wallet name already exists"))
         } else {
@@ -327,6 +334,21 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         } else {
             return Result.success(trimmedAddress)
         }
+    }
+
+    override suspend fun getPktToUsd(): Result<Float> {
+        val response = walletAPI.getPktToUsd()
+        return if (response.isNaN()) {
+            Result.failure(Exception("Failed to get PKT to USD conversion rate"))
+        } else {
+            Result.success(response)
+        }
+    }
+
+    override suspend fun stopPld() {
+        AnodeUtil.stopPld()
+        //Wait for pld to restart
+        delay(2000)
     }
 
 }

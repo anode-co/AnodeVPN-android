@@ -24,11 +24,11 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openCreateWallet(fragment: Fragment, name: String?) {
-        navigate(fragment, NavGraphDirections.toCreateWallet())
+        navigate(fragment, NavGraphDirections.toCreateWallet(name))
     }
 
-    override fun openRecoverWallet(fragment: Fragment) {
-        navigate(fragment, NavGraphDirections.toRecoverWallet())
+    override fun openRecoverWallet(fragment: Fragment, name:String?) {
+        navigate(fragment, NavGraphDirections.toRecoverWallet(name))
     }
 
     override fun openMain(fragment: Fragment) {

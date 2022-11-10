@@ -46,10 +46,10 @@ class WalletRepositoryDummy constructor(
 
     private var activeWallet = "My Wallet 1"
 
-    override suspend fun getAllWalletNames(): Result<List<String>> =
-        Result.success(listOf("My Wallet 1", "My Wallet 2", "My Wallet 3"))
+    override fun getAllWalletNames(): List<String> =
+        listOf("My Wallet 1", "My Wallet 2", "My Wallet 3")
 
-    override suspend fun getActiveWallet(): Result<String> = Result.success(activeWallet)
+    override fun getActiveWallet(): String = activeWallet
 
     override suspend fun setActiveWallet(walletName: String) {
         activeWallet = walletName
@@ -228,6 +228,14 @@ class WalletRepositoryDummy constructor(
     }
 
     override fun isPKTAddressValid(address: String): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getPktToUsd(): Result<Float> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun stopPld() {
         TODO("Not yet implemented")
     }
 }

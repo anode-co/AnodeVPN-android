@@ -46,7 +46,6 @@ class CreatePasswordViewModel @Inject constructor(
             enterPassword != confirmPassword -> {
                 sendEvent(CreatePasswordEvent.ConfirmPasswordError)
             }
-
             else -> {
                 sendNavigation(CreatePasswordNavigation.ToConfirmPassword(mode, enterPassword, name))
             }

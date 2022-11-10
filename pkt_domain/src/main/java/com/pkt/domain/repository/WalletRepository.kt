@@ -5,9 +5,9 @@ import com.pkt.domain.dto.*
 
 interface WalletRepository {
     //Return a list of all existing PKT wallets
-    suspend fun getAllWalletNames(): Result<List<String>>
+    fun getAllWalletNames(): List<String>
     //Return the name of the currently selected wallet
-    suspend fun getActiveWallet(): Result<String>
+    fun getActiveWallet(): String
     //Set the currently selected wallet
     suspend fun setActiveWallet(walletName: String)
     //Get the PKT wallet address that has the biggest balance of PKT
@@ -62,4 +62,8 @@ interface WalletRepository {
     suspend fun getSecret(): Result<String>
     //Validate PKT address
     fun isPKTAddressValid(address: String): Result<String>
+
+    suspend fun getPktToUsd(): Result<Float>
+
+    suspend fun stopPld()
 }

@@ -1,5 +1,6 @@
 package com.pkt.domain.interfaces
 
+import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.pkt.domain.dto.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -9,6 +10,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
+import org.json.JSONObject
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -107,6 +109,18 @@ class WalletAPIService {
 
     suspend fun getSecret(): GetSecretResponse {
         return api.getSecret("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+    }
+
+    suspend fun getPktToUsd(): Float {
+        val priceApi = Retrofit.Builder()
+            .baseUrl("https://pkt.cash/")
+            .addConverterFactory(converter)
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .build()
+            .create(WalletAPI::class.java)
+
+        val response = priceApi.getPktToUSD()
+        return response.data.PKT.quote.USD.price.toFloat()
     }
 }
 

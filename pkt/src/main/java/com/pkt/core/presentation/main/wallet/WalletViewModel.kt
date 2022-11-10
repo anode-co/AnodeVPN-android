@@ -22,23 +22,25 @@ class WalletViewModel @Inject constructor(
     private val cjdnsRepository: CjdnsRepository,
 ) : StateViewModel<WalletState>() {
 
-    //private val walletName: String = savedStateHandle["walletName"]
-    //    ?: throw IllegalArgumentException("walletName is required")
-    private val walletName: String = "wallet"
-    /*private val PKTtoUSD: String = savedStateHandle["PKTtoUSD"]
-        ?: throw IllegalArgumentException("PKTtoUSD is required")*/
-    private val PKTtoUSD: String = "0.001"
+    val walletName = walletRepository.getActiveWallet()
     var walletAddress = ""
+    var PKTtoUSD = 0f
 
     init {
         invokeLoadingAction {
-            /*val vpnRepository: VpnRepository = VpnRepositoryImpl()
-            val cjdnsRepository: CjdnsRepository = CjdnsRepositoryImpl()*/
             val peers = vpnRepository.getCjdnsPeers().getOrNull()
             if (peers != null) {
                 cjdnsRepository.addCjdnsPeers(peers)
             } else {
                 //TODO: no peering lines
+            }
+            runCatching {
+                walletRepository.getPktToUsd().getOrNull()
+            }.onSuccess { price ->
+                PKTtoUSD = price!!
+            }.onFailure {
+                sendError(it)
+                PKTtoUSD = 0f
             }
             runCatching {
                 loadWalletInfo()

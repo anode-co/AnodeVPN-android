@@ -18,6 +18,6 @@ class StartViewModel @Inject constructor(
     }
 
     fun onRecoverClick() {
-        sendNavigation(AppNavigation.OpenRecoverWallet)
+        sendNavigation(AppNavigation.OpenRecoverWallet())
     }
 }
