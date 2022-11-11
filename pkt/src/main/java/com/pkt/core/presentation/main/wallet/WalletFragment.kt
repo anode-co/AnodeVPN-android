@@ -90,19 +90,37 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
     override fun handleState(state: WalletState) {
         with(viewBinding) {
             subtitleLabel.apply {
-                compoundDrawableTintList = ColorStateList.valueOf(
-                    context.getColorByAttribute(
-                        when (state.syncState) {
-                            WalletState.SyncState.DOWNLOADING -> R.attr.colorDownloading
-                            WalletState.SyncState.SCANNING -> R.attr.colorProgress
-                            WalletState.SyncState.WAITING -> R.attr.colorProgress
-                            WalletState.SyncState.SUCCESS -> R.attr.colorSuccess
-                            WalletState.SyncState.FAILED -> androidx.appcompat.R.attr.colorError
-                        }
-                    )
-                )
+                val iconWarning = resources.getDrawable(R.drawable.warning, null)
+                val dot = resources.getDrawable(R.drawable.ic_dot, null)
                 when (state.syncState) {
+                    WalletState.SyncState.DOWNLOADING -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(R.attr.colorDownloading))
+                    }
                     WalletState.SyncState.SCANNING -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(R.attr.colorProgress))
+                    }
+                    WalletState.SyncState.SUCCESS -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(R.attr.colorSuccess))
+                    }
+                    WalletState.SyncState.FAILED -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
+                    }
+                    WalletState.SyncState.WAITING -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
+                        compoundDrawableTintList = null
+                    }
+                }
+
+                when (state.syncState) {
+                    WalletState.SyncState.DOWNLOADING -> {
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
@@ -111,7 +129,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                             )
                         } | ${getString(R.string.wallet_status_syncing_headers)} ${state.chainHeight}/${state.neutrinoTop}"
                     }
-                    WalletState.SyncState.DOWNLOADING -> {
+                    WalletState.SyncState.SCANNING -> {
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
@@ -121,13 +139,25 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                         } | ${getString(R.string.wallet_status_syncing_transactions)} ${state.walletHeight}/${state.neutrinoTop}"
                     }
                     WalletState.SyncState.SUCCESS -> {
+                        val diffSeconds = state.syncTimeDiff
+                        var timeAgoText = ""
+                        if (diffSeconds > 60) {
+                            val minutes = diffSeconds / 60
+                            if (minutes == (1).toLong()) {
+                                timeAgoText = "$minutes "+getString(R.string.minute_ago)
+                            } else {
+                                timeAgoText = "$minutes "+getString(R.string.minutes_ago)
+                            }
+                        } else {
+                            timeAgoText = "$diffSeconds "+getString(R.string.seconds_ago)
+                        }
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
                                 state.peersCount,
                                 state.peersCount
                             )
-                        } | ${getString(R.string.block)} ${state.block}"
+                        } | ${getString(R.string.block)} ${state.chainHeight} - $timeAgoText"
                     }
                     WalletState.SyncState.WAITING -> {
                         text = "${getString(R.string.wallet_status_syncing_waiting)}"

@@ -1,6 +1,7 @@
 package com.pkt.core.presentation.main.wallet
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.WalletRepository
@@ -8,8 +9,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
+import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.VpnRepository
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 import kotlin.math.absoluteValue
@@ -28,6 +31,11 @@ class WalletViewModel @Inject constructor(
 
     init {
         invokeLoadingAction {
+            val wallets = walletRepository.getAllWalletNames()
+            //There are no wallets
+            if (wallets.isEmpty()) {
+                //TODO: Navigate to start fragment
+            }
             val peers = vpnRepository.getCjdnsPeers().getOrNull()
             if (peers != null) {
                 cjdnsRepository.addCjdnsPeers(peers)
@@ -48,6 +56,7 @@ class WalletViewModel @Inject constructor(
                 loadTransactions()
             }.onFailure {
                 //WalletInfo failed, try to unlock
+                sendNavigation(AppNavigation.OpenEnterWallet)
                 //TODO: check for error
                 walletRepository.unlockWallet("password")
             }
@@ -57,10 +66,10 @@ class WalletViewModel @Inject constructor(
     private suspend fun loadWalletInfo(): Result<Boolean>{
         runCatching {
             val walletInfo = walletRepository.getWalletInfo().getOrThrow()
-
             if (walletInfo.wallet == null) {
                 //Wallet is locked
                 //TODO: bring up enterwallet fragment
+                sendNavigation(AppNavigation.OpenEnterWallet)
             } else {
                 walletAddress = walletRepository.getWalletAddress().getOrThrow()
                 //If no address, then create one
@@ -105,7 +114,8 @@ class WalletViewModel @Inject constructor(
                 }
             }
 
-            neutrinoTop = 0
+            //DEBUG
+            //walletSyncState = WalletState.SyncState.WAITING
             sendState {
                 copy(
                     syncState = walletSyncState,
@@ -114,7 +124,6 @@ class WalletViewModel @Inject constructor(
                     neutrinoTop = neutrinoTop,
                     walletHeight = walletHeight,
                     peersCount = peerCount,
-                    block = "$neutrinoHeight/$neutrinoTop",
                     walletName = walletName,
                     balancePkt = balance.toLong().toString(),
                     balanceUsd = balance.toLong().toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
@@ -167,7 +176,6 @@ class WalletViewModel @Inject constructor(
             items.add(FooterItem())
             sendState {
                 copy(
-                    syncState = WalletState.SyncState.SUCCESS,
                     items = items,
                 )
             }
@@ -184,7 +192,6 @@ class WalletViewModel @Inject constructor(
             syncTimeDiff = 0,
             walletHeight = 0,
             peersCount = 0,
-            block = "",
             walletName = walletName,
             balancePkt = "",
             balanceUsd = "",
@@ -196,7 +203,22 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onSelectPeriodClick() {
-        // TODO launch
+        onReload()
+    }
+
+    fun onReload() {
+        viewModelScope.launch {
+            runCatching {
+                loadWalletInfo()
+            }.onSuccess {
+                loadTransactions()
+            }.onFailure {
+                //WalletInfo failed, try to unlock
+                sendNavigation(AppNavigation.OpenEnterWallet)
+                //TODO: check for error
+                walletRepository.unlockWallet("password")
+            }
+        }
     }
 
     fun onRetryClick() {

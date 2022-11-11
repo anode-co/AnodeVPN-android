@@ -7,7 +7,6 @@ data class WalletState(
     val syncState: SyncState,
     val syncTimeDiff: Long,
     val peersCount: Int,
-    val block: String,
     val chainHeight: Int,
     val walletHeight: Int,
     val neutrinoTop: Int,
