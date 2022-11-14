@@ -4,7 +4,7 @@
     <string name="retry">Retry</string>
 
     <!--error-->
-    <string name="error_common">Something goes wrong…</string>
+    <string name="error_common">Something went wrong…</string>
 
     <!--fragment_start-->
     <string name="please_create_wallet">Please create your PKT Wallet. It is needed to launch the application.</string>
@@ -191,6 +191,8 @@
     <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
     <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
     <!--Wallet Status messages-->
+    <string name="wallet_status_locked">Wallet is locked</string>
+    <string name="wallet_status_notexisting">Wallet can not be found</string>
     <string name="wallet_status_disconnected">Connecting to peers</string>
     <string name="wallet_status_syncing_headers">Downloading:</string>
     <string name="wallet_status_syncing_transactions">Scanning:</string>
@@ -204,4 +206,7 @@
     <string name="creating_wallet">Creating wallet please wait…</string>
     <string name="generating_wallet_seed">Generating seed phrase…</string>
     <string name="recovering_wallet">Recovering wallet please wait…</string>
+
+    <string name="error_send_transaction_amount">Invalid amount</string>
+    <string name="error_pkt_address">Invalid PKT address</string>
 </resources>
