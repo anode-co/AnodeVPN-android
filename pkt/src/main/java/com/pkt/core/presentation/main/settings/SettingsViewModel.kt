@@ -70,7 +70,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onWalletRecoveryClick() {
-        sendEvent(SettingsEvent.OpenRecoverWallet)
+        sendEvent(SettingsEvent.OpenNewWallet)
+        //sendEvent(SettingsEvent.OpenRecoverWallet(name))
     }
 
     fun onConsentResult(success: Boolean) {
