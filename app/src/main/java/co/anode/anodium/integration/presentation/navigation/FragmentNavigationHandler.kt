@@ -39,6 +39,14 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress))
     }
 
+    override fun openEnterWallet(fragment: Fragment) {
+        navigate(fragment, NavGraphDirections.toEnterWallet())
+    }
+
+    override fun openStart(fragment: Fragment) {
+        navigate(fragment, NavGraphDirections.toStart())
+    }
+
     override fun openSendConfirm(fragment: Fragment, fromAddress:String, toAddress: String, amount: Double, maxAmount: Boolean) {
         navigate(fragment, NavGraphDirections.toSendConfirm(fromAddress, toAddress, amount.toFloat(), maxAmount))
     }

@@ -60,4 +60,12 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openSendTransaction(fragment: Fragment, fromaddress: String) {
         TODO("Not yet implemented")
     }
+
+    override fun openEnterWallet(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openStart(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
 }

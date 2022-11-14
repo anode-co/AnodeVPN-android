@@ -93,6 +93,12 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 val iconWarning = resources.getDrawable(R.drawable.warning, null)
                 val dot = resources.getDrawable(R.drawable.ic_dot, null)
                 when (state.syncState) {
+                    WalletState.SyncState.NOTEXISTING -> {
+                        mainViewModel.openStart()
+                    }
+                    WalletState.SyncState.LOCKED -> {
+                        mainViewModel.openEnterWallet()
+                    }
                     WalletState.SyncState.DOWNLOADING -> {
                         setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
                         compoundDrawableTintList = ColorStateList.valueOf(
@@ -164,6 +170,12 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                     }
                     WalletState.SyncState.FAILED -> {
                         text = "${getString(R.string.wallet_status_disconnected)}"
+                    }
+                    WalletState.SyncState.LOCKED -> {
+                        text = "${getString(R.string.wallet_status_locked)}"
+                    }
+                    WalletState.SyncState.NOTEXISTING -> {
+                        text = "${getString(R.string.wallet_status_notexisting)}"
                     }
                 }
             }

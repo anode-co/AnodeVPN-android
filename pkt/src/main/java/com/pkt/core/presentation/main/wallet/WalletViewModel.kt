@@ -56,9 +56,10 @@ class WalletViewModel @Inject constructor(
                 loadTransactions()
             }.onFailure {
                 //WalletInfo failed, try to unlock
-                sendNavigation(AppNavigation.OpenEnterWallet)
-                //TODO: check for error
-                walletRepository.unlockWallet("password")
+                //sendNavigation(AppNavigation.OpenEnterWallet)
+                sendState {
+                    copy(syncState = WalletState.SyncState.LOCKED)
+                }
             }
         }
     }
@@ -67,9 +68,9 @@ class WalletViewModel @Inject constructor(
         runCatching {
             val walletInfo = walletRepository.getWalletInfo().getOrThrow()
             if (walletInfo.wallet == null) {
-                //Wallet is locked
-                //TODO: bring up enterwallet fragment
-                sendNavigation(AppNavigation.OpenEnterWallet)
+                sendState {
+                    copy(syncState = WalletState.SyncState.LOCKED)
+                }
             } else {
                 walletAddress = walletRepository.getWalletAddress().getOrThrow()
                 //If no address, then create one

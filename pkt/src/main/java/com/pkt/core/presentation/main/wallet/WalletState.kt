@@ -18,6 +18,8 @@ data class WalletState(
 ) : UiState {
 
     enum class SyncState {
+        NOTEXISTING,
+        LOCKED,
         DOWNLOADING,
         SCANNING,
         SUCCESS,

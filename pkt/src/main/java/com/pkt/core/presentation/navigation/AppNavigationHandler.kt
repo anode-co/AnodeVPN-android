@@ -30,6 +30,8 @@ abstract class AppNavigationHandler : NavigationHandler {
                     AppNavigation.OpenChangePassword -> openChangePassword(fragment)
                     AppNavigation.OpenChangePin -> openChangePin(fragment)
                     is AppNavigation.OpenSendTransaction -> openSendTransaction(fragment, navigation.fromAddress)
+                    AppNavigation.OpenEnterWallet -> openEnterWallet(fragment)
+                    AppNavigation.OpenStart -> openStart(fragment)
                 }
             }
 
@@ -61,4 +63,6 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openChangePassword(fragment: Fragment)
     abstract fun openChangePin(fragment: Fragment)
     abstract fun openSendTransaction(fragment: Fragment, fromaddress: String)
+    abstract fun openEnterWallet(fragment: Fragment)
+    abstract fun openStart(fragment: Fragment)
 }

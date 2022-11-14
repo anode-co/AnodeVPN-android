@@ -48,4 +48,12 @@ class MainViewModel @Inject constructor(
     fun openSendConfirm(fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean) {
         sendNavigation(AppNavigation.OpenSendConfirm(fromaddress, toaddress, amount, maxAmount))
     }
+
+    fun openEnterWallet() {
+        sendNavigation(AppNavigation.OpenEnterWallet)
+    }
+
+    fun openStart() {
+        sendNavigation(AppNavigation.OpenStart)
+    }
 }

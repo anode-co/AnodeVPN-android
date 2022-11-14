@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navGraph"
-    app:startDestination="@id/enterWallet">
+    app:startDestination="@id/main">
 
     <action
         android:id="@+id/toMain"
@@ -37,6 +37,10 @@
         app:destination="@id/sendTransaction" />
 
     <action
+        android:id="@+id/toEnterWallet"
+        app:destination="@id/enterWallet" />
+
+    <action
         android:id="@+id/toSendConfirm"
         app:destination="@id/sendConfirm" />
 
@@ -47,6 +51,10 @@
     <action
         android:id="@+id/toVpnExits"
         app:destination="@id/vpnExits" />
+
+    <action
+        android:id="@+id/toStart"
+        app:destination="@id/start" />
 
     <fragment
         android:id="@+id/start"
