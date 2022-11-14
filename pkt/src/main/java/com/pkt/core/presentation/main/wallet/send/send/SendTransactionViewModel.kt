@@ -1,7 +1,9 @@
 package com.pkt.core.presentation.main.wallet.send.send
 
 import androidx.lifecycle.SavedStateHandle
+import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,14 +41,23 @@ class SendTransactionViewModel @Inject constructor(
     }
 
     fun onSendClick() {
+        var amountToSend = amount.toDoubleOrNull() ?: 0.0
+        if (currentState.maxValueSelected) {
+            amountToSend = 0.0
+        } else if (amount.toDoubleOrNull() == 0.0) {
+            sendEvent(CommonEvent.Warning(R.string.error_send_transaction_amount))
+            return
+        }
+        //TODO: check if wallet has enough balance
         runCatching {
             toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
         }.onSuccess {
+
             sendNavigation(
                 AppNavigation.OpenSendConfirm(
                     fromaddress = fromaddress,
                     toaddress = toaddress,
-                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    amount = amountToSend ,
                     maxAmount = currentState.maxValueSelected
                 )
             )
