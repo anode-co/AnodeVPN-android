@@ -108,6 +108,36 @@
                 app:layout_constraintTop_toBottomOf="@id/idLabel"
                 tools:text="Version: 0.2.113" />
 
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/upgradeCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:minWidth="22dp"
+                android:minHeight="22dp"
+                android:text="@string/upgrade_from_pre_release"
+                android:textColor="?android:textColorSecondary"
+                app:centerIfNoTextEnabled="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/versionLabel" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/switchUiCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:minWidth="22dp"
+                android:minHeight="22dp"
+                android:text="@string/switch_to_new_ui_screens"
+                android:textColor="?android:textColorSecondary"
+                app:centerIfNoTextEnabled="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/upgradeCheckbox" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>

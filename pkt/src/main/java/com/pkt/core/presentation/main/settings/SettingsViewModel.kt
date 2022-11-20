@@ -84,4 +84,14 @@ class SettingsViewModel @Inject constructor(
 
         sendEvent(SettingsEvent.OpenCreateWallet(name))
     }
+
+    fun onUpgradeCheckChanged(checked: Boolean) {
+        // TODO("Not yet implemented")
+        sendState { copy(upgradeChecked = checked) }
+    }
+
+    fun onSwitchUiCheckChanged(checked: Boolean) {
+        // TODO("Not yet implemented")
+        sendState { copy(switchUiChecked = checked) }
+    }
 }
