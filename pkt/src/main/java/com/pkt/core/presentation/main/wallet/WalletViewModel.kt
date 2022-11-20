@@ -212,7 +212,7 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onSelectPeriodClick() {
-        onReload()
+        sendEvent(WalletEvent.OpenDatePicker(currentState.startDate, currentState.endDate))
     }
 
     fun onReload() {
@@ -256,5 +256,14 @@ class WalletViewModel @Inject constructor(
 
     private fun stopPolling() {
         pollingJob?.cancel()
+    }
+
+    fun onPeriodChanged(startDate: Long?, endDate: Long?) {
+        sendState { copy(startDate = startDate, endDate = endDate) }
+        onReload()
+    }
+
+    fun onDeletePeriodClick() {
+        onPeriodChanged(null, null)
     }
 }
