@@ -26,7 +26,7 @@ class QrViewModel @Inject constructor(
             val address = walletRepository.getWalletAddress().getOrElse { "" }
 
             val qr = walletRepository.generateQr(address).getOrNull()
-            sendState { copy(qr = qr) }
+            sendState { copy(address = address, qr = qr) }
         }
     }
 
