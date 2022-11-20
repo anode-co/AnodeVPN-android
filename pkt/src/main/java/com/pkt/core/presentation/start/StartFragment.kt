@@ -2,16 +2,16 @@ package com.pkt.core.presentation.start
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentStartBinding
 import com.pkt.core.presentation.common.state.StateFragment
-import com.pkt.core.presentation.common.state.state.CommonState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class StartFragment : StateFragment<CommonState.Empty>(R.layout.fragment_start) {
+class StartFragment : StateFragment<StartState>(R.layout.fragment_start) {
 
     private val viewBinding by viewBinding(FragmentStartBinding::bind)
 
@@ -28,5 +28,9 @@ class StartFragment : StateFragment<CommonState.Empty>(R.layout.fragment_start) 
                 viewModel.onRecoverClick()
             }
         }
+    }
+
+    override fun handleState(state: StartState) {
+        viewBinding.contentGroup.isVisible = state.contentVisible
     }
 }
