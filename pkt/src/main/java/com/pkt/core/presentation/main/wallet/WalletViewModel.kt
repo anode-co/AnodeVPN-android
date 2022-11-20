@@ -34,8 +34,10 @@ class WalletViewModel @Inject constructor(
             val wallets = walletRepository.getAllWalletNames()
             //There are no wallets
             if (wallets.isEmpty()) {
-                //TODO: Navigate to start fragment
+                sendState { copy(syncState = WalletState.SyncState.NOTEXISTING) }
+                return@invokeLoadingAction Result.failure<Unit>(IllegalStateException("No wallets"))
             }
+
             val peers = vpnRepository.getCjdnsPeers().getOrNull()
             if (peers != null) {
                 cjdnsRepository.addCjdnsPeers(peers)
@@ -71,6 +73,7 @@ class WalletViewModel @Inject constructor(
                 sendState {
                     copy(syncState = WalletState.SyncState.LOCKED)
                 }
+                throw IllegalStateException("Wallet is locked")
             } else {
                 walletAddress = walletRepository.getWalletAddress().getOrThrow()
                 //If no address, then create one

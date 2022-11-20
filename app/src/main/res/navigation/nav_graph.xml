@@ -56,7 +56,9 @@
 
     <action
         android:id="@+id/toStart"
-        app:destination="@id/start" />
+        app:destination="@id/start"
+        app:popUpTo="@id/navGraph"
+        app:popUpToInclusive="true" />
 
     <fragment
         android:id="@+id/start"
