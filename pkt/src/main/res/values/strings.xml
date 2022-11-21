@@ -211,4 +211,5 @@
     <string name="error_pkt_address">Invalid PKT address</string>
     <string name="switch_to_new_ui_screens">Switch to new UI screens</string>
     <string name="error_seed_length">Invalid seed length. Must be 15 words</string>
+    <string name="address_copied">Address copied</string>
 </resources>

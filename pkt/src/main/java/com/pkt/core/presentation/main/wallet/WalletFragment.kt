@@ -74,6 +74,10 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
 
             recyclerView.itemAnimator = null
             recyclerView.adapter = adapter
+
+            addressValue.doOnClick {
+                viewModel.onAddressClick()
+            }
         }
     }
 
