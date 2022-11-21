@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navGraph"
-    app:startDestination="@id/main">
+    app:startDestination="@id/start">
 
     <action
         android:id="@+id/toMain"
@@ -38,7 +38,9 @@
 
     <action
         android:id="@+id/toEnterWallet"
-        app:destination="@id/enterWallet" />
+        app:destination="@id/enterWallet"
+        app:popUpTo="@id/navGraph"
+        app:popUpToInclusive="true" />
 
     <action
         android:id="@+id/toSendConfirm"
@@ -54,7 +56,9 @@
 
     <action
         android:id="@+id/toStart"
-        app:destination="@id/start" />
+        app:destination="@id/start"
+        app:popUpTo="@id/navGraph"
+        app:popUpToInclusive="true" />
 
     <fragment
         android:id="@+id/start"
