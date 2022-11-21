@@ -110,6 +110,10 @@ fun EditText.showKeyboard() {
     UIUtil.showKeyboard(context, this)
 }
 
+fun TextInputLayout.showKeyboardDelayed() {
+    editText?.showKeyboardDelayed()
+}
+
 fun EditText.showKeyboardDelayed() {
     postDelayed({
         requestFocus()
