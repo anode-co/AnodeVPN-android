@@ -9,6 +9,8 @@ import com.pkt.domain.dto.CjdnsInfo
 import com.pkt.domain.dto.CjdnsPeer
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.repository.CjdnsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -63,7 +65,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         }
     }
 
-    override suspend fun getCjdnsInfo(): Result<CjdnsInfo> {
+    override suspend fun getCjdnsInfo(): Result<CjdnsInfo> = withContext(Dispatchers.IO) {
         val ipv4 = CjdnsSocket.ipv4Address
         val cjdnsNodeInfo = CjdnsSocket.Core_nodeInfo()
         val ipv6 = cjdnsNodeInfo["myIp6"].str()
@@ -94,7 +96,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
 
         val nodeUrl = "http://h.snode.cjd.li/#" + cjdnsNodeInfo["myIp6"].str()
         val response = CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection,cjdnsPeers,key,username,nodeUrl,vpnExit)
-        return Result.success(response)
+        Result.success(response)
     }
 
 }
