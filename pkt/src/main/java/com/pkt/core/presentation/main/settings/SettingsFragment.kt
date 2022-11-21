@@ -14,6 +14,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentSettingsBinding
 import com.pkt.core.extensions.applyGradient
+import com.pkt.core.extensions.doOnCheckChanged
 import com.pkt.core.extensions.getColorByAttribute
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
@@ -128,6 +129,22 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
             idLabel.text = "%s %s".format(getString(R.string.id), state.id)
             versionLabel.text = "%s %s".format(getString(R.string.version), state.version)
+
+            upgradeCheckbox.apply {
+                setOnCheckedChangeListener(null)
+                isChecked = state.upgradeChecked
+                doOnCheckChanged {
+                    viewModel.onUpgradeCheckChanged(it)
+                }
+            }
+
+            switchUiCheckbox.apply {
+                setOnCheckedChangeListener(null)
+                isChecked = state.switchUiChecked
+                doOnCheckChanged {
+                    viewModel.onSwitchUiCheckChanged(it)
+                }
+            }
         }
     }
 
