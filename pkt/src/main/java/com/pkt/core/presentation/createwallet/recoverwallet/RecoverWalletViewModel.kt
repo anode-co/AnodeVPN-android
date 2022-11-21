@@ -1,6 +1,7 @@
 package com.pkt.core.presentation.createwallet.recoverwallet
 
 import androidx.lifecycle.SavedStateHandle
+import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ class RecoverWalletViewModel @Inject constructor(
         set(value) {
             field = value
             invalidateNextButtonEnabled()
+            invalidateSeedInput()
         }
 
     var seedPassword: String = ""
@@ -32,12 +34,20 @@ class RecoverWalletViewModel @Inject constructor(
     private fun invalidateNextButtonEnabled() {
         sendState {
             copy(
-                nextButtonEnabled = seed.isSeedValid() && seedPassword.isNotBlank()
+                nextButtonEnabled = seed.seedLength() == SEED_LENGTH
             )
         }
     }
 
-    private fun String.isSeedValid() = split(" ").map { it.trim() }.count { it.isNotBlank() } == SEED_LENGTH
+    private fun invalidateSeedInput() {
+        sendState {
+            copy(
+                seedError = if (seed.seedLength() > SEED_LENGTH) R.string.error_seed_length else null
+            )
+        }
+    }
+
+    private fun String.seedLength() = split(" ").map { it.trim() }.count { it.isNotBlank() }
 
     fun onNextClick() {
         invokeAction {

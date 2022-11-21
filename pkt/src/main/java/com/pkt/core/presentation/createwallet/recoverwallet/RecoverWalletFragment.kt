@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -12,7 +13,6 @@ import com.pkt.core.extensions.clearFocusOnActionDone
 import com.pkt.core.extensions.doOnClick
 import com.pkt.core.extensions.doOnTextChanged
 import com.pkt.core.presentation.common.state.StateFragment
-import com.pkt.core.presentation.common.state.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
@@ -27,8 +27,8 @@ class RecoverWalletFragment : StateFragment<RecoverWalletState>(R.layout.fragmen
         super.onViewCreated(view, savedInstanceState)
 
         with(viewBinding) {
-            seedInputLayout.doOnTextChanged {
-                viewModel.seed = it
+            seedInput.doAfterTextChanged {
+                viewModel.seed = it.toString()
             }
 
             seedInput.apply {
@@ -64,19 +64,9 @@ class RecoverWalletFragment : StateFragment<RecoverWalletState>(R.layout.fragmen
     override fun handleState(state: RecoverWalletState) {
         with(viewBinding) {
             nextButton.isEnabled = state.nextButtonEnabled
-        }
-    }
-
-    override fun handleEvent(event: UiEvent) {
-        super.handleEvent(event)
-
-        when (event) {
-            is RecoverWalletEvent.SeedError -> {
-                viewBinding.seedInputLayout.error = event.error
-            }
-
-            is RecoverWalletEvent.PasswordError -> {
-                viewBinding.passwordInputLayout.error = event.error
+            seedInputLayout.apply {
+                error = state.seedError?.let { getString(it) }
+                isErrorEnabled = state.seedError != null
             }
         }
     }
