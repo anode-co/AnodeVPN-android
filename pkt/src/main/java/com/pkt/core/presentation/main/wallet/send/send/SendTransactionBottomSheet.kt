@@ -118,6 +118,16 @@ class SendTransactionBottomSheet : StateBottomSheet<SendTransactionState>(R.layo
                 dismiss()
             }
 
+            is SendTransactionEvent.AmountError -> {
+                viewBinding.amountInputLayout.error = getString(event.errorResId)
+                viewBinding.amountInput.showKeyboardDelayed()
+            }
+            
+            is SendTransactionEvent.AddressError -> {
+                viewBinding.addressInputLayout.error = event.error
+                viewBinding.addressInput.showKeyboardDelayed()
+            }
+
             else -> super.handleEvent(event)
         }
     }
