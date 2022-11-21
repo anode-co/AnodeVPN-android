@@ -73,6 +73,16 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
+
     private fun showQrDialog() {
         QrBottomSheet().show(childFragmentManager, QrBottomSheet.TAG)
     }

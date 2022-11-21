@@ -12,6 +12,9 @@ import com.pkt.core.extensions.*
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.VpnRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import javax.inject.Inject
@@ -28,6 +31,8 @@ class WalletViewModel @Inject constructor(
     val walletName = walletRepository.getActiveWallet()
     var walletAddress = ""
     var PKTtoUSD = 0f
+
+    private var pollingJob: Job? = null
 
     init {
         invokeLoadingAction {
@@ -227,5 +232,29 @@ class WalletViewModel @Inject constructor(
 
     fun onRetryClick() {
         // TODO
+    }
+
+    fun onResume() {
+        startPolling()
+    }
+
+    fun onPause() {
+        stopPolling()
+    }
+
+    private fun startPolling() {
+        stopPolling()
+        pollingJob = viewModelScope.launch {
+            while (true) {
+                if (!isActive) return@launch
+
+                // TODO: do some work here
+                delay(1000L)
+            }
+        }
+    }
+
+    private fun stopPolling() {
+        pollingJob?.cancel()
     }
 }
