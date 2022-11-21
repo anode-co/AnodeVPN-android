@@ -54,6 +54,10 @@ private val DATE_SHORT_FORMATTER by lazy {
     SimpleDateFormat("MMMM dd", LOCALE)
 }
 
+private val DATE_MMM_DD_FORMATTER by lazy {
+    SimpleDateFormat("MMM dd", LOCALE)
+}
+
 private val TIME_FORMATTER by lazy {
     SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, LOCALE)
 }
@@ -110,6 +114,8 @@ fun LocalDateTime.formatDateTime(): String = DATE_TIME_FORMATTER.format(this.toD
 fun String.formatDateTime(): String = DATE_TIME_FORMATTER.format(this.toDateSafety())
 
 fun LocalDateTime.formatDateShort(): String = DATE_SHORT_FORMATTER.format(this.toDate())
+
+fun Long.formatDateMMMDD(): String = DATE_MMM_DD_FORMATTER.format(Date(this))
 
 fun LocalDateTime.formatTime(): String = TIME_FORMATTER.format(this.toDate())
 

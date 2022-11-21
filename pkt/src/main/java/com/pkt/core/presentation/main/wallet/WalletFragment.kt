@@ -4,18 +4,19 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentWalletBinding
-import com.pkt.core.extensions.applyGradient
-import com.pkt.core.extensions.formatPkt
-import com.pkt.core.extensions.formatUsd
-import com.pkt.core.extensions.getColorByAttribute
+import com.pkt.core.databinding.FragmentWalletCoreBinding
+import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
+import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.wallet.qr.QrBottomSheet
 import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
@@ -24,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
 
-    private val viewBinding by viewBinding(FragmentWalletBinding::bind)
+    private val viewBinding by viewBinding(FragmentWalletCoreBinding::bind)
 
     override val viewModel: WalletViewModel by viewModels()
 
@@ -64,6 +65,9 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             }
             selectPeriodButton.setOnClickListener {
                 viewModel.onSelectPeriodClick()
+            }
+            deletePeriodButton.setOnClickListener {
+                viewModel.onDeletePeriodClick()
             }
 
             transactionsLabel.applyGradient()
@@ -209,7 +213,37 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             addressValue.text = state.walletAddress
 
             adapter.items = state.items
+
+            selectPeriodButton.text = if (state.startDate != null && state.endDate != null) {
+                "${state.startDate.formatDateMMMDD()} - ${state.endDate.formatDateMMMDD()}"
+            } else {
+                getString(R.string.select_period)
+            }
+            deletePeriodButton.isVisible = state.startDate != null && state.endDate != null
         }
 
+    }
+
+    override fun handleEvent(event: UiEvent) {
+        when (event) {
+            is WalletEvent.OpenDatePicker -> {
+                val datePicker = MaterialDatePicker.Builder.dateRangePicker()
+                    .apply {
+                        if (event.startDate != null && event.endDate != null) {
+                            setSelection(androidx.core.util.Pair(event.startDate, event.endDate))
+                        }
+                    }
+                    .build()
+
+                datePicker.addOnPositiveButtonClickListener {
+                    val startDate = it.first
+                    val endDate = it.second
+                    viewModel.onPeriodChanged(startDate, endDate)
+                }
+                datePicker.show(childFragmentManager, "date_picker")
+            }
+
+            else -> super.handleEvent(event)
+        }
     }
 }

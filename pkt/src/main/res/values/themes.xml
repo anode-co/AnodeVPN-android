@@ -20,9 +20,9 @@
         <item name="colorDownloading">@color/orange</item>
 
         <item name="android:windowBackground">@color/bg1</item>
-        <item name="android:statusBarColor">?android:windowBackground</item>
+        <item name="android:statusBarColor">@color/bg1</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:navigationBarColor">?android:windowBackground</item>
+        <item name="android:navigationBarColor">@color/bg1</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
 
         <item name="android:textColorPrimary">@color/text1</item>
@@ -59,6 +59,7 @@
         <item name="android:textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
 
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
+        <item name="materialCalendarTheme">@style/ThemeOverlay.App.DatePicker</item>
 
     </style>
 
@@ -68,5 +69,7 @@
         <item name="bottomSheetStyle">@style/Widget.App.BottomSheet</item>
         <item name="materialButtonStyle">@style/Widget.App.Button</item>
     </style>
+
+    <style name="ThemeOverlay.App.DatePicker" parent="@style/ThemeOverlay.MaterialComponents.MaterialCalendar" />
 
 </resources>
