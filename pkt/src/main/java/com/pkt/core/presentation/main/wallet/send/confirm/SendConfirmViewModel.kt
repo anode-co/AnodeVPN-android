@@ -21,17 +21,27 @@ class SendConfirmViewModel @Inject constructor(
     private val maxAmount: Boolean = savedStateHandle["maxAmount"] ?: error("maxAmount required")
 
     init {
-        if (maxAmount) {
-            invokeLoadingAction {
-                walletRepository.getTotalWalletBalance()
-                    .onSuccess { amount ->
-                        sendState { copy(address = this@SendConfirmViewModel.toaddress, amount = amount) }
-                        sendEvent(SendConfirmEvent.OpenKeyboard)
-                    }
+        invokeLoadingAction {
+            runCatching {
+                val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
+                val amount = if (maxAmount) {
+                    walletRepository.getTotalWalletBalance().getOrThrow()
+                } else {
+                    this@SendConfirmViewModel.amount
+                }
+                isPinAvailable to amount
+            }.onSuccess { (isPinAvailable, amount) ->
+                sendState {
+                    copy(
+                        address = this@SendConfirmViewModel.toaddress,
+                        amount = amount,
+                        isPinVisible = isPinAvailable,
+                        confirmWithPasswordButtonVisible = isPinAvailable,
+                        confirmWithPinButtonVisible = false
+                    )
+                }
+                sendEvent(SendConfirmEvent.OpenKeyboard)
             }
-        } else {
-            sendState { copy(address = this@SendConfirmViewModel.toaddress, amount = this@SendConfirmViewModel.amount) }
-            sendEvent(SendConfirmEvent.OpenKeyboard)
         }
     }
 
@@ -44,7 +54,7 @@ class SendConfirmViewModel @Inject constructor(
             runCatching {
                 val isPinCorrect = walletRepository.checkPin(pin).getOrThrow()
                 if (isPinCorrect) {
-                    walletRepository.sendCoins(listOf(fromaddress),currentState.amount.toLong(),currentState.address).getOrThrow()
+                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount.toLong(), currentState.address).getOrThrow()
                 } else {
                     null
                 }
@@ -54,12 +64,60 @@ class SendConfirmViewModel @Inject constructor(
                     sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
                 } ?: run {
                     sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
-                    sendEvent(SendConfirmEvent.ClearPin)
+                    sendEvent(SendConfirmEvent.ClearInputs)
                     sendEvent(SendConfirmEvent.OpenKeyboard)
                 }
             }.onFailure {
                 sendError(it)
             }
         }
+    }
+
+    fun onPasswordDone(password: String) {
+        password.takeIf { it.isNotBlank() } ?: return
+
+        invokeAction {
+            runCatching {
+                val isPinCorrect = walletRepository.checkWalletPassphrase(password).getOrThrow()
+                if (isPinCorrect) {
+                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount.toLong(), currentState.address).getOrThrow()
+                } else {
+                    null
+                }
+            }.onSuccess { sendResponse ->
+                sendResponse?.let {
+                    sendNavigation(AppNavigation.NavigateBack)
+                    sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
+                } ?: run {
+                    sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
+                    sendEvent(SendConfirmEvent.ClearInputs)
+                    sendEvent(SendConfirmEvent.OpenKeyboard)
+                }
+            }.onFailure {
+                sendError(it)
+            }
+        }
+    }
+
+    fun onConfirmWithPasswordClick() {
+        sendState {
+            copy(
+                isPinVisible = false,
+                confirmWithPasswordButtonVisible = false,
+                confirmWithPinButtonVisible = true
+            )
+        }
+        sendEvent(SendConfirmEvent.OpenKeyboard)
+    }
+
+    fun onConfirmWithPinClick() {
+        sendState {
+            copy(
+                isPinVisible = true,
+                confirmWithPasswordButtonVisible = true,
+                confirmWithPinButtonVisible = false
+            )
+        }
+        sendEvent(SendConfirmEvent.OpenKeyboard)
     }
 }

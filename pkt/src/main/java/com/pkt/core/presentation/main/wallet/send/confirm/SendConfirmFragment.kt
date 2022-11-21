@@ -2,6 +2,7 @@ package com.pkt.core.presentation.main.wallet.send.confirm
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -29,6 +30,21 @@ class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_se
                     viewModel.onPinDone(it.toString())
                 }
             }
+
+            passwordInputLayout.doOnActionDone { inputLayout ->
+                inputLayout.editText?.hideKeyboard()
+
+                inputLayout.editText?.text?.let {
+                    viewModel.onPasswordDone(it.toString())
+                }
+            }
+
+            confirmWithPasswordButton.doOnClick {
+                viewModel.onConfirmWithPasswordClick()
+            }
+            confirmWithPinButton.doOnClick {
+                viewModel.onConfirmWithPinClick()
+            }
         }
     }
 
@@ -42,22 +58,37 @@ class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_se
                 requireContext().getColorByAttribute(android.R.attr.textColorSecondary),
                 unit
             )
+
+            pinInputLayout.isVisible = state.isPinVisible
+            passwordInputLayout.isVisible = !state.isPinVisible
+            confirmWithPasswordButton.isVisible = state.confirmWithPasswordButtonVisible
+            confirmWithPinButton.isVisible = state.confirmWithPinButtonVisible
+
+            toolbar.setTitle(
+                if (state.isPinVisible) {
+                    R.string.please_confirm_pin
+                } else {
+                    R.string.please_confirm_password
+                }
+            )
         }
     }
 
     override fun handleEvent(event: UiEvent) {
-        when (event) {
-            is SendConfirmEvent.OpenKeyboard -> {
-                viewBinding.pinInput.postDelayed({
-                    viewBinding.pinInput.showKeyboard()
-                }, 100)
-            }
+        with(viewBinding) {
+            when (event) {
+                is SendConfirmEvent.OpenKeyboard -> {
+                    pinInputLayout.takeIf { it.isVisible }?.showKeyboardDelayed()
+                    passwordInputLayout.takeIf { it.isVisible }?.showKeyboardDelayed()
+                }
 
-            is SendConfirmEvent.ClearPin -> {
-                viewBinding.pinInput.setText("")
-            }
+                is SendConfirmEvent.ClearInputs -> {
+                    viewBinding.pinInput.setText("")
+                    viewBinding.passwordInput.setText("")
+                }
 
-            else -> super.handleEvent(event)
+                else -> super.handleEvent(event)
+            }
         }
     }
 }
