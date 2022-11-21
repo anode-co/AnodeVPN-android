@@ -2,6 +2,7 @@ package com.pkt.core.presentation.main.wallet
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.pkt.core.R
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.WalletRepository
@@ -9,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.VpnRepository
@@ -265,5 +267,10 @@ class WalletViewModel @Inject constructor(
 
     fun onDeletePeriodClick() {
         onPeriodChanged(null, null)
+    }
+
+    fun onAddressClick() {
+        sendEvent(CommonEvent.CopyToBuffer(R.string.address, currentState.walletAddress))
+        sendEvent(CommonEvent.Info(R.string.address_copied))
     }
 }
