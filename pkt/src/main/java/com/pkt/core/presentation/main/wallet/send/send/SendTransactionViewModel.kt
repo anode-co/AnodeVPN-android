@@ -3,7 +3,6 @@ package com.pkt.core.presentation.main.wallet.send.send
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
-import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +44,7 @@ class SendTransactionViewModel @Inject constructor(
         if (currentState.maxValueSelected) {
             amountToSend = 0.0
         } else if (amount.toDoubleOrNull() == 0.0) {
-            sendEvent(CommonEvent.Warning(R.string.error_send_transaction_amount))
+            sendEvent(SendTransactionEvent.AmountError(R.string.error_send_transaction_amount))
             return
         }
         //TODO: check if wallet has enough balance
@@ -62,8 +61,7 @@ class SendTransactionViewModel @Inject constructor(
                 )
             )
         }.onFailure {
-            //TODO: show error invalid address
-            sendError(it)
+            sendEvent(SendTransactionEvent.AddressError(it.message))
         }
     }
 
