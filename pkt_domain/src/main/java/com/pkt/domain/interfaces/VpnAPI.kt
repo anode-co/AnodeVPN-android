@@ -15,4 +15,9 @@ interface VpnAPI {
     @Headers("Content-Type: application/json; charset=utf-8")
     @POST("authorize/")
     suspend fun authorizeVPN(@Header("Authorization") signature: String, @Body requestAuthorizeVpn:RequestAuthorizeVpn): ResponseAuthorizeVpn
+    @POST("vpn/clients/events/")
+    fun postError(@Body error: String): ResponseErrorPost
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @GET("vpn/accounts/username/")
+    suspend fun generateUsername(@Header("Authorization") signature: String): UsernameResponse
 }

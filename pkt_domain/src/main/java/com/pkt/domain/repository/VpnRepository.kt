@@ -22,4 +22,8 @@ interface VpnRepository {
     suspend fun getIPv6Address(): Result<String>
     suspend fun authorizeVPN(): Result<Boolean>
     suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>>
+    fun postError(error: String): Result<String>
+    suspend fun generateUsername(): Result<String>
+    fun setUsername(username: String)
+    fun getUsername(): String
 }

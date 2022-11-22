@@ -3,6 +3,7 @@ package com.pkt.domain.interfaces
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.RequestAuthorizeVpn
+import com.pkt.domain.dto.ResponseErrorPost
 import com.pkt.domain.dto.VpnServer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -78,5 +79,38 @@ class VpnAPIService {
 
     suspend fun getCjdnsPeeringLines(): List<CjdnsPeeringLine> {
         return vpnApi.getCjdnsPeeringLines()
+    }
+
+    fun postError(error: String): Result<String> {
+        val response = vpnApi.postError(error)
+        if (response.status == "success") {
+            return Result.success("success")
+        } else {
+            return Result.failure(Exception(response.message))
+        }
+    }
+
+    suspend fun generateUsername(signature: String): Result<String> {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS)
+        val httpClient = OkHttpClient.Builder()
+
+            .addInterceptor(interceptor)
+            .build()
+
+        val api = Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(httpClient)
+            .build()
+            .create(VpnAPI::class.java)
+
+        val response = api.generateUsername("cjdns $signature")
+        if (response.username.isNotEmpty()) {
+            return Result.success(response.username)
+        } else {
+            return Result.failure(Exception(response.message))
+        }
     }
 }
