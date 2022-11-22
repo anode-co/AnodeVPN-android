@@ -77,6 +77,22 @@ class VpnRepositoryDummy : VpnRepository {
         TODO("Not yet implemented")
     }
 
+    override fun postError(error: String): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun generateUsername(): Result<String> {
+        TODO("Not yet implemented")
+    }
+
+    override fun setUsername(username: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getUsername(): String {
+        TODO("Not yet implemented")
+    }
+
     private companion object {
         val VPN_LIST = listOf(
             Vpn(

@@ -143,11 +143,7 @@ class WalletRepositoryDummy constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getWalletBalances(): Result<WalletAddressBalances> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getWalletTransactions(): Result<WalletTransactions> {
+    override suspend fun getWalletTransactions(coinbase: Int, reversed: Boolean, skip: Int, limit: Int, startTimestamp: Long, endTimestamp: Long): Result<WalletTransactions> {
         TODO("Not yet implemented")
     }
 
@@ -176,15 +172,8 @@ class WalletRepositoryDummy constructor(
         )
     }
 
-    override suspend fun deleteWallet(name: String): Result<String?> {
-        delay(1000)
-        return Result.success(
-            if (name == "My Wallet 1") {
-                null
-            } else {
-                "Invalid name"
-            }
-        )
+    override fun deleteWallet(name: String) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean> {
