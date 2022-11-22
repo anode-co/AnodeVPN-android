@@ -2,12 +2,14 @@ package co.anode.anodium.integration.di
 
 import co.anode.anodium.BuildConfig
 import co.anode.anodium.integration.model.repository.CjdnsRepositoryImpl
+import co.anode.anodium.integration.model.repository.GeneralRepositoryImpl
 import co.anode.anodium.integration.model.repository.VpnRepositoryImpl
 import co.anode.anodium.integration.model.repository.WalletRepositoryImpl
 import co.anode.anodium.support.AnodeUtil
 import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.Module
@@ -39,4 +41,8 @@ object AppModule {
     @Provides
     @Singleton
     fun providesCjdnsRepository(): CjdnsRepository = CjdnsRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun providesGeneralRepository(): GeneralRepository = GeneralRepositoryImpl()
 }

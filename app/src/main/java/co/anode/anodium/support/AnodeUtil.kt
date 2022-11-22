@@ -118,6 +118,45 @@ object AnodeUtil {
         //copyAssets()
     }
 
+    fun setUsernameToSharedPrefs(username: String) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putString("username", username).apply()
+        }
+    }
+
+    fun getUsernameFromSharedPrefs(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getString("username", "")!!
+        }
+        return ""
+    }
+
+    fun setPreReleaseUpgrade(value: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("preRelease", value).apply()
+        }
+    }
+
+    fun getPreReleaseUpgrade(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        return prefs!!.getBoolean("preRelease", false)
+    }
+
+    fun setUseNewUi(value: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("useNewUI", value).apply()
+        }
+    }
+
+    fun getUseNewUi(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        return prefs!!.getBoolean("useNewUI", false)
+    }
+
     fun generateUsername(textview:TextView?) {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         //If there is no username stored
