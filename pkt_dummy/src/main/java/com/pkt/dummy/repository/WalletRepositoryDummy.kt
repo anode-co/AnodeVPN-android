@@ -85,14 +85,14 @@ class WalletRepositoryDummy constructor(
         }
     }
 
-    override suspend fun getWalletBalance(address: String): Result<Double> {
+    override suspend fun getWalletBalance(address: String): Result<Long> {
         return getWallets()
             .mapCatching { list ->
-                list.find { it.address == address }!!.total
+                list.find { it.address == address }!!.total.toLong()
             }
     }
 
-    override suspend fun getTotalWalletBalance(): Result<Double> =
+    override suspend fun getTotalWalletBalance(): Result<Long> =
         getWalletBalance("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
     override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO) {
@@ -194,7 +194,7 @@ class WalletRepositoryDummy constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun sendCoins(fromAddresses: List<String>, amount: Long, toAddress: String): Result<SendTransactionResponse> {
+    override suspend fun sendCoins(fromAddresses: List<String>, amount: Double, toAddress: String): Result<SendTransactionResponse> {
         delay(1000L)
         Result.success(
             SendResponse(

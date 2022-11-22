@@ -36,7 +36,7 @@ class ChangePinViewModel @Inject constructor(
                             walletRepository.changePin(enterPassword, enterPin)
                             sendEvent(CommonEvent.Info(R.string.success))
                             delay(1000)
-                            sendNavigation(AppNavigation.NavigateBack)
+                            sendNavigation(AppNavigation.OpenMain)
                         }.onFailure {
                             sendError(Throwable("Wrong password"))
                         }

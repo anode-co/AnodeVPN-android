@@ -2,6 +2,8 @@ package com.pkt.core.presentation.main.wallet.send.confirm
 
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
+import com.pkt.core.extensions.formatPkt
+import com.pkt.core.extensions.toPKT
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.navigation.AppNavigation
@@ -24,12 +26,11 @@ class SendConfirmViewModel @Inject constructor(
         invokeLoadingAction {
             runCatching {
                 val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
-                val amount = if (maxAmount) {
-                    walletRepository.getTotalWalletBalance().getOrThrow()
-                } else {
-                    this@SendConfirmViewModel.amount
+                var amountToPass = amount
+                if (maxAmount) {
+                    amountToPass = walletRepository.getTotalWalletBalance().getOrThrow().toPKT().toDouble()
                 }
-                isPinAvailable to amount
+                isPinAvailable to amountToPass
             }.onSuccess { (isPinAvailable, amount) ->
                 sendState {
                     copy(
@@ -54,7 +55,7 @@ class SendConfirmViewModel @Inject constructor(
             runCatching {
                 val isPinCorrect = walletRepository.checkPin(pin).getOrThrow()
                 if (isPinCorrect) {
-                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount.toLong(), currentState.address).getOrThrow()
+                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).getOrThrow()
                 } else {
                     null
                 }
@@ -80,7 +81,7 @@ class SendConfirmViewModel @Inject constructor(
             runCatching {
                 val isPinCorrect = walletRepository.checkWalletPassphrase(password).getOrThrow()
                 if (isPinCorrect) {
-                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount.toLong(), currentState.address).getOrThrow()
+                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).getOrThrow()
                 } else {
                     null
                 }

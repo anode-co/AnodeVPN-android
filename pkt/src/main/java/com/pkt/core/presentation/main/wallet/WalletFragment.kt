@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.pkt.core.R
-import com.pkt.core.databinding.FragmentWalletBinding
 import com.pkt.core.databinding.FragmentWalletCoreBinding
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
@@ -55,7 +54,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
 
         with(viewBinding) {
             sendButton.setOnClickListener {
-                mainViewModel.openSendTransaction(viewModel.walletAddress)
+                viewModel.onSendClick()
             }
             qrButton.setOnClickListener {
                 showQrDialog()
@@ -112,39 +111,21 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 val dot = resources.getDrawable(R.drawable.ic_dot, null)
                 when (state.syncState) {
                     WalletState.SyncState.NOTEXISTING -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
+                        compoundDrawableTintList = null
+                        text = "${getString(R.string.wallet_status_notexisting)}"
                         mainViewModel.openStart()
                     }
                     WalletState.SyncState.LOCKED -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
+                        compoundDrawableTintList = null
+                        text = "${getString(R.string.wallet_status_locked)}"
                         mainViewModel.openEnterWallet()
                     }
                     WalletState.SyncState.DOWNLOADING -> {
                         setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
                         compoundDrawableTintList = ColorStateList.valueOf(
                             context.getColorByAttribute(R.attr.colorDownloading))
-                    }
-                    WalletState.SyncState.SCANNING -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(R.attr.colorProgress))
-                    }
-                    WalletState.SyncState.SUCCESS -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(R.attr.colorSuccess))
-                    }
-                    WalletState.SyncState.FAILED -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
-                    }
-                    WalletState.SyncState.WAITING -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
-                        compoundDrawableTintList = null
-                    }
-                }
-
-                when (state.syncState) {
-                    WalletState.SyncState.DOWNLOADING -> {
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
@@ -154,6 +135,9 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                         } | ${getString(R.string.wallet_status_syncing_headers)} ${state.chainHeight}/${state.neutrinoTop}"
                     }
                     WalletState.SyncState.SCANNING -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(R.attr.colorProgress))
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
@@ -163,6 +147,9 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                         } | ${getString(R.string.wallet_status_syncing_transactions)} ${state.walletHeight}/${state.neutrinoTop}"
                     }
                     WalletState.SyncState.SUCCESS -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(R.attr.colorSuccess))
                         val diffSeconds = state.syncTimeDiff
                         var timeAgoText = ""
                         if (diffSeconds > 60) {
@@ -183,17 +170,16 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                             )
                         } | ${getString(R.string.block)} ${state.chainHeight} - $timeAgoText"
                     }
-                    WalletState.SyncState.WAITING -> {
-                        text = "${getString(R.string.wallet_status_syncing_waiting)}"
-                    }
                     WalletState.SyncState.FAILED -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
                         text = "${getString(R.string.wallet_status_disconnected)}"
                     }
-                    WalletState.SyncState.LOCKED -> {
-                        text = "${getString(R.string.wallet_status_locked)}"
-                    }
-                    WalletState.SyncState.NOTEXISTING -> {
-                        text = "${getString(R.string.wallet_status_notexisting)}"
+                    WalletState.SyncState.WAITING -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
+                        compoundDrawableTintList = null
+                        text = "${getString(R.string.wallet_status_syncing_waiting)}"
                     }
                 }
             }
@@ -207,7 +193,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 text = if (state.balancePkt.isEmpty()) {
                     "0.00"
                 } else {
-                    state.balancePkt.toLong().formatPkt()
+                    state.balancePkt
                 }
                 applyGradient()
             }
@@ -246,7 +232,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 }
                 datePicker.show(childFragmentManager, "date_picker")
             }
-
+            is WalletEvent.OpenSendTransaction -> mainViewModel.openSendTransaction(viewModel.walletAddress)
             else -> super.handleEvent(event)
         }
     }

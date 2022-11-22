@@ -39,8 +39,9 @@ class ChangePasswordViewModel @Inject constructor(
                         .onSuccess {
                             sendEvent(CommonEvent.Info(R.string.success))
                             delay(1000)
+                            //Ask user to reset PIN
+                            //TODO: close this and changepassword if it came from there
                             sendNavigation(AppNavigation.NavigateBack)
-                            //TODO: reset PIN
                         }
                         .onFailure {
                             sendError(it)

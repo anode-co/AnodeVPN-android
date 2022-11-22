@@ -32,7 +32,7 @@ data class ChangePassphraseResponse(
 @Serializable
 data class SendTransactionRequest(
     val to_address: String,
-    val amount: Long,
+    val amount: Double,
     val from_address: List<String>
 )
 
@@ -77,7 +77,9 @@ data class WalletTransactionsRequest (
     val coinbase: Int,
     val reversed: Boolean,
     val txnsSkip: Int,
-    val txnsLimit: Int,
+    val txnsLimit: Int
+    /*val startTimestamp: Long,
+    val endTimestamp: Long,*/
 )
 
 @Serializable

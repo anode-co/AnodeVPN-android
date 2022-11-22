@@ -259,11 +259,15 @@ object AnodeClient {
         File(ctx.filesDir,fname).appendText(err)
     }
 
-    fun storeError(ctx: Context, type: String, e: Throwable) {
+    fun storeError(ctx: Context?, type: String, e: Throwable) {
+        var c = ctx
+        if (ctx == null) {
+            c = mycontext
+        }
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
         val err = errorJsonObj(type, e).toString(1)
         Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
-        File(ctx.filesDir,fname).appendText(err)
+        File(c?.filesDir,fname).appendText(err)
     }
 
     fun storeRating(pubkey: String, rating: Float, comment: String) {
@@ -721,8 +725,9 @@ object AnodeClient {
         var result:String
         var url: URL
 
-        statustv.post(Runnable { statustv.text  = "Waiting for network..." } )
-
+        if(this::statustv.isInitialized) {
+            statustv.post(Runnable { statustv.text = "Waiting for network..." })
+        }
         url = URL(address)
         //url = URL("https://vpn.anode.co/api/0.3/tests/500error/")
         //if connection failed and we are connected to cjdns try with ipv6 address
@@ -784,9 +789,11 @@ object AnodeClient {
                 result = "ERROR: "+conn.responseCode.toString() + " - " + conn.responseMessage
             }
         }
-        statustv.post(Runnable {
-            statustv.text  = ""
-        } )
+        if(this::statustv.isInitialized) {
+            statustv.post(Runnable {
+                statustv.text = ""
+            })
+        }
         return result
     }
 

@@ -85,16 +85,19 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         }
     }
 
-    override suspend fun authorizeVPN(): Result<Boolean> {
-        val jsonObject = JSONObject()
-        val date = System.currentTimeMillis()
-        jsonObject.accumulate("date", date)
-        val bytes = jsonObject.toString().toByteArray()
+    fun getCjdnsSignature(bytes: ByteArray): String {
         val md = MessageDigest.getInstance("SHA-256")
         val digest: ByteArray = md.digest(bytes)
         val digestStr = Base64.getEncoder().encodeToString(digest)
         val res = CjdnsSocket.Sign_sign(digestStr)
-        val sig = res["signature"].str()
+        return res["signature"].str()
+    }
+
+    override suspend fun authorizeVPN(): Result<Boolean> {
+        val date = System.currentTimeMillis()
+        val jsonObject = JSONObject()
+        jsonObject.accumulate("date", date)
+        val sig = getCjdnsSignature(jsonObject.toString().toByteArray())
         val pubKey = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("LastServerPubkey", defaultNode)
         if (pubKey != null) {
             vpnAPI.authorizeVPN(sig, pubKey, date)
@@ -107,6 +110,32 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>> {
         return Result.success(vpnAPI.getCjdnsPeeringLines())
+    }
+
+    override fun postError(error: String): Result<String> {
+        return vpnAPI.postError(error)
+    }
+
+    override suspend fun generateUsername(): Result<String> {
+        val signature = getCjdnsSignature("".toByteArray())
+        runCatching {
+            vpnAPI.generateUsername(signature).getOrThrow()
+        }.onSuccess { username ->
+            setUsername(username)
+            return Result.success(username)
+        }.onFailure {
+            return Result.failure(it)
+        }
+
+        return Result.success("")
+    }
+
+    override fun setUsername(username: String) {
+        AnodeUtil.setUsernameToSharedPrefs(username)
+    }
+
+    override fun getUsername(): String {
+        return AnodeUtil.getUsernameFromSharedPrefs()
     }
 
     override suspend fun disconnect(): Result<Boolean> {

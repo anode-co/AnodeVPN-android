@@ -38,18 +38,7 @@ class DeleteWalletViewModel @Inject constructor(
     }
 
     fun onDeleteClick() {
-        invokeAction {
-            walletRepository.deleteWallet(name)
-                .onSuccess { error ->
-                    if (error == null) {
-                        sendEvent(DeleteWalletEvent.Dismiss)
-                        // TODO where to redirect?
-                    } else {
-                        sendEvent(DeleteWalletEvent.ShowInputError(error))
-                    }
-                }.onFailure {
-                    sendError(it)
-                }
-        }
+        walletRepository.deleteWallet(name)
+        //TODO: refresh wallets list in settings
     }
 }

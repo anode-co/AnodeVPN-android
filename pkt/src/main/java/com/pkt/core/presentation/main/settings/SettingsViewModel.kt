@@ -4,6 +4,8 @@ import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.enterwallet.EnterWalletEvent
+import com.pkt.domain.repository.GeneralRepository
+import com.pkt.domain.repository.VpnRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -13,12 +15,16 @@ class SettingsViewModel @Inject constructor(
     @VersionName private val versionName: String,
     @Username private val id: String,
     private val walletRepository: WalletRepository,
+    private val vpnRepository: VpnRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<SettingsState>() {
 
     override fun createInitialState() = SettingsState(
         walletName = walletRepository.getActiveWallet(),
         id = id,
-        version = versionName
+        version = versionName,
+        upgradeChecked = generalRepository.getPreReleaseUpgrade(),
+        switchUiChecked = generalRepository.getNewUI()
     )
 
     fun onWalletClick() {
@@ -58,7 +64,16 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onExportClick() {
-        // TODO
+        invokeLoadingAction {
+            runCatching {
+                val username = vpnRepository.generateUsername()
+                val n = username
+            }.onSuccess {
+
+            }.onFailure {
+                sendError(it)
+            }
+        }
     }
 
     fun onDeleteClick() {
@@ -86,12 +101,12 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onUpgradeCheckChanged(checked: Boolean) {
-        // TODO("Not yet implemented")
+        generalRepository.enablePreReleaseUpgrade(checked)
         sendState { copy(upgradeChecked = checked) }
     }
 
     fun onSwitchUiCheckChanged(checked: Boolean) {
-        // TODO("Not yet implemented")
+        generalRepository.enableNewUI(checked)
         sendState { copy(switchUiChecked = checked) }
     }
 }

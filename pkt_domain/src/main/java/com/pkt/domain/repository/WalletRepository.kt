@@ -17,9 +17,9 @@ interface WalletRepository {
     //Check if the PIN is correct
     suspend fun checkPin(pin: String): Result<Boolean>
     //Get the total available balance of PKT in all the addresses of the wallet
-    suspend fun getTotalWalletBalance(): Result<Double>
+    suspend fun getTotalWalletBalance(): Result<Long>
     //Get the wallet balance of a specific address
-    suspend fun getWalletBalance(address: String): Result<Double>
+    suspend fun getWalletBalance(address: String): Result<Long>
     //Get the wallet info
     suspend fun getWalletInfo(): Result<WalletInfo>
     //Generate seed words for a new PKT wallet
@@ -35,9 +35,9 @@ interface WalletRepository {
     //Create a new PKT address
     suspend fun createAddress(): Result<WalletAddressCreateResponse>
     //Get the list of all PKT addresses and their balances of the active wallet
-    suspend fun getWalletBalances(): Result<WalletAddressBalances>
+    //suspend fun getWalletBalances(): Result<WalletAddressBalances>
     //Get the list of Transactions of the active wallet
-    suspend fun getWalletTransactions(): Result<WalletTransactions>
+    suspend fun getWalletTransactions(coinbase: Int=1, reversed: Boolean=false, skip: Int=0, limit: Int=10, startTimestamp: Long=0, endTimestamp: Long=0): Result<WalletTransactions>
     //Get the seed words of the active wallet
     suspend fun getSeed(): Result<String>
     //Rename the active wallet file in the device
@@ -45,7 +45,7 @@ interface WalletRepository {
     //Check if wallet name exists
     suspend fun checkWalletName(name: String): Result<String?>
     //Delete wallet name from device
-    suspend fun deleteWallet(name: String): Result<String?>
+    fun deleteWallet(name: String)
     //Change active wallet passphrase
     suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean>
     //Change active wallet PIN
@@ -55,7 +55,7 @@ interface WalletRepository {
     //Check if passphrase is correct against active wallet
     suspend fun checkWalletPassphrase(passphrase: String): Result<Boolean>
     //Send PKT to an address
-    suspend fun sendCoins(fromAddresses: List<String>, amount: Long, toAddress: String): Result<SendTransactionResponse>
+    suspend fun sendCoins(fromAddresses: List<String>, amount: Double, toAddress: String): Result<SendTransactionResponse>
     //Change the active wallet's passphrase
     suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean>
     //Get secret

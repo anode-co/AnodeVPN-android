@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.settings.cjdnsinfo
 
+import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.domain.dto.CjdnsInfo
 import com.pkt.core.R
@@ -8,6 +9,7 @@ import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.adapter.delegate.KeyValueHorizontalItem
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.GeneralRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -16,6 +18,7 @@ class CjdnsInfoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     @VersionName private val versionName: String,
     private val cjdnsRepository: CjdnsRepository,
+    private val repository: GeneralRepository,
 ) : StateViewModel<CjdnsInfoState>() {
 
     init {
@@ -48,7 +51,7 @@ class CjdnsInfoViewModel @Inject constructor(
     }
 
     fun onSubmitLogsClick() {
-        // TODO
+        repository.submitErrorLogs()
     }
 
     private fun CjdnsInfo.toItems(): List<DisplayableItem> {

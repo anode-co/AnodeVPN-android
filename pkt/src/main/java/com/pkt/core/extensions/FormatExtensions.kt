@@ -62,20 +62,10 @@ private val TIME_FORMATTER by lazy {
     SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, LOCALE)
 }
 
-fun String?.formatPkt(digits: Int = 0): String =
-    when (digits) {
-        0 -> PKT_FORMATTER
-
-        else -> (PKT_FORMATTER.clone() as DecimalFormat).apply {
-            maximumFractionDigits = digits
-            minimumFractionDigits = digits
-        }
-    }.format(this.toBigDecimalSafety())
-
-fun Double?.formatPkt(): String {
-    val amount = this.toBigDecimalSafety().movePointRight(PKT_DIGITS).toLong()
-    val unit = PKT_UNITS.entries.find { amount >= it.value } ?: PKT_UNITS.entries.last()
-    val value = BigDecimal(amount).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
+fun Double.formatPkt(): String {
+    val long = this*1000000000
+    val unit = PKT_UNITS.entries.find { long >= it.value } ?: PKT_UNITS.entries.last()
+    val value = BigDecimal(this)
     return (PKT_FORMATTER.clone() as DecimalFormat).apply {
         decimalFormatSymbols = decimalFormatSymbols.apply {
             positiveSuffix = " ${unit.key}"

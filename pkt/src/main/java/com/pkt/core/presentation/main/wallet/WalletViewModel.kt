@@ -12,12 +12,14 @@ import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.navigation.AppNavigation
+import com.pkt.domain.dto.Transaction
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 import kotlin.math.absoluteValue
@@ -30,9 +32,12 @@ class WalletViewModel @Inject constructor(
     private val cjdnsRepository: CjdnsRepository,
 ) : StateViewModel<WalletState>() {
 
+    private val refreshInterval: Long = 5000
     val walletName = walletRepository.getActiveWallet()
     var walletAddress = ""
-    var PKTtoUSD = 0f
+    var balance: Long = 0
+    private var PKTtoUSD = 0f
+    private var transactions: List<Transaction> = emptyList()
 
     private var pollingJob: Job? = null
 
@@ -59,17 +64,7 @@ class WalletViewModel @Inject constructor(
                 sendError(it)
                 PKTtoUSD = 0f
             }
-            runCatching {
-                loadWalletInfo()
-            }.onSuccess {
-                loadTransactions()
-            }.onFailure {
-                //WalletInfo failed, try to unlock
-                //sendNavigation(AppNavigation.OpenEnterWallet)
-                sendState {
-                    copy(syncState = WalletState.SyncState.LOCKED)
-                }
-            }
+
         }
     }
 
@@ -89,7 +84,7 @@ class WalletViewModel @Inject constructor(
                     walletAddress = response.address
                 }
             }
-            val balance = walletRepository.getTotalWalletBalance().getOrThrow()
+            balance = walletRepository.getTotalWalletBalance().getOrThrow()
             Triple(walletInfo, walletAddress, balance)
         }.onSuccess { (info, address, balance) ->
             val wallet = info.wallet
@@ -125,21 +120,18 @@ class WalletViewModel @Inject constructor(
                 }
             }
 
-            //DEBUG
-            //walletSyncState = WalletState.SyncState.WAITING
             sendState {
                 copy(
                     syncState = walletSyncState,
                     syncTimeDiff = syncTimeDiff,
                     chainHeight = neutrinoHeight,
                     neutrinoTop = neutrinoTop,
-                    walletHeight = walletHeight,
+                    walletHeight = wallet!!.currentHeight,
                     peersCount = peerCount,
                     walletName = walletName,
-                    balancePkt = balance.toLong().toString(),
-                    balanceUsd = balance.toLong().toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
-                    walletAddress = address,
-                    items = listOf()
+                    balancePkt = balance.formatPkt(),
+                    balanceUsd = balance.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
+                    walletAddress = address
                 )
             }
             return Result.success(true)
@@ -155,7 +147,8 @@ class WalletViewModel @Inject constructor(
         runCatching {
             walletRepository.getWalletTransactions().getOrThrow()
         }.onSuccess { t ->
-            val transactions = t.transactions
+            if (transactions.size == t.transactions.size) return@onSuccess
+            transactions = t.transactions
             val items: MutableList<DisplayableItem> = mutableListOf()
             var prevDate: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
             for (i in transactions.indices) {
@@ -191,7 +184,7 @@ class WalletViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            //TODO: handle failure
+            Timber.e(it)
         }
     }
 
@@ -217,7 +210,15 @@ class WalletViewModel @Inject constructor(
         sendEvent(WalletEvent.OpenDatePicker(currentState.startDate, currentState.endDate))
     }
 
-    fun onReload() {
+    fun onSendClick() {
+        if (balance > 1) {
+            sendEvent(WalletEvent.OpenSendTransaction)
+        } else {
+            sendEvent(CommonEvent.Warning(R.string.error_insufficient_balance))
+        }
+    }
+
+    fun reload() {
         viewModelScope.launch {
             runCatching {
                 loadWalletInfo()
@@ -249,9 +250,16 @@ class WalletViewModel @Inject constructor(
         pollingJob = viewModelScope.launch {
             while (true) {
                 if (!isActive) return@launch
-
-                // TODO: do some work here
-                delay(1000L)
+                runCatching {
+                    loadWalletInfo()
+                }.onSuccess {
+                    loadTransactions()
+                }.onFailure {
+                    sendState {
+                        copy(syncState = WalletState.SyncState.LOCKED)
+                    }
+                }
+                delay(refreshInterval)
             }
         }
     }
@@ -262,7 +270,7 @@ class WalletViewModel @Inject constructor(
 
     fun onPeriodChanged(startDate: Long?, endDate: Long?) {
         sendState { copy(startDate = startDate, endDate = endDate) }
-        onReload()
+        reload()
     }
 
     fun onDeletePeriodClick() {

@@ -81,11 +81,11 @@ class MainActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
         var newUI = prefs.getBoolean("useNewUI", false)
-        newUI = true//DEBUG
         if (newUI) {
-            prefs.edit().putBoolean("useNewUI", false).apply()
+            //Launch new UI main acivity
             startActivity(Intent(this, PktMainActivity::class.java))
         } else {
+            //Follow old UI process
             AnodeUtil.addCjdnsPeers()
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
