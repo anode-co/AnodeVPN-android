@@ -7,4 +7,5 @@ interface GeneralRepository {
     fun enableNewUI(value:Boolean)
     fun getNewUI():Boolean
     fun removePIN(walletName: String)
+    fun restartApplication()
 }

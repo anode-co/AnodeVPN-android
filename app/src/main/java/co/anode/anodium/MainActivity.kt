@@ -81,8 +81,7 @@ class MainActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
         var newUI = prefs.getBoolean("useNewUI", false)
-        //DEBUG
-        newUI = true
+
         if (newUI) {
             //Launch new UI main acivity
             startActivity(Intent(this, PktMainActivity::class.java))

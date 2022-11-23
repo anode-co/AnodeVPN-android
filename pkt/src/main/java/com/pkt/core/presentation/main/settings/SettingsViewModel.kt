@@ -103,10 +103,12 @@ class SettingsViewModel @Inject constructor(
     fun onUpgradeCheckChanged(checked: Boolean) {
         generalRepository.enablePreReleaseUpgrade(checked)
         sendState { copy(upgradeChecked = checked) }
+        generalRepository.restartApplication()
     }
 
     fun onSwitchUiCheckChanged(checked: Boolean) {
         generalRepository.enableNewUI(checked)
         sendState { copy(switchUiChecked = checked) }
+        generalRepository.restartApplication()
     }
 }

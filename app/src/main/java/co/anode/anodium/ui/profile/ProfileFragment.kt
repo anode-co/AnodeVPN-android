@@ -18,20 +18,12 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentProfileBinding
-import co.anode.anodium.AboutDialog
-import co.anode.anodium.AnodeVpnService
-import co.anode.anodium.CjdnsStatsActivity
-import co.anode.anodium.integration.presentation.ChangePINActivity
-import co.anode.anodium.integration.presentation.ChangePasswordActivity
-import co.anode.anodium.integration.presentation.SettingsActivity
-import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.support.CubeWifi
 import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.PinPrompt
-import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import co.anode.anodium.wallet.WalletStatsActivity
 import org.json.JSONObject
 import timber.log.Timber
@@ -209,6 +201,9 @@ class ProfileFragment : Fragment() {
         newUiCheckBox.isChecked = prefs.getBoolean("useNewUI", false)
         newUiCheckBox.setOnClickListener {
             prefs.edit().putBoolean("useNewUI", newUiCheckBox.isChecked).apply()
+            Thread.sleep(500)
+            //Restart app
+            AnodeUtil.restartApp()
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

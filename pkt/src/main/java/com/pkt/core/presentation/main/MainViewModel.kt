@@ -2,6 +2,7 @@ package com.pkt.core.presentation.main
 
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.state.CommonState
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.navigation.AppNavigation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -34,7 +35,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun openCreateWallet(name: String) {
-        sendNavigation(AppNavigation.OpenCreateWallet(name))
+        sendNavigation(AppNavigation.OpenCreateWallet(name,CreateWalletMode.CREATE))
     }
 
     fun openRecoverWallet(name: String) {

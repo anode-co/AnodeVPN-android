@@ -33,4 +33,8 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
         AnodeUtil.removeEncryptedWalletPreferences(walletName)
     }
 
+    override fun restartApplication() {
+        Thread.sleep(500)
+        AnodeUtil.restartApp()
+    }
 }

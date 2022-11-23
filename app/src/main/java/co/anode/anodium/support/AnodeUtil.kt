@@ -1,7 +1,9 @@
 package co.anode.anodium.support
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -456,6 +458,17 @@ object AnodeUtil {
         } else {
             amount /= nPKT
             return "%.2f nPKT".format(amount)
+        }
+    }
+
+    fun restartApp() {
+        if (context != null) {
+            val packageManager: PackageManager = context!!.packageManager
+            val intent: Intent? = packageManager.getLaunchIntentForPackage(context!!.packageName)
+            val componentName = intent?.component
+            val mainIntent = Intent.makeRestartActivityTask(componentName)
+            context!!.startActivity(mainIntent)
+            Runtime.getRuntime().exit(0)
         }
     }
 
