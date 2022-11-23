@@ -2,6 +2,7 @@ package com.pkt.core.presentation.navigation
 
 import androidx.navigation.NavDirections
 import com.pkt.core.presentation.common.state.UiNavigation
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 
 sealed class AppNavigation : UiNavigation {
 
@@ -9,7 +10,7 @@ sealed class AppNavigation : UiNavigation {
 
     object OpenCjdnsInfo : AppNavigation()
     data class OpenWalletInfo(val address: String) : AppNavigation()
-    data class OpenCreateWallet(val name: String? = null) : AppNavigation()
+    data class OpenCreateWallet(val name: String? = null, val mode: CreateWalletMode) : AppNavigation()
     data class OpenRecoverWallet(val name: String? = null) : AppNavigation()
     object OpenMain : AppNavigation()
     data class OpenSendTransaction(val fromAddress: String) : AppNavigation()

@@ -18,7 +18,7 @@ class CreateWalletActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(
                     android.R.id.content,
-                    CreateWalletFragment.newInstance(intent.extras?.getSerializable(EXTRA_MODE) as? CreateWalletMode)
+                    CreateWalletFragment.newCreateWalletInstance(intent.extras?.getSerializable(EXTRA_MODE) as? CreateWalletMode)
                 )
                 .commit()
         }

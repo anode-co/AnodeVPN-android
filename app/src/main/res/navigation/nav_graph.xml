@@ -75,6 +75,9 @@
             android:name="name"
             app:nullable="true"
             app:argType="string" />
+        <argument
+            android:name="mode"
+            app:argType="com.pkt.core.presentation.createwallet.CreateWalletMode" />
     </fragment>
 
     <fragment

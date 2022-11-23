@@ -1,6 +1,7 @@
 package com.pkt.core.presentation.start
 
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,10 +34,10 @@ class StartViewModel @Inject constructor(
     override fun createInitialState() = StartState()
 
     fun onCreateClick() {
-        sendNavigation(AppNavigation.OpenCreateWallet())
+        sendNavigation(AppNavigation.OpenCreateWallet(null,CreateWalletMode.CREATE))
     }
 
     fun onRecoverClick() {
-        sendNavigation(AppNavigation.OpenRecoverWallet())
+        sendNavigation(AppNavigation.OpenCreateWallet(null,CreateWalletMode.RECOVER))
     }
 }

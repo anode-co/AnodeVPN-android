@@ -5,6 +5,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.pkt.core.presentation.common.state.UiNavigation
 import com.pkt.core.presentation.common.state.navigation.NavigationHandler
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 
 abstract class AppNavigationHandler : NavigationHandler {
 
@@ -15,7 +16,7 @@ abstract class AppNavigationHandler : NavigationHandler {
                     AppNavigation.NavigateBack -> navigateBack(fragment)
                     is AppNavigation.OpenCjdnsInfo -> openCjdnsInfo(fragment)
                     is AppNavigation.OpenWalletInfo -> openWalletInfo(fragment, navigation.address)
-                    is AppNavigation.OpenCreateWallet -> openCreateWallet(fragment, navigation.name)
+                    is AppNavigation.OpenCreateWallet -> openCreateWallet(fragment, navigation.name, navigation.mode)
                     is AppNavigation.OpenRecoverWallet -> openRecoverWallet(fragment, navigation.name)
                     AppNavigation.OpenMain -> openMain(fragment)
                     is AppNavigation.OpenSendConfirm -> openSendConfirm(
@@ -54,7 +55,7 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun navigateBack(fragment: Fragment)
     abstract fun openCjdnsInfo(fragment: Fragment)
     abstract fun openWalletInfo(fragment: Fragment, address: String)
-    abstract fun openCreateWallet(fragment: Fragment, name: String?)
+    abstract fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode)
     abstract fun openRecoverWallet(fragment: Fragment, name: String?)
     abstract fun openMain(fragment: Fragment)
     abstract fun openSendConfirm(fragment: Fragment, fromaddress: String, toaddress:String, amount: Double, maxAmount: Boolean)

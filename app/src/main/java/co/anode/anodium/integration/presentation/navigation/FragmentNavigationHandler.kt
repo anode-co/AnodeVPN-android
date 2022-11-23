@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import co.anode.anodium.NavGraphDirections
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.navigation.AppNavigationHandler
 import javax.inject.Inject
 
@@ -23,8 +24,8 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toWalletInfo(address))
     }
 
-    override fun openCreateWallet(fragment: Fragment, name: String?) {
-        navigate(fragment, NavGraphDirections.toCreateWallet(name))
+    override fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode) {
+        navigate(fragment, NavGraphDirections.toCreateWallet(name, mode))
     }
 
     override fun openRecoverWallet(fragment: Fragment, name:String?) {

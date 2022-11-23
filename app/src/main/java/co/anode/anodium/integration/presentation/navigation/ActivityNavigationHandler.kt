@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import co.anode.anodium.integration.presentation.*
 import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
 import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.navigation.AppNavigationHandler
 import javax.inject.Inject
 
@@ -22,8 +23,12 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(WalletInfoActivity.getIntent(fragment.requireContext(), address))
     }
 
-    override fun openCreateWallet(fragment: Fragment, name: String?) {
-        fragment.startActivity(CreateWalletActivity.getCreateWalletIntent(fragment.requireContext(), name))
+    override fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode) {
+        if (mode == CreateWalletMode.CREATE) {
+            fragment.startActivity(CreateWalletActivity.getCreateWalletIntent(fragment.requireContext(), name))
+        } else {
+            fragment.startActivity(CreateWalletActivity.getRecoverWalletIntent(fragment.requireContext()))
+        }
     }
 
     override fun openRecoverWallet(fragment: Fragment, name: String?) {

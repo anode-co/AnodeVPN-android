@@ -52,8 +52,12 @@ class CreateWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragment_
     companion object {
         private const val KEY_MODE = "mode"
 
-        fun newInstance(mode: CreateWalletMode?) = CreateWalletFragment().apply {
-            arguments = bundleOf(KEY_MODE to mode)
+        fun newCreateWalletInstance(mode: CreateWalletMode?) = CreateWalletFragment().apply {
+            arguments = bundleOf(KEY_MODE to CreateWalletMode.CREATE)
+        }
+
+        fun newRecoverWalletInstance(mode: CreateWalletMode?) = CreateWalletFragment().apply {
+            arguments = bundleOf(KEY_MODE to CreateWalletMode.RECOVER)
         }
     }
 }
