@@ -155,7 +155,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             }
         }
 
-    override suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> =
+    override suspend fun recoverWallet(password: String, pin: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> =
         runCatching {
             //We need to restart pld before creating a new wallet
             stopPld()
@@ -168,6 +168,11 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             return if (response.message.isNotEmpty()) {
                 Result.failure(Exception("Failed to recover wallet: ${response.message}"))
             } else {
+                val encryptedPassword = AnodeUtil.encrypt(password, pin)
+                AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
+                if (pin.isNotEmpty()) {
+                    AnodeUtil.storeWalletPin(pin, wallet)
+                }
                 setActiveWallet(wallet)
                 Result.success(true)
             }

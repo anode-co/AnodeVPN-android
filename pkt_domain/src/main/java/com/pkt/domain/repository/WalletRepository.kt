@@ -27,7 +27,7 @@ interface WalletRepository {
     //Create a new PKT wallet
     suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?): Result<Boolean>
     //Recover a PKT wallet
-    suspend fun recoverWallet(password: String, seed: String, seedPassword: String, walletName: String): Result<Boolean>
+    suspend fun recoverWallet(password: String, pin:String, seed: String, seedPassword: String, walletName: String): Result<Boolean>
     //Unlock the active PKT wallet
     suspend fun unlockWallet(passphrase: String): Result<Boolean>
     //Unlock the active PKT wallet with the PIN

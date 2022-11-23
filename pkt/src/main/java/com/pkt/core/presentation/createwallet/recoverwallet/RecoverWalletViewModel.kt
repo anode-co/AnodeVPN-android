@@ -52,7 +52,7 @@ class RecoverWalletViewModel @Inject constructor(
     fun onNextClick() {
         invokeAction {
             val walletName = walletRepository.getActiveWallet()
-            walletRepository.recoverWallet(password, seed, seedPassword, walletName)
+            walletRepository.recoverWallet(password, pin, seed, seedPassword, walletName)
                 .onSuccess {
                     sendNavigation(RecoverWalletNavigation.ToCongratulations)
                 }
