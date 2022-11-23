@@ -29,4 +29,8 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
         return AnodeUtil.getUseNewUi()
     }
 
+    override fun removePIN(walletName: String) {
+        AnodeUtil.removeEncryptedWalletPreferences(walletName)
+    }
+
 }

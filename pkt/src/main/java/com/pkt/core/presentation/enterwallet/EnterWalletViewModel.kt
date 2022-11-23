@@ -6,6 +6,7 @@ import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.common.widget.PinKeyboardView
 import com.pkt.core.presentation.navigation.AppNavigation
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -13,6 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EnterWalletViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<EnterWalletState>() {
 
     var password: String = ""
@@ -82,7 +84,7 @@ class EnterWalletViewModel @Inject constructor(
             PinKeyboardView.PinKey.KEY_9 -> sendState { copy(pin = "${pin}9") }
             PinKeyboardView.PinKey.KEY_0 -> sendState { copy(pin = "${pin}0") }
             PinKeyboardView.PinKey.KEY_LOG_OUT -> {
-                // TODO
+                onLogOut()
             }
             PinKeyboardView.PinKey.KEY_APPLY -> {
                 checkPin()
@@ -92,6 +94,12 @@ class EnterWalletViewModel @Inject constructor(
 
     fun onPinDeleteClick() {
         sendState { copy(pin = if (pin.isEmpty()) pin else pin.substring(0, pin.length - 1)) }
+    }
+
+    private fun onLogOut() {
+        this.isPinAvailable = false
+        generalRepository.removePIN(currentState.currentWallet)
+        sendState { copy(isPinVisible = false, enterPasswordButtonVisible = false, enterPinButtonVisible = false) }
     }
 
     private fun checkPin() {

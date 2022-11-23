@@ -269,7 +269,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun generateQr(address: String): Result<Bitmap> {
-        var qrgEncoder = QRGEncoder(address, null, QRGContents.Type.TEXT, 600)
+        val qrgEncoder = QRGEncoder(address, null, QRGContents.Type.TEXT, 600)
         qrgEncoder.colorBlack = Color.WHITE
         qrgEncoder.colorWhite = Color.BLACK
         return try {

@@ -538,10 +538,12 @@ object AnodeUtil {
         removeKeyFromEncSharedPreferences(currentWalletName)
     }
 
-    fun removeEncryptedWalletPreferences(currentWalletName: String) {
-        val prefKeyPassword = currentWalletName+"_password"
+    fun removeEncryptedWalletPreferences(walletName: String) {
+        var wallet = walletName
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
+        val prefKeyPassword = wallet+"_password"
         removeKeyFromEncSharedPreferences(prefKeyPassword)
-        val prefKeyPin = currentWalletName+"_pin"
+        val prefKeyPin = wallet+"_pin"
         removeKeyFromEncSharedPreferences(prefKeyPin)
     }
 
