@@ -143,9 +143,12 @@ class WalletViewModel @Inject constructor(
     }
 
     private suspend fun loadTransactions(){
+        val startTime = currentState.startDate?.div(1000) ?: 0L
+        val endTime = currentState.endDate?.div(1000) ?: 0L
+
         //Get transactions
         runCatching {
-            walletRepository.getWalletTransactions().getOrThrow()
+            walletRepository.getWalletTransactions(coinbase = 1, reversed = false, skip = 0, limit = 20, startTime, endTime).getOrThrow()
         }.onSuccess { t ->
             if (transactions.size == t.transactions.size) return@onSuccess
             transactions = t.transactions
