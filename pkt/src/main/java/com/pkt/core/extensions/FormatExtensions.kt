@@ -75,6 +75,7 @@ fun Double.formatPkt(): String {
 }
 
 fun Long.formatPkt(): String {
+    if(this == 0L) return "0.00 PKT"
     val unit = PKT_UNITS.entries.find { this >= it.value } ?: PKT_UNITS.entries.last()
     val value = BigDecimal(this).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
     return (PKT_FORMATTER.clone() as DecimalFormat).apply {
@@ -86,8 +87,7 @@ fun Long.formatPkt(): String {
 }
 
 fun Long.toPKT(): BigDecimal {
-    val unit = PKT_UNITS.entries.find { this >= it.value } ?: PKT_UNITS.entries.last()
-    return BigDecimal(this).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
+    return BigDecimal(this).divide(BigDecimal(1073741824), 2, RoundingMode.HALF_EVEN)
 }
 
 

@@ -96,19 +96,15 @@ fun transactionAdapterDelegate() =
                         iconImage.setImageResource(R.drawable.ic_transaction_sent)
                         titleLabel.setText(R.string.sent_pkt)
                         amountPktLabel.setTextColor(context.getColorByAttribute(android.R.attr.textColorPrimary))
-                        amountPktLabel.text = "-${item.amountPkt.toLong().formatPkt()}"
-                        if (item.amountUsd.formatUsd() != "") {
-                            amountUsdLabel.text = "-${item.amountUsd.formatUsd()}"
-                        } else {
-                            amountUsdLabel.text = ""
-                        }
+                        amountPktLabel.text = "-${item.amountPkt}"
+                        amountUsdLabel.text = item.amountUsd.formatUsd()
                     }
 
                     TransactionItem.Type.RECEIVE -> {
                         iconImage.setImageResource(R.drawable.ic_transaction_received)
                         titleLabel.setText(R.string.received_pkt)
                         amountPktLabel.setTextColor(context.getColorByAttribute(R.attr.colorSuccess))
-                        amountPktLabel.text = item.amountPkt.toLong().formatPkt()
+                        amountPktLabel.text = item.amountPkt
                         amountUsdLabel.text = item.amountUsd.formatUsd()
                     }
                 }

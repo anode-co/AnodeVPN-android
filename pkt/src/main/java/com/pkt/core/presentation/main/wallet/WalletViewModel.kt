@@ -56,15 +56,7 @@ class WalletViewModel @Inject constructor(
             } else {
                 //TODO: no peering lines
             }
-            runCatching {
-                walletRepository.getPktToUsd().getOrNull()
-            }.onSuccess { price ->
-                PKTtoUSD = price!!
-            }.onFailure {
-                sendError(it)
-                PKTtoUSD = 0f
-            }
-
+            Result.success(true)
         }
     }
 
@@ -170,12 +162,13 @@ class WalletViewModel @Inject constructor(
                 if (amount < 0)
                     type = TransactionItem.Type.SENT
                 amount = amount.absoluteValue
+
                 items.add(
                     TransactionItem(
                         id = i.toString(),
                         type = type,
                         time = date,
-                        amountPkt = amount.toString(),
+                        amountPkt = amount.formatPkt(),
                         amountUsd = amount.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
                     )
                 )
@@ -223,6 +216,9 @@ class WalletViewModel @Inject constructor(
 
     fun reload() {
         viewModelScope.launch {
+            if (PKTtoUSD == 0f) {
+                PKTtoUSD = walletRepository.getPktToUsd().getOrDefault(0f)
+            }
             runCatching {
                 loadWalletInfo()
             }.onSuccess {
@@ -253,6 +249,9 @@ class WalletViewModel @Inject constructor(
         pollingJob = viewModelScope.launch {
             while (true) {
                 if (!isActive) return@launch
+                if (PKTtoUSD == 0f) {
+                    PKTtoUSD = walletRepository.getPktToUsd().getOrDefault(0f)
+                }
                 runCatching {
                     loadWalletInfo()
                 }.onSuccess {
