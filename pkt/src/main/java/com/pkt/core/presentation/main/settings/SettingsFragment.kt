@@ -19,6 +19,7 @@ import com.pkt.core.extensions.getColorByAttribute
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.common.consent.ConsentBottomSheet
 import com.pkt.core.presentation.main.settings.deletewallet.DeleteWalletBottomSheet
@@ -53,7 +54,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
         }
 
         setFragmentResultListener(NewWalletBottomSheet.REQUEST_KEY) { _, bundle ->
-            viewModel.onNewWallet(bundle.getString(NewWalletBottomSheet.WALLET_KEY))
+            viewModel.onNewWallet(bundle.getString(NewWalletBottomSheet.WALLET_KEY), bundle.getSerializable(NewWalletBottomSheet.MODE) as CreateWalletMode)
         }
 
         with(viewBinding) {
@@ -172,9 +173,19 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             }
 
             is SettingsEvent.OpenNewWallet -> {
-                NewWalletBottomSheet().show(parentFragmentManager, NewWalletBottomSheet.TAG)
+                val newWallet = NewWalletBottomSheet()
+                val bundle = Bundle()
+                bundle.putSerializable("mode",CreateWalletMode.CREATE)
+                newWallet.arguments = bundle
+                newWallet.show(parentFragmentManager, NewWalletBottomSheet.TAG)
             }
-
+            is SettingsEvent.OpenWalletRecovery -> {
+                val newWallet = NewWalletBottomSheet()
+                val bundle = Bundle()
+                bundle.putSerializable("mode",CreateWalletMode.RECOVER)
+                newWallet.arguments = bundle
+                newWallet.show(parentFragmentManager, NewWalletBottomSheet.TAG)
+            }
             is SettingsEvent.OpenChangePassword -> mainViewModel.openChangePassword()
             is SettingsEvent.OpenChangePin -> mainViewModel.openChangePin()
             is SettingsEvent.OpenCreateWallet -> mainViewModel.openCreateWallet(event.name)

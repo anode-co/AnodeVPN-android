@@ -3,6 +3,7 @@ package com.pkt.core.presentation.main.settings
 import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.enterwallet.EnterWalletEvent
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
@@ -85,8 +86,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onWalletRecoveryClick() {
-        sendEvent(SettingsEvent.OpenNewWallet)
-        //sendEvent(SettingsEvent.OpenRecoverWallet(name))
+        sendEvent(SettingsEvent.OpenWalletRecovery)
     }
 
     fun onConsentResult(success: Boolean) {
@@ -94,10 +94,16 @@ class SettingsViewModel @Inject constructor(
         //context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)?.edit()?.putBoolean("DataConsent", success)?.apply()
     }
 
-    fun onNewWallet(name: String?) {
+    fun onNewWallet(name: String?, mode: CreateWalletMode) {
         name ?: return
-
-        sendEvent(SettingsEvent.OpenCreateWallet(name))
+        when(mode) {
+            CreateWalletMode.CREATE -> {
+                sendEvent(SettingsEvent.OpenCreateWallet(name))
+            }
+            CreateWalletMode.RECOVER -> {
+                sendEvent(SettingsEvent.OpenRecoverWallet(name))
+            }
+        }
     }
 
     fun onUpgradeCheckChanged(checked: Boolean) {

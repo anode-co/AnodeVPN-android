@@ -59,7 +59,10 @@ class NewWalletBottomSheet : StateBottomSheet<NewWalletState>(R.layout.bottom_sh
             }
 
             is NewWalletEvent.Success -> {
-                setFragmentResult(REQUEST_KEY, bundleOf(WALLET_KEY to event.name))
+                setFragmentResult(REQUEST_KEY, bundleOf(
+                    WALLET_KEY to event.name,
+                    MODE to event.mode
+                ))
                 dismiss()
             }
 
@@ -71,5 +74,6 @@ class NewWalletBottomSheet : StateBottomSheet<NewWalletState>(R.layout.bottom_sh
         const val TAG = "new_wallet_dialog"
         const val REQUEST_KEY = "new_wallet_request"
         const val WALLET_KEY = "wallet"
+        const val MODE = "mode"
     }
 }
