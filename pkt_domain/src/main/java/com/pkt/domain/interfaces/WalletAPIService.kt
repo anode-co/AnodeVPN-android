@@ -66,7 +66,7 @@ class WalletAPIService {
     }
 
     suspend fun getWalletTransactions(coinbase: Int, reversed: Boolean, txnsSkip: Int, txnsLimit: Int, startTimestamp: Long, endTimestamp: Long) : WalletTransactions {
-        val request = WalletTransactionsRequest(coinbase, reversed, txnsSkip, txnsLimit)
+        val request = WalletTransactionsRequest(coinbase, reversed, txnsSkip, txnsLimit, startTimestamp, endTimestamp)
         return api.getWalletTransactions(request)
     }
 

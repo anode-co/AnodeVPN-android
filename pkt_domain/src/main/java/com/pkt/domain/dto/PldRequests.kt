@@ -77,9 +77,9 @@ data class WalletTransactionsRequest (
     val coinbase: Int,
     val reversed: Boolean,
     val txnsSkip: Int,
-    val txnsLimit: Int
-    /*val startTimestamp: Long,
-    val endTimestamp: Long,*/
+    val txnsLimit: Int,
+    val startTimestamp: Long,
+    val endTimestamp: Long
 )
 
 @Serializable
