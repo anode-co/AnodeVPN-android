@@ -6,4 +6,5 @@ interface GeneralRepository {
     fun getPreReleaseUpgrade(): Boolean
     fun enableNewUI(value:Boolean)
     fun getNewUI():Boolean
+    fun removePIN(walletName: String)
 }
