@@ -35,6 +35,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun setActiveWallet(walletName: String) {
+        //delete existing chain back up file when changing active wallet
+        if (walletName != activeWallet) {
+            AnodeUtil.deleteWalletChainBackupFile()
+        }
         activeWallet = walletName
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("activeWallet", walletName)?.apply()
     }
@@ -188,8 +192,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
         val passphrase = AnodeUtil.decrypt(encryptedPassword, pin)
         if (passphrase != null) {
-            val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
-            return Result.success(walletAPI.unlockWalletAPI(request))
+            return unlockWallet(passphrase)
         } else {
             return Result.failure(Exception("Wrong PIN. Cannot decrypt wallet password"))
         }
