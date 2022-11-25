@@ -37,6 +37,7 @@ class WalletViewModel @Inject constructor(
     var walletAddress = ""
     var balance: Long = 0
     private var PKTtoUSD = 0f
+    private var firstTime = true
     private var transactions: List<Transaction> = emptyList()
 
     private var pollingJob: Job? = null
@@ -137,7 +138,6 @@ class WalletViewModel @Inject constructor(
     private suspend fun loadTransactions(){
         val startTime = currentState.startDate?.div(1000) ?: 0L
         val endTime = currentState.endDate?.div(1000) ?: 0L
-
         //Get transactions
         runCatching {
             walletRepository.getWalletTransactions(coinbase = 1, reversed = false, skip = 0, limit = 20, startTime, endTime).getOrThrow()
@@ -179,6 +179,12 @@ class WalletViewModel @Inject constructor(
                     items = items,
                 )
             }
+            delay(200)
+            //After loading transactions for the 1st time scroll the list to top
+            if (firstTime) {
+                sendEvent(WalletEvent.ScrollToTop)
+                firstTime = false
+            }
         }.onFailure {
             Timber.e(it)
         }
@@ -196,9 +202,7 @@ class WalletViewModel @Inject constructor(
             balancePkt = "",
             balanceUsd = "",
             walletAddress = "",
-            items = listOf(
-                FooterItem()
-            )
+            items = listOf(FooterItem())
         )
     }
 
@@ -211,24 +215,6 @@ class WalletViewModel @Inject constructor(
             sendEvent(WalletEvent.OpenSendTransaction)
         } else {
             sendEvent(CommonEvent.Warning(R.string.error_insufficient_balance))
-        }
-    }
-
-    fun reload() {
-        viewModelScope.launch {
-            if (PKTtoUSD == 0f) {
-                PKTtoUSD = walletRepository.getPktToUsd().getOrDefault(0f)
-            }
-            runCatching {
-                loadWalletInfo()
-            }.onSuccess {
-                loadTransactions()
-            }.onFailure {
-                //WalletInfo failed, try to unlock
-                sendNavigation(AppNavigation.OpenEnterWallet)
-                //TODO: check for error
-                walletRepository.unlockWallet("password")
-            }
         }
     }
 
@@ -272,7 +258,7 @@ class WalletViewModel @Inject constructor(
 
     fun onPeriodChanged(startDate: Long?, endDate: Long?) {
         sendState { copy(startDate = startDate, endDate = endDate) }
-        reload()
+        startPolling()
     }
 
     fun onDeletePeriodClick() {

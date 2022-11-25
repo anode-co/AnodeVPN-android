@@ -233,6 +233,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 datePicker.show(childFragmentManager, "date_picker")
             }
             is WalletEvent.OpenSendTransaction -> mainViewModel.openSendTransaction(viewModel.walletAddress)
+            is WalletEvent.ScrollToTop -> viewBinding.recyclerView.scrollToPosition(0)
             else -> super.handleEvent(event)
         }
     }

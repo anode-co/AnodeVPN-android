@@ -39,4 +39,6 @@ sealed class WalletEvent : UiEvent {
         val startDate: Long?,
         val endDate: Long?,
     ) : WalletEvent()
+
+    object ScrollToTop: WalletEvent()
 }
