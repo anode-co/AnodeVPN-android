@@ -10,7 +10,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
-import org.json.JSONObject
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -27,10 +27,13 @@ class WalletAPIService {
     @OptIn(ExperimentalSerializationApi::class)
     private val converter = Json.asConverterFactory("application/json".toMediaType())
     //OkhttpClient to introduce timeout
-    val httpClient = OkHttpClient.Builder()
+    private val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+
+    private val httpClient = OkHttpClient.Builder()
         .connectTimeout(2, TimeUnit.SECONDS)
         .readTimeout(50, TimeUnit.SECONDS)//needed for creating wallet
         .writeTimeout(20, TimeUnit.SECONDS)
+        .addInterceptor(interceptor)
         .build()
     private val api = Retrofit.Builder()
         .client(httpClient)
