@@ -117,4 +117,22 @@ class VpnViewModel @Inject constructor(
             }
         }
     }
+
+    fun onResume() {
+        viewModelScope.launch {
+            viewModelScope.launch {
+                combine(
+                    vpnRepository.currentVpnFlow,
+                    vpnRepository.vpnStateFlow
+                ) { vpn, vpnState ->
+                    sendState {
+                        copy(
+                            vpn = vpn,
+                            vpnState = vpnState
+                        )
+                    }
+                }.collect()
+            }
+        }
+    }
 }

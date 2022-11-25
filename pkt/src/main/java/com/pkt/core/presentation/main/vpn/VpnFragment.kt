@@ -104,4 +104,9 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
             else -> super.handleEvent(event)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
 }

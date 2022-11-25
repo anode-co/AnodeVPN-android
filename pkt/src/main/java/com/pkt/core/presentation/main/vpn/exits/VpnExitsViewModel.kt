@@ -40,6 +40,7 @@ class VpnExitsViewModel @Inject constructor(
                                 name = vpn.name,
                                 countryFlag = CountryUtil.getCountryFlag(vpn.countryCode),
                                 countryName = CountryUtil.getCountryName(vpn.countryCode),
+                                publicKey = vpn.publicKey,
                                 isConnected = vpnState == VpnState.CONNECTED && vpn.name == currentVpn?.name,
                             )
                         }.filter {
@@ -62,9 +63,9 @@ class VpnExitsViewModel @Inject constructor(
     fun onVpnExitItemClick(item: VpnExitItem) {
         invokeAction {
             vpnRepository.disconnect()
-
             vpnRepository.setCurrentVpn(item.name)
                 .onSuccess {
+                    vpnRepository.connect(item.publicKey)
                     navigateBack()
                 }
                 .onFailure {

@@ -60,6 +60,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override suspend fun setCurrentVpn(name: String): Result<Unit> {
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("LastServerPubkey", defaultNode)?.apply()
+        _currentVpnNameFlow.tryEmit(name)
         return Result.success(Unit)
     }
 

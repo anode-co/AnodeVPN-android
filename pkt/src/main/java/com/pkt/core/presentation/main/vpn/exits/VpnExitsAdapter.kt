@@ -9,6 +9,7 @@ data class VpnExitItem(
     val countryFlag: String,
     val countryName: String,
     val isConnected: Boolean,
+    val publicKey: String,
 ) : DisplayableItem {
     override fun getItemId(): String = name
     override fun getItemHash(): String = hashCode().toString()
