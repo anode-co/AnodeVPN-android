@@ -29,12 +29,13 @@ class VpnViewModel @Inject constructor(
                 val ipv6 = vpnRepository.getIPv6Address().getOrNull()
                 val list = vpnRepository.fetchVpnList().getOrThrow()
                 //Set default VPN
-                var vpn = Vpn("Anode","US","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
-                //Check list for default VPN name
+                var vpn = Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
+                //Check list for default VPN
                 if (list.isNotEmpty()) {
                     for (item in list) {
-                        if (item.name == "2022-virtual.anode.co") {
+                        if (item.publicKey == "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k") {
                             vpn = item
+                            vpnRepository.setCurrentVpn(vpn).getOrThrow()
                             break
                         }
                     }
@@ -50,7 +51,6 @@ class VpnViewModel @Inject constructor(
                 }
             }
         }
-//        sendEvent(VpnEvent.OpenConsent)
 
         viewModelScope.launch {
             combine(
@@ -100,16 +100,24 @@ class VpnViewModel @Inject constructor(
         when (currentState.vpnState) {
             com.pkt.domain.dto.VpnState.DISCONNECTED -> {
                 viewModelScope.launch {
-                    vpnRepository.connect("929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
+                    currentState.vpn?.let { vpnRepository.connect(it.publicKey) }
                 }
             }
-
             com.pkt.domain.dto.VpnState.CONNECTING -> {
                 viewModelScope.launch {
                     vpnRepository.disconnect()
                 }
             }
-
+            com.pkt.domain.dto.VpnState.GETTING_ROUTES -> {
+                viewModelScope.launch {
+                    vpnRepository.disconnect()
+                }
+            }
+            com.pkt.domain.dto.VpnState.GOT_ROUTES -> {
+                viewModelScope.launch {
+                    vpnRepository.disconnect()
+                }
+            }
             com.pkt.domain.dto.VpnState.CONNECTED -> {
                 viewModelScope.launch {
                     vpnRepository.disconnect()

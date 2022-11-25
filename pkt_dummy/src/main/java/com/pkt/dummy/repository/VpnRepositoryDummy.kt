@@ -42,8 +42,8 @@ class VpnRepositoryDummy : VpnRepository {
         return Result.success(listOf())
     }
 
-    override suspend fun setCurrentVpn(name: String) :Result <Unit>{
-        _currentVpnNameFlow.tryEmit(name)
+    override suspend fun setCurrentVpn(vpn: Vpn): Result<Unit> {
+        _currentVpnNameFlow.tryEmit(vpn.name)
         return Result.success(Unit)
     }
 
@@ -98,12 +98,12 @@ class VpnRepositoryDummy : VpnRepository {
             Vpn(
                 name = "goofy14-vpn.anode.co",
                 countryCode = "CA",
-                pubKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
+                publicKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
             ),
             Vpn(
                 name = "2022-virtual.anode.co",
                 countryCode = "US",
-                pubKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
+                publicKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
             ),
         )
     }

@@ -11,6 +11,8 @@ data class Vpn(
 enum class VpnState {
     DISCONNECTED,
     CONNECTING,
+    GETTING_ROUTES,
+    GOT_ROUTES,
     CONNECTED
 }
 

@@ -8,6 +8,7 @@ data class VpnExitItem(
     val name: String,
     val countryFlag: String,
     val countryName: String,
+    val countryCode: String,
     val isConnected: Boolean,
     val publicKey: String,
 ) : DisplayableItem {

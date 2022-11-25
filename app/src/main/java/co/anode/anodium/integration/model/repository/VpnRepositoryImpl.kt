@@ -13,7 +13,6 @@ import com.pkt.domain.interfaces.VpnAPIService
 import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import org.json.JSONObject
 import java.security.MessageDigest
 import java.util.*
@@ -22,7 +21,7 @@ import javax.inject.Singleton
 
 @Singleton
 class VpnRepositoryImpl @Inject constructor() : VpnRepository {
-    private val defaultNode = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
+    private val defaultNode = "1y7k7zb64f242hvv8mht54ssvgcqdfzbxrng5uz7qpgu7fkjudd0.k"
     private val vpnAPI = VpnAPIService()
     private val _vpnState: MutableStateFlow<VpnState> by lazy { MutableStateFlow(VpnState.DISCONNECTED) }
 
@@ -37,14 +36,9 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     override val vpnListFlow: Flow<List<Vpn>>
         get() = _vpnListFlow
 
-    private val _currentVpnNameFlow: MutableStateFlow<String?> by lazy { MutableStateFlow(null) }
-    override val currentVpnFlow: Flow<Vpn?>
-        get() = combine(
-            vpnListFlow,
-            _currentVpnNameFlow
-        ) { vpnList, currentVpn ->
-            vpnList.find { it.name == currentVpn } ?: vpnList.firstOrNull()
-        }
+    private val _currentVpnFlow: MutableStateFlow<Vpn> by lazy { MutableStateFlow(Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")) }
+    override val currentVpnFlow: Flow<Vpn>
+        get() = _currentVpnFlow
 
     override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
         val list = vpnAPI.getVpnServersList()
@@ -58,21 +52,56 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return Result.success(vpnList)
     }
 
-    override suspend fun setCurrentVpn(name: String): Result<Unit> {
-        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("LastServerPubkey", defaultNode)?.apply()
-        _currentVpnNameFlow.tryEmit(name)
+    override suspend fun setCurrentVpn(vpn: Vpn): Result<Unit> {
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("LastServerPubkey", vpn.publicKey)?.apply()
+        _currentVpnFlow.tryEmit(vpn)
         return Result.success(Unit)
+    }
+
+    fun cjdnsConnectVPN(node: String) {
+        var iconnected = false
+        CjdnsSocket.IpTunnel_removeAllConnections()
+        if (node.isNotEmpty()) {
+            //Connect to Internet
+            CjdnsSocket.ipTunnelConnectTo(node)
+        }
+        var tries = 0
+        //Check for ip address given by cjdns try for 20 times, 10secs
+        Thread(Runnable {
+            while ((node.isNotEmpty()) && (!iconnected && (tries < 10))) {
+                _startConnectionTime = 0L
+                _vpnState.tryEmit(VpnState.GETTING_ROUTES)
+                iconnected = CjdnsSocket.getCjdnsRoutes()
+                tries++
+                Thread.sleep(2000)
+            }
+            if (iconnected || node.isEmpty()) {
+                _vpnState.tryEmit(VpnState.GOT_ROUTES)
+                //Restart Service
+                CjdnsSocket.Core_stopTun()
+                AnodeClient.mycontext.startService(Intent(AnodeClient.mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
+                AnodeClient.mycontext.startService(Intent(AnodeClient.mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.START"))
+                _startConnectionTime = System.currentTimeMillis()
+                _vpnState.tryEmit(VpnState.CONNECTED)
+                //Start Thread for checking connection
+                //AnodeClient.h.postDelayed(AnodeClient.runnableConnection, 10000)
+            } else {
+                CjdnsSocket.IpTunnel_removeAllConnections()
+                _startConnectionTime = 0L
+                _vpnState.tryEmit(VpnState.DISCONNECTED)
+                //Stop UI thread
+                //AnodeClient.h.removeCallbacks(AnodeClient.runnableConnection)
+            }
+        }, "VpnRepository.cjdnsConnectVPN").start()
     }
 
     override suspend fun connect(node: String): Result<Boolean>  {
         _vpnState.tryEmit(VpnState.CONNECTING)
         AnodeUtil.addCjdnsPeers()
-
         if(authorizeVPN().isSuccess){
-            _vpnState.tryEmit(VpnState.CONNECTED)
             val connectedNode = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","")
             if ((!node.isNullOrEmpty()) && ((!AnodeClient.isVpnActive()) || (node != connectedNode))) {
-                AnodeClient.cjdnsConnectVPN(node)
+                cjdnsConnectVPN(node)
             }
             AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("ServerPublicKey", node)?.apply()
             return Result.success(true)
@@ -140,6 +169,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun disconnect(): Result<Boolean> {
+        _startConnectionTime = 0L
         _vpnState.tryEmit(VpnState.DISCONNECTED)
         AnodeClient.AuthorizeVPN().cancel(true)
         AnodeClient.stopThreads()

@@ -63,6 +63,8 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                     when (state.vpnState) {
                         com.pkt.domain.dto.VpnState.DISCONNECTED -> R.string.not_connected
                         com.pkt.domain.dto.VpnState.CONNECTING -> R.string.connecting
+                        com.pkt.domain.dto.VpnState.GETTING_ROUTES -> R.string.getting_routes
+                        com.pkt.domain.dto.VpnState.GOT_ROUTES -> R.string.got_routes
                         com.pkt.domain.dto.VpnState.CONNECTED -> R.string.connected
                     }
                 )
@@ -73,6 +75,8 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                 when (state.vpnState) {
                     com.pkt.domain.dto.VpnState.DISCONNECTED -> R.drawable.ic_disconnected
                     com.pkt.domain.dto.VpnState.CONNECTING -> R.drawable.ic_connecting
+                    com.pkt.domain.dto.VpnState.GETTING_ROUTES -> R.drawable.ic_connecting
+                    com.pkt.domain.dto.VpnState.GOT_ROUTES -> R.drawable.ic_connecting
                     com.pkt.domain.dto.VpnState.CONNECTED -> R.drawable.ic_connected_large
                 }
             )

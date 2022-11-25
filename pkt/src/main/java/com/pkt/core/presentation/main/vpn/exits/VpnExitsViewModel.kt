@@ -3,6 +3,7 @@ package com.pkt.core.presentation.main.vpn.exits
 import androidx.lifecycle.viewModelScope
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.util.CountryUtil
+import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,6 +41,7 @@ class VpnExitsViewModel @Inject constructor(
                                 name = vpn.name,
                                 countryFlag = CountryUtil.getCountryFlag(vpn.countryCode),
                                 countryName = CountryUtil.getCountryName(vpn.countryCode),
+                                countryCode = vpn.countryCode,
                                 publicKey = vpn.publicKey,
                                 isConnected = vpnState == VpnState.CONNECTED && vpn.name == currentVpn?.name,
                             )
@@ -63,7 +65,7 @@ class VpnExitsViewModel @Inject constructor(
     fun onVpnExitItemClick(item: VpnExitItem) {
         invokeAction {
             vpnRepository.disconnect()
-            vpnRepository.setCurrentVpn(item.name)
+            vpnRepository.setCurrentVpn(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey))
                 .onSuccess {
                     vpnRepository.connect(item.publicKey)
                     navigateBack()
