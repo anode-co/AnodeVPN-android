@@ -602,9 +602,11 @@ object AnodeClient {
             val jsonObject = JSONObject()
             jsonObject.accumulate("date", System.currentTimeMillis())
             val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
-            statustv.post(Runnable {
-                statustv.text  = "VPN connecting..."
-            } )
+            if(AnodeClient::statustv.isInitialized) {
+                statustv.post(Runnable {
+                    statustv.text = "VPN connecting..."
+                })
+            }
             return resp
         }
 
@@ -620,9 +622,11 @@ object AnodeClient {
             //if 200 or 201 then connect to VPN
             if (result.isNullOrBlank() || result.contains("ERROR: ")) {
                 LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_DISCONNECTED)
-                statustv.post(Runnable {
-                    statustv.text  = mycontext.resources.getString(R.string.status_authorization_failed)
-                } )
+                if(AnodeClient::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
+                    })
+                }
                 //Sign user out
                 val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                 with (prefs.edit()) {
@@ -634,9 +638,11 @@ object AnodeClient {
                     val jsonObj = JSONObject(result)
                     if (jsonObj.has("status")) {
                         if (jsonObj.getString("status") == "success") {
-                            statustv.post(Runnable {
-                                statustv.text = mycontext.resources.getString(R.string.status_authorized)
-                            })
+                            if(AnodeClient::statustv.isInitialized) {
+                                statustv.post(Runnable {
+                                    statustv.text = mycontext.resources.getString(R.string.status_authorized)
+                                })
+                            }
                             //do not try to reconnect while re-authorization
                             val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             val node = prefs.getString("LastServerPubkey", defaultNode)
@@ -650,9 +656,11 @@ object AnodeClient {
                                 commit()
                             }
                         } else {
-                            statustv.post(Runnable {
-                                statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
-                            })
+                            if(AnodeClient::statustv.isInitialized) {
+                                statustv.post(Runnable {
+                                    statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
+                                })
+                            }
                             val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putLong("LastAuthorized", 0)
@@ -667,9 +675,11 @@ object AnodeClient {
                     }
                 } catch (e: JSONException) {
                     LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_DISCONNECTED)
-                    statustv.post(Runnable {
-                        statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
-                    })
+                    if(AnodeClient::statustv.isInitialized) {
+                        statustv.post(Runnable {
+                            statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
+                        })
+                    }
                 }
             }
         }
@@ -687,18 +697,22 @@ object AnodeClient {
         //Check for ip address given by cjdns try for 20 times, 10secs
         Thread(Runnable {
             while ((node.isNotEmpty()) && (!iconnected && (tries < 10))) {
-                statustv.post(Runnable {
-                    statustv.text  = "Getting routes..."
-                } )
+                if(this::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = "Getting routes..."
+                    })
+                }
                 vpnConnected = false
                 iconnected = CjdnsSocket.getCjdnsRoutes()
                 tries++
                 Thread.sleep(2000)
             }
             if (iconnected || node.isEmpty()) {
-                statustv.post(Runnable {
-                    statustv.text  = "Got routes..."
-                } )
+                if(this::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = "Got routes..."
+                    })
+                }
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
@@ -819,9 +833,11 @@ object AnodeClient {
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
             if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
-                statustv.post(Runnable {
-                    statustv.text  = mycontext.resources.getString(R.string.status_connecting)
-                } )
+                if(AnodeClient::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = mycontext.resources.getString(R.string.status_connecting)
+                    })
+                }
                 LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_CONNECTING)
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
