@@ -149,7 +149,9 @@
         <argument
             android:name="pin"
             app:argType="string" />
-
+        <argument
+            android:name="name"
+            app:argType="string" />
     </fragment>
 
     <fragment

@@ -14,7 +14,7 @@ class SetPinViewModel @Inject constructor(
 
     private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
-    private val name: String? = savedStateHandle["name"]
+    private var name: String = savedStateHandle["name"] ?: ""
 
     var enterPin: String = ""
 
@@ -23,6 +23,9 @@ class SetPinViewModel @Inject constructor(
     override fun createInitialState() = CommonState.Empty
 
     fun onNextClick() {
+        if (name.isEmpty()) {
+            name = "wallet"
+        }
         when {
             enterPin != confirmPin -> {
                 sendEvent(SetPinEvent.ConfirmPinError)
@@ -33,7 +36,7 @@ class SetPinViewModel @Inject constructor(
             }
 
             else -> {
-                sendNavigation(SetPinNavigation.ToRecoverWallet(password, enterPin))
+                sendNavigation(SetPinNavigation.ToRecoverWallet(password, enterPin, name))
             }
         }
     }

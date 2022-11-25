@@ -15,6 +15,7 @@ class RecoverWalletViewModel @Inject constructor(
 
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
     private val pin: String = savedStateHandle["pin"] ?: throw IllegalArgumentException("pin required")
+    private val name: String = savedStateHandle["name"] ?: ""
 
     var seed: String = ""
         set(value) {
@@ -51,8 +52,8 @@ class RecoverWalletViewModel @Inject constructor(
 
     fun onNextClick() {
         invokeAction {
-            val walletName = walletRepository.getActiveWallet()
-            walletRepository.recoverWallet(password, pin, seed, seedPassword, walletName)
+            //val walletName = walletRepository.getActiveWallet()
+            walletRepository.recoverWallet(password, pin, seed, seedPassword, name)
                 .onSuccess {
                     sendNavigation(RecoverWalletNavigation.ToCongratulations)
                 }
