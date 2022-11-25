@@ -167,6 +167,8 @@
     <string name="search">Search</string>
     <string name="not_connected">Not connected</string>
     <string name="connecting">Connecting</string>
+    <string name="getting_routes">Getting routes</string>
+    <string name="got_routes">Got routes</string>
     <string name="connected">Connected</string>
     <string name="public_ipv4">Public IPv4: %s</string>
     <string name="public_ipv6">IPv6: %s</string>
