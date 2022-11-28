@@ -65,6 +65,10 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         }
     }
 
+    override fun init() {
+        CjdnsSocket.init(AnodeUtil.filesDirectory + "/" + AnodeUtil.CJDROUTE_SOCK)
+    }
+
     override suspend fun getCjdnsInfo(): Result<CjdnsInfo> = withContext(Dispatchers.IO) {
         val ipv4 = CjdnsSocket.ipv4Address
         val cjdnsNodeInfo = CjdnsSocket.Core_nodeInfo()
@@ -98,5 +102,6 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         val response = CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection,cjdnsPeers,key,username,nodeUrl,vpnExit)
         Result.success(response)
     }
+
 
 }
