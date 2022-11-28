@@ -3,7 +3,6 @@ package com.pkt.domain.interfaces
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.RequestAuthorizeVpn
-import com.pkt.domain.dto.ResponseErrorPost
 import com.pkt.domain.dto.VpnServer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -13,9 +12,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import timber.log.Timber
 import java.util.*
 
-class VpnAPIService {
+class VpnAPIService() {
     private val apiVersion = "0.3"
     private val baseUrl = "https://vpn.anode.co/api/$apiVersion/"
 
@@ -36,7 +36,12 @@ class VpnAPIService {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
             .create(VpnAPI::class.java)
-        return api.getIPv4Address().ipAddress
+        try {
+            return api.getIPv4Address().ipAddress
+        } catch (e: Exception) {
+            Timber.e(e)
+            return ""
+        }
     }
 
     suspend fun getIPv6Address(): String {
@@ -46,11 +51,21 @@ class VpnAPIService {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
             .create(VpnAPI::class.java)
-        return api.getIPv6Address().ipAddress
+        try {
+            return api.getIPv6Address().ipAddress
+        } catch (e: Exception) {
+            Timber.e(e)
+            return ""
+        }
     }
 
     suspend fun getVpnServersList():List<VpnServer> {
-        return vpnApi.getVpnServersList()
+        try {
+            return vpnApi.getVpnServersList()
+        } catch (e: Exception) {
+            Timber.d("getVpnServersList: failed with message ${e.message}")
+            return emptyList()
+        }
     }
 
     suspend fun authorizeVPN(signature: String, pubKey:String, date: Long):Result<Boolean> {
@@ -69,16 +84,25 @@ class VpnAPIService {
             .build()
             .create(VpnAPI::class.java)
         val request = RequestAuthorizeVpn(date)
-        val response = api.authorizeVPN("cjdns $signature", request)
-        if (response.status == "success") {
-            return Result.success(true)
-        } else {
-            return Result.failure(Exception(response.message))
+        try {
+            val response = api.authorizeVPN("cjdns $signature", request)
+            if (response.status == "success") {
+                return Result.success(true)
+            } else {
+                return Result.failure(Exception(response.message))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 
-    suspend fun getCjdnsPeeringLines(): List<CjdnsPeeringLine> {
-        return vpnApi.getCjdnsPeeringLines()
+    suspend fun getCjdnsPeeringLines(): Result<List<CjdnsPeeringLine>> {
+        try {
+            val response = vpnApi.getCjdnsPeeringLines()
+            return Result.success(response)
+        }catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 
     fun postError(error: String): Result<String> {
