@@ -166,6 +166,7 @@
     <string name="vpn_exits">VPN Exits</string>
     <string name="search">Search</string>
     <string name="not_connected">Not connected</string>
+    <string name="no_internet">No internet connection</string>
     <string name="connecting">Connecting</string>
     <string name="getting_routes">Getting routes</string>
     <string name="got_routes">Got routes</string>
@@ -200,6 +201,7 @@
     <string name="wallet_status_syncing_headers">Downloading:</string>
     <string name="wallet_status_syncing_transactions">Scanning:</string>
     <string name="wallet_status_syncing_waiting">Waiting for data...</string>
+    <string name="wallet_status_no_internet">No internet connection</string>
     <string name="wallet_status_synced">Block: </string>
     <string name="wallet_status_unlocking">Unlocking wallet…</string>
     <string name="wallet_status_unlock">Wallet unlocked</string>
