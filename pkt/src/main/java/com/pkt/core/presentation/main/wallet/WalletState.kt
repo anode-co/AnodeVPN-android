@@ -27,7 +27,8 @@ data class WalletState(
         SCANNING,
         SUCCESS,
         WAITING,
-        FAILED
+        FAILED,
+        NOINTERNET
     }
 }
 
