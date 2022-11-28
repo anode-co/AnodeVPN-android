@@ -153,7 +153,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
         super.handleEvent(event)
 
         when (event) {
-            is SettingsEvent.OpenWalletInfo -> mainViewModel.openWalletInfo(event.address)
+            is SettingsEvent.OpenWalletInfo -> mainViewModel.openWalletInfo()
             is SettingsEvent.OpenCjdnsInfo -> mainViewModel.openCjdnsInfo()
 
             is SettingsEvent.OpenShowSeed -> {

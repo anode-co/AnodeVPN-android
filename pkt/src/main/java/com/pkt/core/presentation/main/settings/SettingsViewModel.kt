@@ -52,7 +52,7 @@ class SettingsViewModel @Inject constructor(
                 sendEvent(SettingsEvent.OpenCjdnsInfo)
             }
             MenuItem.Type.WALLET_INFO -> {
-                sendEvent(SettingsEvent.OpenWalletInfo("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm"))
+                sendEvent(SettingsEvent.OpenWalletInfo)
             }
             MenuItem.Type.DATA_CONSENT -> {
                 sendEvent(SettingsEvent.OpenConsent)

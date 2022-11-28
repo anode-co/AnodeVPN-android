@@ -13,7 +13,7 @@ data class SettingsState(
 
 sealed class SettingsEvent : UiEvent {
 
-    data class OpenWalletInfo(val address: String) : SettingsEvent()
+    object OpenWalletInfo : SettingsEvent()
 
     object OpenCjdnsInfo : SettingsEvent()
 

@@ -14,8 +14,8 @@ class MainViewModel @Inject constructor(
 
     override fun createInitialState() = CommonState.Empty
 
-    fun openWalletInfo(address: String) {
-        sendNavigation(AppNavigation.OpenWalletInfo(address))
+    fun openWalletInfo() {
+        sendNavigation(AppNavigation.OpenWalletInfo)
     }
 
     fun openCjdnsInfo() {

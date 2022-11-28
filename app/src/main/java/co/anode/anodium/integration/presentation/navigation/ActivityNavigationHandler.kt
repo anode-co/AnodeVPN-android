@@ -19,8 +19,8 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(CjdnsInfoActivity.getIntent(fragment.requireContext()))
     }
 
-    override fun openWalletInfo(fragment: Fragment, address: String) {
-        fragment.startActivity(WalletInfoActivity.getIntent(fragment.requireContext(), address))
+    override fun openWalletInfo(fragment: Fragment) {
+        fragment.startActivity(WalletInfoActivity.getIntent(fragment.requireContext(), ""))
     }
 
     override fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode) {
