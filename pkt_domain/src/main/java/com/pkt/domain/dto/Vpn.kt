@@ -13,7 +13,8 @@ enum class VpnState {
     CONNECTING,
     GETTING_ROUTES,
     GOT_ROUTES,
-    CONNECTED
+    CONNECTED,
+    NO_INTERNET
 }
 
 @Serializable
