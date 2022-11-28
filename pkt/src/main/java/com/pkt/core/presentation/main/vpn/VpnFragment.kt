@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.vpn
 
+import android.net.VpnService
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -28,6 +29,8 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        startVPNService()
 
         setFragmentResultListener(ConsentBottomSheet.REQUEST_KEY) { _, bundle ->
             viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
@@ -61,6 +64,7 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
             connectionStateLabel.apply {
                 setText(
                     when (state.vpnState) {
+                        com.pkt.domain.dto.VpnState.NO_INTERNET -> R.string.no_internet
                         com.pkt.domain.dto.VpnState.DISCONNECTED -> R.string.not_connected
                         com.pkt.domain.dto.VpnState.CONNECTING -> R.string.connecting
                         com.pkt.domain.dto.VpnState.GETTING_ROUTES -> R.string.getting_routes
@@ -78,6 +82,7 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                     com.pkt.domain.dto.VpnState.GETTING_ROUTES -> R.drawable.ic_connecting
                     com.pkt.domain.dto.VpnState.GOT_ROUTES -> R.drawable.ic_connecting
                     com.pkt.domain.dto.VpnState.CONNECTED -> R.drawable.ic_connected_large
+                    com.pkt.domain.dto.VpnState.NO_INTERNET -> R.drawable.ic_disconnected
                 }
             )
 
@@ -112,5 +117,14 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
+    }
+
+    private fun startVPNService() {
+        val intent = VpnService.prepare(context)
+        if (intent != null) {
+            startActivityForResult(intent, 0)
+        } else {
+            viewModel.cjdnsInit()
+        }
     }
 }
