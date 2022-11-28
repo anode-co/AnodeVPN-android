@@ -37,4 +37,8 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
         Thread.sleep(500)
         AnodeUtil.restartApp()
     }
+
+    override fun hasInternetConnection(): Boolean {
+        return AnodeUtil.internetConnection()
+    }
 }
