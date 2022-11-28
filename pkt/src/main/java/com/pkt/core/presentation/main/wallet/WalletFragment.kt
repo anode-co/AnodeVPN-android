@@ -8,12 +8,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentWalletCoreBinding
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
+import com.pkt.core.presentation.common.adapter.EndlessRecyclerViewScrollListener
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.main.MainViewModel
@@ -73,6 +76,12 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
 
             recyclerView.itemAnimator = null
             recyclerView.adapter = adapter
+            recyclerView.addOnScrollListener(
+                object : EndlessRecyclerViewScrollListener(recyclerView.layoutManager as LinearLayoutManager) {
+                    override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
+                        viewModel.onLoadMore(page, totalItemsCount)
+                    }
+                })
 
             addressValue.doOnClick {
                 viewModel.onAddressClick()

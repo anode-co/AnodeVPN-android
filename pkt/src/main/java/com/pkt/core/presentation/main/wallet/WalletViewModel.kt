@@ -269,4 +269,8 @@ class WalletViewModel @Inject constructor(
         sendEvent(CommonEvent.CopyToBuffer(R.string.address, currentState.walletAddress))
         sendEvent(CommonEvent.Info(R.string.address_copied))
     }
+
+    fun onLoadMore(page: Int, totalItemsCount: Int) {
+        // TODO("Not yet implemented")
+    }
 }
