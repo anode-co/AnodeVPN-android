@@ -198,7 +198,7 @@ class ProfileFragment : Fragment() {
         }
 
         val newUiCheckBox = root.findViewById<CheckBox>(R.id.use_newui_checkbox)
-        newUiCheckBox.isChecked = prefs.getBoolean("useNewUI", false)
+        newUiCheckBox.isChecked = prefs.getBoolean("useNewUI", true)
         newUiCheckBox.setOnClickListener {
             prefs.edit().putBoolean("useNewUI", newUiCheckBox.isChecked).apply()
             Thread.sleep(500)
