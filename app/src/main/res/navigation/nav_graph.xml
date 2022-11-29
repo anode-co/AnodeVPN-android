@@ -51,6 +51,10 @@
         app:destination="@id/sendSuccess" />
 
     <action
+        android:id="@+id/toTransactionDetails"
+        app:destination="@id/transactionDetails" />
+
+    <action
         android:id="@+id/toVpnExits"
         app:destination="@id/vpnExits" />
 
@@ -180,6 +184,18 @@
         <argument
             android:name="transactionId"
             app:argType="string" />
+
+    </dialog>
+
+    <dialog
+        android:id="@+id/transactionDetails"
+        android:name="com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsBottomSheet"
+        android:label="TransactionDetails"
+        tools:layout="@layout/bottom_sheet_transaction_details">
+
+        <argument
+            android:name="extra"
+            app:argType="com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra" />
 
     </dialog>
 

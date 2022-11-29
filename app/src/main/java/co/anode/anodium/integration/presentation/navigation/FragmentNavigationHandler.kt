@@ -5,6 +5,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import co.anode.anodium.NavGraphDirections
 import com.pkt.core.presentation.createwallet.CreateWalletMode
+import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 import com.pkt.core.presentation.navigation.AppNavigationHandler
 import javax.inject.Inject
 
@@ -66,6 +67,10 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
 
     override fun openChangePin(fragment: Fragment) {
         navigate(fragment, NavGraphDirections.toChangePin())
+    }
+
+    override fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra) {
+        navigate(fragment, NavGraphDirections.toTransactionDetails(extra))
     }
 
     private fun navigate(fragment: Fragment, navDirections: NavDirections) {

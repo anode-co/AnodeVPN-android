@@ -11,6 +11,9 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.event.CommonEvent
+import com.pkt.core.presentation.main.wallet.transaction.TransactionType
+import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
+import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.dto.Transaction
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
@@ -164,9 +167,9 @@ class WalletViewModel @Inject constructor(
                 prevDate = date
 
                 var amount = transactions[i].amount.toLong()
-                var type = TransactionItem.Type.RECEIVE
+                var type = TransactionType.RECEIVE
                 if (amount < 0)
-                    type = TransactionItem.Type.SENT
+                    type = TransactionType.SENT
                 amount = amount.absoluteValue
 
                 items.add(
@@ -176,6 +179,9 @@ class WalletViewModel @Inject constructor(
                         time = date,
                         amountPkt = amount.formatPkt(),
                         amountUsd = amount.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
+                        transactionId = transactions[i].txHash,
+                        addresses = transactions[i].destAddresses,
+                        blockNumber = transactions[i].blockHeight,
                     )
                 )
             }
@@ -274,5 +280,21 @@ class WalletViewModel @Inject constructor(
     fun onAddressClick() {
         sendEvent(CommonEvent.CopyToBuffer(R.string.address, currentState.walletAddress))
         sendEvent(CommonEvent.Info(R.string.address_copied))
+    }
+
+    fun onTransactionClick(transaction: TransactionItem) {
+        sendEvent(
+            WalletEvent.OpenTransactionDetails(
+                TransactionDetailsExtra(
+                    transactionId = transaction.transactionId,
+                    addresses = transaction.addresses,
+                    blockNumber = transaction.blockNumber,
+                    type = transaction.type,
+                    time = transaction.time,
+                    amountPkt = transaction.amountPkt,
+                    amountUsd = transaction.amountUsd
+                )
+            )
+        )
     }
 }

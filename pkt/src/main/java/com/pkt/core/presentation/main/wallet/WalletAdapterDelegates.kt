@@ -5,6 +5,7 @@ import com.pkt.core.R
 import com.pkt.core.databinding.*
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.adapter.DisplayableItem
+import com.pkt.core.presentation.main.wallet.transaction.TransactionType
 import java.time.LocalDateTime
 
 class LoadingItem : DisplayableItem {
@@ -71,28 +72,29 @@ fun dateAdapterDelegate() =
 
 data class TransactionItem(
     val id: String,
-    val type: Type,
+    val type: TransactionType,
     val time: LocalDateTime,
     val amountPkt: String,
     val amountUsd: String,
+    val transactionId: String,
+    val addresses: List<String>,
+    val blockNumber: Int,
 ) : DisplayableItem {
     override fun getItemId(): String = id
     override fun getItemHash(): String = hashCode().toString()
 
-    enum class Type {
-        SENT,
-        RECEIVE
-    }
 }
 
-fun transactionAdapterDelegate() =
+fun transactionAdapterDelegate(
+    onItemClick: (TransactionItem) -> Unit
+) =
     adapterDelegateViewBinding<TransactionItem, DisplayableItem, ItemTransactionBinding>(
         { layoutInflater, root -> ItemTransactionBinding.inflate(layoutInflater, root, false) }
     ) {
         bind {
             with(binding) {
                 when (item.type) {
-                    TransactionItem.Type.SENT -> {
+                    TransactionType.SENT -> {
                         iconImage.setImageResource(R.drawable.ic_transaction_sent)
                         titleLabel.setText(R.string.sent_pkt)
                         amountPktLabel.setTextColor(context.getColorByAttribute(android.R.attr.textColorPrimary))
@@ -100,7 +102,7 @@ fun transactionAdapterDelegate() =
                         amountUsdLabel.text = item.amountUsd.formatUsd()
                     }
 
-                    TransactionItem.Type.RECEIVE -> {
+                    TransactionType.RECEIVE -> {
                         iconImage.setImageResource(R.drawable.ic_transaction_received)
                         titleLabel.setText(R.string.received_pkt)
                         amountPktLabel.setTextColor(context.getColorByAttribute(R.attr.colorSuccess))
@@ -111,6 +113,10 @@ fun transactionAdapterDelegate() =
 
                 timeLabel.text = item.time.formatTime()
                 amountUsdLabel.text = item.amountUsd.formatUsd()
+
+                root.setOnClickListener {
+                    onItemClick(item)
+                }
             }
         }
     }
