@@ -25,6 +25,11 @@
         android:id="@+id/toChangePin"
         app:destination="@id/changePin" />
     <action
+        android:id="@+id/toChangePinFromChangePassword"
+        app:destination="@id/changePin"
+        app:popUpTo="@id/changePassword"
+        app:popUpToInclusive="true" />
+    <action
         android:id="@+id/toCreateWallet"
         app:destination="@id/createWallet" />
 
