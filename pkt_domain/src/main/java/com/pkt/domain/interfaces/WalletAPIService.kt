@@ -122,8 +122,13 @@ class WalletAPIService {
             .build()
             .create(WalletAPI::class.java)
 
-        val response = priceApi.getPktToUSD()
-        return response.data.PKT.quote.USD.price.toFloat()
+        try {
+            val response = priceApi.getPktToUSD()
+            return response.data.PKT.quote.USD.price.toFloat()
+        }catch (e: Exception) {
+            Timber.d("getPktToUsd: failed with message ${e.message}")
+            return 0.0f
+        }
     }
 }
 

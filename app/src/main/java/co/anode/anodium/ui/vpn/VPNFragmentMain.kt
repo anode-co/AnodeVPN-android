@@ -147,7 +147,7 @@ class VPNFragmentMain : Fragment() {
         //Check internet connectivity & public IP
         Thread({
             while (this.isVisible) {
-                if (!internetConnection() && uiInForeground) {
+                if (!AnodeUtil.internetConnection() && uiInForeground) {
                     activity?.runOnUiThread {
                         Toast.makeText(mycontext, getString(R.string.toast_no_internet), Toast.LENGTH_LONG).show()
                     }
@@ -159,7 +159,7 @@ class VPNFragmentMain : Fragment() {
         //Get v4 public IP
         Thread({
             while (true) {
-                if (internetConnection() && uiInForeground) {
+                if (AnodeUtil.internetConnection() && uiInForeground) {
                     val textPublicIP = activity?.findViewById<TextView>(R.id.v4publicip)
                     val publicIP = getPublicIPv4()
                     if (!publicIP.contains("Error")) {
@@ -182,7 +182,7 @@ class VPNFragmentMain : Fragment() {
         //Get v6 public IP
         Thread({
             while (true) {
-                if (internetConnection() && uiInForeground) {
+                if (AnodeUtil.internetConnection() && uiInForeground) {
                     val textPublicIP = activity?.findViewById<TextView>(R.id.v6publicip)
                     val publicIP = getPublicIPv6()
                     if (!publicIP.contains("Error")) {
@@ -212,15 +212,6 @@ class VPNFragmentMain : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun internetConnection(): Boolean {
-        val cm = mycontext.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
-        return if (activeNetwork?.isConnected == null)
-            false
-        else
-            activeNetwork.isConnected
     }
 
     private fun disconnectVPN(showRatingBar: Boolean) {

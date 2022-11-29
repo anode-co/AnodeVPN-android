@@ -11,9 +11,9 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.event.CommonEvent
-import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.dto.Transaction
 import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -30,6 +30,7 @@ class WalletViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
     private val vpnRepository: VpnRepository,
     private val cjdnsRepository: CjdnsRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<WalletState>() {
 
     private val refreshInterval: Long = 5000
@@ -50,13 +51,15 @@ class WalletViewModel @Inject constructor(
                 sendState { copy(syncState = WalletState.SyncState.NOTEXISTING) }
                 return@invokeLoadingAction Result.failure<Unit>(IllegalStateException("No wallets"))
             }
-
-            val peers = vpnRepository.getCjdnsPeers().getOrNull()
-            if (peers != null) {
+            try {
+                val peers = vpnRepository.getCjdnsPeers().getOrThrow()
                 cjdnsRepository.addCjdnsPeers(peers)
-            } else {
-                //TODO: no peering lines
+            } catch (e: Exception) {
+                if (e.message?.contains("Unable to resolve host") == true) {
+                    sendState { copy(syncState = WalletState.SyncState.NOINTERNET)  }
+                }
             }
+
             Result.success(true)
         }
     }
@@ -96,6 +99,9 @@ class WalletViewModel @Inject constructor(
             //Set wallet status
             if (peerCount == 0){
                 walletSyncState = WalletState.SyncState.FAILED
+                if (!generalRepository.hasInternetConnection()) {
+                    walletSyncState = WalletState.SyncState.NOINTERNET
+                }
             } else if (neutrinoHeight < neutrinoTop) {
                 walletSyncState = WalletState.SyncState.DOWNLOADING
             } else if (wallet?.currentHeight!! < neutrinoHeight) {

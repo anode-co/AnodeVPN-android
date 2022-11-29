@@ -185,6 +185,12 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                             context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
                         text = "${getString(R.string.wallet_status_disconnected)}"
                     }
+                    WalletState.SyncState.NOINTERNET -> {
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
+                        compoundDrawableTintList = ColorStateList.valueOf(
+                            context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
+                        text = "${getString(R.string.wallet_status_no_internet)}"
+                    }
                     WalletState.SyncState.WAITING -> {
                         setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
                         compoundDrawableTintList = null

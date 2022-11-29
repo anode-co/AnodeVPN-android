@@ -21,16 +21,9 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.anode.anodium.databinding.ActivityMainBinding
-import co.anode.anodium.integration.model.repository.CjdnsRepositoryImpl
-import co.anode.anodium.integration.model.repository.VpnRepositoryImpl
 import co.anode.anodium.support.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.pkt.domain.repository.CjdnsRepository
-import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -48,8 +41,9 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.INTERNET,
         Manifest.permission.CHANGE_NETWORK_STATE,
         Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        //Manifest.permission.ACCESS_COARSE_LOCATION,
+        //Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.BIND_VPN_SERVICE
     )
 
     private fun initTimber() {
@@ -80,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         initializeApp()
 
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
-        var newUI = prefs.getBoolean("useNewUI", false)
+        var newUI = prefs.getBoolean("useNewUI", true)
 
         if (newUI) {
             //Launch new UI main acivity
@@ -139,8 +133,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (missingPermissions.isNotEmpty()) {
             // request all missing permissions
-            val permissions = missingPermissions
-                .toTypedArray()
+            val permissions = missingPermissions.toTypedArray()
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_ASK_PERMISSIONS)
         } else {
             val grantResults = IntArray(REQUIRED_SDK_PERMISSIONS.size)

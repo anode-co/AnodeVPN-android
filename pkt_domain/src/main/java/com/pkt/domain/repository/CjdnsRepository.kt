@@ -11,4 +11,5 @@ interface CjdnsRepository {
     suspend fun getCjdnsPeers(): Result<List<CjdnsPeer>>
     suspend fun getCjdnsConnections(): Result<List<CjdnsConnection>>
     suspend fun addCjdnsPeers(peers:List<CjdnsPeeringLine>): Boolean
+    fun init()
 }

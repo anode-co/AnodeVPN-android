@@ -22,7 +22,7 @@ interface ValueFormatter {
         }
 
         val BALANCE: ValueFormatter = object : ValueFormatter {
-            override fun format(params: List<Any>): String = (params.first() as Double).formatPkt()
+            override fun format(params: List<Any>): String = (params.first() as Long).formatPkt()
         }
 
         val SYNC: ValueFormatter = object : ValueFormatter {

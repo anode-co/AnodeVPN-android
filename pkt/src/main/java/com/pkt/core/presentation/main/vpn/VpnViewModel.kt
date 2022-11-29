@@ -3,6 +3,8 @@ package com.pkt.core.presentation.main.vpn
 import androidx.lifecycle.viewModelScope
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.dto.Vpn
+import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -15,6 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VpnViewModel @Inject constructor(
     private val vpnRepository: VpnRepository,
+    private val cjdnsRepository: CjdnsRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<VpnState>() {
 
     private val _timerUiState: MutableStateFlow<Int> by lazy { MutableStateFlow(0) }
@@ -23,15 +27,20 @@ class VpnViewModel @Inject constructor(
     private var timerJob: Job? = null
 
     init {
+
         invokeLoadingAction {
+            //Set default VPN
+            var vpn = Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
+            if (!generalRepository.hasInternetConnection()) {
+                return@invokeLoadingAction Result.success("")
+            }
             runCatching {
                 val ipv4 = vpnRepository.getIPv4Address().getOrNull()
                 val ipv6 = vpnRepository.getIPv6Address().getOrNull()
-                val list = vpnRepository.fetchVpnList().getOrThrow()
-                //Set default VPN
-                var vpn = Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
+                val list = vpnRepository.fetchVpnList().getOrNull()
+
                 //Check list for default VPN
-                if (list.isNotEmpty()) {
+                if (!list.isNullOrEmpty()) {
                     for (item in list) {
                         if (item.publicKey == "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k") {
                             vpn = item
@@ -123,6 +132,11 @@ class VpnViewModel @Inject constructor(
                     vpnRepository.disconnect()
                 }
             }
+            com.pkt.domain.dto.VpnState.NO_INTERNET -> {
+                viewModelScope.launch {
+                    vpnRepository.disconnect()
+                }
+            }
         }
     }
 
@@ -141,6 +155,13 @@ class VpnViewModel @Inject constructor(
                     }
                 }.collect()
             }
+        }
+    }
+
+    fun cjdnsInit() {
+        //Initialize CJDNS socket
+        viewModelScope.launch {
+            cjdnsRepository.init()
         }
     }
 }

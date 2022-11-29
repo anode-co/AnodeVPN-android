@@ -15,7 +15,7 @@ abstract class AppNavigationHandler : NavigationHandler {
                 when (navigation) {
                     AppNavigation.NavigateBack -> navigateBack(fragment)
                     is AppNavigation.OpenCjdnsInfo -> openCjdnsInfo(fragment)
-                    is AppNavigation.OpenWalletInfo -> openWalletInfo(fragment, navigation.address)
+                    is AppNavigation.OpenWalletInfo -> openWalletInfo(fragment)
                     is AppNavigation.OpenCreateWallet -> openCreateWallet(fragment, navigation.name, navigation.mode)
                     is AppNavigation.OpenRecoverWallet -> openRecoverWallet(fragment, navigation.name)
                     AppNavigation.OpenMain -> openMain(fragment)
@@ -54,7 +54,7 @@ abstract class AppNavigationHandler : NavigationHandler {
 
     abstract fun navigateBack(fragment: Fragment)
     abstract fun openCjdnsInfo(fragment: Fragment)
-    abstract fun openWalletInfo(fragment: Fragment, address: String)
+    abstract fun openWalletInfo(fragment: Fragment)
     abstract fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode)
     abstract fun openRecoverWallet(fragment: Fragment, name: String?)
     abstract fun openMain(fragment: Fragment)

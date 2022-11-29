@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -156,7 +158,7 @@ object AnodeUtil {
 
     fun getUseNewUi(): Boolean {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
-        return prefs!!.getBoolean("useNewUI", false)
+        return prefs!!.getBoolean("useNewUI", true)
     }
 
     fun generateUsername(textview:TextView?) {
@@ -954,6 +956,15 @@ object AnodeUtil {
 
         }
         return prefs?.getString("username", "") ?: ""
+    }
+
+    fun internetConnection(): Boolean {
+        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return if (activeNetwork?.isConnected == null)
+            false
+        else
+            activeNetwork.isConnected
     }
 }
 

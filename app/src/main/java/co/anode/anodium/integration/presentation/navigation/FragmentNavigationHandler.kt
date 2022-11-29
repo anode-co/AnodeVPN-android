@@ -20,8 +20,8 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toCjdnsInfo())
     }
 
-    override fun openWalletInfo(fragment: Fragment, address: String) {
-        navigate(fragment, NavGraphDirections.toWalletInfo(address))
+    override fun openWalletInfo(fragment: Fragment) {
+        navigate(fragment, NavGraphDirections.toWalletInfo(""))
     }
 
     override fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode) {

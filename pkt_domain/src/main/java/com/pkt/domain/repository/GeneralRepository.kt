@@ -8,4 +8,5 @@ interface GeneralRepository {
     fun getNewUI():Boolean
     fun removePIN(walletName: String)
     fun restartApplication()
+    fun hasInternetConnection(): Boolean
 }

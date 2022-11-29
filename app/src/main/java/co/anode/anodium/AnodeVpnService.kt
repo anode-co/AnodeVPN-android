@@ -95,10 +95,12 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
 
         avpn.mInterface = b.establish()
         Log.i(LOGTAG, "interface vpn")
-        val fdNum = CjdnsSocket.Admin_importFd(avpn.mInterface!!.fileDescriptor)
-        Log.i(LOGTAG, "imported vpn fd $fdNum")
-        Log.i(LOGTAG, CjdnsSocket.Core_initTunfd(fdNum).toString())
-        Log.i(LOGTAG, "vpn launched")
+        if (avpn.mInterface != null) {
+            val fdNum = CjdnsSocket.Admin_importFd(avpn.mInterface!!.fileDescriptor)
+            Log.i(LOGTAG, "imported vpn fd $fdNum")
+            Log.i(LOGTAG, CjdnsSocket.Core_initTunfd(fdNum).toString())
+            Log.i(LOGTAG, "vpn launched")
+        }
     }
 
     private fun init() {

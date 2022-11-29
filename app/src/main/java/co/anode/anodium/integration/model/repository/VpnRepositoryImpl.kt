@@ -59,6 +59,10 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     fun cjdnsConnectVPN(node: String) {
+        if (!AnodeUtil.internetConnection()) {
+            _vpnState.tryEmit(VpnState.NO_INTERNET)
+            return
+        }
         var iconnected = false
         CjdnsSocket.IpTunnel_removeAllConnections()
         if (node.isNotEmpty()) {
@@ -139,7 +143,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>> {
-        return Result.success(vpnAPI.getCjdnsPeeringLines())
+        return vpnAPI.getCjdnsPeeringLines()
     }
 
     override fun postError(error: String): Result<String> {
@@ -195,4 +199,6 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     override suspend fun getIPv6Address(): Result<String> {
         return Result.success(vpnAPI.getIPv6Address())
     }
+
+
 }
