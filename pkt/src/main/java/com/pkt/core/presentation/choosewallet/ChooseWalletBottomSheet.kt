@@ -1,4 +1,4 @@
-package com.pkt.core.presentation.enterwallet.choosewallet
+package com.pkt.core.presentation.choosewallet
 
 import android.os.Bundle
 import android.view.View
