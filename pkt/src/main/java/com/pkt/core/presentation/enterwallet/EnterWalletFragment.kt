@@ -13,7 +13,7 @@ import com.pkt.core.extensions.doOnClick
 import com.pkt.core.extensions.doOnTextChanged
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
-import com.pkt.core.presentation.enterwallet.choosewallet.ChooseWalletBottomSheet
+import com.pkt.core.presentation.choosewallet.ChooseWalletBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 

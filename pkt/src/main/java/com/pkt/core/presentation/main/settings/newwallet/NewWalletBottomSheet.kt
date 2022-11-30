@@ -11,7 +11,7 @@ import com.pkt.core.databinding.BottomSheetNewWalletBinding
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.StateBottomSheet
 import com.pkt.core.presentation.common.state.UiEvent
-import com.pkt.core.presentation.enterwallet.choosewallet.ChooseWalletBottomSheet
+import com.pkt.core.presentation.choosewallet.ChooseWalletBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

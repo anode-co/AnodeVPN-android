@@ -1,4 +1,4 @@
-package com.pkt.core.presentation.enterwallet.choosewallet
+package com.pkt.core.presentation.choosewallet
 
 import androidx.core.view.isVisible
 import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegateViewBinding
