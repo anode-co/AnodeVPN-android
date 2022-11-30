@@ -81,6 +81,8 @@ class WalletViewModel @Inject constructor(
                 if (walletAddress.isEmpty()) {
                     val response = walletRepository.createAddress().getOrThrow()
                     walletAddress = response.address
+                    //Now try to resync the wallet
+                    walletRepository.resyncWallet()
                 }
             }
             balance = walletRepository.getTotalWalletBalance().getOrThrow()

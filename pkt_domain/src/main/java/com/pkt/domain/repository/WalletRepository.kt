@@ -63,6 +63,8 @@ interface WalletRepository {
     //Validate PKT address
     fun isPKTAddressValid(address: String): Result<String>
 
+    suspend fun resyncWallet()
+
     suspend fun getPktToUsd(): Result<Float>
 
     suspend fun stopPld()
