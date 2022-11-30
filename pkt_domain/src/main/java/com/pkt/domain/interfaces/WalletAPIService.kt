@@ -130,6 +130,16 @@ class WalletAPIService {
             return 0.0f
         }
     }
+
+    suspend fun resyncWallet() {
+        val response = api.resyncWallet("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+        if (response.message == "") {
+            Timber.d("resyncWallet: success")
+        } else {
+            Timber.d("resyncWallet: failed with message ${response.message}")
+        }
+    }
+
 }
 
 class NullOnEmptyConverterFactory : Converter.Factory() {

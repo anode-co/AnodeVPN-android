@@ -4,6 +4,7 @@ import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.UiState
 
 data class SettingsState(
+    val wallets: List<String>,
     val walletName: String,
     val id: String,
     val version: String,
@@ -25,6 +26,8 @@ sealed class SettingsEvent : UiEvent {
     object OpenWalletRecovery : SettingsEvent()
     object OpenChangePassword : SettingsEvent()
     object OpenChangePin : SettingsEvent()
+    object OpenEnterWallet : SettingsEvent()
     data class OpenCreateWallet(val name: String) : SettingsEvent()
     data class OpenRecoverWallet(val name: String) : SettingsEvent()
+    data class OpenChooseWallet(val wallets: List<String>, val currentWallet: String) : SettingsEvent()
 }

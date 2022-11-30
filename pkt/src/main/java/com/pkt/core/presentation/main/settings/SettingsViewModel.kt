@@ -4,7 +4,6 @@ import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.createwallet.CreateWalletMode
-import com.pkt.core.presentation.enterwallet.EnterWalletEvent
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
 import com.pkt.domain.repository.WalletRepository
@@ -21,6 +20,7 @@ class SettingsViewModel @Inject constructor(
 ) : StateViewModel<SettingsState>() {
 
     override fun createInitialState() = SettingsState(
+        wallets = walletRepository.getAllWalletNames(),
         walletName = walletRepository.getActiveWallet(),
         id = id,
         version = versionName,
@@ -29,12 +29,12 @@ class SettingsViewModel @Inject constructor(
     )
 
     fun onWalletClick() {
-        val wallets = walletRepository.getAllWalletNames()
-        if (wallets.size > 1) {
-            sendEvent(
-                EnterWalletEvent.OpenChooseWallet(wallets, walletRepository.getActiveWallet())
+        sendEvent(
+            SettingsEvent.OpenChooseWallet(
+                currentState.wallets,
+                currentState.walletName
             )
-        }
+        )
     }
 
     fun onMenuItemClick(item: MenuItem) {
@@ -116,5 +116,21 @@ class SettingsViewModel @Inject constructor(
         generalRepository.enableNewUI(checked)
         sendState { copy(switchUiChecked = checked) }
         generalRepository.restartApplication()
+    }
+
+    fun onWalletChanged(walletName: String?) {
+        walletName
+            ?.takeIf { it != currentState.walletName }
+            ?.let { wallet ->
+                invokeAction {
+                    runCatching {
+                        walletRepository.setActiveWallet(wallet)
+                    }.onSuccess {
+                        sendEvent(SettingsEvent.OpenEnterWallet)
+                    }.onFailure {
+                        sendError(it)
+                    }
+                }
+            }
     }
 }

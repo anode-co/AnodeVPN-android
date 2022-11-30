@@ -221,4 +221,9 @@
     <string name="confirm_with_pin">Confirm with PIN</string>
 
     <string name="error_insufficient_balance">Insufficient balance</string>
+    <string name="sender_address">Sender address</string>
+    <string name="see_more">See more</string>
+    <string name="see_less">See less</string>
+    <string name="in_block_number">In block number</string>
+    <string name="transaction_date_time">%1$s at %2$s</string>
 </resources>

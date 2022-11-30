@@ -6,6 +6,7 @@ import co.anode.anodium.integration.presentation.*
 import co.anode.anodium.integration.presentation.settings.CjdnsInfoActivity
 import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import com.pkt.core.presentation.createwallet.CreateWalletMode
+import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 import com.pkt.core.presentation.navigation.AppNavigationHandler
 import javax.inject.Inject
 
@@ -62,6 +63,10 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(ChangePINActivity.getIntent(fragment.requireContext()))
     }
 
+    override fun openChangePinFromChangePassword(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
     override fun openSendTransaction(fragment: Fragment, fromaddress: String) {
         TODO("Not yet implemented")
     }
@@ -71,6 +76,10 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openStart(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra) {
         TODO("Not yet implemented")
     }
 }

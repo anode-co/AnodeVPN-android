@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_pin"
                 android:imeOptions="actionNext"
-                android:inputType="textPassword"
+                android:inputType="numberPassword"
                 android:paddingVertical="13dp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/confirm_pin"
                 android:imeOptions="actionDone"
-                android:inputType="textPassword"
+                android:inputType="numberPassword"
                 android:paddingVertical="13dp" />
 
         </com.google.android.material.textfield.TextInputLayout>

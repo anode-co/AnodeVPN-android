@@ -220,6 +220,10 @@ class WalletRepositoryDummy constructor(
         TODO("Not yet implemented")
     }
 
+    override suspend fun resyncWallet() {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getPktToUsd(): Result<Float> {
         TODO("Not yet implemented")
     }

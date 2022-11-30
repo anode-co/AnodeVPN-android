@@ -68,6 +68,12 @@ data class UnlockWalletResponse (
 )
 
 @Serializable
+data class ResyncWalletResponse (
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Serializable
 data class WalletBalancesRequest (
     var showzerobalance: Boolean,
 )

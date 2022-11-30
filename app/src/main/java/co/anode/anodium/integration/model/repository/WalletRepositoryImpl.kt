@@ -347,6 +347,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
+    override suspend fun resyncWallet() {
+        walletAPI.resyncWallet()
+    }
+
     override suspend fun getPktToUsd(): Result<Float> {
         val response = walletAPI.getPktToUsd()
         return if (response.isNaN()) {

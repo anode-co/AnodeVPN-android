@@ -3,6 +3,7 @@ package com.pkt.core.presentation.main.wallet
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.UiState
+import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 
 data class WalletState(
     val syncState: SyncState,
@@ -42,4 +43,6 @@ sealed class WalletEvent : UiEvent {
     ) : WalletEvent()
 
     object ScrollToTop: WalletEvent()
+
+    data class OpenTransactionDetails(val extra: TransactionDetailsExtra) : WalletEvent()
 }
