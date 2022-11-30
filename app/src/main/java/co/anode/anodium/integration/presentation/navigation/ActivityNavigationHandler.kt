@@ -63,6 +63,10 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(ChangePINActivity.getIntent(fragment.requireContext()))
     }
 
+    override fun openChangePinFromChangePassword(fragment: Fragment) {
+        TODO("Not yet implemented")
+    }
+
     override fun openSendTransaction(fragment: Fragment, fromaddress: String) {
         TODO("Not yet implemented")
     }

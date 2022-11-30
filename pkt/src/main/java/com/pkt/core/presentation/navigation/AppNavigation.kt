@@ -22,6 +22,7 @@ sealed class AppNavigation : UiNavigation {
     object OpenVpnExits : AppNavigation()
     object OpenChangePassword : AppNavigation()
     object OpenChangePin : AppNavigation()
+    object OpenChangePinFromChangePassword : AppNavigation()
     object OpenEnterWallet : AppNavigation()
     object OpenStart : AppNavigation()
 

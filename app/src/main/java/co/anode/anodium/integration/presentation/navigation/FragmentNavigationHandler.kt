@@ -69,6 +69,10 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toChangePin())
     }
 
+    override fun openChangePinFromChangePassword(fragment: Fragment) {
+        navigate(fragment, NavGraphDirections.toChangePinFromChangePassword())
+    }
+
     override fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra) {
         navigate(fragment, NavGraphDirections.toTransactionDetails(extra))
     }
