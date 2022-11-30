@@ -3,6 +3,7 @@ package com.pkt.core.presentation.main
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.core.presentation.createwallet.CreateWalletMode
+import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 import com.pkt.core.presentation.navigation.AppNavigation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -56,5 +57,9 @@ class MainViewModel @Inject constructor(
 
     fun openStart() {
         sendNavigation(AppNavigation.OpenStart)
+    }
+
+    fun openTransactionDetails(extra: TransactionDetailsExtra) {
+        sendNavigation(AppNavigation.OpenTransactionDetails(extra))
     }
 }

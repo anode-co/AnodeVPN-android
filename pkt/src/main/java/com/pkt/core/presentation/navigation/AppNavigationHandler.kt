@@ -6,6 +6,7 @@ import androidx.navigation.fragment.findNavController
 import com.pkt.core.presentation.common.state.UiNavigation
 import com.pkt.core.presentation.common.state.navigation.NavigationHandler
 import com.pkt.core.presentation.createwallet.CreateWalletMode
+import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 
 abstract class AppNavigationHandler : NavigationHandler {
 
@@ -27,6 +28,7 @@ abstract class AppNavigationHandler : NavigationHandler {
                         navigation.maxAmount
                     )
                     is AppNavigation.OpenSendSuccess -> openSendSuccess(fragment, navigation.transactionId)
+                    is AppNavigation.OpenTransactionDetails -> openTransactionDetails(fragment, navigation.extra)
                     AppNavigation.OpenVpnExits -> openVpnExits(fragment)
                     AppNavigation.OpenChangePassword -> openChangePassword(fragment)
                     AppNavigation.OpenChangePin -> openChangePin(fragment)
@@ -66,4 +68,5 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openSendTransaction(fragment: Fragment, fromaddress: String)
     abstract fun openEnterWallet(fragment: Fragment)
     abstract fun openStart(fragment: Fragment)
+    abstract fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra)
 }

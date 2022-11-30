@@ -38,7 +38,9 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
         emptyAdapterDelegate(),
         footerAdapterDelegate(),
         dateAdapterDelegate(),
-        transactionAdapterDelegate()
+        transactionAdapterDelegate {
+            viewModel.onTransactionClick(it)
+        }
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -240,6 +242,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             }
             is WalletEvent.OpenSendTransaction -> mainViewModel.openSendTransaction(viewModel.walletAddress)
             is WalletEvent.ScrollToTop -> viewBinding.recyclerView.scrollToPosition(0)
+            is WalletEvent.OpenTransactionDetails -> mainViewModel.openTransactionDetails(event.extra)
             else -> super.handleEvent(event)
         }
     }
