@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.wallet
 
+import androidx.annotation.StringRes
 import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegateViewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.*
@@ -44,7 +45,9 @@ fun emptyAdapterDelegate() =
         { layoutInflater, root -> ItemEmptyBinding.inflate(layoutInflater, root, false) }
     ) {}
 
-class FooterItem : DisplayableItem {
+data class FooterItem(
+    @StringRes val textResId: Int = R.string.these_are_all_your_transactions,
+) : DisplayableItem {
     override fun getItemId(): String = "FOOTER_ITEM"
     override fun getItemHash(): String = hashCode().toString()
 }
@@ -52,7 +55,11 @@ class FooterItem : DisplayableItem {
 fun footerAdapterDelegate() =
     adapterDelegateViewBinding<FooterItem, DisplayableItem, ItemFooterBinding>(
         { layoutInflater, root -> ItemFooterBinding.inflate(layoutInflater, root, false) }
-    ) {}
+    ) {
+        bind {
+            binding.root.setText(item.textResId)
+        }
+    }
 
 data class DateItem(
     val date: LocalDateTime,
