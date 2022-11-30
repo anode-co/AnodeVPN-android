@@ -299,4 +299,8 @@ class WalletViewModel @Inject constructor(
             )
         )
     }
+
+    fun onLoadMore(page: Int, totalItemsCount: Int) {
+        // TODO("Not yet implemented")
+    }
 }
