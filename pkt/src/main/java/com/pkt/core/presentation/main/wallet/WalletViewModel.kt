@@ -142,7 +142,6 @@ class WalletViewModel @Inject constructor(
             }
             return Result.success(true)
         }.onFailure {
-            //TODO: handle error
             return Result.failure(it)
         }
         return Result.success(true)
@@ -150,14 +149,11 @@ class WalletViewModel @Inject constructor(
 
     private suspend fun loadTransactions(skip: Int = 0){
         val startTime = currentState.startDate?.div(1000) ?: 0L
-        var endTime = currentState.endDate?.div(1000) ?: 0L
-
+        val endTime = currentState.endDate?.div(1000) ?: 0L
+        //TODO: increase txnsLimit = 20 after testing
         //Get transactions
         runCatching {
             //Get one more txns to see if there are more
-            if (endTime == 0L) {
-                endTime = System.currentTimeMillis() / 1000
-            }
             walletRepository.getWalletTransactions(coinbase = 1, reversed = true, skip, txnsPerPage+1, startTime, endTime).getOrThrow()
         }.onSuccess { t ->
             //We have already transactions and this is a call from polling
@@ -176,8 +172,10 @@ class WalletViewModel @Inject constructor(
             //Check if t.transaction already exists in transactions and remove it
             //this may occur when wallet is syncing
             if (transactions.isNotEmpty()) {
-                for (i in 0 until tempList.size) {
-                    for (j in 0 until transactions.size) {
+                for (j in 0 until transactions.size) {
+                    for (i in tempList.indices) {
+                        //TODO: double check that when we remove item the indice are reduced
+                        //so the index won't go out of bounds
                         if (tempList[i].txHash == transactions[j].txHash) {
                             tempList.removeAt(i)
                         }
@@ -186,7 +184,15 @@ class WalletViewModel @Inject constructor(
             }
             transactions.addAll(tempList)
             val items: MutableList<DisplayableItem> = mutableListOf()
-            items.addAll(currentState.items)
+            //Do not add loading, error and footer items from current list
+            for (i in 0 until currentState.items.size) {
+                if ((currentState.items[i].getItemId() != "LOADING_ITEM") &&
+                    (currentState.items[i].getItemId() != "ERROR_ITEM") &&
+                    (currentState.items[i].getItemId() != "FOOTER_ITEM")) {
+                    items.add(currentState.items[i])
+                }
+            }
+
             for (i in skip until transactions.size) {
                 //Add date
                 val date = LocalDateTime.ofEpochSecond(transactions[i].timeStamp.toLong(), 0, ZonedDateTime.now().offset)
@@ -217,8 +223,7 @@ class WalletViewModel @Inject constructor(
                     )
                 )
             }
-            if ((!hasMoreTxns) &&
-                ((currentState.items.isEmpty()) || (currentState.items.last() != FooterItem()))){
+            if (!hasMoreTxns) {
                 items.add(FooterItem())
             }
             sendState {
@@ -298,7 +303,12 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onPeriodChanged(startDate: Long?, endDate: Long?) {
-        sendState { copy(startDate = startDate, endDate = endDate) }
+        sendState { copy(
+            startDate = startDate,
+            endDate = endDate,
+            items = listOf())//Clear transactions when period changes
+        }
+        transactions.clear()
         startPolling()
     }
 
@@ -330,9 +340,9 @@ class WalletViewModel @Inject constructor(
     fun onLoadMore(page: Int, totalItemsCount: Int) {
         viewModelScope.launch {
             runCatching {
-                /*sendState {
+                sendState {
                     copy(items = currentState.items + LoadingItem())
-                }*/
+                }
                 //Load more transactions, skip the ones that are already loaded
                 loadTransactions(transactions.size)
             }.onFailure {

@@ -86,7 +86,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         // If we do need to reload some more data, we execute onLoadMore to fetch the data.
         // threshold should reflect how many total columns there are too
         // do not call onLoadMore if the totalItemCount is less than the visibleThreshold
-        if (!loading && (totalItemCount > 2) && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
+        if (!loading && (totalItemCount > 1) && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
             currentPage++;
             onLoadMore(currentPage, totalItemCount, view);
             loading = true;

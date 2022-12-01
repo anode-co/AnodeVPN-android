@@ -321,6 +321,11 @@ object AnodeUtil {
                         pldLines = pldLines.drop(pldLines.size - 100)
                     }
                     AnodeClient.PostMessage().execute("lnd", pldLines.toString(), "false")
+                    //check if chainbackup file error has caused crash
+                    if (pldLines.toString().contains("unable to extract on disk encrypted SCB")) {
+                        //delete chainbackup file
+                        deleteWalletChainBackupFile()
+                    }
                     //Delete log file
                     pldLogFile.delete()
                 }
