@@ -42,7 +42,7 @@ sealed class WalletEvent : UiEvent {
         val endDate: Long?,
     ) : WalletEvent()
 
-    object ScrollToTop: WalletEvent()
+    //object ScrollToTop: WalletEvent()
 
     data class OpenTransactionDetails(val extra: TransactionDetailsExtra) : WalletEvent()
 }

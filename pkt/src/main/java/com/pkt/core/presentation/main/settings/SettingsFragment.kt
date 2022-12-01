@@ -63,6 +63,10 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             viewModel.onWalletChanged(bundle.getString(ChooseWalletBottomSheet.WALLET_KEY))
         }
 
+        setFragmentResultListener(DeleteWalletBottomSheet.REQUEST_KEY) { _, _ ->
+            viewModel.onWalletDeleted()
+        }
+
         with(viewBinding) {
             walletButton.setOnClickListener {
                 viewModel.onWalletClick()

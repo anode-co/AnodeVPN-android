@@ -42,8 +42,10 @@ class WalletViewModel @Inject constructor(
     var balance: Long = 0
     private var PKTtoUSD = 0f
     private var firstTime = true
-    private var transactions: List<Transaction> = emptyList()
+    private var transactions: MutableList<Transaction> = mutableListOf()
+    private var lastDateInTxnsList: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
 
+    private val txnsPerPage = 6
     private var pollingJob: Job? = null
 
     init {
@@ -146,27 +148,55 @@ class WalletViewModel @Inject constructor(
         return Result.success(true)
     }
 
-    private suspend fun loadTransactions(){
+    private suspend fun loadTransactions(skip: Int = 0){
         val startTime = currentState.startDate?.div(1000) ?: 0L
-        val endTime = currentState.endDate?.div(1000) ?: 0L
+        var endTime = currentState.endDate?.div(1000) ?: 0L
+
         //Get transactions
         runCatching {
-            walletRepository.getWalletTransactions(coinbase = 1, reversed = false, skip = 0, limit = 20, startTime, endTime).getOrThrow()
+            //Get one more txns to see if there are more
+            if (endTime == 0L) {
+                endTime = System.currentTimeMillis() / 1000
+            }
+            walletRepository.getWalletTransactions(coinbase = 1, reversed = true, skip, txnsPerPage+1, startTime, endTime).getOrThrow()
         }.onSuccess { t ->
-            if (transactions.size == t.transactions.size) return@onSuccess
-            transactions = t.transactions
+            //We have already transactions and this is a call from polling
+            //Check if the last transaction is new
+            if (transactions.isNotEmpty()  && (skip == 0) && (transactions.first().txHash == t.transactions.reversed().first().txHash)) return@onSuccess
+            //Do we have more transactions to load?
+            val hasMoreTxns = t.transactions.size > txnsPerPage-1
+            val tempList = mutableListOf<Transaction>()
+            //reverse the list, drop last if > txnsPerPage
+            if (hasMoreTxns) {
+                tempList.addAll(t.transactions.reversed().dropLast(1))
+            } else {
+                tempList.addAll(t.transactions.reversed())
+            }
+
+            //Check if t.transaction already exists in transactions and remove it
+            //this may occur when wallet is syncing
+            if (transactions.isNotEmpty()) {
+                for (i in 0 until tempList.size) {
+                    for (j in 0 until transactions.size) {
+                        if (tempList[i].txHash == transactions[j].txHash) {
+                            tempList.removeAt(i)
+                        }
+                    }
+                }
+            }
+            transactions.addAll(tempList)
             val items: MutableList<DisplayableItem> = mutableListOf()
-            var prevDate: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
-            for (i in transactions.indices) {
+            items.addAll(currentState.items)
+            for (i in skip until transactions.size) {
                 //Add date
                 val date = LocalDateTime.ofEpochSecond(transactions[i].timeStamp.toLong(), 0, ZonedDateTime.now().offset)
-                if ((prevDate.dayOfMonth != date.dayOfMonth) ||
-                    (prevDate.month != date.month) ||
-                    (prevDate.year != date.year)
+                if ((lastDateInTxnsList.dayOfMonth != date.dayOfMonth) ||
+                    (lastDateInTxnsList.month != date.month) ||
+                    (lastDateInTxnsList.year != date.year)
                 ) {
                     items.add(DateItem(date))
                 }
-                prevDate = date
+                lastDateInTxnsList = date
 
                 var amount = transactions[i].amount.toLong()
                 var type = TransactionType.RECEIVE
@@ -187,17 +217,14 @@ class WalletViewModel @Inject constructor(
                     )
                 )
             }
-            items.add(FooterItem())
+            if ((!hasMoreTxns) &&
+                ((currentState.items.isEmpty()) || (currentState.items.last() != FooterItem()))){
+                items.add(FooterItem())
+            }
             sendState {
                 copy(
                     items = items,
                 )
-            }
-            delay(200)
-            //After loading transactions for the 1st time scroll the list to top
-            if (firstTime) {
-                sendEvent(WalletEvent.ScrollToTop)
-                firstTime = false
             }
         }.onFailure {
             Timber.e(it)
@@ -216,7 +243,7 @@ class WalletViewModel @Inject constructor(
             balancePkt = "",
             balanceUsd = "",
             walletAddress = "",
-            items = listOf(FooterItem())
+            items = listOf(),
         )
     }
 
@@ -301,6 +328,19 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onLoadMore(page: Int, totalItemsCount: Int) {
-        // TODO("Not yet implemented")
+        viewModelScope.launch {
+            runCatching {
+                /*sendState {
+                    copy(items = currentState.items + LoadingItem())
+                }*/
+                //Load more transactions, skip the ones that are already loaded
+                loadTransactions(transactions.size)
+            }.onFailure {
+                Timber.e(it)
+                sendState {
+                    copy(items = currentState.items + ErrorItem())
+                }
+            }
+        }
     }
 }

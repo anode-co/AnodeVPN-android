@@ -218,7 +218,6 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             balanceUsdLabel.text = state.balanceUsd.formatUsd()
 
             addressValue.text = state.walletAddress
-
             adapter.items = state.items
 
             selectPeriodButton.text = if (state.startDate != null && state.endDate != null) {
@@ -250,7 +249,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 datePicker.show(childFragmentManager, "date_picker")
             }
             is WalletEvent.OpenSendTransaction -> mainViewModel.openSendTransaction(viewModel.walletAddress)
-            is WalletEvent.ScrollToTop -> viewBinding.recyclerView.scrollToPosition(0)
+            //is WalletEvent.ScrollToTop -> viewBinding.recyclerView.scrollToPosition(0)
             is WalletEvent.OpenTransactionDetails -> mainViewModel.openTransactionDetails(event.extra)
             else -> super.handleEvent(event)
         }

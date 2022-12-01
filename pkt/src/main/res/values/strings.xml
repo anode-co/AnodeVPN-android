@@ -78,6 +78,7 @@
     <string name="received_pkt">Received PKT</string>
     <string name="sent_pkt">Sent PKT</string>
     <string name="these_are_all_your_transactions">These are all your transactions</string>
+    <string name="scroll_for_more_transactions">Scroll down to load more transactions</string>
     <string name="transactions_empty">There aren\'t any transactions on this address yet</string>
 
     <!--fragment_settings-->

@@ -79,6 +79,12 @@ class SettingsViewModel @Inject constructor(
 
     fun onDeleteClick() {
         sendEvent(SettingsEvent.OpenDeleteWallet)
+        sendState {
+            copy(
+                wallets = walletRepository.getAllWalletNames(),
+                walletName = walletRepository.getActiveWallet()
+            )
+        }
     }
 
     fun onNewWalletClick() {
@@ -124,6 +130,7 @@ class SettingsViewModel @Inject constructor(
             ?.let { wallet ->
                 invokeAction {
                     runCatching {
+                        //setting new active wallet, will restart pld
                         walletRepository.setActiveWallet(wallet)
                     }.onSuccess {
                         sendEvent(SettingsEvent.OpenEnterWallet)
@@ -132,5 +139,21 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
             }
+    }
+
+    fun onWalletDeleted() {
+        //check for remaining wallets
+        if (walletRepository.getAllWalletNames().isEmpty()) {
+            //if no wallets, go to create wallet screen
+            sendEvent(SettingsEvent.OpenNewWallet)
+        } else {
+            sendEvent(SettingsEvent.OpenEnterWallet)
+        }
+        sendState {
+            copy(
+                wallets = walletRepository.getAllWalletNames(),
+                walletName = walletRepository.getActiveWallet()
+            )
+        }
     }
 }

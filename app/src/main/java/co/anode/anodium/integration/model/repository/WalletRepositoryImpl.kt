@@ -31,6 +31,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("activeWallet", "wallet")?.let {
             activeWallet = it
         }
+        //Check if wallet file exists, otherwise choose other available wallet
+        if (!AnodeUtil.getWalletFiles().contains(activeWallet)) {
+            activeWallet = AnodeUtil.getWalletFiles().firstOrNull() ?: AnodeUtil.DEFAULT_WALLET_NAME
+        }
         return activeWallet
     }
 
@@ -38,6 +42,8 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         //delete existing chain back up file when changing active wallet
         if (walletName != activeWallet) {
             AnodeUtil.deleteWalletChainBackupFile()
+            //and stop pld
+            stopPld()
         }
         activeWallet = walletName
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("activeWallet", walletName)?.apply()
@@ -202,18 +208,6 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val address = walletAPI.createAddress()
         return Result.success(address)
     }
-
-/*
-    override suspend fun getWalletBalances(): Result<WalletAddressBalances> {
-        runCatching {
-            walletAPI.getWalletBalances(true).getOrThrow()
-        }.onSuccess {
-            Timber.d("getWalletBalances: success")
-        }.onFailure {
-            Timber.e(it, "getWalletBalances: failure")
-        }
-    }
-*/
 
      override suspend fun getWalletTransactions(coinbase: Int, reversed: Boolean, skip: Int, limit: Int, start: Long, end: Long): Result<WalletTransactions> = withContext(Dispatchers.IO) {
         runCatching {
