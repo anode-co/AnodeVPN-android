@@ -41,12 +41,12 @@ class WalletViewModel @Inject constructor(
     var walletAddress = ""
     var balance: Long = 0
     private var PKTtoUSD = 0f
-    private var firstTime = true
     private var transactions: MutableList<Transaction> = mutableListOf()
     private var lastDateInTxnsList: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
 
     private val txnsPerPage = 6
     private var pollingJob: Job? = null
+    private var isLoadingMore = false
 
     init {
         invokeLoadingAction {
@@ -156,9 +156,6 @@ class WalletViewModel @Inject constructor(
             //Get one more txns to see if there are more
             walletRepository.getWalletTransactions(coinbase = 1, reversed = true, skip, txnsPerPage+1, startTime, endTime).getOrThrow()
         }.onSuccess { t ->
-            //We have already transactions and this is a call from polling
-            //Check if the last transaction is new
-            if (transactions.isNotEmpty()  && (skip == 0) && (transactions.first().txHash == t.transactions.reversed().first().txHash)) return@onSuccess
             //Do we have more transactions to load?
             val hasMoreTxns = t.transactions.size > txnsPerPage-1
             val tempList = mutableListOf<Transaction>()
@@ -169,31 +166,34 @@ class WalletViewModel @Inject constructor(
                 tempList.addAll(t.transactions.reversed())
             }
 
-            //Check if t.transaction already exists in transactions and remove it
-            //this may occur when wallet is syncing
+            //Remove duplicates
             if (transactions.isNotEmpty()) {
                 for (j in 0 until transactions.size) {
                     for (i in tempList.indices) {
-                        //TODO: double check that when we remove item the indice are reduced
-                        //so the index won't go out of bounds
                         if (tempList[i].txHash == transactions[j].txHash) {
                             tempList.removeAt(i)
+                            break
                         }
                     }
                 }
             }
+            transactions.sortByDescending { it.timeStamp }
             transactions.addAll(tempList)
             val items: MutableList<DisplayableItem> = mutableListOf()
-            //Do not add loading, error and footer items from current list
+            /*//Do not add loading, error and footer items from current list
             for (i in 0 until currentState.items.size) {
                 if ((currentState.items[i].getItemId() != "LOADING_ITEM") &&
                     (currentState.items[i].getItemId() != "ERROR_ITEM") &&
                     (currentState.items[i].getItemId() != "FOOTER_ITEM")) {
                     items.add(currentState.items[i])
                 }
+            }*/
+            sendState {
+                copy(
+                    items = listOf(),
+                )
             }
-
-            for (i in skip until transactions.size) {
+            for (i in 0 until transactions.size) {
                 //Add date
                 val date = LocalDateTime.ofEpochSecond(transactions[i].timeStamp.toLong(), 0, ZonedDateTime.now().offset)
                 if ((lastDateInTxnsList.dayOfMonth != date.dayOfMonth) ||
@@ -338,6 +338,8 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onLoadMore(page: Int, totalItemsCount: Int) {
+        if (isLoadingMore) return
+        isLoadingMore = true
         viewModelScope.launch {
             runCatching {
                 sendState {
@@ -345,7 +347,10 @@ class WalletViewModel @Inject constructor(
                 }
                 //Load more transactions, skip the ones that are already loaded
                 loadTransactions(transactions.size)
+            }.onSuccess {
+                isLoadingMore = false
             }.onFailure {
+                isLoadingMore = false
                 Timber.e(it)
                 sendState {
                     copy(items = currentState.items + ErrorItem())
