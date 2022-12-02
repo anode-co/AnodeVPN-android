@@ -11,8 +11,11 @@ android {
     compileSdk 32
 
     defaultConfig {
+        buildConfigField "Boolean", "ALLOW_MULTIPLE_WALLETS", "false"
+        buildConfigField "Boolean", "ALLOW_VPN_LIST", "false"
         minSdk 26
         targetSdk 32
+
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

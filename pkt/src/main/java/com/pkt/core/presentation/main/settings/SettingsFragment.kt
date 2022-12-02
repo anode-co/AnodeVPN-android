@@ -12,8 +12,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.pkt.core.BuildConfig
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentSettingsBinding
+import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.extensions.applyGradient
 import com.pkt.core.extensions.doOnCheckChanged
 import com.pkt.core.extensions.getColorByAttribute
@@ -51,6 +53,14 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!BuildConfig.ALLOW_MULTIPLE_WALLETS) {
+            //Hide UI elements for multiple wallets
+            with(viewBinding) {
+                moreButton.visibility = View.GONE
+                addButton.visibility = View.GONE
+                walletButton.visibility = View.GONE
+            }
+        }
         setFragmentResultListener(ConsentBottomSheet.REQUEST_KEY) { _, bundle ->
             viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
         }

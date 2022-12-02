@@ -8,6 +8,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.pkt.core.BuildConfig
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentVpnBinding
 import com.pkt.core.extensions.*
@@ -31,7 +32,10 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
         super.onViewCreated(view, savedInstanceState)
 
         startVPNService()
-
+        //If VPNExits is not allowed make button not clickable
+        if (!BuildConfig.ALLOW_VPN_LIST) {
+            viewBinding.vpnLayout.isEnabled = false
+        }
         setFragmentResultListener(ConsentBottomSheet.REQUEST_KEY) { _, bundle ->
             viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
         }
