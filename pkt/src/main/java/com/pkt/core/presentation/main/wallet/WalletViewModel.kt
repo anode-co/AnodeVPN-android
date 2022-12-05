@@ -44,7 +44,7 @@ class WalletViewModel @Inject constructor(
     private var transactions: MutableList<Transaction> = mutableListOf()
     private var lastDateInTxnsList: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
 
-    private val txnsPerPage = 6
+    private val txnsPerPage = 20
     private var pollingJob: Job? = null
     private var isLoadingMore = false
 
