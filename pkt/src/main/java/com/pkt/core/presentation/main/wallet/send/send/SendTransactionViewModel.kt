@@ -2,6 +2,7 @@ package com.pkt.core.presentation.main.wallet.send.send
 
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
+import com.pkt.core.extensions.toPKT
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
@@ -27,6 +28,15 @@ class SendTransactionViewModel @Inject constructor(
             field = value
             invalidateSendButtonState()
         }
+    private var balance = 0L
+
+    init {
+        invokeLoadingAction {
+            runCatching {
+                balance = walletRepository.getWalletBalance(fromaddress).getOrNull()!!
+            }
+        }
+    }
 
     override fun createInitialState() = SendTransactionState()
 
@@ -46,8 +56,11 @@ class SendTransactionViewModel @Inject constructor(
         } else if (amount.toDoubleOrNull() == 0.0) {
             sendEvent(SendTransactionEvent.AmountError(R.string.error_send_transaction_amount))
             return
+        }else if (amount.toDoubleOrNull()!! > balance.toPKT().toDouble()) {
+            sendEvent(SendTransactionEvent.AmountError(R.string.error_insufficient_balance))
+            return
         }
-        //TODO: check if wallet has enough balance
+
         runCatching {
             toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
         }.onSuccess {
