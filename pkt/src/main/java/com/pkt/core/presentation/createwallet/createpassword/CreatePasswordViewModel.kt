@@ -3,6 +3,7 @@ package com.pkt.core.presentation.createwallet.createpassword
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.createwallet.CreateWalletMode
+import com.pkt.domain.repository.GeneralRepository
 import com.ybs.passwordstrengthmeter.PasswordStrength
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -10,6 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePasswordViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val generalRepository: GeneralRepository
 ) : StateViewModel<CreatePasswordState>() {
 
     private val mode: CreateWalletMode = savedStateHandle["mode"] ?: CreateWalletMode.CREATE
@@ -50,5 +52,9 @@ class CreatePasswordViewModel @Inject constructor(
                 sendNavigation(CreatePasswordNavigation.ToConfirmPassword(mode, enterPassword, name))
             }
         }
+    }
+
+    fun onDataConsentClick() {
+        generalRepository.setDataConsent(checkbox2Checked)
     }
 }

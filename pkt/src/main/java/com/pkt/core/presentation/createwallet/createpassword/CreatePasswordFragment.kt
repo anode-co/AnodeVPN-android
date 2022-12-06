@@ -44,6 +44,7 @@ class CreatePasswordFragment : StateFragment<CreatePasswordState>(R.layout.fragm
 
             checkbox2.doOnCheckChanged {
                 viewModel.checkbox2Checked = it
+                viewModel.onDataConsentClick()
             }
 
             val privacyPolicyText = SpannableString(getString(R.string.create_password_checkbox_2)).apply {
