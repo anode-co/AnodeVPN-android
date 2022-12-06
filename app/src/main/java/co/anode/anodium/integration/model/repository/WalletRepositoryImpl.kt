@@ -90,7 +90,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }.onSuccess {
             Timber.d("getWalletBalance: success")
         }.onFailure {
-            Timber.d("getWalletBalance: success")
+            Timber.d("getWalletBalance: failed")
         }
 
     override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO){
@@ -153,6 +153,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             val response = walletAPI.createWallet(password, password, seed.split(" "), "$wallet.db")
 
             return if (response.message.isNotEmpty()) {
+                Timber.e("createWallet: failed: ${response.message}")
                 Result.failure(Exception("Failed to create wallet: ${response.message}"))
             } else {
                 val encryptedPassword = AnodeUtil.encrypt(password, pin)
@@ -161,6 +162,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                     AnodeUtil.storeWalletPin(pin, wallet)
                 }
                 setActiveWallet(wallet)
+                Timber.d("createWallet: success")
                 Result.success(true)
             }
         }
@@ -176,6 +178,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
             val response = walletAPI.recoverWallet(password, seedPassword, seed.split(" "), "$wallet.db")
             return if (response.message.isNotEmpty()) {
+                Timber.e("Failed to recover wallet: ${response.message}")
                 Result.failure(Exception("Failed to recover wallet: ${response.message}"))
             } else {
                 val encryptedPassword = AnodeUtil.encrypt(password, pin)
@@ -184,17 +187,20 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                     AnodeUtil.storeWalletPin(pin, wallet)
                 }
                 setActiveWallet(wallet)
+                Timber.d("Wallet recovered successfully")
                 Result.success(true)
             }
         }
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
+        Timber.d("unlockWallet")
         val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
         val response = walletAPI.unlockWalletAPI(request)
         return Result.success(response)
     }
 
     override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
+        Timber.d("unlockWalletWithPIN")
         val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
         val passphrase = AnodeUtil.decrypt(encryptedPassword, pin)
         if (passphrase != null) {
@@ -205,6 +211,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun createAddress(): Result<WalletAddressCreateResponse> {
+        Timber.d("createAddress: creating new address")
         val address = walletAPI.createAddress()
         return Result.success(address)
     }
@@ -222,13 +229,16 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     override suspend fun getSeed(): Result<String> {
         val response = walletAPI.getWalletSeed()
         return if (response.seed.isNotEmpty()) {
+            Timber.d("getSeed: success")
             Result.success(response.seed.joinToString(" "))
         } else {
+            Timber.d("getSeed: failed")
             Result.failure(Exception("Failed to get seed: ${response.message}"))
         }
     }
 
     override suspend fun renameWallet(name: String): Result<String?> {
+        Timber.d("renameWallet: $name")
         val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
         walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
         activeWallet = name
@@ -238,13 +248,16 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     override suspend fun checkWalletName(name: String): Result<String?> {
         val existingWallets = getAllWalletNames()
         if (existingWallets.contains(name)) {
+            Timber.d("Wallet name already exists")
             return Result.failure(Exception("Wallet name already exists"))
         } else {
+            Timber.d("Wallet name is available")
             return Result.success(name)
         }
     }
 
     override fun deleteWallet(name: String) {
+        Timber.d("Deleting wallet $name")
         //Delete saved pin/password
         AnodeUtil.removeEncryptedWalletPreferences(name)
         //Delete Wallet
@@ -255,14 +268,17 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val request = ChangePassphraseRequest(oldPassword, newPassword)
         val response = walletAPI.changePassphrase(request)
         return if (response.message.isNotEmpty()) {
+            Timber.e("Failed to change password: ${response.message}")
             Result.failure(Exception("Failed to change password: ${response.message}"))
         } else {
+            Timber.d("changePassword: Success")
             AnodeUtil.removeEncryptedWalletPreferences(activeWallet)
             Result.success(true)
         }
     }
 
     override suspend fun changePin(password: String, pin: String) {
+        Timber.d("changePin")
         //Encrypt password using PIN and save it in encrypted shared preferences
         val encryptedPassword = AnodeUtil.encrypt(password, pin)
         AnodeUtil.storeWalletPassword(encryptedPassword,activeWallet)
@@ -277,6 +293,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return try {
             // Getting QR-Code as Bitmap
             val bitmap = qrgEncoder.bitmap
+            Timber.d("generateQr: success")
             Result.success(bitmap)
         } catch (e: Exception) {
             Timber.e(e.toString(), "generateQr: failure")
@@ -288,8 +305,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val request = CheckPassphraseRequest(passphrase)
         val response = walletAPI.checkPassphrase(request)
         return if (response.validPassphrase) {
+            Timber.d("checkWalletPassphrase: success")
             Result.success(true)
         } else {
+            Timber.e("checkWalletPassphrase: failure")
             Result.failure(Exception("Invalid wallet passphrase"))
         }
     }
@@ -298,10 +317,13 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val request = SendTransactionRequest(toAddress, amount, fromAddresses)
         val response = walletAPI.sendTransaction(request)
         if (!response.message.isNullOrEmpty()) {
+            Timber.e("sendCoins: Failed: ${response.message}")
             return Result.failure(Exception("Failed to send coins: ${response.message}"))
         } else if (response.txHash.isNotEmpty()){
+            Timber.d("sendCoins: success")
             return Result.success(response)
         } else {
+            Timber.e("sendCoins: Failed, empty response")
             return Result.failure(Exception("Failed to send coins"))
         }
     }
@@ -310,8 +332,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val request = ChangePassphraseRequest(oldPassphrase, newPassphrase)
         val response = walletAPI.changePassphrase(request)
         if (!response.message.isNullOrEmpty()) {
+            Timber.e("changePassphrase: Failed: ${response.message}")
             return Result.failure(Exception("Failed to change passphrase: ${response.message}"))
         } else {
+            Timber.d("changePassphrase: Success")
             return Result.success(true)
         }
     }
@@ -319,8 +343,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     override suspend fun getSecret(): Result<String> {
         val response = walletAPI.getSecret()
         return if (response.secret.isNotEmpty()) {
+            Timber.d("getSecret: Success")
             Result.success(response.secret)
         } else {
+            Timber.e("getSecret: Failure: ${response.message}")
             Result.failure(Exception("Failed to get secret: ${response.message}"))
         }
     }
@@ -332,29 +358,36 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         if (trimmedAddress.isNullOrEmpty()){
             trimmedAddress = shortRegex.find(address,0)?.value
             if (trimmedAddress.isNullOrEmpty()) {
+                Timber.e("isPKTAddressValid: Invalid address")
                 return Result.failure(Exception("Invalid PKT address"))
             } else {
+                Timber.d("isPKTAddressValid: Valid short address")
                 return Result.success(trimmedAddress)
             }
         } else {
+            Timber.d("isPKTAddressValid Success")
             return Result.success(trimmedAddress)
         }
     }
 
     override suspend fun resyncWallet() {
+        Timber.d("resyncWallet: called")
         walletAPI.resyncWallet()
     }
 
     override suspend fun getPktToUsd(): Result<Float> {
         val response = walletAPI.getPktToUsd()
         return if (response.isNaN()) {
+            Timber.d("getPktToUsd Failure")
             Result.failure(Exception("Failed to get PKT to USD conversion rate"))
         } else {
+            Timber.d("getPktToUsd Success")
             Result.success(response)
         }
     }
 
     override suspend fun stopPld() {
+        Timber.d("stopPld: stopping pld")
         AnodeUtil.stopPld()
         //Wait for pld to restart
         delay(2000)
