@@ -27,7 +27,6 @@ class VpnViewModel @Inject constructor(
     private var timerJob: Job? = null
 
     init {
-
         invokeLoadingAction {
             //Set default VPN
             var vpn = Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
@@ -100,10 +99,6 @@ class VpnViewModel @Inject constructor(
         ipV4 = "",
         ipV6 = ""
     )
-
-    fun onConsentResult(success: Boolean) {
-        // TODO("Not yet implemented")
-    }
 
     fun onConnectionClick() {
         when (currentState.vpnState) {

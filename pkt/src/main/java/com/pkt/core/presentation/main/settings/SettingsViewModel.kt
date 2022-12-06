@@ -95,9 +95,8 @@ class SettingsViewModel @Inject constructor(
         sendEvent(SettingsEvent.OpenWalletRecovery)
     }
 
-    fun onConsentResult(success: Boolean) {
-        //TODO: save in prefs
-        //context?.getSharedPreferences("co.anode.anodium", AppCompatActivity.MODE_PRIVATE)?.edit()?.putBoolean("DataConsent", success)?.apply()
+    fun onConsentResult(value: Boolean) {
+        generalRepository.setDataConsent(value)
     }
 
     fun onNewWallet(name: String?, mode: CreateWalletMode) {

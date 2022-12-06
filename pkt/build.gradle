@@ -90,4 +90,7 @@ dependencies {
     implementation('com.github.yesterselga:password-strength-checker-android:v1.0') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
+
+    //add gson
+    implementation 'com.google.code.gson:gson:2.8.8'
 }

@@ -61,6 +61,7 @@ class VpnAPIService() {
 
     suspend fun getVpnServersList():List<VpnServer> {
         try {
+            Timber.d("getVpnServersList")
             return vpnApi.getVpnServersList()
         } catch (e: Exception) {
             Timber.d("getVpnServersList: failed with message ${e.message}")
@@ -87,11 +88,14 @@ class VpnAPIService() {
         try {
             val response = api.authorizeVPN("cjdns $signature", request)
             if (response.status == "success") {
+                Timber.d("authorizeVPN Success")
                 return Result.success(true)
             } else {
+                Timber.e("authorizeVPN Failed: ${response.message}")
                 return Result.failure(Exception(response.message))
             }
         } catch (e: Exception) {
+            Timber.e("authorizeVPN Failed: ${e.message}")
             return Result.failure(e)
         }
     }
@@ -99,8 +103,10 @@ class VpnAPIService() {
     suspend fun getCjdnsPeeringLines(): Result<List<CjdnsPeeringLine>> {
         try {
             val response = vpnApi.getCjdnsPeeringLines()
+            Timber.d("getCjdnsPeeringLines Success")
             return Result.success(response)
         }catch (e: Exception) {
+            Timber.e("getCjdnsPeeringLines Failed: ${e.message}")
             return Result.failure(e)
         }
     }
@@ -108,8 +114,10 @@ class VpnAPIService() {
     fun postError(error: String): Result<String> {
         val response = vpnApi.postError(error)
         if (response.status == "success") {
+            Timber.d("postError Success")
             return Result.success("success")
         } else {
+            Timber.e("postError Failed: ${response.message}")
             return Result.failure(Exception(response.message))
         }
     }
@@ -118,7 +126,6 @@ class VpnAPIService() {
         val interceptor = HttpLoggingInterceptor()
         interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS)
         val httpClient = OkHttpClient.Builder()
-
             .addInterceptor(interceptor)
             .build()
 
@@ -132,8 +139,10 @@ class VpnAPIService() {
 
         val response = api.generateUsername("cjdns $signature")
         if (response.username.isNotEmpty()) {
+            Timber.d("generateUsername Success")
             return Result.success(response.username)
         } else {
+            Timber.e("generateUsername Failed: ${response.message}")
             return Result.failure(Exception(response.message))
         }
     }

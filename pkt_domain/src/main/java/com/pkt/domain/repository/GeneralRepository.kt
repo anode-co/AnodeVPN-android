@@ -9,4 +9,10 @@ interface GeneralRepository {
     fun removePIN(walletName: String)
     fun restartApplication()
     fun hasInternetConnection(): Boolean
+    fun getDataConsent(): Boolean
+    fun setDataConsent(value: Boolean)
+    fun saveGetInfoHtml(html: String)
+    fun savePldLogHtml(html: String)
+    fun getWalletInfoUrl(): String
+    fun getPldLogUrl(): String
 }
