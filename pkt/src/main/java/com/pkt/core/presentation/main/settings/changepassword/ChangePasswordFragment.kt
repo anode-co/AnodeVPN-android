@@ -13,6 +13,7 @@ import com.pkt.core.extensions.setError
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ChangePasswordFragment : StateFragment<ChangePasswordState>(R.layout.fragment_change_password) {
@@ -23,7 +24,7 @@ class ChangePasswordFragment : StateFragment<ChangePasswordState>(R.layout.fragm
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("ChangePasswordFragment onViewCreated")
         with(viewBinding) {
             enterCurrentPasswordInputLayout.doOnTextChanged {
                 viewModel.enterCurrentPassword = it

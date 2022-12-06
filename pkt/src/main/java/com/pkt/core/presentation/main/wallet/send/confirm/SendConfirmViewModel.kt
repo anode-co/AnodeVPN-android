@@ -9,6 +9,7 @@ import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +33,7 @@ class SendConfirmViewModel @Inject constructor(
                 }
                 isPinAvailable to amountToPass
             }.onSuccess { (isPinAvailable, amount) ->
+
                 sendState {
                     copy(
                         address = this@SendConfirmViewModel.toaddress,
@@ -42,6 +44,8 @@ class SendConfirmViewModel @Inject constructor(
                     )
                 }
                 sendEvent(SendConfirmEvent.OpenKeyboard)
+            }.onFailure {
+                Timber.e(it, "SendConfirmViewModel init| Error")
             }
         }
     }
@@ -60,6 +64,7 @@ class SendConfirmViewModel @Inject constructor(
                     null
                 }
             }.onSuccess { sendResponse ->
+                Timber.d("SendConfirmViewModel onPinDone| Success")
                 sendResponse?.let {
                     sendNavigation(AppNavigation.NavigateBack)
                     sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
@@ -69,6 +74,7 @@ class SendConfirmViewModel @Inject constructor(
                     sendEvent(SendConfirmEvent.OpenKeyboard)
                 }
             }.onFailure {
+                Timber.e(it, "SendConfirmViewModel onPinDone| Error")
                 sendError(it)
             }
         }
@@ -86,6 +92,7 @@ class SendConfirmViewModel @Inject constructor(
                     null
                 }
             }.onSuccess { sendResponse ->
+                Timber.d("SendConfirmViewModel onPasswordDone| Success")
                 sendResponse?.let {
                     sendNavigation(AppNavigation.NavigateBack)
                     sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
@@ -95,6 +102,7 @@ class SendConfirmViewModel @Inject constructor(
                     sendEvent(SendConfirmEvent.OpenKeyboard)
                 }
             }.onFailure {
+                Timber.e(it, "SendConfirmViewModel onPasswordDone| Error")
                 sendError(it)
             }
         }

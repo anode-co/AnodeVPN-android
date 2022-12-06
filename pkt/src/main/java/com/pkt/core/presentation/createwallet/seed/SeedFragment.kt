@@ -9,6 +9,7 @@ import com.pkt.core.databinding.FragmentSeedBinding
 import com.pkt.core.extensions.doOnClick
 import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SeedFragment : StateFragment<SeedState>(R.layout.fragment_seed) {
@@ -19,7 +20,7 @@ class SeedFragment : StateFragment<SeedState>(R.layout.fragment_seed) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("SeedFragment onViewCreated")
         with(viewBinding) {
             copyButton.setOnClickListener {
                 viewModel.onCopyClick()

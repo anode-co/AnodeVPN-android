@@ -31,6 +31,5 @@ class QrViewModel @Inject constructor(
     }
 
     fun onSaveClick() {
-        // TODO("Not yet implemented")
     }
 }

@@ -1010,6 +1010,8 @@ object AnodeUtil {
             activeNetwork.isConnected
         }
     }
+
+
 }
 
 class AnodeUtilException(message: String): Exception(message)

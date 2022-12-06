@@ -9,6 +9,7 @@ import com.pkt.core.R
 import com.pkt.core.databinding.FragmentStartBinding
 import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class StartFragment : StateFragment<StartState>(R.layout.fragment_start) {
@@ -19,7 +20,7 @@ class StartFragment : StateFragment<StartState>(R.layout.fragment_start) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("StartFragment onViewCreated")
         with(viewBinding) {
             createButton.setOnClickListener {
                 viewModel.onCreateClick()

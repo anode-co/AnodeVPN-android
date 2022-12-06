@@ -110,6 +110,8 @@
     <string name="debug_logs">Debug Logs</string>
 
     <!--fragment_cjdns_info-->
+    <string name="logs_submitted">Logs submitted</string>
+    <string name="logs_submitted_consent">Please consent for data posting first</string>
     <string name="app_version">App Version:</string>
     <string name="ipv4">IPv4:</string>
     <string name="internet_ipv6">Internet IPv6:</string>

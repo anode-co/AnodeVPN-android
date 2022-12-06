@@ -19,10 +19,10 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
-import co.anode.anodium.AnodeVpnService
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.*
 import java.net.*
 import java.security.KeyPair
@@ -320,9 +320,10 @@ object AnodeClient {
         } else {
             jsonObject.accumulate("message", "")
         }
+        AnodeUtil.logFile()
         val cjdroutelogfile = File(AnodeUtil.filesDirectory +"/"+ AnodeUtil.CJDROUTE_LOG)
-        val lastlogfile = File(AnodeUtil.filesDirectory +"/last_anodium.log")
-        val currlogfile = File(AnodeUtil.filesDirectory +"/anodium.log")
+        val lastlogfile = File(AnodeUtil.filesDirectory +"/anodium.log")
+        val currlogfile = File(AnodeUtil.filesDirectory +"/anodeTimber.txt")
         var debugmsg = "";
         ignoreErr {
             debugmsg += "Error stack: " + stackString(err) + "\n";

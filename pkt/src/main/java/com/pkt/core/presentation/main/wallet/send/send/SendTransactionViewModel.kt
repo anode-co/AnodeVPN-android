@@ -7,6 +7,7 @@ import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,11 +53,14 @@ class SendTransactionViewModel @Inject constructor(
     fun onSendClick() {
         var amountToSend = amount.toDoubleOrNull() ?: 0.0
         if (currentState.maxValueSelected) {
+            Timber.d("SendTransactionViewModel onSendClick| Max value selected")
             amountToSend = 0.0
         } else if (amount.toDoubleOrNull() == 0.0) {
+            Timber.d("SendTransactionViewModel onSendClick| Amount is 0")
             sendEvent(SendTransactionEvent.AmountError(R.string.error_send_transaction_amount))
             return
         }else if (amount.toDoubleOrNull()!! > balance.toPKT().toDouble()) {
+            Timber.d("SendTransactionViewModel onSendClick| Amount $amount > balance ${balance.toPKT()}")
             sendEvent(SendTransactionEvent.AmountError(R.string.error_insufficient_balance))
             return
         }
@@ -64,7 +68,7 @@ class SendTransactionViewModel @Inject constructor(
         runCatching {
             toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
         }.onSuccess {
-
+            Timber.i("SendTransactionViewModel onSendClick| PKT address is valid")
             sendNavigation(
                 AppNavigation.OpenSendConfirm(
                     fromaddress = fromaddress,
@@ -74,6 +78,7 @@ class SendTransactionViewModel @Inject constructor(
                 )
             )
         }.onFailure {
+            Timber.i("SendTransactionViewModel onSendClick| PKT address is invalid")
             sendEvent(SendTransactionEvent.AddressError(it.message))
         }
     }

@@ -47,16 +47,11 @@ class MainActivity : AppCompatActivity() {
     )
 
     private fun initTimber() {
-        if (BuildConfig.DEBUG) {
-            plant(Timber.DebugTree())
-        } else {
-            plant(object : Timber.Tree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    // TODO
-                }
-            })
-        }
+        //Log to file
+        plant(FileLoggingTree())
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,11 +94,13 @@ class MainActivity : AppCompatActivity() {
         //Initialize Util before Client
         AnodeUtil.init(applicationContext)
         AnodeClient.init(applicationContext, this)
+        checkPermissions()
+        initTimber()
         AnodeUtil.initializeApp()
         AnodeUtil.launchCJDNS()
         AnodeUtil.launchPld()
         AnodeUtil.serviceThreads()
-        checkPermissions()
+
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {

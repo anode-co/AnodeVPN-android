@@ -37,7 +37,7 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
             viewBinding.vpnLayout.isEnabled = false
         }
         setFragmentResultListener(ConsentBottomSheet.REQUEST_KEY) { _, bundle ->
-            viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
+            //viewModel.onConsentResult(bundle.getBoolean(ConsentBottomSheet.RESULT_KEY))
         }
 
         with(viewBinding) {

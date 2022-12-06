@@ -15,6 +15,7 @@ import com.pkt.core.extensions.doOnTextChanged
 import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
+import timber.log.Timber
 
 @AndroidEntryPoint
 class RecoverWalletFragment : StateFragment<RecoverWalletState>(R.layout.fragment_recover_wallet) {
@@ -25,7 +26,7 @@ class RecoverWalletFragment : StateFragment<RecoverWalletState>(R.layout.fragmen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("RecoverWalletFragment onViewCreated")
         with(viewBinding) {
             seedInput.doAfterTextChanged {
                 viewModel.seed = it.toString()

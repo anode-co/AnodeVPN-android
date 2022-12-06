@@ -9,6 +9,7 @@ import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -107,14 +108,17 @@ class EnterWalletViewModel @Inject constructor(
             walletRepository.unlockWalletWithPIN(currentState.pin)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
+                        Timber.d("Unlocked wallet using PIN. Going to main screen...")
                         sendNavigation(AppNavigation.OpenMain)
                     } else {
                         pinAttempts++
                         sendState { copy(pin = "") }
+                        Timber.d("PIN was incorrect")
                         sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
                     }
                 }
                 .onFailure {
+                    Timber.d("unlockWalletWithPIN failed")
                     pinAttempts++
                     sendState { copy(pin = "") }
                     sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
@@ -127,14 +131,17 @@ class EnterWalletViewModel @Inject constructor(
             walletRepository.unlockWallet(password)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
+                        Timber.i("Unlocked wallet using password. Going to main screen...")
                         sendNavigation(AppNavigation.OpenMain)
                     } else {
+                        Timber.i("Password was incorrect")
                         sendEvent(EnterWalletEvent.ClearPassword)
                         sendEvent(EnterWalletEvent.ShowKeyboard)
                         sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
                     }
                 }
                 .onFailure {
+                    Timber.e(it, "unlockWallet failed")
                     sendError(it)
                 }
         }
@@ -155,6 +162,7 @@ class EnterWalletViewModel @Inject constructor(
             ?.let { wallet ->
                 invokeAction {
                     runCatching {
+                        Timber.i("Switching to wallet $wallet")
                         walletRepository.setActiveWallet(wallet)
                         walletRepository.isPinAvailable().getOrElse { false }
                     }.onSuccess { isPinAvailable ->

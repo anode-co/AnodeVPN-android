@@ -13,6 +13,7 @@ import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.core.presentation.createwallet.CreateWalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class CongratulationsFragment : StateFragment<CommonState.Empty>(R.layout.fragment_congratulations) {
@@ -33,7 +34,7 @@ class CongratulationsFragment : StateFragment<CommonState.Empty>(R.layout.fragme
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("CongratulationsFragment onViewCreated")
         with(viewBinding) {
             nextButton.setOnClickListener {
                 viewModel.onNextClick()

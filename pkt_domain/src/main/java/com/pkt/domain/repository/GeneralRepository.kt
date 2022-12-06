@@ -1,7 +1,7 @@
 package com.pkt.domain.repository
 
 interface GeneralRepository {
-    fun submitErrorLogs()
+    fun submitErrorLogs(): Boolean
     fun enablePreReleaseUpgrade(value: Boolean)
     fun getPreReleaseUpgrade(): Boolean
     fun enableNewUI(value:Boolean)

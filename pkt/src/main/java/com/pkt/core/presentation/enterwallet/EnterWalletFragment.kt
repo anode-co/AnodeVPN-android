@@ -16,6 +16,7 @@ import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.choosewallet.ChooseWalletBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
+import timber.log.Timber
 
 @AndroidEntryPoint
 class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_enter_wallet) {
@@ -26,7 +27,7 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("EnterWalletFragment onViewCreated")
         setFragmentResultListener(ChooseWalletBottomSheet.REQUEST_KEY) { _, bundle ->
             viewModel.onWalletChanged(bundle.getString(ChooseWalletBottomSheet.WALLET_KEY))
         }

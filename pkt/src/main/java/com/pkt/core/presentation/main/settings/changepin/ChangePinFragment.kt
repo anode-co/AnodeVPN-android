@@ -14,6 +14,7 @@ import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.state.CommonState
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ChangePinFragment : StateFragment<CommonState.Empty>(R.layout.fragment_change_pin) {
@@ -24,7 +25,7 @@ class ChangePinFragment : StateFragment<CommonState.Empty>(R.layout.fragment_cha
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("ChangePinFragment onViewCreated")
         with(viewBinding) {
             enterPasswordInputLayout.doOnTextChanged {
                 viewModel.enterPassword = it

@@ -150,7 +150,7 @@ class WalletViewModel @Inject constructor(
     private suspend fun loadTransactions(skip: Int = 0){
         val startTime = currentState.startDate?.div(1000) ?: 0L
         val endTime = currentState.endDate?.div(1000) ?: 0L
-        //TODO: increase txnsLimit = 20 after testing
+
         //Get transactions
         runCatching {
             //Get one more txns to see if there are more
@@ -258,14 +258,16 @@ class WalletViewModel @Inject constructor(
 
     fun onSendClick() {
         if (balance > 1) {
+            Timber.i("WalletViewModel onSendClick")
             sendEvent(WalletEvent.OpenSendTransaction)
         } else {
+            Timber.i("WalletViewModel onSendClick. Balance is too low $balance")
             sendEvent(CommonEvent.Warning(R.string.error_insufficient_balance))
         }
     }
 
     fun onRetryClick() {
-        // TODO
+
     }
 
     fun onResume() {
@@ -303,6 +305,7 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onPeriodChanged(startDate: Long?, endDate: Long?) {
+        Timber.d("WalletViewModel onPeriodChanged: $startDate $endDate")
         sendState { copy(
             startDate = startDate,
             endDate = endDate,

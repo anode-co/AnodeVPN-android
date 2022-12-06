@@ -27,7 +27,7 @@ class SendTransactionBottomSheet : StateBottomSheet<SendTransactionState>(R.layo
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("SendTransactionBottomSheet onViewCreated")
         with(viewBinding) {
             addressInputLayout.doOnTextChanged {
                 viewModel.toaddress = it

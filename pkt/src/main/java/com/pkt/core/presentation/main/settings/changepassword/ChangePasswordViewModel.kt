@@ -8,6 +8,7 @@ import com.pkt.domain.repository.WalletRepository
 import com.ybs.passwordstrengthmeter.PasswordStrength
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,14 +36,17 @@ class ChangePasswordViewModel @Inject constructor(
 
             else -> {
                 invokeAction {
+                    Timber.d("ChangePasswordViewModel onChangeClick. Trying to change password")
                     walletRepository.changePassword(enterCurrentPassword, enterPassword)
                         .onSuccess {
+                            Timber.d("Password changed successfully")
                             sendEvent(CommonEvent.Info(R.string.success))
                             delay(1000)
                             //Ask user to reset PIN
                             sendNavigation(AppNavigation.OpenChangePinFromChangePassword)
                         }
                         .onFailure {
+                            Timber.e(it, "Password change failed")
                             sendError(it)
                         }
                 }

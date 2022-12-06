@@ -10,9 +10,10 @@ import javax.inject.Singleton
 
 @Singleton
 class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
-    override fun submitErrorLogs() {
+    override fun submitErrorLogs(): Boolean {
         AnodeClient.storeError(null,"other", Throwable("User submitted logs"))
         AnodeClient.PostLogs()
+        return getDataConsent()
     }
 
     override fun enablePreReleaseUpgrade(value: Boolean) {

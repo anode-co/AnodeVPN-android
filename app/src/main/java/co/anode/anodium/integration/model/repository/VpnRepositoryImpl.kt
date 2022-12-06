@@ -42,6 +42,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         get() = _currentVpnFlow
 
     override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
+        Timber.d("VpnRepositoryImpl fetchVpnList")
         val list = vpnAPI.getVpnServersList()
 
         val vpnList: MutableList<Vpn> = mutableListOf()
@@ -60,7 +61,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     fun cjdnsConnectVPN(node: String) {
-        Timber.d("cjdnsConnectVPN")
+        Timber.d("VpnRepositoryImpl cjdnsConnectVPN")
         if (!AnodeUtil.internetConnection()) {
             Timber.d("cjdnsConnectVPN: No internet connection")
             _vpnState.tryEmit(VpnState.NO_INTERNET)
@@ -103,9 +104,11 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun connect(node: String): Result<Boolean>  {
+        Timber.d("VpnRepositoryImpl connect")
         _vpnState.tryEmit(VpnState.CONNECTING)
         AnodeUtil.addCjdnsPeers()
         if(authorizeVPN().isSuccess){
+            Timber.d("authorizeVPN success")
             val connectedNode = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","")
             if ((!node.isNullOrEmpty()) && ((!AnodeClient.isVpnActive()) || (node != connectedNode))) {
                 cjdnsConnectVPN(node)
@@ -113,6 +116,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
             AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("ServerPublicKey", node)?.apply()
             return Result.success(true)
         } else {
+            Timber.d("authorizeVPN failed")
             _vpnState.tryEmit(VpnState.DISCONNECTED)
             CjdnsSocket.IpTunnel_removeAllConnections()
             CjdnsSocket.Core_stopTun()
@@ -137,8 +141,10 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         val sig = getCjdnsSignature(jsonObject.toString().toByteArray())
         val pubKey = AnodeUtil.getLastServerPubkeyFromSharedPrefs()
         if (pubKey.isNotEmpty()) {
+            Timber.d("authorizeVPN: pubKey: $pubKey")
             vpnAPI.authorizeVPN(sig, pubKey, date)
         } else {
+            Timber.d("authorizeVPN: pubKey with defaultNode $defaultNode")
             vpnAPI.authorizeVPN(sig, defaultNode, date)
         }
 
@@ -146,6 +152,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun getCjdnsPeers(): Result<List<CjdnsPeeringLine>> {
+        Timber.d("VpnRepositoryImpl getCjdnsPeers")
         return vpnAPI.getCjdnsPeeringLines()
     }
 
@@ -154,6 +161,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun generateUsername(): Result<String> {
+        Timber.d("VpnRepositoryImpl generateUsername")
         val signature = getCjdnsSignature("".toByteArray())
         runCatching {
             vpnAPI.generateUsername(signature).getOrThrow()
@@ -168,14 +176,17 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override fun setUsername(username: String) {
+        Timber.d("VpnRepositoryImpl setUsername")
         AnodeUtil.setUsernameToSharedPrefs(username)
     }
 
     override fun getUsername(): String {
+        Timber.d("VpnRepositoryImpl getUsername")
         return AnodeUtil.getUsernameFromSharedPrefs()
     }
 
     override suspend fun disconnect(): Result<Boolean> {
+        Timber.d("VpnRepositoryImpl disconnect")
         _startConnectionTime = 0L
         _vpnState.tryEmit(VpnState.DISCONNECTED)
         AnodeClient.AuthorizeVPN().cancel(true)

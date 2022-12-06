@@ -11,6 +11,7 @@ import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_send_confirm) {
@@ -21,7 +22,7 @@ class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_se
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("SendConfirmFragment onViewCreated")
         with(viewBinding) {
             pinInputLayout.doOnActionDone { inputLayout ->
                 inputLayout.editText?.hideKeyboard()

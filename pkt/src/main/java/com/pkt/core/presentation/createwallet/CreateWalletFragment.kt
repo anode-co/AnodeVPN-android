@@ -12,6 +12,7 @@ import com.pkt.core.databinding.FragmentCreateWalletBinding
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.state.CommonState
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class CreateWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragment_create_wallet) {
@@ -22,7 +23,7 @@ class CreateWalletFragment : StateFragment<CommonState.Empty>(R.layout.fragment_
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("CreateWalletFragment onViewCreated")
         with(viewBinding) {
             toolbar.setNavigationOnClickListener { requireActivity().onBackPressed() }
 

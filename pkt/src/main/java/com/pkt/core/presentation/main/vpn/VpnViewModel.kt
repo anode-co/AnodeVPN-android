@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,6 +51,7 @@ class VpnViewModel @Inject constructor(
                 }
                 Triple(ipv4,ipv6, vpn)
             }.onSuccess { (ipv4, ipv6, vpn) ->
+                Timber.i("VpnViewModel init| Success")
                 sendState {
                     copy(
                         vpn = vpn,
@@ -57,6 +59,8 @@ class VpnViewModel @Inject constructor(
                         ipV6 = ipv6,
                     )
                 }
+            }.onFailure {
+                Timber.e(it, "VpnViewModel init| Failed")
             }
         }
 

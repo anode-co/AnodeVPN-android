@@ -23,6 +23,7 @@ import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.wallet.qr.QrBottomSheet
 import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
@@ -56,7 +57,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             val maxAmount = bundle.getBoolean(SendTransactionBottomSheet.KEY_MAX_AMOUNT)
             mainViewModel.openSendConfirm(fromaddress, toaddress, amount, maxAmount)
         }
-
+        Timber.i("WalletFragment onViewCreated")
         with(viewBinding) {
             sendButton.setOnClickListener {
                 viewModel.onSendClick()

@@ -9,6 +9,7 @@ import com.pkt.core.databinding.BottomSheetSendSuccessBinding
 import com.pkt.core.extensions.doOnClick
 import com.pkt.core.presentation.common.state.StateBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SendSuccessBottomSheet : StateBottomSheet<SendSuccessState>(R.layout.bottom_sheet_send_success) {
@@ -19,7 +20,7 @@ class SendSuccessBottomSheet : StateBottomSheet<SendSuccessState>(R.layout.botto
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("SendSuccessBottomSheet onViewCreated")
         with(viewBinding) {
             copyButton.doOnClick {
                 viewModel.onCopyClick()

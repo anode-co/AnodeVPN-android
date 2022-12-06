@@ -31,6 +31,7 @@ import com.pkt.core.presentation.main.settings.newwallet.NewWalletBottomSheet
 import com.pkt.core.presentation.main.settings.renamewallet.RenameWalletBottomSheet
 import com.pkt.core.presentation.main.settings.showseed.ShowSeedBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings) {
@@ -52,7 +53,7 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("SettingsFragment onViewCreated")
         if (!BuildConfig.ALLOW_MULTIPLE_WALLETS) {
             //Hide UI elements for multiple wallets
             with(viewBinding) {

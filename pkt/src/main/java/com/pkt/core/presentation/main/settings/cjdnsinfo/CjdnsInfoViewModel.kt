@@ -8,6 +8,7 @@ import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.adapter.delegate.KeyValueHorizontalItem
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +52,11 @@ class CjdnsInfoViewModel @Inject constructor(
     }
 
     fun onSubmitLogsClick() {
-        repository.submitErrorLogs()
+        if (repository.submitErrorLogs()) {
+            sendEvent(CommonEvent.Info(R.string.logs_submitted))
+        } else {
+            sendEvent(CommonEvent.Warning(R.string.logs_submitted_consent))
+        }
     }
 
     private fun CjdnsInfo.toItems(): List<DisplayableItem> {
