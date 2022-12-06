@@ -7,6 +7,7 @@ import com.pkt.core.R
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.navigation.AppNavigation
+import com.pkt.domain.repository.GeneralRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,10 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class WalletInfoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val generalRepository: GeneralRepository,
     private val walletRepository: WalletRepository,
 ) : StateViewModel<WalletInfoState>() {
 
-    //private val address: String = savedStateHandle["address"] ?: throw IllegalArgumentException("address is required")
     private var address: String = ""
 
     private val _timerUiState: MutableStateFlow<Int?> by lazy { MutableStateFlow(null) }
@@ -45,7 +46,7 @@ class WalletInfoViewModel @Inject constructor(
                 val walletInfo = walletRepository.getWalletInfo().getOrThrow()
                 if (walletInfo.wallet == null) {
                     //Wallet is locked
-                    //TODO: unlock wallet
+                    sendNavigation(AppNavigation.OpenEnterWallet)
                 }
                 Pair(balance, walletInfo)
             }.onSuccess { (balance, walletInfo) ->
@@ -100,10 +101,10 @@ class WalletInfoViewModel @Inject constructor(
     override fun createInitialState() = WalletInfoState()
 
     fun onDetailsClick() {
-        sendNavigation(AppNavigation.OpenCjdnsInfo)
+        sendNavigation(AppNavigation.OpenWebView("getinfo"))
     }
 
     fun onDebugLogsClick() {
-        // TODO
+        sendNavigation(AppNavigation.OpenWebView("pldlog"))
     }
 }
