@@ -14,6 +14,7 @@ import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.json.JSONObject
+import timber.log.Timber
 import java.security.MessageDigest
 import java.util.*
 import javax.inject.Inject
@@ -59,7 +60,9 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     fun cjdnsConnectVPN(node: String) {
+        Timber.d("cjdnsConnectVPN")
         if (!AnodeUtil.internetConnection()) {
+            Timber.d("cjdnsConnectVPN: No internet connection")
             _vpnState.tryEmit(VpnState.NO_INTERNET)
             return
         }
@@ -132,8 +135,8 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         val jsonObject = JSONObject()
         jsonObject.accumulate("date", date)
         val sig = getCjdnsSignature(jsonObject.toString().toByteArray())
-        val pubKey = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("LastServerPubkey", defaultNode)
-        if (pubKey != null) {
+        val pubKey = AnodeUtil.getLastServerPubkeyFromSharedPrefs()
+        if (pubKey.isNotEmpty()) {
             vpnAPI.authorizeVPN(sig, pubKey, date)
         } else {
             vpnAPI.authorizeVPN(sig, defaultNode, date)
