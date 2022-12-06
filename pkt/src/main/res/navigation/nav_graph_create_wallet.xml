@@ -141,16 +141,15 @@
         android:name="com.pkt.core.presentation.createwallet.recoverwallet.RecoverWalletFragment"
         android:label="RecoverWallet"
         tools:layout="@layout/fragment_recover_wallet">
-
         <argument
             android:name="password"
             app:argType="string" />
-
         <argument
             android:name="pin"
             app:argType="string" />
         <argument
             android:name="name"
+            app:nullable="true"
             app:argType="string" />
     </fragment>
 
