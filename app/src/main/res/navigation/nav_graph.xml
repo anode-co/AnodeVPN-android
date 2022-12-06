@@ -34,10 +34,6 @@
         app:destination="@id/createWallet" />
 
     <action
-        android:id="@+id/toRecoverWallet"
-        app:destination="@id/recoverWallet" />
-
-    <action
         android:id="@+id/toSendTransaction"
         app:destination="@id/sendTransaction" />
 
@@ -91,17 +87,6 @@
         <argument
             android:name="mode"
             app:argType="com.pkt.core.presentation.createwallet.CreateWalletMode" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/recoverWallet"
-        android:name="com.pkt.core.presentation.createwallet.recoverwallet.RecoverWalletFragment"
-        android:label="RecoverWallet"
-        tools:layout="@layout/fragment_recover_wallet">
-        <argument
-            android:name="name"
-            app:nullable="true"
-            app:argType="string" />
     </fragment>
 
     <fragment
@@ -165,19 +150,15 @@
         android:name="com.pkt.core.presentation.main.wallet.send.confirm.SendConfirmFragment"
         android:label="SendConfirm"
         tools:layout="@layout/fragment_send_confirm">
-
         <argument
             android:name="fromaddress"
             app:argType="string" />
-
         <argument
             android:name="toaddress"
             app:argType="string" />
-
         <argument
             android:name="amount"
             app:argType="float" />
-
         <argument
             android:name="maxAmount"
             app:argType="boolean" />
@@ -201,11 +182,9 @@
         android:name="com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsBottomSheet"
         android:label="TransactionDetails"
         tools:layout="@layout/bottom_sheet_transaction_details">
-
         <argument
             android:name="extra"
             app:argType="com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra" />
-
     </dialog>
 
     <fragment
