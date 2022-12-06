@@ -4,14 +4,18 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
 }
 
 android {
     compileSdk 32
 
     defaultConfig {
+        buildConfigField "Boolean", "ALLOW_MULTIPLE_WALLETS", "false"
+        buildConfigField "Boolean", "ALLOW_VPN_LIST", "false"
         minSdk 26
         targetSdk 32
+
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -44,7 +48,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.5.1"
     implementation "com.google.android.material:material:1.6.1"
 
-    implementation "androidx.fragment:fragment-ktx:1.5.2"
+    implementation "androidx.fragment:fragment-ktx:1.5.4"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.browser:browser:1.4.0"
@@ -86,4 +90,7 @@ dependencies {
     implementation('com.github.yesterselga:password-strength-checker-android:v1.0') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
+
+    //add gson
+    implementation 'com.google.code.gson:gson:2.8.8'
 }

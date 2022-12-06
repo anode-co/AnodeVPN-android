@@ -169,7 +169,7 @@
     <style name="Widget.App.CheckBox" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
         <item name="useMaterialThemeColors">false</item>
         <item name="android:button">@drawable/ic_checkbox</item>
-        <item name="android:textAppearance">?textAppearance14Regular</item>
+        <item name="android:textAppearance">?textAppearance12Regular</item>
         <item name="android:lineSpacingExtra">4sp</item>
         <item name="paddingStart">12dp</item>
         <item name="android:paddingStart">12dp</item>
@@ -185,6 +185,93 @@
         <item name="android:button">@drawable/rbtn_button</item>
         <item name="buttonTint">@null</item>
         <item name="android:buttonTint">@null</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderLayout" parent="Widget.MaterialComponents.MaterialCalendar.HeaderLayout">
+        <item name="android:background">@color/bg3</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderTitle" parent="Widget.MaterialComponents.MaterialCalendar.HeaderTitle">
+        <item name="android:textAppearance">@style/TextAppearance.App.Regular</item>
+        <item name="android:textColor">@color/text1_50</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderSelection" parent="Widget.MaterialComponents.MaterialCalendar.HeaderSelection">
+        <item name="android:textAppearance">@style/TextAppearance.App.SemiBold</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textSize">34sp</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderSelection.Fullscreen">
+        <item name="android:textAppearance">@style/TextAppearance.App.SemiBold</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderCancelButton" parent="Widget.MaterialComponents.MaterialCalendar.HeaderCancelButton">
+        <item name="iconTint">?colorPrimary</item>
+        <item name="android:textAppearance">?textAppearance16Regular</item>
+        <item name="android:textColor">@color/text_btn_text_color_selector</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderConfirmButton" parent="Widget.MaterialComponents.MaterialCalendar.HeaderConfirmButton">
+        <item name="android:textAppearance">?textAppearance16Regular</item>
+        <item name="android:textColor">@color/text_btn_text_color_selector</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.HeaderToggleButton" parent="Widget.MaterialComponents.MaterialCalendar.HeaderToggleButton">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.DayOfWeekLabel" parent="Widget.MaterialComponents.MaterialCalendar.DayOfWeekLabel">
+        <item name="android:textAppearance">?textAppearance12Regular</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/text1_50</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.DayTextView" parent="Widget.MaterialComponents.MaterialCalendar.DayTextView">
+        <item name="android:textAppearance">?textAppearance14Regular</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.MonthTextView" parent="Widget.MaterialComponents.MaterialCalendar.MonthTextView">
+        <item name="android:textAppearance">?textAppearance20SemiBold</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar" parent="Widget.MaterialComponents.MaterialCalendar">
+        <item name="dayStyle">@style/Widget.App.MaterialCalendar.Day</item>
+        <item name="dayInvalidStyle">@style/Widget.App.MaterialCalendar.Day.Invalid</item>
+        <item name="daySelectedStyle">@style/Widget.App.MaterialCalendar.Day.Selected</item>
+        <item name="dayTodayStyle">@style/Widget.App.MaterialCalendar.Day.Today</item>
+        <item name="rangeFillColor">@color/calendar_selected_range</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MaterialComponents.MaterialCalendar.Window.Fullscreen</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.Day" parent="Widget.MaterialComponents.MaterialCalendar.Day">
+        <item name="itemShapeAppearance">?textAppearance14Regular</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.Day.Invalid">
+        <item name="itemTextColor">@color/material_on_surface_disabled</item>
+        <item name="itemStrokeWidth">0dp</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.Day.Selected">
+        <item name="itemFillColor">?attr/colorPrimary</item>
+        <item name="itemTextColor">?attr/colorOnPrimary</item>
+        <item name="itemStrokeWidth">0dp</item>
+    </style>
+
+    <style name="Widget.App.MaterialCalendar.Day.Today">
+        <item name="itemStrokeColor">@android:color/transparent</item>
+        <item name="itemTextColor">?colorPrimary</item>
     </style>
 
 </resources>

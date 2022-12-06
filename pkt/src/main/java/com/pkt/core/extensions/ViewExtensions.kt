@@ -4,6 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.view.updatePaddingRelative
@@ -36,6 +37,18 @@ inline fun TextInputLayout.doOnActionDone(
     }
 }
 
+inline fun TextInputLayout.doOnActionSearch(
+    crossinline action: (view: TextInputLayout) -> Unit,
+) = editText?.setOnEditorActionListener { _, actionId, _ ->
+    when (actionId) {
+        EditorInfo.IME_ACTION_SEARCH -> {
+            action.invoke(this)
+            true
+        }
+        else -> false
+    }
+}
+
 inline fun TextInputLayout.doOnTextChanged(
     crossinline action: (text: String) -> Unit,
 ) = editText?.doAfterTextChanged {
@@ -46,6 +59,13 @@ inline fun TextInputLayout.doOnTextChanged(
 
 fun TextInputLayout.clearFocusOnActionDone() {
     doOnActionDone {
+        clearFocus()
+        UIUtil.hideKeyboard(context, this)
+    }
+}
+
+fun TextInputLayout.clearFocusOnActionSearch() {
+    doOnActionSearch {
         clearFocus()
         UIUtil.hideKeyboard(context, this)
     }
@@ -82,4 +102,27 @@ inline fun CheckBox.doOnCheckChanged(
         UIUtil.hideKeyboard(it.context, it)
     }*/
     action.invoke(isChecked)
+}
+
+fun EditText.showKeyboard() {
+    requestFocus()
+    setSelection(text.length)
+    UIUtil.showKeyboard(context, this)
+}
+
+fun TextInputLayout.showKeyboardDelayed() {
+    editText?.showKeyboardDelayed()
+}
+
+fun EditText.showKeyboardDelayed() {
+    postDelayed({
+        requestFocus()
+        setSelection(text.length)
+        UIUtil.showKeyboard(context, this)
+    }, 100)
+}
+
+fun EditText.hideKeyboard() {
+    clearFocus()
+    UIUtil.hideKeyboard(context, this)
 }

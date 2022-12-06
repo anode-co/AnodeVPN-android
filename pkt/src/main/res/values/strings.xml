@@ -4,7 +4,7 @@
     <string name="retry">Retry</string>
 
     <!--error-->
-    <string name="error_common">Something goes wrong…</string>
+    <string name="error_common">Something went wrong…</string>
 
     <!--fragment_start-->
     <string name="please_create_wallet">Please create your PKT Wallet. It is needed to launch the application.</string>
@@ -78,6 +78,7 @@
     <string name="received_pkt">Received PKT</string>
     <string name="sent_pkt">Sent PKT</string>
     <string name="these_are_all_your_transactions">These are all your transactions</string>
+    <string name="scroll_for_more_transactions">Scroll down to load more transactions</string>
     <string name="transactions_empty">There aren\'t any transactions on this address yet</string>
 
     <!--fragment_settings-->
@@ -109,6 +110,8 @@
     <string name="debug_logs">Debug Logs</string>
 
     <!--fragment_cjdns_info-->
+    <string name="logs_submitted">Logs submitted</string>
+    <string name="logs_submitted_consent">Please consent for data posting first</string>
     <string name="app_version">App Version:</string>
     <string name="ipv4">IPv4:</string>
     <string name="internet_ipv6">Internet IPv6:</string>
@@ -145,5 +148,85 @@
     <string name="enter_your_password">Enter Your Password</string>
     <string name="log_in">Log In</string>
     <string name="choose_wallet">Choose wallet</string>
+    <string name="send_transaction">Send Transaction</string>
+    <string name="max">Max</string>
+    <string name="amount">Amount</string>
+    <string name="send_pkt">Send PKT</string>
+    <string name="send_as_much_pkt_as_possible">Send as much PKT as possible</string>
+    <string name="please_confirm_pin">Please confirm PIN</string>
+    <string name="please_confirm_password">Please confirm Password</string>
+    <string name="recipient_address">Recipient Address</string>
+    <string name="pin">PIN</string>
+    <string name="pkt_successfully_sent">PKT successfully sent</string>
+    <string name="transaction_id">Transaction ID</string>
+    <string name="view_transaction">View Transaction</string>
+    <string name="done">Done</string>
+    <string name="transaction_id_copied">Transaction Id copied</string>
+    <string name="consent">Consent</string>
+    <string name="consent_description">Anode collects data to optimize the app and improve the experience. We would like to ask your consent.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="vpn_exits">VPN Exits</string>
+    <string name="search">Search</string>
+    <string name="not_connected">Not connected</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="connecting">Connecting</string>
+    <string name="getting_routes">Getting routes</string>
+    <string name="got_routes">Got routes</string>
+    <string name="connected">Connected</string>
+    <string name="public_ipv4">Public IPv4: %s</string>
+    <string name="public_ipv6">IPv6: %s</string>
+    <string name="your_seed_phrase_2">Your seed phrase</string>
+    <string name="you_seed_phrase_description">You need your 15 word seed phrase and your password to recover this wallet</string>
+    <string name="copy">Copy</string>
+    <string name="seed_phrase_copied_2">Seed phrase copied</string>
+    <string name="rename_wallet">Rename Wallet</string>
+    <string name="save">Save</string>
+    <string name="enter_current_wallet_password">Enter current wallet password</string>
+    <string name="type_your_new_password">Type your new password</string>
+    <string name="success">Success!</string>
+    <string name="type_your_new_pin">Type your new PIN</string>
+    <string name="delete_wallet">Delete Wallet</string>
+    <string name="delete_1">This will delete "%s”</string>
+    <string name="delete_2">You will lose access to all funds on every address on this wallet</string>
+    <string name="delete_3">You can recover the wallet using the seed phrase and password</string>
+    <string name="enter_the_name_wallet_to_confirm">Enter the name wallet to confirm</string>
+    <string name="i_know_this_is_not_reversible">I know this is not reversible</string>
+    <string name="enter_with_password">Enter with password</string>
+    <string name="enter_with_pin">Enter with PIN</string>
+    <string name="qr_scan_code">QR Scan Code</string>
+    <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
+    <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
+    <!--Wallet Status messages-->
+    <string name="wallet_status_locked">Wallet is locked</string>
+    <string name="wallet_status_notexisting">Wallet can not be found</string>
+    <string name="wallet_status_disconnected">Connecting to peers</string>
+    <string name="wallet_status_syncing_headers">Downloading:</string>
+    <string name="wallet_status_syncing_transactions">Scanning:</string>
+    <string name="wallet_status_syncing_waiting">Waiting for data...</string>
+    <string name="wallet_status_no_internet">No internet connection</string>
+    <string name="wallet_status_synced">Block: </string>
+    <string name="wallet_status_unlocking">Unlocking wallet…</string>
+    <string name="wallet_status_unlock">Wallet unlocked</string>
+    <string name="minutes_ago">minutes old</string>
+    <string name="minute_ago">minute old</string>
+    <string name="seconds_ago">seconds old</string>
+    <string name="creating_wallet">Creating wallet please wait…</string>
+    <string name="generating_wallet_seed">Generating seed phrase…</string>
+    <string name="recovering_wallet">Recovering wallet please wait…</string>
 
+    <string name="error_send_transaction_amount">Invalid amount</string>
+    <string name="error_pkt_address">Invalid PKT address</string>
+    <string name="switch_to_new_ui_screens">Switch to new UI (requires restart)</string>
+    <string name="error_seed_length">Invalid seed length. Must be 15 words</string>
+    <string name="address_copied">Address copied</string>
+    <string name="confirm_with_password">Confirm with Password</string>
+    <string name="confirm_with_pin">Confirm with PIN</string>
+
+    <string name="error_insufficient_balance">Insufficient balance</string>
+    <string name="sender_address">Sender address</string>
+    <string name="see_more">See more</string>
+    <string name="see_less">See less</string>
+    <string name="in_block_number">In block number</string>
+    <string name="transaction_date_time">%1$s at %2$s</string>
 </resources>

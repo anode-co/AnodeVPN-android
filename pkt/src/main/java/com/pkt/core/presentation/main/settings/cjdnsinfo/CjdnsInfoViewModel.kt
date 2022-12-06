@@ -1,13 +1,16 @@
 package com.pkt.core.presentation.main.settings.cjdnsinfo
 
+import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.domain.dto.CjdnsInfo
-import com.pkt.domain.repository.WalletRepository
 import com.pkt.core.R
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.adapter.delegate.KeyValueHorizontalItem
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
+import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.GeneralRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -15,23 +18,32 @@ import javax.inject.Inject
 class CjdnsInfoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     @VersionName private val versionName: String,
-    private val walletRepository: WalletRepository,
+    private val cjdnsRepository: CjdnsRepository,
+    private val repository: GeneralRepository,
 ) : StateViewModel<CjdnsInfoState>() {
 
-    private val address: String = savedStateHandle["address"] ?: throw IllegalArgumentException("address is required")
-
     init {
-        invokeLoadingAction()
+        invokeLoadingAction {
+            loadCjdnsInfo()
+        }
+    }
+
+    private suspend fun loadCjdnsInfo() : Result<*> {
+        runCatching {
+            cjdnsRepository.getCjdnsInfo().getOrThrow()
+        }.onSuccess { info ->
+            sendState {
+                copy(
+                    info = info,
+                    items = info.toItems())
+            }
+        }.onFailure {
+            sendError(it)
+        }
+        return Result.success(Unit)
     }
 
     override fun createInitialState() = CjdnsInfoState()
-
-    override fun createLoadingAction(): (suspend () -> Result<*>) = {
-        walletRepository.getCjdnsInfo(address)
-            .onSuccess { info ->
-                sendState { copy(info = info, items = info.toItems()) }
-            }
-    }
 
     fun onFindYourselfClick() {
         currentState.info?.nodeUrl?.let { url ->
@@ -40,7 +52,11 @@ class CjdnsInfoViewModel @Inject constructor(
     }
 
     fun onSubmitLogsClick() {
-        // TODO
+        if (repository.submitErrorLogs()) {
+            sendEvent(CommonEvent.Info(R.string.logs_submitted))
+        } else {
+            sendEvent(CommonEvent.Warning(R.string.logs_submitted_consent))
+        }
     }
 
     private fun CjdnsInfo.toItems(): List<DisplayableItem> {
@@ -77,10 +93,14 @@ class CjdnsInfoViewModel @Inject constructor(
                 listOf(
                     TitleItem(R.string.connection),
                     KeyValueHorizontalItem(R.string.server, connection.key),
-                    KeyValueHorizontalItem(R.string.ipv4,
-                        "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"),
-                    KeyValueHorizontalItem(R.string.ipv6,
-                        "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"),
+                    KeyValueHorizontalItem(
+                        R.string.ipv4,
+                        "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"
+                    ),
+                    KeyValueHorizontalItem(
+                        R.string.ipv6,
+                        "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"
+                    ),
                 )
             )
         }

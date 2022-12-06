@@ -19,10 +19,10 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import co.anode.anodium.*
-import co.anode.anodium.AnodeVpnService
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.*
 import java.net.*
 import java.security.KeyPair
@@ -259,11 +259,15 @@ object AnodeClient {
         File(ctx.filesDir,fname).appendText(err)
     }
 
-    fun storeError(ctx: Context, type: String, e: Throwable) {
+    fun storeError(ctx: Context?, type: String, e: Throwable) {
+        var c = ctx
+        if (ctx == null) {
+            c = mycontext
+        }
         val fname = "error-uploadme-" + Instant.now().toEpochMilli().toString() + ".json"
         val err = errorJsonObj(type, e).toString(1)
         Log.e(LOGTAG, "Logged error [${e.message}] to file $fname")
-        File(ctx.filesDir,fname).appendText(err)
+        File(c?.filesDir,fname).appendText(err)
     }
 
     fun storeRating(pubkey: String, rating: Float, comment: String) {
@@ -316,9 +320,10 @@ object AnodeClient {
         } else {
             jsonObject.accumulate("message", "")
         }
+        AnodeUtil.logFile()
         val cjdroutelogfile = File(AnodeUtil.filesDirectory +"/"+ AnodeUtil.CJDROUTE_LOG)
-        val lastlogfile = File(AnodeUtil.filesDirectory +"/last_anodium.log")
-        val currlogfile = File(AnodeUtil.filesDirectory +"/anodium.log")
+        val lastlogfile = File(AnodeUtil.filesDirectory +"/anodium.log")
+        val currlogfile = File(AnodeUtil.filesDirectory +"/anodeTimber.txt")
         var debugmsg = "";
         ignoreErr {
             debugmsg += "Error stack: " + stackString(err) + "\n";
@@ -586,8 +591,11 @@ object AnodeClient {
 
     class AuthorizeVPN() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String? {
-            val pubkey = params[0]
+            var pubkey = params[0]
             val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
+            if (pubkey.isNullOrEmpty()) {
+                pubkey = prefs.getString("LastServerPubkey", defaultNode)
+            }
             with (prefs.edit()) {
                 putString("LastServerPubkey", pubkey)
                 commit()
@@ -595,9 +603,11 @@ object AnodeClient {
             val jsonObject = JSONObject()
             jsonObject.accumulate("date", System.currentTimeMillis())
             val resp = APIHttpReq( "$API_AUTH_VPN$pubkey/authorize/",jsonObject.toString(), "POST", true , false)
-            statustv.post(Runnable {
-                statustv.text  = "VPN connecting..."
-            } )
+            if(AnodeClient::statustv.isInitialized) {
+                statustv.post(Runnable {
+                    statustv.text = "VPN connecting..."
+                })
+            }
             return resp
         }
 
@@ -613,9 +623,11 @@ object AnodeClient {
             //if 200 or 201 then connect to VPN
             if (result.isNullOrBlank() || result.contains("ERROR: ")) {
                 LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_DISCONNECTED)
-                statustv.post(Runnable {
-                    statustv.text  = mycontext.resources.getString(R.string.status_authorization_failed)
-                } )
+                if(AnodeClient::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
+                    })
+                }
                 //Sign user out
                 val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                 with (prefs.edit()) {
@@ -627,9 +639,11 @@ object AnodeClient {
                     val jsonObj = JSONObject(result)
                     if (jsonObj.has("status")) {
                         if (jsonObj.getString("status") == "success") {
-                            statustv.post(Runnable {
-                                statustv.text = mycontext.resources.getString(R.string.status_authorized)
-                            })
+                            if(AnodeClient::statustv.isInitialized) {
+                                statustv.post(Runnable {
+                                    statustv.text = mycontext.resources.getString(R.string.status_authorized)
+                                })
+                            }
                             //do not try to reconnect while re-authorization
                             val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             val node = prefs.getString("LastServerPubkey", defaultNode)
@@ -643,9 +657,11 @@ object AnodeClient {
                                 commit()
                             }
                         } else {
-                            statustv.post(Runnable {
-                                statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
-                            })
+                            if(AnodeClient::statustv.isInitialized) {
+                                statustv.post(Runnable {
+                                    statustv.text = "VPN Authorization failed: ${jsonObj.getString("message")}"
+                                })
+                            }
                             val prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
                             with(prefs.edit()) {
                                 putLong("LastAuthorized", 0)
@@ -660,9 +676,11 @@ object AnodeClient {
                     }
                 } catch (e: JSONException) {
                     LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_DISCONNECTED)
-                    statustv.post(Runnable {
-                        statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
-                    })
+                    if(AnodeClient::statustv.isInitialized) {
+                        statustv.post(Runnable {
+                            statustv.text = mycontext.resources.getString(R.string.status_authorization_failed)
+                        })
+                    }
                 }
             }
         }
@@ -680,18 +698,22 @@ object AnodeClient {
         //Check for ip address given by cjdns try for 20 times, 10secs
         Thread(Runnable {
             while ((node.isNotEmpty()) && (!iconnected && (tries < 10))) {
-                statustv.post(Runnable {
-                    statustv.text  = "Getting routes..."
-                } )
+                if(this::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = "Getting routes..."
+                    })
+                }
                 vpnConnected = false
                 iconnected = CjdnsSocket.getCjdnsRoutes()
                 tries++
                 Thread.sleep(2000)
             }
             if (iconnected || node.isEmpty()) {
-                statustv.post(Runnable {
-                    statustv.text  = "Got routes..."
-                } )
+                if(this::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = "Got routes..."
+                    })
+                }
                 //Restart Service
                 CjdnsSocket.Core_stopTun()
                 mycontext.startService(Intent(mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
@@ -718,10 +740,9 @@ object AnodeClient {
         var result:String
         var url: URL
 
-        statustv.post(Runnable {
-            statustv.text  = "Waiting for network..."
-        } )
-
+        if(this::statustv.isInitialized) {
+            statustv.post(Runnable { statustv.text = "Waiting for network..." })
+        }
         url = URL(address)
         //url = URL("https://vpn.anode.co/api/0.3/tests/500error/")
         //if connection failed and we are connected to cjdns try with ipv6 address
@@ -783,9 +804,11 @@ object AnodeClient {
                 result = "ERROR: "+conn.responseCode.toString() + " - " + conn.responseMessage
             }
         }
-        statustv.post(Runnable {
-            statustv.text  = ""
-        } )
+        if(this::statustv.isInitialized) {
+            statustv.post(Runnable {
+                statustv.text = ""
+            })
+        }
         return result
     }
 
@@ -811,9 +834,11 @@ object AnodeClient {
             val newip6address = CjdnsSocket.ipv6Address
             //Reset VPN with new address
             if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
-                statustv.post(Runnable {
-                    statustv.text  = mycontext.resources.getString(R.string.status_connecting)
-                } )
+                if(AnodeClient::statustv.isInitialized) {
+                    statustv.post(Runnable {
+                        statustv.text = mycontext.resources.getString(R.string.status_connecting)
+                    })
+                }
                 LocalBroadcastManager.getInstance(mycontext).sendBroadcast(VPN_CONNECTING)
                 //Restart Service
                 CjdnsSocket.Core_stopTun()

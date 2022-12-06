@@ -207,7 +207,6 @@ class RecoverySeed : AppCompatActivity() {
             } else {
                 Log.e(BuildConfig.APPLICATION_ID, "Error in generating wallet seed")
                 Toast.makeText(this, "Failed to generate wallet seed.", Toast.LENGTH_LONG).show()
-                //TODO: update UI, do we need to change layout?
             }
         }
     }

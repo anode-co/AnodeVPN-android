@@ -11,6 +11,7 @@ import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ConfirmSeedFragment : StateFragment<ConfirmSeedState>(R.layout.fragment_confirm_seed) {
@@ -21,7 +22,7 @@ class ConfirmSeedFragment : StateFragment<ConfirmSeedState>(R.layout.fragment_co
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("ConfirmSeedFragment onViewCreated")
         with(viewBinding) {
             wordInputLayout.apply {
                 clearFocusOnActionDone()

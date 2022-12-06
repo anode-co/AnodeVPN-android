@@ -1,7 +1,11 @@
 package co.anode.anodium.support
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -48,6 +52,8 @@ import javax.crypto.spec.SecretKeySpec
 object AnodeUtil {
     private val LOGTAG = BuildConfig.APPLICATION_ID
     var context: Context? = null
+    val ApplicationID = BuildConfig.APPLICATION_ID
+    val DEFAULT_WALLET_NAME = "wallet"
     var filesDirectory = ""
     val CJDROUTE_SOCK = "cjdroute.sock"
     val CJDROUTE_BINFILE = "cjdroute"
@@ -116,7 +122,84 @@ object AnodeUtil {
         //copyAssets()
     }
 
-    fun generateUsername(textview:TextView) {
+    fun setUsernameToSharedPrefs(username: String) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putString("username", username).apply()
+        }
+    }
+
+    fun getUsernameFromSharedPrefs(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getString("username", "")!!
+        }
+        return ""
+    }
+
+    fun setServerPublicKeyToSharedPrefs(username: String) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putString("ServerPublicKey", username).apply()
+        }
+    }
+
+    fun getServerPublicKeyFromSharedPrefs(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getString("ServerPublicKey", "")!!
+        }
+        return ""
+    }
+
+    fun setPreReleaseUpgrade(value: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("preRelease", value).apply()
+        }
+    }
+
+    fun getLastServerPubkeyFromSharedPrefs(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getString("LastServerPubkey", "")!!
+        }
+        return ""
+    }
+
+    fun setDataConsentToSharedPrefs(consent: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("DataConsent", consent).apply()
+        }
+    }
+
+    fun getDataConsentFromSharedPrefs(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getBoolean("DataConsent", false)
+        }
+        return false
+    }
+
+    fun getPreReleaseUpgrade(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        return prefs!!.getBoolean("preRelease", false)
+    }
+
+    fun setUseNewUi(value: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("useNewUI", value).apply()
+        }
+    }
+
+    fun getUseNewUi(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        return prefs!!.getBoolean("useNewUI", true)
+    }
+
+    fun generateUsername(textview:TextView?) {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         //If there is no username stored
         if (prefs?.getString("username", "").isNullOrEmpty()) {
@@ -133,7 +216,7 @@ object AnodeUtil {
         }
     }
 
-    private fun generateUsernameHandler(result: String, textview:TextView) {
+    private fun generateUsernameHandler(result: String, textview:TextView?) {
         Log.i(BuildConfig.APPLICATION_ID,"Received from API: $result")
         if ((result.isBlank())) {
             return
@@ -152,7 +235,10 @@ object AnodeUtil {
         } else {
             val jsonObj = JSONObject(result)
             if (jsonObj.has("username")) {
-                textview.text = jsonObj.getString("username")
+                val username = jsonObj.getString("username")
+                if (textview != null) {
+                    textview.text = username
+                }
                 val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
                 if (prefs != null) {
                     with (prefs.edit()) {
@@ -273,6 +359,11 @@ object AnodeUtil {
                         pldLines = pldLines.drop(pldLines.size - 100)
                     }
                     AnodeClient.PostMessage().execute("lnd", pldLines.toString(), "false")
+                    //check if chainbackup file error has caused crash
+                    if (pldLines.toString().contains("unable to extract on disk encrypted SCB")) {
+                        //delete chainbackup file
+                        deleteWalletChainBackupFile()
+                    }
                     //Delete log file
                     pldLogFile.delete()
                 }
@@ -415,6 +506,17 @@ object AnodeUtil {
         }
     }
 
+    fun restartApp() {
+        if (context != null) {
+            val packageManager: PackageManager = context!!.packageManager
+            val intent: Intent? = packageManager.getLaunchIntentForPackage(context!!.packageName)
+            val componentName = intent?.component
+            val mainIntent = Intent.makeRestartActivityTask(componentName)
+            context!!.startActivity(mainIntent)
+            Runtime.getRuntime().exit(0)
+        }
+    }
+
     fun pushNotification(title: String, text: String) {
         if (context != null) {
             var builder = NotificationCompat.Builder(context!!, CHANNEL_ID)
@@ -453,7 +555,7 @@ object AnodeUtil {
      */
     fun storeWalletPassword(password: String, walletName: String) {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -469,7 +571,7 @@ object AnodeUtil {
 
     fun storeWalletPin(pin: String, walletName: String) {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val masterKey = getMasterKey()
         val encSharedPreferences: SharedPreferences =
             EncryptedSharedPreferences.create(
@@ -494,23 +596,25 @@ object AnodeUtil {
         removeKeyFromEncSharedPreferences(currentWalletName)
     }
 
-    fun removeEncryptedWalletPreferences(currentWalletName: String) {
-        val prefKeyPassword = currentWalletName+"_password"
+    fun removeEncryptedWalletPreferences(walletName: String) {
+        var wallet = walletName
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
+        val prefKeyPassword = wallet+"_password"
         removeKeyFromEncSharedPreferences(prefKeyPassword)
-        val prefKeyPin = currentWalletName+"_pin"
+        val prefKeyPin = wallet+"_pin"
         removeKeyFromEncSharedPreferences(prefKeyPin)
     }
 
     fun getWalletPin(walletName:String):String {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val prefKey = wallet+"_pin"
         return getValueFromEncSharedPreferences(prefKey)
     }
 
     fun getWalletPassword(walletName:String):String {
         var wallet = walletName
-        if (wallet.isEmpty()) wallet = "wallet"
+        if (wallet.isEmpty()) wallet = DEFAULT_WALLET_NAME
         val prefKey = wallet+"_password"
         return getValueFromEncSharedPreferences(prefKey)
     }
@@ -882,6 +986,32 @@ object AnodeUtil {
         val packet = DatagramPacket(buf, buf.size, serviceHost, servicePort)
         udpSocket.send(packet)
     }
+
+    fun getUsername(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            var tries = 0
+            while (prefs.getString("username", "").isNullOrEmpty() && (tries < 5)) {
+                AnodeUtil.generateUsername(null)
+                tries++
+                Thread.sleep(50)
+            }
+
+        }
+        return prefs?.getString("username", "") ?: ""
+    }
+
+    fun internetConnection(): Boolean {
+        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return if (activeNetwork?.isConnected == null) {
+            false
+        } else {
+            activeNetwork.isConnected
+        }
+    }
+
+
 }
 
 class AnodeUtilException(message: String): Exception(message)

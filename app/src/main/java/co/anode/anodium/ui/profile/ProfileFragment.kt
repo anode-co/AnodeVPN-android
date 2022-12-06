@@ -16,19 +16,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import co.anode.anodium.*
 import co.anode.anodium.databinding.FragmentProfileBinding
-import co.anode.anodium.AboutDialog
-import co.anode.anodium.AnodeVpnService
-import co.anode.anodium.CjdnsStatsActivity
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
 import co.anode.anodium.support.CubeWifi
 import co.anode.anodium.wallet.PasswordPrompt
 import co.anode.anodium.wallet.PinPrompt
-import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import co.anode.anodium.wallet.WalletStatsActivity
 import org.json.JSONObject
 import timber.log.Timber
@@ -59,6 +54,8 @@ class ProfileFragment : Fragment() {
         val idTextview = root.findViewById<TextView>(R.id.user_id)
         val versionTextview = root.findViewById<TextView>(R.id.version_number)
         prefs = mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+
+
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
             AnodeUtil.generateUsername(idTextview)
@@ -87,16 +84,10 @@ class ProfileFragment : Fragment() {
         val walletStatsButton = root.findViewById<LinearLayout>(R.id.button_wallet_stats)
         walletStatsButton.setOnClickListener {
             Timber.tag(LOGTAG).i("Start wallet stats activity")
-            //check for new UI
-            if (prefs.getBoolean("useNewUI", false)) {
-                val statsActivity = Intent(mycontext, WalletInfoActivity::class.java)
-                statsActivity.putExtra("walletName", activeWallet)
-                startActivity(statsActivity)
-            } else {
-                val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
-                statsActivity.putExtra("walletName", activeWallet)
-                startActivity(statsActivity)
-            }
+
+            val statsActivity = Intent(mycontext, WalletStatsActivity::class.java)
+            statsActivity.putExtra("walletName", activeWallet)
+            startActivity(statsActivity)
         }
         val setPinButton = root.findViewById<LinearLayout>(R.id.button_set_pin)
         setPinButton.setOnClickListener {
@@ -149,7 +140,7 @@ class ProfileFragment : Fragment() {
         val dataAdapter = ArrayAdapter(mycontext, android.R.layout.simple_spinner_dropdown_item, walletNames)
 
         walletsSpinner.adapter = dataAdapter
-        activeWallet = prefs.getString("activeWallet", "wallet").toString()
+        activeWallet = prefs.getString("activeWallet", AnodeUtil.DEFAULT_WALLET_NAME).toString()
         var activeWalletId = 0
         var i = 0
         for (name in walletNames) {
@@ -207,9 +198,12 @@ class ProfileFragment : Fragment() {
         }
 
         val newUiCheckBox = root.findViewById<CheckBox>(R.id.use_newui_checkbox)
-        newUiCheckBox.isChecked = prefs.getBoolean("useNewUI", false)
+        newUiCheckBox.isChecked = prefs.getBoolean("useNewUI", true)
         newUiCheckBox.setOnClickListener {
             prefs.edit().putBoolean("useNewUI", newUiCheckBox.isChecked).apply()
+            Thread.sleep(500)
+            //Restart app
+            AnodeUtil.restartApp()
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -248,7 +242,7 @@ class ProfileFragment : Fragment() {
         walletNames = AnodeUtil.getWalletFiles()
         val dataAdapter = ArrayAdapter(mycontext,android.R.layout.simple_spinner_dropdown_item, walletNames)
         walletsSpinner.adapter = dataAdapter
-        activeWallet = prefs.getString("activeWallet", "wallet").toString()
+        activeWallet = prefs.getString("activeWallet", AnodeUtil.DEFAULT_WALLET_NAME).toString()
         var activeWalletId = 0
         var i = 0
         for (name in walletNames) {

@@ -1,36 +1,52 @@
 package co.anode.anodium.integration.model.repository
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
+import androidmads.library.qrgenearator.QRGContents
+import androidmads.library.qrgenearator.QRGEncoder
 import co.anode.anodium.support.AnodeUtil
 import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
 import com.pkt.domain.repository.WalletRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     private val walletAPI = WalletAPIService()
-    private var activeWallet = "wallet.db"
+    private var activeWallet = AnodeUtil.DEFAULT_WALLET_NAME
 
-    override suspend fun getAllWalletNames(): Result<List<String>> {
-        return Result.success(AnodeUtil.getWalletFiles())
+    override fun getAllWalletNames(): List<String> {
+        return AnodeUtil.getWalletFiles()
     }
 
-    override suspend fun getActiveWallet(): Result<String> {
-        TODO("Not yet implemented")
-        //get activeWallet from sharedPreferences or DataStore
+    override fun getActiveWallet(): String {
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("activeWallet", "wallet")?.let {
+            activeWallet = it
+        }
+        //Check if wallet file exists, otherwise choose other available wallet
+        if (!AnodeUtil.getWalletFiles().contains(activeWallet)) {
+            activeWallet = AnodeUtil.getWalletFiles().firstOrNull() ?: AnodeUtil.DEFAULT_WALLET_NAME
+        }
+        return activeWallet
     }
 
     override suspend fun setActiveWallet(walletName: String) {
-        TODO("Not yet implemented")
-        //set activeWallet to sharedPreferences or DataStore
-    }
-
-    override suspend fun getWalletAddress(): Result<String> {
-        TODO("Not yet implemented")
+        //delete existing chain back up file when changing active wallet
+        if (walletName != activeWallet) {
+            AnodeUtil.deleteWalletChainBackupFile()
+            //and stop pld
+            stopPld()
+        }
+        activeWallet = walletName
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("activeWallet", walletName)?.apply()
     }
 
     override suspend fun isPinAvailable(): Result<Boolean> {
@@ -46,114 +62,335 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return Result.success(pin == storedPin)
     }
 
+    //Get the wallet balance from all available addresses
+    override suspend fun getTotalWalletBalance(): Result<Long> {
+        val addresses = walletAPI.getWalletBalances(true)
+        //Return the balance of address
+        var balance:Long = 0
+        for (i in 0 until addresses.addrs.size) {
+            balance = addresses.addrs[i].stotal.toLong()
+        }
+        return Result.success(balance)
+    }
+
     //Get wallet balance, if address is empty then return total balance of all addresses
-    override suspend fun getWalletBalance(address: String): Result<Double> = withContext(Dispatchers.IO){
+    override suspend fun getWalletBalance(address: String): Result<Long> =
         runCatching {
             val addresses = walletAPI.getWalletBalances(true)
             //Return the balance of address
-            var balance = 0.0
-            for(i in 0 until addresses.addrs.size) {
+            var balance: Long = 0
+            for (i in 0 until addresses.addrs.size) {
                 if (address.isEmpty()) {
-                    balance += addresses.addrs[i].total
+                    balance += addresses.addrs[i].stotal.toLong()
                 } else if (addresses.addrs[i].address == address) {
-                    balance = addresses.addrs[i].total
+                    balance = addresses.addrs[i].stotal.toLong()
                 }
             }
-            return@runCatching balance
+            balance
         }.onSuccess {
-            Timber.d("getCurrentAddress: success")
+            Timber.d("getWalletBalance: success")
         }.onFailure {
-            Timber.e(it, "getCurrentAddress: failure")
+            Timber.d("getWalletBalance: failed")
         }
-    }
 
-    override suspend fun getWalletInfo(): Result<WalletInfo>  = withContext(Dispatchers.IO)  {
-        kotlin.runCatching {
+    override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO){
+        runCatching {
             walletAPI.getWalletInfo()
         }.onSuccess {
-            Timber.d("getWalletIfo: success")
+            Timber.d("getWalletInfo: success")
         }.onFailure {
-            Timber.e(it, "getWalletInfo : failure")
+            Timber.e(it, "getWalletInfo: failure")
         }
-    }
-
-    override suspend fun getCjdnsInfo(address: String): Result<CjdnsInfo> {
-        TODO("Not yet implemented")
     }
 
     override suspend fun generateSeed(password: String, pin: String): Result<String> {
-        TODO("Not yet implemented")
-    }
+        val response = walletAPI.createSeed(password)
 
-    override suspend fun createWallet(password: String, pin: String, seed: String): Result<Unit> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun recoverWallet(password: String, seed: String): Result<Unit> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun unlockWallet(passphrase: String): Result<Boolean> = withContext(Dispatchers.IO) {
-        runCatching {
-            val request = UnlockWalletRequest(passphrase, activeWallet)
-            walletAPI.unlockWalletAPI(request)
-        }.onSuccess {
-            Timber.d("unlockWalletAPI: success")
-        }.onFailure {
-            Timber.e(it, "unlockWalletAPI : failure")
+        if (response.seed.isNotEmpty()) {
+            return Result.success(response.seed.joinToString(" "))
+        } else {
+            return Result.failure(Exception("Failed to generate seed: ${response.message}"))
         }
+    }
+
+    override suspend fun getWalletAddress(): Result<String> =
+        runCatching {
+            val addresses = walletAPI.getWalletBalances(true)
+            //Return the balance of address
+            var address = ""
+            if (addresses != null) {
+                if (addresses.addrs.size == 1) {
+                    address = addresses.addrs[0].address
+                } else if (addresses.addrs.size > 1) {
+                    //Find address with the biggest balance
+                    var biggestBalance = 0.0
+                    for (i in 0 until addresses.addrs.size) {
+                        val balance = addresses.addrs[i].total
+                        if (balance > biggestBalance) {
+                            biggestBalance = balance
+                            address = addresses.addrs[i].address
+                        }
+                    }
+                }
+            }
+            address
+        }.onSuccess { address ->
+            Timber.d("getWalletAddress: success: $address")
+            address
+        }.onFailure {
+            Timber.e(it, "getWalletAddress: failure")
+        }
+
+    override suspend fun createWallet(password: String, pin: String, seed: String, walletName: String?): Result<Boolean> =
+        runCatching {
+            //We need to restart pld before creating a new wallet
+            stopPld()
+            var wallet = AnodeUtil.DEFAULT_WALLET_NAME
+            if (!walletName.isNullOrBlank()) {
+                wallet = walletName
+            }
+
+            val response = walletAPI.createWallet(password, password, seed.split(" "), "$wallet.db")
+
+            return if (response.message.isNotEmpty()) {
+                Timber.e("createWallet: failed: ${response.message}")
+                Result.failure(Exception("Failed to create wallet: ${response.message}"))
+            } else {
+                val encryptedPassword = AnodeUtil.encrypt(password, pin)
+                AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
+                if (pin.isNotEmpty()) {
+                    AnodeUtil.storeWalletPin(pin, wallet)
+                }
+                setActiveWallet(wallet)
+                Timber.d("createWallet: success")
+                Result.success(true)
+            }
+        }
+
+    override suspend fun recoverWallet(password: String, pin: String, seed: String, seedPassword: String, walletName: String): Result<Boolean> =
+        runCatching {
+            //We need to restart pld before creating a new wallet
+            stopPld()
+            var wallet = AnodeUtil.DEFAULT_WALLET_NAME
+            if (walletName.isNotEmpty()) {
+                wallet = walletName
+            }
+
+            val response = walletAPI.recoverWallet(password, seedPassword, seed.split(" "), "$wallet.db")
+            return if (response.message.isNotEmpty()) {
+                Timber.e("Failed to recover wallet: ${response.message}")
+                Result.failure(Exception("Failed to recover wallet: ${response.message}"))
+            } else {
+                val encryptedPassword = AnodeUtil.encrypt(password, pin)
+                AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
+                if (pin.isNotEmpty()) {
+                    AnodeUtil.storeWalletPin(pin, wallet)
+                }
+                setActiveWallet(wallet)
+                Timber.d("Wallet recovered successfully")
+                Result.success(true)
+            }
+        }
+
+    override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
+        Timber.d("unlockWallet")
+        val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
+        val response = walletAPI.unlockWalletAPI(request)
+        return Result.success(response)
     }
 
     override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
+        Timber.d("unlockWalletWithPIN")
         val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
-        val passphrase = AnodeUtil.decrypt(encryptedPassword, pin).toString()
-        val request = UnlockWalletRequest(passphrase, activeWallet)
-        walletAPI.unlockWalletAPI(request)
-        return Result.success(false)
-    }
-
-    override suspend fun createAddress(): String {
-        return walletAPI.createAddress()
-    }
-
-    override suspend fun getWalletBalances(): Result<WalletAddressBalances> = withContext(Dispatchers.IO){
-        runCatching {
-            walletAPI.getWalletBalances(true)
-        }.onSuccess {
-            Timber.d("getWalletBalances: success")
-        }.onFailure {
-            Timber.e(it, "getWalletBalances: failure")
+        val passphrase = AnodeUtil.decrypt(encryptedPassword, pin)
+        if (passphrase != null) {
+            return unlockWallet(passphrase)
+        } else {
+            return Result.failure(Exception("Wrong PIN. Cannot decrypt wallet password"))
         }
     }
 
-    override suspend fun getCurrentAddress(): Result<String> = withContext(Dispatchers.IO){
-        runCatching {
-            val addresses = walletAPI.getWalletBalances(true)
-            //Get the address with the heighest balance
-            var balance = -1.0
-            var address = ""
-            for(i in 0 until addresses.addrs.size) {
-                if (addresses.addrs[i].total > balance) {
-                    balance = addresses.addrs[i].total
-                    address = addresses.addrs[i].address
-                }
-            }
-            return@runCatching address
-        }.onSuccess {
-            Timber.d("getCurrentAddress: success")
-        }.onFailure {
-            Timber.e(it, "getCurrentAddress: failure")
-        }
+    override suspend fun createAddress(): Result<WalletAddressCreateResponse> {
+        Timber.d("createAddress: creating new address")
+        val address = walletAPI.createAddress()
+        return Result.success(address)
     }
 
-    override suspend fun getWalletTransactions(): Result<WalletTransactions> = withContext(Dispatchers.IO){
+     override suspend fun getWalletTransactions(coinbase: Int, reversed: Boolean, skip: Int, limit: Int, start: Long, end: Long): Result<WalletTransactions> = withContext(Dispatchers.IO) {
         runCatching {
-            walletAPI.getWalletTransactions(1, false, 0, 10)
+            walletAPI.getWalletTransactions(coinbase, reversed, skip, limit, start, end)
         }.onSuccess {
             Timber.d("getWalletTransactions: success")
         }.onFailure {
             Timber.e(it, "getWalletTransactions: failure")
         }
+    }
+
+    override suspend fun getSeed(): Result<String> {
+        val response = walletAPI.getWalletSeed()
+        return if (response.seed.isNotEmpty()) {
+            Timber.d("getSeed: success")
+            Result.success(response.seed.joinToString(" "))
+        } else {
+            Timber.d("getSeed: failed")
+            Result.failure(Exception("Failed to get seed: ${response.message}"))
+        }
+    }
+
+    override suspend fun renameWallet(name: String): Result<String?> {
+        Timber.d("renameWallet: $name")
+        val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
+        walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
+        activeWallet = name
+        return Result.success(name)
+    }
+
+    override suspend fun checkWalletName(name: String): Result<String?> {
+        val existingWallets = getAllWalletNames()
+        if (existingWallets.contains(name)) {
+            Timber.d("Wallet name already exists")
+            return Result.failure(Exception("Wallet name already exists"))
+        } else {
+            Timber.d("Wallet name is available")
+            return Result.success(name)
+        }
+    }
+
+    override fun deleteWallet(name: String) {
+        Timber.d("Deleting wallet $name")
+        //Delete saved pin/password
+        AnodeUtil.removeEncryptedWalletPreferences(name)
+        //Delete Wallet
+        AnodeUtil.deleteWallet(name)
+    }
+
+    override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean> {
+        val request = ChangePassphraseRequest(oldPassword, newPassword)
+        val response = walletAPI.changePassphrase(request)
+        return if (response.message.isNotEmpty()) {
+            Timber.e("Failed to change password: ${response.message}")
+            Result.failure(Exception("Failed to change password: ${response.message}"))
+        } else {
+            Timber.d("changePassword: Success")
+            AnodeUtil.removeEncryptedWalletPreferences(activeWallet)
+            Result.success(true)
+        }
+    }
+
+    override suspend fun changePin(password: String, pin: String) {
+        Timber.d("changePin")
+        //Encrypt password using PIN and save it in encrypted shared preferences
+        val encryptedPassword = AnodeUtil.encrypt(password, pin)
+        AnodeUtil.storeWalletPassword(encryptedPassword,activeWallet)
+        //Store PIN in encrypted shared preferences
+        AnodeUtil.storeWalletPin(pin,activeWallet)
+    }
+
+    override suspend fun generateQr(address: String): Result<Bitmap> {
+        val qrgEncoder = QRGEncoder(address, null, QRGContents.Type.TEXT, 600)
+        qrgEncoder.colorBlack = Color.WHITE
+        qrgEncoder.colorWhite = Color.BLACK
+        return try {
+            // Getting QR-Code as Bitmap
+            val bitmap = qrgEncoder.bitmap
+            Timber.d("generateQr: success")
+            Result.success(bitmap)
+        } catch (e: Exception) {
+            Timber.e(e.toString(), "generateQr: failure")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun checkWalletPassphrase(passphrase: String): Result<Boolean> {
+        val request = CheckPassphraseRequest(passphrase)
+        val response = walletAPI.checkPassphrase(request)
+        return if (response.validPassphrase) {
+            Timber.d("checkWalletPassphrase: success")
+            Result.success(true)
+        } else {
+            Timber.e("checkWalletPassphrase: failure")
+            Result.failure(Exception("Invalid wallet passphrase"))
+        }
+    }
+
+    override suspend fun sendCoins(fromAddresses: List<String>, amount: Double, toAddress: String): Result<SendTransactionResponse> {
+        val request = SendTransactionRequest(toAddress, amount, fromAddresses)
+        val response = walletAPI.sendTransaction(request)
+        if (!response.message.isNullOrEmpty()) {
+            Timber.e("sendCoins: Failed: ${response.message}")
+            return Result.failure(Exception("Failed to send coins: ${response.message}"))
+        } else if (response.txHash.isNotEmpty()){
+            Timber.d("sendCoins: success")
+            return Result.success(response)
+        } else {
+            Timber.e("sendCoins: Failed, empty response")
+            return Result.failure(Exception("Failed to send coins"))
+        }
+    }
+
+    override suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean> {
+        val request = ChangePassphraseRequest(oldPassphrase, newPassphrase)
+        val response = walletAPI.changePassphrase(request)
+        if (!response.message.isNullOrEmpty()) {
+            Timber.e("changePassphrase: Failed: ${response.message}")
+            return Result.failure(Exception("Failed to change passphrase: ${response.message}"))
+        } else {
+            Timber.d("changePassphrase: Success")
+            return Result.success(true)
+        }
+    }
+
+    override suspend fun getSecret(): Result<String> {
+        val response = walletAPI.getSecret()
+        return if (response.secret.isNotEmpty()) {
+            Timber.d("getSecret: Success")
+            Result.success(response.secret)
+        } else {
+            Timber.e("getSecret: Failure: ${response.message}")
+            Result.failure(Exception("Failed to get secret: ${response.message}"))
+        }
+    }
+
+    override fun isPKTAddressValid(address: String): Result<String> {
+        val longRegex = "(pkt1)([a-zA-Z0-9]{59})".toRegex()
+        val shortRegex = "(pkt1)([a-zA-Z0-9]{39})".toRegex()
+        var trimmedAddress = longRegex.find(address,0)?.value
+        if (trimmedAddress.isNullOrEmpty()){
+            trimmedAddress = shortRegex.find(address,0)?.value
+            if (trimmedAddress.isNullOrEmpty()) {
+                Timber.e("isPKTAddressValid: Invalid address")
+                return Result.failure(Exception("Invalid PKT address"))
+            } else {
+                Timber.d("isPKTAddressValid: Valid short address")
+                return Result.success(trimmedAddress)
+            }
+        } else {
+            Timber.d("isPKTAddressValid Success")
+            return Result.success(trimmedAddress)
+        }
+    }
+
+    override suspend fun resyncWallet() {
+        Timber.d("resyncWallet: called")
+        walletAPI.resyncWallet()
+    }
+
+    override suspend fun getPktToUsd(): Result<Float> {
+        val response = walletAPI.getPktToUsd()
+        return if (response.isNaN()) {
+            Timber.d("getPktToUsd Failure")
+            Result.failure(Exception("Failed to get PKT to USD conversion rate"))
+        } else {
+            Timber.d("getPktToUsd Success")
+            Result.success(response)
+        }
+    }
+
+    override suspend fun stopPld() {
+        Timber.d("stopPld: stopping pld")
+        AnodeUtil.stopPld()
+        //Wait for pld to restart
+        delay(2000)
     }
 
 }

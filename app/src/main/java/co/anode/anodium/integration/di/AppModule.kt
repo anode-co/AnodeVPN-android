@@ -1,16 +1,22 @@
 package co.anode.anodium.integration.di
 
-import android.content.Context
 import co.anode.anodium.BuildConfig
+import co.anode.anodium.integration.model.repository.CjdnsRepositoryImpl
+import co.anode.anodium.integration.model.repository.GeneralRepositoryImpl
+import co.anode.anodium.integration.model.repository.VpnRepositoryImpl
 import co.anode.anodium.integration.model.repository.WalletRepositoryImpl
+import co.anode.anodium.support.AnodeUtil
+import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
+import com.pkt.domain.repository.CjdnsRepository
+import com.pkt.domain.repository.GeneralRepository
+import com.pkt.domain.repository.VpnRepository
 import com.pkt.domain.repository.WalletRepository
-import com.pkt.dummy.repository.WalletRepositoryDummy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -20,10 +26,23 @@ object AppModule {
     @Provides
     fun providesVersionName(): String = BuildConfig.VERSION_NAME
 
-/*    @Provides
-    fun providesWalletRepository(@ApplicationContext context: Context): WalletRepository =
-        WalletRepositoryDummy(context)*/
+    @Username
+    @Provides
+    fun providesUsername(): String = AnodeUtil.getUsername()
 
     @Provides
+    @Singleton
     fun providesWalletRepository(): WalletRepository = WalletRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun providesVpnRepository(): VpnRepository = VpnRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun providesCjdnsRepository(): CjdnsRepository = CjdnsRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun providesGeneralRepository(): GeneralRepository = GeneralRepositoryImpl()
 }

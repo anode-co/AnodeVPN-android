@@ -10,13 +10,13 @@ data class WalletAddressBalances(
 @Serializable
 data class Addr(
     val address: String,
-    val immaturereward: Int,
-    val outputcount: Int,
-    val simmaturereward: String,
+    val total: Double,
+    val stotal: String,
     val spendable: Double,
     val sspendable: String,
-    val stotal: String,
-    val sunconfirmed: String,
-    val total: Double,
+    val immaturereward: Int,
+    val simmaturereward: String,
     val unconfirmed: Int,
+    val sunconfirmed: String,
+    val outputcount: Int,
 )

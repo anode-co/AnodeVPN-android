@@ -25,6 +25,42 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:theme">
         <activity
+            android:name=".PktMainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.ChangePINActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.ChangePasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.VPNExitsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.StartWalletActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.VpnActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
             android:name=".integration.presentation.WalletActivity"
             android:exported="false"
             android:theme="@style/Theme.App"
@@ -33,6 +69,12 @@
             android:name=".integration.presentation.EnterWalletActivity"
             android:exported="false"
             android:theme="@style/Theme.App"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".integration.presentation.CreateWalletActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App"
+            android:windowSoftInputMode="adjustResize"
             tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
             android:name=".wallet.NewWalletActivity"

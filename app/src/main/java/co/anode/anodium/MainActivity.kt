@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -22,6 +23,7 @@ import androidx.navigation.ui.setupWithNavController
 import co.anode.anodium.databinding.ActivityMainBinding
 import co.anode.anodium.support.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import dagger.hilt.android.AndroidEntryPoint
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -30,7 +32,7 @@ import java.util.*
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val REQUIRED_SDK_PERMISSIONS = arrayOf(
@@ -39,21 +41,17 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.INTERNET,
         Manifest.permission.CHANGE_NETWORK_STATE,
         Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        //Manifest.permission.ACCESS_COARSE_LOCATION,
+        //Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.BIND_VPN_SERVICE
     )
 
     private fun initTimber() {
-        if (BuildConfig.DEBUG) {
-            plant(Timber.DebugTree())
-        } else {
-            plant(object : Timber.Tree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    // TODO
-                }
-            })
-        }
+        //Log to file
+        plant(FileLoggingTree())
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,20 +61,31 @@ class MainActivity : AppCompatActivity() {
             finish()
             exitProcess(0)
         }
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
         //Error Handling
         Thread.setDefaultUncaughtExceptionHandler { _, paramThrowable -> //Catch your exception
             exception(paramThrowable)
         }
 
-        val navView: BottomNavigationView = binding.navView
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         initializeApp()
-        val navController = navHostFragment.navController
-        navView.setupWithNavController(navController)
 
+        val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
+        var newUI = prefs.getBoolean("useNewUI", true)
+
+        if (newUI) {
+            //Launch new UI main acivity
+            startActivity(Intent(this, PktMainActivity::class.java))
+        } else {
+            //Follow old UI process
+            AnodeUtil.addCjdnsPeers()
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            val navView: BottomNavigationView = binding.navView
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
+
+            val navController = navHostFragment.navController
+            navView.setupWithNavController(navController)
+        }
         //start thread to look for Pkt.cube wifi
         searchForInternetSharing()
     }
@@ -85,11 +94,13 @@ class MainActivity : AppCompatActivity() {
         //Initialize Util before Client
         AnodeUtil.init(applicationContext)
         AnodeClient.init(applicationContext, this)
+        checkPermissions()
+        initTimber()
         AnodeUtil.initializeApp()
         AnodeUtil.launchCJDNS()
         AnodeUtil.launchPld()
         AnodeUtil.serviceThreads()
-        checkPermissions()
+
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
         //If there is no username stored
         if (prefs.getString("username", "").isNullOrEmpty()) {
@@ -104,7 +115,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        AnodeUtil.addCjdnsPeers()
         createNotificationChannel()
     }
 
@@ -120,8 +130,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (missingPermissions.isNotEmpty()) {
             // request all missing permissions
-            val permissions = missingPermissions
-                .toTypedArray()
+            val permissions = missingPermissions.toTypedArray()
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_ASK_PERMISSIONS)
         } else {
             val grantResults = IntArray(REQUIRED_SDK_PERMISSIONS.size)
@@ -176,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                     AnodeUtil.isInternetSharingAvailable = CubeWifi.isCubeNetworkAvailable()
                     Thread.sleep(30000)
                 }
-            }, "VPNFragment.SearchForCubeWifi").start()
+            }, "MainActivity.SearchForCubeWifi").start()
         }
     }
 

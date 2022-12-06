@@ -12,11 +12,12 @@ import com.pkt.core.extensions.doOnTextChanged
 import com.pkt.core.extensions.setError
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
+import com.pkt.core.presentation.common.state.state.CommonState
 import dagger.hilt.android.AndroidEntryPoint
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
+import timber.log.Timber
 
 @AndroidEntryPoint
-class SetPinFragment : StateFragment<SetPinState>(R.layout.fragment_set_pin) {
+class SetPinFragment : StateFragment<CommonState.Empty>(R.layout.fragment_set_pin) {
 
     private val viewBinding by viewBinding(FragmentSetPinBinding::bind)
 
@@ -24,7 +25,7 @@ class SetPinFragment : StateFragment<SetPinState>(R.layout.fragment_set_pin) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("SetPinFragment onViewCreated")
         with(viewBinding) {
             enterPinInputLayout.doOnTextChanged {
                 viewModel.enterPin = it
@@ -41,23 +42,6 @@ class SetPinFragment : StateFragment<SetPinState>(R.layout.fragment_set_pin) {
             nextButton.doOnClick {
                 viewModel.onNextClick()
             }
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        with(viewBinding) {
-            if (!enterPinInput.hasFocus() && !confirmPinInput.hasFocus()) {
-                enterPinInput.requestFocus()
-                UIUtil.showKeyboard(requireContext(), enterPinInput)
-            }
-        }
-    }
-
-    override fun handleState(state: SetPinState) {
-        with(viewBinding) {
-            nextButton.isEnabled = state.nextButtonEnabled
         }
     }
 

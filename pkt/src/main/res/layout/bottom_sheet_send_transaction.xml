@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_rounded_top_20dp"
+    android:backgroundTint="@color/bg3">
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/send_transaction"
+        android:textAppearance="?textAppearance20SemiBold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/addressInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="20dp"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/addressInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/address"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:paddingVertical="13dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="@color/stroke1"
+        app:layout_constraintBottom_toBottomOf="@id/maxCheckbox"
+        app:layout_constraintStart_toStartOf="@id/maxCheckbox"
+        app:layout_constraintTop_toTopOf="@id/maxCheckbox" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/amountInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="20dp"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addressInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/amountInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="1234567890."
+            android:hint="@string/amount"
+            android:imeOptions="actionDone"
+            android:inputType="numberDecimal"
+            android:paddingVertical="13dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/maxLabel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/shape_rounded_start_8dp"
+        android:backgroundTint="#303249"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:gravity="start|center_vertical"
+        android:maxLines="1"
+        android:paddingHorizontal="16dp"
+        android:text="@string/send_as_much_pkt_as_possible"
+        android:textAppearance="?textAppearance16Regular"
+        android:visibility="gone"
+        app:autoSizeMaxTextSize="16sp"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/amountInputLayout"
+        app:layout_constraintEnd_toStartOf="@id/maxCheckbox"
+        app:layout_constraintStart_toStartOf="@id/amountInputLayout"
+        app:layout_constraintTop_toTopOf="@id/amountInputLayout"
+        tools:visibility="visible" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/maxCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:background="@drawable/bg_checkbox_max"
+        android:button="@null"
+        android:gravity="center"
+        android:minHeight="48dp"
+        android:paddingHorizontal="15dp"
+        android:text="@string/max"
+        android:textAppearance="?textAppearance14Medium"
+        android:textColor="@color/checkbox_text_color_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addressInputLayout"
+        tools:checked="true" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="@dimen/bottom_button_margin_bottom"
+        android:text="@string/send_pkt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/amountInputLayout" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

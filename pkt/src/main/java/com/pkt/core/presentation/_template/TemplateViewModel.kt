@@ -9,9 +9,7 @@ class TemplateViewModel @Inject constructor(
 
 ) : StateViewModel<TemplateState>() {
 
-    init {
-        // TODO
-    }
+    init {}
 
     override fun createInitialState() = TemplateState()
 }

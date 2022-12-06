@@ -12,7 +12,7 @@ import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.navigation.fragment.NavHostFragment
 import co.anode.anodium.R
-import co.anode.anodium.ui.wallet.WalletFragment
+import co.anode.anodium.ui.wallet.WalletFragmentOld
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class TransactionDetailsFragment : BottomSheetDialogFragment(){
@@ -69,7 +69,7 @@ class TransactionDetailsFragment : BottomSheetDialogFragment(){
         }
         super.onDismiss(dialog)
         if (parentFragment is NavHostFragment) {
-            (parentFragmentManager.primaryNavigationFragment as WalletFragment).clearLines(lineID)
+            (parentFragmentManager.primaryNavigationFragment as WalletFragmentOld).clearLines(lineID)
         }
     }
 

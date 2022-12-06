@@ -115,7 +115,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:clickable="true"
         android:textAppearance="?textAppearance16Regular"
+        android:textColor="@color/btn_text_color_selector_inverse"
         app:layout_constraintEnd_toEndOf="@id/addressLabel"
         app:layout_constraintStart_toStartOf="@id/addressLabel"
         app:layout_constraintTop_toBottomOf="@id/addressLabel"
@@ -164,11 +166,27 @@
         style="?borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="22dp"
+        android:layout_marginEnd="2dp"
         android:text="@string/select_period"
         app:layout_constraintBottom_toBottomOf="@id/transactionsLabel"
+        app:layout_constraintEnd_toStartOf="@id/deletePeriodButton"
+        app:layout_constraintTop_toTopOf="@id/transactionsLabel"
+        app:layout_goneMarginEnd="22dp" />
+
+    <ImageButton
+        android:id="@+id/deletePeriodButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:minWidth="24dp"
+        android:minHeight="24dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="@id/selectPeriodButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/transactionsLabel" />
+        app:layout_constraintTop_toTopOf="@id/selectPeriodButton"
+        app:srcCompat="@drawable/ic_delete_period"
+        tools:ignore="ContentDescription" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -177,6 +195,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:paddingBottom="10dp"
+        android:focusable="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

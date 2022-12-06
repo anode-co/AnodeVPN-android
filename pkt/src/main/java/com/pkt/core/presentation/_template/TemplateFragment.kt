@@ -19,12 +19,8 @@ class TemplateFragment : StateFragment<TemplateState>(R.layout.fragment_template
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        with(viewBinding) {
-            // TODO
-        }
+        with(viewBinding) {}
     }
 
-    override fun handleState(state: TemplateState) {
-        // TODO
-    }
+    override fun handleState(state: TemplateState) {}
 }

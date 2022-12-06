@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="enter_wallet_guideline" format="float" type="dimen">0.1</item>
+
+</resources>

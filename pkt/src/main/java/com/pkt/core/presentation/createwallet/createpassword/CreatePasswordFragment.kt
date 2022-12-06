@@ -14,6 +14,7 @@ import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.util.IntentUtil
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class CreatePasswordFragment : StateFragment<CreatePasswordState>(R.layout.fragment_create_password) {
@@ -24,7 +25,7 @@ class CreatePasswordFragment : StateFragment<CreatePasswordState>(R.layout.fragm
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("CreatePasswordFragment onViewCreated")
         with(viewBinding) {
             enterPasswordInputLayout.doOnTextChanged {
                 viewModel.enterPassword = it
@@ -44,6 +45,7 @@ class CreatePasswordFragment : StateFragment<CreatePasswordState>(R.layout.fragm
 
             checkbox2.doOnCheckChanged {
                 viewModel.checkbox2Checked = it
+                viewModel.onDataConsentClick()
             }
 
             val privacyPolicyText = SpannableString(getString(R.string.create_password_checkbox_2)).apply {

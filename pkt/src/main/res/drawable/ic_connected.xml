@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_connected_active" android:state_activated="true" />
+    <item>
+        <layer-list>
+            <item android:bottom="3dp" android:drawable="@drawable/ic_connected_normal" android:end="3dp" android:start="3dp" android:top="3dp" />
+        </layer-list>
+    </item>
+</selector>

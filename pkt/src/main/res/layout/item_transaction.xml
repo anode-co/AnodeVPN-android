@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:foreground="@drawable/ripple_mask_rectangle"
     android:paddingHorizontal="@dimen/spacing_horizontal"
     android:paddingVertical="10dp">
 

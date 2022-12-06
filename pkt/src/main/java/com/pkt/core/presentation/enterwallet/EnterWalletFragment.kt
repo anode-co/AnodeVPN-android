@@ -13,9 +13,10 @@ import com.pkt.core.extensions.doOnClick
 import com.pkt.core.extensions.doOnTextChanged
 import com.pkt.core.presentation.common.state.StateFragment
 import com.pkt.core.presentation.common.state.UiEvent
-import com.pkt.core.presentation.enterwallet.choosewallet.ChooseWalletBottomSheet
+import com.pkt.core.presentation.choosewallet.ChooseWalletBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
+import timber.log.Timber
 
 @AndroidEntryPoint
 class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_enter_wallet) {
@@ -26,7 +27,7 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("EnterWalletFragment onViewCreated")
         setFragmentResultListener(ChooseWalletBottomSheet.REQUEST_KEY) { _, bundle ->
             viewModel.onWalletChanged(bundle.getString(ChooseWalletBottomSheet.WALLET_KEY))
         }
@@ -55,13 +56,21 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
             loginButton.doOnClick {
                 viewModel.onLoginClick()
             }
+
+            enterPasswordButton.doOnClick {
+                viewModel.onEnterPasswordClick()
+            }
+
+            enterPinButton.doOnClick {
+                viewModel.onEnterPinClick()
+            }
         }
     }
 
     override fun handleState(state: EnterWalletState) {
         with(viewBinding) {
             walletButton.apply {
-                text = state.currentWalletName
+                text = state.currentWallet
                 isVisible = state.wallets.size > 1
             }
 
@@ -69,7 +78,10 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
 
             loginButton.isEnabled = state.loginButtonEnabled
 
-            if (state.isPinAvailable) {
+            enterPasswordButton.isVisible = state.enterPasswordButtonVisible
+            enterPinButton.isVisible = state.enterPinButtonVisible
+
+            if (state.isPinVisible) {
                 pinInputLabel.isVisible = true
                 pinInputLayout.isVisible = true
                 pinKeyboard.isVisible = true

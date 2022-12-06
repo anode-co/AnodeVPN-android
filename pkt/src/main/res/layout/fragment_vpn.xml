@@ -1,8 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/worldImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="375:451"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/img_world"
+        tools:ignore="ContentDescription" />
+
+    <ImageButton
+        android:id="@+id/connectionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:foreground="@drawable/ripple_mask_oval"
+        app:layout_constraintBottom_toTopOf="@id/ipInfoLabel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/connectionStateLabel"
+        tools:ignore="ContentDescription"
+        tools:srcCompat="@drawable/ic_disconnected" />
+
+    <TextView
+        android:id="@+id/connectionStateLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="52dp"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:textAppearance="?textAppearance20SemiBold"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Not connected" />
+
+    <TextView
+        android:id="@+id/connectionTimeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:includeFontPadding="false"
+        android:textAppearance="?textAppearance14Medium"
+        android:textColor="@color/text1_50"
+        app:layout_constraintEnd_toEndOf="@id/connectionStateLabel"
+        app:layout_constraintStart_toStartOf="@id/connectionStateLabel"
+        app:layout_constraintTop_toBottomOf="@id/connectionStateLabel"
+        tools:text="00:00:00" />
+
+    <TextView
+        android:id="@+id/ipInfoLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:lineSpacingExtra="3sp"
+        android:textAppearance="?textAppearance12Medium"
+        android:textColor="@color/text1_30"
+        app:layout_constraintBottom_toTopOf="@id/vpnLayout"
+        app:layout_constraintEnd_toEndOf="@id/connectionStateLabel"
+        app:layout_constraintStart_toStartOf="@id/connectionStateLabel"
+        tools:text="Public IPv4: 217.71.236.178\nIPv6: 2607.5300.2038.fc00.1234.2038.fc00.1234" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/vpnLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_rounded_20dp"
+        android:backgroundTint="#cc262738"
+        android:paddingVertical="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/flagImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="14dp"
+            android:gravity="center"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="🇨🇦" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/nameLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textAppearance="?textAppearance14Medium"
+            android:textSize="16sp"
+            app:autoSizeMaxTextSize="16sp"
+            app:autoSizeMinTextSize="11sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@id/countryLabel"
+            app:layout_constraintEnd_toStartOf="@id/selectImage"
+            app:layout_constraintStart_toEndOf="@id/flagImage"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="PKT World" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/countryLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:includeFontPadding="false"
+            android:textAppearance="?textAppearance14Regular"
+            android:textColor="?android:textColorSecondary"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="11sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/nameLabel"
+            app:layout_constraintStart_toStartOf="@id/nameLabel"
+            app:layout_constraintTop_toBottomOf="@id/nameLabel"
+            tools:text="United States" />
+
+        <ImageView
+            android:id="@+id/selectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="18dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_select"
+            tools:ignore="ContentDescription" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

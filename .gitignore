@@ -96,3 +96,9 @@ app/.settings/
 
 #app/release
 app/app.iml
+/app/keystore/your_keystore.jks
+/tools/your_signing_keystore_base64_encoded.txt
+/tools/private_key.pepk
+/.idea/deploymentTargetDropDown.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/app/release/output-metadata.json

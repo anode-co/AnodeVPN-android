@@ -53,37 +53,37 @@ abstract class StateViewModel<S : UiState> : ViewModel() {
     }
 
     // Loading section
-    private val _loadingState: MutableStateFlow<CommonState.LoadingState> by lazy { MutableStateFlow(CommonState.LoadingState()) }
+    private val _loadingState: MutableStateFlow<CommonState.LoadingState> by lazy { MutableStateFlow(createLoadingState()) }
     val loadingState: Flow<CommonState.LoadingState> by lazy { _loadingState }
 
     protected val currentLoadingState: CommonState.LoadingState
         get() = _loadingState.value
 
-    private val loadingAction: (suspend () -> Result<*>)? by lazy { createLoadingAction() }
+    private var loadingAction: (suspend () -> Result<*>)? = null
 
-    protected open fun createLoadingAction(): (suspend () -> Result<*>)? = null
+    protected open fun createLoadingState() = CommonState.LoadingState()
 
     private fun sendLoadingState(reduce: CommonState.LoadingState.() -> CommonState.LoadingState) {
         _loadingState.tryEmit(_loadingState.value.reduce())
     }
 
-    protected fun invokeLoadingAction() {
-        loadingAction?.let { action ->
-            viewModelScope.launch {
-                sendLoadingState { copy(isLoading = true, loadingError = null, loadingAction = null) }
+    protected fun invokeLoadingAction(action: suspend () -> Result<*>) {
+        loadingAction = action
 
-                action()
-                    .onSuccess {
-                        sendLoadingState { copy(isLoading = false) }
-                    }
-                    .onFailure {
-                        sendLoadingState { copy(loadingError = it, loadingAction = { invokeLoadingAction() }) }
-                    }
-            }
+        viewModelScope.launch {
+            sendLoadingState { copy(isLoading = true, loadingError = null, loadingAction = null) }
+
+            action()
+                .onSuccess {
+                    sendLoadingState { copy(isLoading = false) }
+                }
+                .onFailure {
+                    sendLoadingState { copy(loadingError = it, loadingAction = { invokeLoadingAction(action) }) }
+                }
         }
     }
 
-    fun invokeRefreshingAction() {
+    fun onRefresh() {
         loadingAction?.let { action ->
             viewModelScope.launch {
                 sendLoadingState { copy(isRefreshing = true) }

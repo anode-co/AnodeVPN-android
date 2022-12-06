@@ -54,24 +54,22 @@ private val DATE_SHORT_FORMATTER by lazy {
     SimpleDateFormat("MMMM dd", LOCALE)
 }
 
+private val DATE_LONG_FORMATTER by lazy {
+    SimpleDateFormat("MMMM dd, yyyy", LOCALE)
+}
+
+private val DATE_MMM_DD_FORMATTER by lazy {
+    SimpleDateFormat("MMM dd", LOCALE)
+}
+
 private val TIME_FORMATTER by lazy {
     SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, LOCALE)
 }
 
-fun String?.formatPkt(digits: Int = 0): String =
-    when (digits) {
-        0 -> PKT_FORMATTER
-
-        else -> (PKT_FORMATTER.clone() as DecimalFormat).apply {
-            maximumFractionDigits = digits
-            minimumFractionDigits = digits
-        }
-    }.format(this.toBigDecimalSafety())
-
-fun Double?.formatPkt(): String {
-    val amount = this.toBigDecimalSafety().movePointRight(PKT_DIGITS).toLong()
-    val unit = PKT_UNITS.entries.find { amount >= it.value } ?: PKT_UNITS.entries.last()
-    val value = BigDecimal(amount).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
+fun Double.formatPkt(): String {
+    val long = this*1000000000
+    val unit = PKT_UNITS.entries.find { long >= it.value } ?: PKT_UNITS.entries.last()
+    val value = BigDecimal(this)
     return (PKT_FORMATTER.clone() as DecimalFormat).apply {
         decimalFormatSymbols = decimalFormatSymbols.apply {
             positiveSuffix = " ${unit.key}"
@@ -81,6 +79,7 @@ fun Double?.formatPkt(): String {
 }
 
 fun Long.formatPkt(): String {
+    if(this == 0L) return "0.00 PKT"
     val unit = PKT_UNITS.entries.find { this >= it.value } ?: PKT_UNITS.entries.last()
     val value = BigDecimal(this).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
     return (PKT_FORMATTER.clone() as DecimalFormat).apply {
@@ -92,8 +91,7 @@ fun Long.formatPkt(): String {
 }
 
 fun Long.toPKT(): BigDecimal {
-    val unit = PKT_UNITS.entries.find { this >= it.value } ?: PKT_UNITS.entries.last()
-    return BigDecimal(this).divide(BigDecimal(unit.value), 2, RoundingMode.HALF_EVEN)
+    return BigDecimal(this).divide(BigDecimal(1073741824), 2, RoundingMode.HALF_EVEN)
 }
 
 
@@ -110,6 +108,10 @@ fun LocalDateTime.formatDateTime(): String = DATE_TIME_FORMATTER.format(this.toD
 fun String.formatDateTime(): String = DATE_TIME_FORMATTER.format(this.toDateSafety())
 
 fun LocalDateTime.formatDateShort(): String = DATE_SHORT_FORMATTER.format(this.toDate())
+
+fun LocalDateTime.formatDateLong(): String = DATE_LONG_FORMATTER.format(this.toDate())
+
+fun Long.formatDateMMMDD(): String = DATE_MMM_DD_FORMATTER.format(Date(this))
 
 fun LocalDateTime.formatTime(): String = TIME_FORMATTER.format(this.toDate())
 
@@ -129,6 +131,17 @@ fun Int?.formatSeconds(): String {
     val minutes = seconds / 60
     seconds %= 60
     return "%d:%02d".format(minutes, seconds)
+}
+
+fun Int?.formatSecondsLong(): String {
+    var seconds = this ?: 0
+    var minutes = seconds / 60
+    seconds %= 60
+    val hours = minutes / 60
+    if (hours > 0) {
+        minutes %= 60
+    }
+    return "%02d:%02d:%02d".format(hours, minutes, seconds)
 }
 
 fun Int.formatPosition(context: Context): String {

@@ -10,6 +10,7 @@ import com.pkt.core.extensions.doOnCheckChanged
 import com.pkt.core.extensions.doOnClick
 import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ConfirmPasswordFragment : StateFragment<ConfirmPasswordState>(R.layout.fragment_confirm_password) {
@@ -20,7 +21,7 @@ class ConfirmPasswordFragment : StateFragment<ConfirmPasswordState>(R.layout.fra
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("ConfirmPasswordFragment onViewCreated")
         with(viewBinding) {
             checkbox.doOnCheckChanged {
                 viewModel.checkboxChecked = it

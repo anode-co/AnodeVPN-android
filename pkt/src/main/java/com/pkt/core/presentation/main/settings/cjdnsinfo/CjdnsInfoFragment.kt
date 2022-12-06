@@ -10,6 +10,7 @@ import com.pkt.core.presentation.common.adapter.AsyncListDifferAdapter
 import com.pkt.core.presentation.common.adapter.delegate.keyValueHorizontalAdapterDelegate
 import com.pkt.core.presentation.common.state.StateFragment
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class CjdnsInfoFragment : StateFragment<CjdnsInfoState>(R.layout.fragment_cjdns_info) {
@@ -29,7 +30,7 @@ class CjdnsInfoFragment : StateFragment<CjdnsInfoState>(R.layout.fragment_cjdns_
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.i("CjdnsInfoFragment onViewCreated")
         with(viewBinding) {
             submitLogsButton.setOnClickListener {
                 viewModel.onSubmitLogsClick()

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_rounded_top_20dp"
+    android:backgroundTint="@color/bg3">
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="@string/delete_wallet"
+        android:textAppearance="?textAppearance20SemiBold"
+        app:drawableStartCompat="@drawable/ic_bullet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/description1Image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_horizontal"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/description1Label"
+        app:srcCompat="@drawable/ic_dot"
+        app:tint="@color/color1"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/description2Image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_horizontal"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/description2Label"
+        app:srcCompat="@drawable/ic_dot"
+        app:tint="@color/color1"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/description3Image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_horizontal"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/description3Label"
+        app:srcCompat="@drawable/ic_dot"
+        app:tint="@color/color1"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/description1Label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/description1Image"
+        app:layout_constraintTop_toBottomOf="@id/titleLabel"
+        tools:text="@string/delete_1" />
+
+    <TextView
+        android:id="@+id/description2Label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:text="@string/delete_2"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/description2Image"
+        app:layout_constraintTop_toBottomOf="@id/description1Label" />
+
+    <TextView
+        android:id="@+id/description3Label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:text="@string/delete_3"
+        android:textAppearance="?textAppearance16Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/description3Image"
+        app:layout_constraintTop_toBottomOf="@id/description2Label" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nameInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/description3Label">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_the_name_wallet_to_confirm"
+            android:imeOptions="actionDone"
+            android:inputType="textNoSuggestions"
+            android:paddingVertical="13dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_horizontal"
+        android:layout_marginTop="20dp"
+        android:minWidth="34dp"
+        app:centerIfNoTextEnabled="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nameInputLayout" />
+
+    <TextView
+        android:id="@+id/checkbox1Label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/i_know_this_is_not_reversible"
+        android:textAppearance="?textAppearance14Regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/checkbox"
+        app:layout_constraintTop_toTopOf="@id/checkbox" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/deleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="@dimen/bottom_button_margin_bottom"
+        android:backgroundTint="?colorError"
+        android:text="@string/delete"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkbox1Label" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

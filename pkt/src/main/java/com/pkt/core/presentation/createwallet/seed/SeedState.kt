@@ -14,8 +14,9 @@ sealed class SeedNavigation : InternalNavigation {
         private val password: String,
         private val pin: String,
         private val seed: String,
+        private val name: String?,
     ) : SeedNavigation() {
         override val navDirections: NavDirections
-            get() = SeedFragmentDirections.toConfirmSeed(password, pin, seed)
+            get() = SeedFragmentDirections.toConfirmSeed(password, pin, seed, name)
     }
 }
