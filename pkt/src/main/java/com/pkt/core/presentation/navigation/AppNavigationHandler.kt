@@ -36,6 +36,7 @@ abstract class AppNavigationHandler : NavigationHandler {
                     is AppNavigation.OpenSendTransaction -> openSendTransaction(fragment, navigation.fromAddress)
                     AppNavigation.OpenEnterWallet -> openEnterWallet(fragment)
                     AppNavigation.OpenStart -> openStart(fragment)
+                    is AppNavigation.OpenWebView -> openWebView(fragment, navigation.html)
                 }
             }
 
@@ -71,4 +72,5 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openEnterWallet(fragment: Fragment)
     abstract fun openStart(fragment: Fragment)
     abstract fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra)
+    abstract fun openWebView(fragment: Fragment, html: String)
 }

@@ -77,6 +77,10 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toTransactionDetails(extra))
     }
 
+    override fun openWebView(fragment: Fragment, html: String) {
+        navigate(fragment, NavGraphDirections.toWebView(html))
+    }
+
     private fun navigate(fragment: Fragment, navDirections: NavDirections) {
         fragment.findNavController()
             .takeIf { it.currentDestination?.getAction(navDirections.actionId) != null }

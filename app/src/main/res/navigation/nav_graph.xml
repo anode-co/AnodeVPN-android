@@ -60,6 +60,10 @@
         app:destination="@id/transactionDetails" />
 
     <action
+        android:id="@+id/toWebView"
+        app:destination="@id/WebView" />
+
+    <action
         android:id="@+id/toVpnExits"
         app:destination="@id/vpnExits" />
 
@@ -209,5 +213,15 @@
         android:name="com.pkt.core.presentation.main.vpn.exits.VpnExitsFragment"
         android:label="VpnExits"
         tools:layout="@layout/fragment_vpn_exits" />
+
+    <fragment
+        android:id="@+id/WebView"
+        android:name="com.pkt.core.presentation.main.settings.webview.WebViewFragment"
+        android:label="WebView"
+        tools:layout="@layout/fragment_webview">
+        <argument
+            android:name="html"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

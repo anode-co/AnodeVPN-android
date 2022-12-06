@@ -25,7 +25,7 @@ sealed class AppNavigation : UiNavigation {
     object OpenChangePinFromChangePassword : AppNavigation()
     object OpenEnterWallet : AppNavigation()
     object OpenStart : AppNavigation()
-
+    data class OpenWebView(val html: String) : AppNavigation()
 }
 
 interface InternalNavigation : UiNavigation {

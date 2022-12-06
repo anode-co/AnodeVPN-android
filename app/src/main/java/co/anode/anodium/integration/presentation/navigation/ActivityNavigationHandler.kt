@@ -82,4 +82,8 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra) {
         TODO("Not yet implemented")
     }
+
+    override fun openWebView(fragment: Fragment, html: String) {
+        TODO("Not yet implemented")
+    }
 }
