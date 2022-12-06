@@ -137,11 +137,49 @@ object AnodeUtil {
         return ""
     }
 
+    fun setServerPublicKeyToSharedPrefs(username: String) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putString("ServerPublicKey", username).apply()
+        }
+    }
+
+    fun getServerPublicKeyFromSharedPrefs(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getString("ServerPublicKey", "")!!
+        }
+        return ""
+    }
+
     fun setPreReleaseUpgrade(value: Boolean) {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         if (prefs != null) {
             prefs.edit().putBoolean("preRelease", value).apply()
         }
+    }
+
+    fun getLastServerPubkeyFromSharedPrefs(): String {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getString("LastServerPubkey", "")!!
+        }
+        return ""
+    }
+
+    fun setDataConsentToSharedPrefs(consent: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("DataConsent", consent).apply()
+        }
+    }
+
+    fun getDataConsentFromSharedPrefs(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            return prefs.getBoolean("DataConsent", false)
+        }
+        return false
     }
 
     fun getPreReleaseUpgrade(): Boolean {
@@ -966,10 +1004,11 @@ object AnodeUtil {
     fun internetConnection(): Boolean {
         val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
-        return if (activeNetwork?.isConnected == null)
+        return if (activeNetwork?.isConnected == null) {
             false
-        else
+        } else {
             activeNetwork.isConnected
+        }
     }
 }
 
