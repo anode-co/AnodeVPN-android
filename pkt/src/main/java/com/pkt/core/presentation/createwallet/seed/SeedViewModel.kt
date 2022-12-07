@@ -6,6 +6,7 @@ import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,7 +23,11 @@ class SeedViewModel @Inject constructor(
         invokeLoadingAction {
             walletRepository.generateSeed(password, pin)
                 .onSuccess {
+                    Timber.d("SeedViewModel| Seed generated successfully")
                     sendState { copy(seed = it) }
+                }.onFailure {
+                    Timber.e(it, "SeedViewModel| Seed generation failed")
+                    sendError(it)
                 }
         }
     }

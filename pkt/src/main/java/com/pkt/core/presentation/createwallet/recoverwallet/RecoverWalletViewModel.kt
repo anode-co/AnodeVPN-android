@@ -5,6 +5,7 @@ import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,9 +56,11 @@ class RecoverWalletViewModel @Inject constructor(
             //val walletName = walletRepository.getActiveWallet()
             walletRepository.recoverWallet(password, pin, seed, seedPassword, name)
                 .onSuccess {
+                    Timber.i("RecoverWalletViewModel| Wallet recovery successful")
                     sendNavigation(RecoverWalletNavigation.ToCongratulations)
                 }
                 .onFailure {
+                    Timber.e(it,"RecoverWalletViewModel| Wallet recovery failed")
                     sendError(it)
                 }
         }

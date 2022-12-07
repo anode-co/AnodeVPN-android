@@ -1,7 +1,9 @@
 package com.pkt.domain.dto
 
+import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
 
+@Keep
 @Serializable
 data class WalletInfo(
     val lightning: Lightning? = null,
@@ -9,6 +11,7 @@ data class WalletInfo(
     val wallet: Wallet? = null
 )
 
+@Keep
 @Serializable
 data class Lightning(
     val alias: String,
@@ -31,6 +34,7 @@ data class Lightning(
     val version: String,
 )
 
+@Keep
 @Serializable
 data class Neutrino(
     val bans: List<Ban>,
@@ -42,6 +46,7 @@ data class Neutrino(
     val queries: List<Query>,
 )
 
+@Keep
 @Serializable
 data class Wallet(
     val currentBlockHash: String,
@@ -57,6 +62,7 @@ data class Chain(
     val network: String,
 )
 
+@Keep
 @Serializable
 data class Feature(
     val isKnown: Boolean,
@@ -64,6 +70,7 @@ data class Feature(
     val name: String,
 )
 
+@Keep
 @Serializable
 data class Peer(
     val addr: String,
@@ -94,6 +101,7 @@ data class Peer(
     val witnessEnabled: Boolean,
 )
 
+@Keep
 @Serializable
 data class WalletStats(
     val birthdayBlock: Int,
@@ -110,6 +118,7 @@ data class WalletStats(
     val timeOfLastMaintenance: String,
 )
 
+@Keep
 @Serializable
 data class Ban(
     val addr: String,
@@ -132,6 +141,7 @@ data class ServerPeer(
     mtxSubscribers
 )*/
 
+@Keep
 @Serializable
 data class Query(
     val peer: String,

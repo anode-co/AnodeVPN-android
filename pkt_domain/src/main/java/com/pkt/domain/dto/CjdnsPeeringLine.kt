@@ -1,5 +1,8 @@
 package com.pkt.domain.dto
 
+import androidx.annotation.Keep
+
+@Keep
 @kotlinx.serialization.Serializable
 data class CjdnsPeeringLine(
     val ip: String,

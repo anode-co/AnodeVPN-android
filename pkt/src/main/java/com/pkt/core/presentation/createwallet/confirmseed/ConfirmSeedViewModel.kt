@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,9 +48,11 @@ class ConfirmSeedViewModel @Inject constructor(
                 invokeAction {
                     walletRepository.createWallet(password, pin, seed, name)
                         .onSuccess {
+                            Timber.d("ConfirmSeedViewModel | Wallet created successfully")
                             sendNavigation(ConfirmSeedNavigation.ToCongratulations)
                         }
                         .onFailure {
+                            Timber.e(it, "ConfirmSeedViewModel | Wallet creation failed")
                             sendError(it)
                         }
                 }

@@ -1,14 +1,23 @@
 package com.pkt.domain.dto
-@kotlinx.serialization.Serializable
+
+import androidx.annotation.Keep
+import kotlinx.serialization.Serializable
+
+@Keep
+@Serializable
 data class PktPrice(
     val `data`: Data,
     val status: Status
 )
-@kotlinx.serialization.Serializable
+
+@Keep
+@Serializable
 data class Data(
     val PKT: PKT
 )
-@kotlinx.serialization.Serializable
+
+@Keep
+@Serializable
 data class PKT(
     val circulating_supply: Double,
     val cmc_rank: Int,
@@ -30,11 +39,15 @@ data class PKT(
     val total_supply: Long,
     val tvl_ratio: Long?
 )
-@kotlinx.serialization.Serializable
+
+@Keep
+@Serializable
 data class Quote(
     val USD: USD
 )
-@kotlinx.serialization.Serializable
+
+@Keep
+@Serializable
 data class USD(
     val fully_diluted_market_cap: Double,
     val last_updated: String,
@@ -52,7 +65,8 @@ data class USD(
     val volume_change_24h: Double
 )
 
-@kotlinx.serialization.Serializable
+@Keep
+@Serializable
 data class Status(
     val credit_count: Int,
     val elapsed: Int,

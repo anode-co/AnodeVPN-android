@@ -1,5 +1,8 @@
 package com.pkt.domain.dto
 
+import androidx.annotation.Keep
+
+@Keep
 data class CjdnsInfo(
     val appVersion: String,
     val ipv4: String,
@@ -13,6 +16,7 @@ data class CjdnsInfo(
     val vpnExit: String,
 )
 
+@Keep
 data class CjdnsConnection(
     val ip4Address: String,
     val ip6Address: String,
@@ -25,6 +29,7 @@ data class CjdnsConnection(
     val outgoing: Int,
 )
 
+@Keep
 data class CjdnsPeer(
     val ipv4: String,
     val port: Int,
