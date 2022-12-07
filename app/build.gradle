@@ -4,6 +4,8 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
+    id 'kotlin-android'
 }
 ext.versionMajor = null
 ext.versionMinor = 0
@@ -66,7 +68,9 @@ android {
                 applicationIdSuffix ".release"
                 versionNameSuffix "-release"
             }
-            minifyEnabled true
+            //Disable minify,
+            // check this: https://developer.android.com/guide/navigation/navigation-pass-data#proguard_considerations
+            //minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -145,6 +149,8 @@ dependencies {
 /*    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'*/
+    //for @Keep at dtos
+    implementation 'androidx.annotation:annotation:1.5.0'
 
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.10'
     implementation 'javax.annotation:javax.annotation-api:1.3.2'

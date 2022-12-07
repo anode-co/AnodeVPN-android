@@ -1,8 +1,9 @@
 package com.pkt.domain.dto
 
-import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
+import androidx.annotation.Keep
 
+@Keep
 @Serializable
 data class RequestErrorPost(
     val publicKey: String = "",
