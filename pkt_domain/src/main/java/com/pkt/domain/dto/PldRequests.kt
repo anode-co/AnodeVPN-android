@@ -1,8 +1,9 @@
 package com.pkt.domain.dto
 
+import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
-import org.json.JSONArray
 
+@Keep
 @Serializable
 data class GetSecretResponse(
     val secret: String,
@@ -10,6 +11,7 @@ data class GetSecretResponse(
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class GetSeedResponse(
     val seed: List<String>,
@@ -17,18 +19,21 @@ data class GetSeedResponse(
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class ChangePassphraseRequest(
     val current_passphrase: String,
     val new_passphrase: String
 )
 
+@Keep
 @Serializable
 data class ChangePassphraseResponse(
     var message: String = "",
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class SendTransactionRequest(
     val to_address: String,
@@ -36,6 +41,7 @@ data class SendTransactionRequest(
     val from_address: List<String>
 )
 
+@Keep
 @Serializable
 data class SendTransactionResponse(
     val txHash: String,
@@ -43,11 +49,13 @@ data class SendTransactionResponse(
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class CheckPassphraseRequest(
     val wallet_passphrase: String
 )
 
+@Keep
 @Serializable
 data class CheckPassphraseResponse(
     val validPassphrase: Boolean,
@@ -55,29 +63,34 @@ data class CheckPassphraseResponse(
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class UnlockWalletRequest (
     var wallet_passphrase: String,
     val wallet_name: String,
 )
 
+@Keep
 @Serializable
 data class UnlockWalletResponse (
     var message: String = "",
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class ResyncWalletResponse (
     var message: String = "",
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class WalletBalancesRequest (
     var showzerobalance: Boolean,
 )
 
+@Keep
 @Serializable
 data class WalletTransactionsRequest (
     val coinbase: Int,
@@ -88,11 +101,13 @@ data class WalletTransactionsRequest (
     val endTimestamp: Long
 )
 
+@Keep
 @Serializable
 data class CreateSeedRequest (
     val seed_passphrase: String
 )
 
+@Keep
 @Serializable
 data class CreateSeedResponse (
     val seed: List<String>,
@@ -100,6 +115,7 @@ data class CreateSeedResponse (
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class CreateWalletRequest (
     val wallet_passphrase: String,
@@ -108,6 +124,7 @@ data class CreateWalletRequest (
     val wallet_name: String,
 )
 
+@Keep
 @Serializable
 data class RecoverWalletRequest (
     val wallet_passphrase: String,
@@ -115,12 +132,14 @@ data class RecoverWalletRequest (
     val wallet_name: String,
 )
 
+@Keep
 @Serializable
 data class CreateWalletResponse (
     var message: String = "",
     val stack: String = ""
 )
 
+@Keep
 @Serializable
 data class WalletAddressCreateResponse (
     val address: String,

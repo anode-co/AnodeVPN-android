@@ -1,5 +1,6 @@
 package com.pkt.domain.dto
 
+import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,6 +22,7 @@ data class RequestErrorPost(
     val debuggingMessages: String = ""
 )
 
+@Keep
 @Serializable
 data class ResponseErrorPost(
     val status: String = "",

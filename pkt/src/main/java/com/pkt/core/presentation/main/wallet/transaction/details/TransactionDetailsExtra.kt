@@ -1,10 +1,12 @@
 package com.pkt.core.presentation.main.wallet.transaction.details
 
 import android.os.Parcelable
+import androidx.annotation.Keep
 import com.pkt.core.presentation.main.wallet.transaction.TransactionType
 import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 
+@Keep
 @Parcelize
 data class TransactionDetailsExtra(
     val transactionId: String,
@@ -13,5 +15,5 @@ data class TransactionDetailsExtra(
     val type: TransactionType,
     val time: LocalDateTime,
     val amountPkt: String,
-    val amountUsd: String,
+    val amountUsd: String
 ) : Parcelable
