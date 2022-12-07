@@ -164,7 +164,7 @@ repositories {
 }
 
 private Integer generateVersionCode() {
-    return ext.minimumSdkVersion * 10000000 + ext.versionMajor * 10000 + ext.versionMinor * 100 + ext.versionPatch
+    return ext.minimumSdkVersion * 10000000 + ext.versionMajor * 100000 + ext.versionMinor * 1000 + ext.versionPatch
 }
 
 private String generateVersionName() {
