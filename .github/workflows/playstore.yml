@@ -45,7 +45,7 @@ jobs:
           track: internal
           status: draft
           inAppUpdatePriority: 3
-          changesNotSentForReview: true
+          #changesNotSentForReview: true
           #userFraction: 0.99 #for inProgress status
           whatsNewDirectory: /home/runner/work/AnodeVPN-android/AnodeVPN-android/whatsnew
       # - name: Debug with tmate on failure
