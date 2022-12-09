@@ -28,6 +28,7 @@
             android:name=".PktMainActivity"
             android:exported="false"
             android:theme="@style/Theme.App"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"
             tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
