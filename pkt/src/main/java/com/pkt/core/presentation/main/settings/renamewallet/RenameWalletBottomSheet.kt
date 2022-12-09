@@ -2,6 +2,8 @@ package com.pkt.core.presentation.main.settings.renamewallet
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -60,6 +62,7 @@ class RenameWalletBottomSheet : StateBottomSheet<RenameWalletState>(R.layout.bot
             }
 
             is RenameWalletEvent.Dismiss -> {
+                setFragmentResult(REQUEST_KEY, bundleOf())
                 dismiss()
             }
 
@@ -69,5 +72,12 @@ class RenameWalletBottomSheet : StateBottomSheet<RenameWalletState>(R.layout.bot
 
     companion object {
         const val TAG = "rename_wallet_dialog"
+        const val REQUEST_KEY = "rename_wallet_request"
+        const val WALLET_KEY = "wallet"
+        fun newInstance(wallet: String) = RenameWalletBottomSheet().apply {
+            arguments = bundleOf(
+                RenameWalletBottomSheet.WALLET_KEY to wallet
+            )
+        }
     }
 }
