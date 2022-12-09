@@ -1,6 +1,7 @@
 package com.pkt.domain.repository
 
 import android.graphics.Bitmap
+import android.net.Uri
 import com.pkt.domain.dto.*
 
 interface WalletRepository {
@@ -68,4 +69,6 @@ interface WalletRepository {
     suspend fun getPktToUsd(): Result<Float>
 
     suspend fun stopPld()
+
+    fun getActiveWalletUri(): Uri?
 }

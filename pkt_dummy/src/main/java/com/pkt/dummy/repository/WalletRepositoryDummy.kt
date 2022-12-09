@@ -3,13 +3,13 @@ package com.pkt.dummy.repository
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import com.pkt.domain.dto.*
 import com.pkt.domain.repository.WalletRepository
 import com.pkt.dummy.AddrMapper
 import com.pkt.dummy.CjdnsInfoMapper
 import com.pkt.dummy.R
 import com.pkt.dummy.WalletInfoMapper
-import com.pkt.dummy.dto.CjdnsInfoDummy
 import com.pkt.dummy.dto.WalletAddressBalancesDummy
 import com.pkt.dummy.dto.WalletInfoDummy
 import kotlinx.coroutines.Dispatchers
@@ -229,6 +229,10 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun stopPld() {
+        TODO("Not yet implemented")
+    }
+
+    override fun getActiveWalletUri(): Uri? {
         TODO("Not yet implemented")
     }
 }
