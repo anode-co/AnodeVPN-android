@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.settings
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -15,7 +16,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.BuildConfig
 import com.pkt.core.R
 import com.pkt.core.databinding.FragmentSettingsBinding
-import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.extensions.applyGradient
 import com.pkt.core.extensions.doOnCheckChanged
 import com.pkt.core.extensions.getColorByAttribute
@@ -76,6 +76,10 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
 
         setFragmentResultListener(DeleteWalletBottomSheet.REQUEST_KEY) { _, _ ->
             viewModel.onWalletDeleted()
+        }
+
+        setFragmentResultListener(RenameWalletBottomSheet.REQUEST_KEY) { _, _ ->
+            viewModel.onWalletRenamed()
         }
 
         with(viewBinding) {
@@ -217,6 +221,19 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
                 ChooseWalletBottomSheet.newInstance(event.wallets, event.currentWallet)
                     .show(parentFragmentManager, ChooseWalletBottomSheet.TAG)
             }
+            is SettingsEvent.OpenExportWallet -> exportWallet()
         }
+    }
+
+    private fun exportWallet() {
+        val walletUri = viewModel.walletUri
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "*/*"
+            putExtra(Intent.EXTRA_STREAM, walletUri)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 }

@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.settings
 
+import android.net.Uri
 import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
@@ -8,6 +9,7 @@ import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,6 +20,8 @@ class SettingsViewModel @Inject constructor(
     private val vpnRepository: VpnRepository,
     private val generalRepository: GeneralRepository,
 ) : StateViewModel<SettingsState>() {
+
+    var walletUri = Uri.EMPTY
 
     override fun createInitialState() = SettingsState(
         wallets = walletRepository.getAllWalletNames(),
@@ -65,16 +69,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onExportClick() {
-        invokeLoadingAction {
-            runCatching {
-                val username = vpnRepository.generateUsername()
-                val n = username
-            }.onSuccess {
-
-            }.onFailure {
-                sendError(it)
-            }
-        }
+        walletUri = walletRepository.getActiveWalletUri()
+        sendEvent(SettingsEvent.OpenExportWallet)
     }
 
     fun onDeleteClick() {
@@ -114,7 +110,6 @@ class SettingsViewModel @Inject constructor(
     fun onUpgradeCheckChanged(checked: Boolean) {
         generalRepository.enablePreReleaseUpgrade(checked)
         sendState { copy(upgradeChecked = checked) }
-        generalRepository.restartApplication()
     }
 
     fun onSwitchUiCheckChanged(checked: Boolean) {
@@ -140,12 +135,24 @@ class SettingsViewModel @Inject constructor(
             }
     }
 
+    fun onWalletRenamed() {
+        Timber.d("onWalletRenamed refreshing wallets")
+        sendState {
+            copy(
+                wallets = walletRepository.getAllWalletNames(),
+                walletName = walletRepository.getActiveWallet()
+            )
+        }
+    }
+
     fun onWalletDeleted() {
         //check for remaining wallets
         if (walletRepository.getAllWalletNames().isEmpty()) {
+            Timber.d("onWalletDeleted No wallets left, prompting user to create a new one")
             //if no wallets, go to create wallet screen
             sendEvent(SettingsEvent.OpenNewWallet)
         } else {
+            Timber.d("onWalletDeleted prompting user to open activewallet")
             sendEvent(SettingsEvent.OpenEnterWallet)
         }
         sendState {
