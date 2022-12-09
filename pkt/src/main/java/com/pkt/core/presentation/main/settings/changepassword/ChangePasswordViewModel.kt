@@ -47,7 +47,7 @@ class ChangePasswordViewModel @Inject constructor(
                         }
                         .onFailure {
                             Timber.e(it, "Password change failed")
-                            sendError(it)
+                            sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
                         }
                 }
             }
