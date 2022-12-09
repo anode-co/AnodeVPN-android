@@ -1,10 +1,13 @@
 package com.pkt.core.presentation.main.settings.renamewallet
 
 import androidx.lifecycle.viewModelScope
+import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,14 +33,13 @@ class RenameWalletViewModel @Inject constructor(
     fun onSaveClick() {
         invokeAction {
             walletRepository.renameWallet(name)
-                .onSuccess { error ->
-                    if (error == null) {
-                        sendEvent(RenameWalletEvent.Dismiss)
-                    } else {
-                        sendEvent(RenameWalletEvent.ShowInputError(error))
-                    }
+                .onSuccess {
+                    Timber.d("Wallet renamed to $name")
+                    sendEvent(CommonEvent.Info(R.string.success))
+                    sendEvent(RenameWalletEvent.Dismiss)
                 }.onFailure {
-                    sendError(it)
+                    Timber.e(it, "Error renaming wallet")
+                    sendEvent(RenameWalletEvent.ShowInputError(it.localizedMessage))
                 }
         }
     }
