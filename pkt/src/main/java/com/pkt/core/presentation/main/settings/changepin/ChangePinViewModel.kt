@@ -8,6 +8,7 @@ import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,7 +39,8 @@ class ChangePinViewModel @Inject constructor(
                             delay(1000)
                             sendNavigation(AppNavigation.OpenMain)
                         }.onFailure {
-                            sendError(Throwable("Wrong password"))
+                            Timber.e(it, "Error changing pin, password incorrect")
+                            sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
                         }
                 }
             }
