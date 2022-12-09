@@ -3,12 +3,12 @@ package com.pkt.core.presentation.main.settings.deletewallet
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.BottomSheetDeleteWalletBinding
 import com.pkt.core.extensions.*
-import com.pkt.core.presentation.choosewallet.ChooseWalletBottomSheet
 import com.pkt.core.presentation.common.state.StateBottomSheet
 import com.pkt.core.presentation.common.state.UiEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,6 +69,7 @@ class DeleteWalletBottomSheet : StateBottomSheet<DeleteWalletState>(R.layout.bot
             }
 
             is DeleteWalletEvent.Dismiss -> {
+                setFragmentResult(REQUEST_KEY, bundleOf())
                 dismiss()
             }
 
