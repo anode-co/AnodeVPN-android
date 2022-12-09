@@ -3,15 +3,16 @@ package co.anode.anodium.integration.model.repository
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGEncoder
+import androidx.core.content.FileProvider
 import co.anode.anodium.support.AnodeUtil
 import com.pkt.domain.dto.*
 import com.pkt.domain.interfaces.WalletAPIService
 import com.pkt.domain.repository.WalletRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
@@ -239,10 +240,18 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
     override suspend fun renameWallet(name: String): Result<String?> {
         Timber.d("renameWallet: $name")
-        val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
-        walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
-        activeWallet = name
-        return Result.success(name)
+        checkWalletName(name).onSuccess {
+            val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
+            walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
+            setActiveWallet(name)
+            //update stored PIN
+            AnodeUtil.renameEncryptedWalletPreferences(activeWallet,name)
+            return Result.success(name)
+        }.onFailure {
+            Timber.e(it, "renameWallet: failed")
+            return Result.failure(Exception("A wallet already exists with this name"))
+        }
+        return Result.success("")
     }
 
     override suspend fun checkWalletName(name: String): Result<String?> {
@@ -391,6 +400,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         AnodeUtil.stopPld()
         //Wait for pld to restart
         delay(2000)
+    }
+
+    override fun getActiveWalletUri(): Uri? {
+        return AnodeUtil.context?.let { FileProvider.getUriForFile(it, AnodeUtil.ApplicationID +".provider", File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")) }
     }
 
 }
