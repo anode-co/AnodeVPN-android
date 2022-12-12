@@ -119,25 +119,22 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
     override fun handleState(state: WalletState) {
         with(viewBinding) {
             subtitleLabel.apply {
-                val iconWarning = resources.getDrawable(R.drawable.warning, null)
+                //val iconWarning = resources.getDrawable(R.drawable.warning, null)
                 val dot = resources.getDrawable(R.drawable.ic_dot, null)
+                setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
                 when (state.syncState) {
                     WalletState.SyncState.NOTEXISTING -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
-                        compoundDrawableTintList = null
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(R.attr.colorError))
                         text = "${getString(R.string.wallet_status_notexisting)}"
                         mainViewModel.openStart()
                     }
                     WalletState.SyncState.LOCKED -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
-                        compoundDrawableTintList = null
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(R.attr.colorError))
                         text = "${getString(R.string.wallet_status_locked)}"
                         mainViewModel.openEnterWallet()
                     }
                     WalletState.SyncState.DOWNLOADING -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(R.attr.colorDownloading))
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(R.attr.colorProgress))
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
@@ -147,9 +144,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                         } | ${getString(R.string.wallet_status_syncing_headers)} ${state.chainHeight}/${state.neutrinoTop}"
                     }
                     WalletState.SyncState.SCANNING -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(R.attr.colorProgress))
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(R.attr.colorProgress))
                         text = "${
                             resources.getQuantityString(
                                 R.plurals.peers,
@@ -159,9 +154,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                         } | ${getString(R.string.wallet_status_syncing_transactions)} ${state.walletHeight}/${state.neutrinoTop}"
                     }
                     WalletState.SyncState.SUCCESS -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(R.attr.colorSuccess))
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(R.attr.colorSuccess))
                         val diffSeconds = state.syncTimeDiff
                         var timeAgoText = ""
                         if (diffSeconds > 60) {
@@ -183,20 +176,15 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                         } | ${getString(R.string.block)} ${state.chainHeight} - $timeAgoText"
                     }
                     WalletState.SyncState.FAILED -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
                         text = "${getString(R.string.wallet_status_disconnected)}"
                     }
                     WalletState.SyncState.NOINTERNET -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null)
-                        compoundDrawableTintList = ColorStateList.valueOf(
-                            context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(androidx.appcompat.R.attr.colorError))
                         text = "${getString(R.string.wallet_status_no_internet)}"
                     }
                     WalletState.SyncState.WAITING -> {
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(iconWarning, null, null, null)
-                        compoundDrawableTintList = null
+                        compoundDrawableTintList = ColorStateList.valueOf(context.getColorByAttribute(R.attr.colorError))
                         text = "${getString(R.string.wallet_status_syncing_waiting)}"
                     }
                 }
