@@ -205,10 +205,17 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         val encryptedPassword = AnodeUtil.getWalletPassword(activeWallet)
         val passphrase = AnodeUtil.decrypt(encryptedPassword, pin)
         if (passphrase != null) {
-            return unlockWallet(passphrase)
+            unlockWallet(passphrase).onSuccess {
+                Timber.d("unlockWalletWithPIN: success")
+                return Result.success(true)
+            }.onFailure {
+                Timber.e(it, "unlockWalletWithPIN: failure")
+                return Result.failure(it)
+            }
         } else {
             return Result.failure(Exception("Wrong PIN. Cannot decrypt wallet password"))
         }
+        return Result.failure(Exception("Failed to unlock wallet"))
     }
 
     override suspend fun createAddress(): Result<WalletAddressCreateResponse> {
@@ -243,9 +250,9 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         checkWalletName(name).onSuccess {
             val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
             walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
-            setActiveWallet(name)
             //update stored PIN
             AnodeUtil.renameEncryptedWalletPreferences(activeWallet,name)
+            setActiveWallet(name)
             return Result.success(name)
         }.onFailure {
             Timber.e(it, "renameWallet: failed")
@@ -265,12 +272,14 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override fun deleteWallet(name: String) {
+    override suspend fun deleteWallet(name: String) {
         Timber.d("Deleting wallet $name")
         //Delete saved pin/password
         AnodeUtil.removeEncryptedWalletPreferences(name)
         //Delete Wallet
         AnodeUtil.deleteWallet(name)
+        //restart pld
+        stopPld()
     }
 
     override suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean> {

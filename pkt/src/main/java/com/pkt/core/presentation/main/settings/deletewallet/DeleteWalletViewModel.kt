@@ -44,8 +44,10 @@ class DeleteWalletViewModel @Inject constructor(
     }
 
     fun onDeleteClick() {
-        walletRepository.deleteWallet(name)
-        sendEvent(CommonEvent.Info(R.string.success))
-        sendEvent(DeleteWalletEvent.Dismiss)
+        viewModelScope.launch {
+            walletRepository.deleteWallet(name)
+            sendEvent(CommonEvent.Info(R.string.success))
+            sendEvent(DeleteWalletEvent.Dismiss)
+        }
     }
 }

@@ -172,7 +172,7 @@ class WalletRepositoryDummy constructor(
         )
     }
 
-    override fun deleteWallet(name: String) {
+    override suspend fun deleteWallet(name: String) {
         TODO("Not yet implemented")
     }
 

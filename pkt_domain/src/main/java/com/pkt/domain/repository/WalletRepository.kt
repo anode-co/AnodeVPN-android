@@ -46,7 +46,7 @@ interface WalletRepository {
     //Check if wallet name exists
     suspend fun checkWalletName(name: String): Result<String?>
     //Delete wallet name from device
-    fun deleteWallet(name: String)
+    suspend fun deleteWallet(name: String)
     //Change active wallet passphrase
     suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean>
     //Change active wallet PIN

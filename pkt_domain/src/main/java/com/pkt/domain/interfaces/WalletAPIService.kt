@@ -1,6 +1,5 @@
 package com.pkt.domain.interfaces
 
-import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.pkt.domain.dto.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -18,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import timber.log.Timber
 import java.lang.reflect.Type
+import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
 
@@ -50,18 +50,32 @@ class WalletAPIService {
     }
 
     suspend fun unlockWalletAPI(@Body unlockWalletRequest: UnlockWalletRequest): Boolean {
-        val response = api.unlockWallet(unlockWalletRequest)
-        if (response.body()?.message == "") {
-            return true
-        } else {
-            Timber.d("unlockWalletAPI: failed with message ${response.errorBody()?.string()}")
+        try {
+            val response = api.unlockWallet(unlockWalletRequest)
+            if (response.body()?.message == "") {
+                return true
+            } else {
+                Timber.d("unlockWalletAPI: failed with message ${response.errorBody()?.string()}")
+                return false
+            }
+        }catch (e: SocketTimeoutException){
+            Timber.d("unlockWalletAPI: timed out")
+            return false
+        }catch (e: Exception) {
+            Timber.e(e)
             return false
         }
     }
 
     suspend fun createAddress(): WalletAddressCreateResponse {
-        return api.createAddress("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+        try {
+            return api.createAddress("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+        } catch (e: Exception) {
+            Timber.d("unlockWalletAPI: failed with message ${e.message}")
+            return WalletAddressCreateResponse("","${e.message}", e.stackTraceToString())
+        }
     }
+
 
     suspend fun getWalletBalances(showzerobalances: Boolean): WalletAddressBalances {
         val request = WalletBalancesRequest(showzerobalances)
