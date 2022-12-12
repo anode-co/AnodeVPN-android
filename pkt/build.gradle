@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         buildConfigField "Boolean", "ALLOW_MULTIPLE_WALLETS", "true"
-        buildConfigField "Boolean", "ALLOW_VPN_LIST", "false"
+        buildConfigField "Boolean", "ALLOW_VPN_LIST", "true"
         minSdk 26
         targetSdk 32
 
