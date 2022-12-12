@@ -157,6 +157,7 @@
         app:layout_constraintStart_toEndOf="@id/key0Button"
         app:layout_constraintTop_toTopOf="@id/key0Button"
         app:srcCompat="@drawable/ic_apply"
-        tools:ignore="ContentDescription,HardcodedText" />
+        tools:ignore="ContentDescription,HardcodedText"
+        app:tint="?android:textColorPrimary" />
 
 </merge>

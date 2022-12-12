@@ -61,7 +61,8 @@
             app:layout_constraintEnd_toEndOf="@id/transactionIdValue"
             app:layout_constraintTop_toTopOf="@id/transactionIdValue"
             app:srcCompat="@drawable/ic_overlay_address"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            android:forceDarkAllowed="false"/>
 
         <ImageButton
             android:id="@+id/copyButton"
