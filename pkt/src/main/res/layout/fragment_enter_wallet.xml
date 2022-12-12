@@ -79,6 +79,7 @@
             android:layout_weight="1"
             android:paddingHorizontal="16dp"
             android:textAllCaps="true"
+            android:inputType="numberPassword"
             android:textAppearance="?textAppearance16Regular" />
 
         <ImageButton
