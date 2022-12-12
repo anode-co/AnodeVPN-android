@@ -107,6 +107,12 @@ android {
         }
     }
 
+    bundle {
+        storeArchive {
+            enable = false
+        }
+    }
+
     namespace 'co.anode.anodium'
 }
 
