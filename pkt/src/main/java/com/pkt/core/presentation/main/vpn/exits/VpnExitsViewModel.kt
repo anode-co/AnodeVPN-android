@@ -1,7 +1,9 @@
 package com.pkt.core.presentation.main.vpn.exits
 
 import androidx.lifecycle.viewModelScope
+import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.util.CountryUtil
 import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnState
@@ -56,7 +58,13 @@ class VpnExitsViewModel @Inject constructor(
         }
 
         invokeLoadingAction {
-            vpnRepository.fetchVpnList(force = true)
+            vpnRepository.fetchVpnList(force = true).onFailure {
+                if (it.message == "timeout") {
+                    sendEvent(CommonEvent.Warning(R.string.connection_timeout))
+                } else {
+                    sendError(it)
+                }
+            }
         }
     }
 

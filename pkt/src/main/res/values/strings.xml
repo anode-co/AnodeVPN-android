@@ -170,6 +170,7 @@
     <string name="search">Search</string>
     <string name="not_connected">Not connected</string>
     <string name="no_internet">No internet connection</string>
+    <string name="connection_timeout">Connection timeout</string>
     <string name="connecting">Connecting</string>
     <string name="getting_routes">Getting routes</string>
     <string name="got_routes">Got routes</string>

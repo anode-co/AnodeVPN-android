@@ -43,15 +43,19 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
         Timber.d("VpnRepositoryImpl fetchVpnList")
-        val list = vpnAPI.getVpnServersList()
-
-        val vpnList: MutableList<Vpn> = mutableListOf()
-        for(i in list.indices){
-            val server = list[i]
-            vpnList.add(Vpn(server.name, server.countryCode, server.publicKey))
+            vpnAPI.getVpnServersList().onSuccess { list ->
+            val vpnList: MutableList<Vpn> = mutableListOf()
+            for(i in list.indices){
+                val server = list[i]
+                vpnList.add(Vpn(server.name, server.countryCode, server.publicKey))
+            }
+            _vpnListFlow.tryEmit(vpnList)
+            return Result.success(vpnList)
+        }.onFailure {
+            Timber.e("VpnRepositoryImpl fetchVpnList failed")
+            return Result.failure(it)
         }
-        _vpnListFlow.tryEmit(vpnList)
-        return Result.success(vpnList)
+        return Result.success(emptyList())
     }
 
     override suspend fun setCurrentVpn(vpn: Vpn): Result<Unit> {
@@ -105,6 +109,11 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override suspend fun connect(node: String): Result<Boolean>  {
         Timber.d("VpnRepositoryImpl connect")
+        if ((_vpnState.value == VpnState.CONNECTING) || (_vpnState.value == VpnState.CONNECTED)) {
+            Timber.d("VpnRepositoryImpl connect: disconnect current before attempting to connect again")
+            disconnect()
+        }
+
         _vpnState.tryEmit(VpnState.CONNECTING)
         AnodeUtil.addCjdnsPeers()
         if(authorizeVPN().isSuccess){
