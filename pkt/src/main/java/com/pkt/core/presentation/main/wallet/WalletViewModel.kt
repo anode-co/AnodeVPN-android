@@ -305,10 +305,12 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onPeriodChanged(startDate: Long?, endDate: Long?) {
-        Timber.d("WalletViewModel onPeriodChanged: $startDate $endDate")
+        //Add 23h:59m:59s to endDate
+        val endDateWithTime = endDate?.plus(86399000)
+        Timber.d("WalletViewModel onPeriodChanged: $startDate $endDateWithTime")
         sendState { copy(
             startDate = startDate,
-            endDate = endDate,
+            endDate = endDateWithTime,
             items = listOf())//Clear transactions when period changes
         }
         transactions.clear()
@@ -325,11 +327,14 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onTransactionClick(transaction: TransactionItem) {
+        //remove our address from sender's addresses
+        val addresses = transaction.addresses.toMutableList()
+        addresses.remove(currentState.walletAddress)
         sendEvent(
             WalletEvent.OpenTransactionDetails(
                 TransactionDetailsExtra(
                     transactionId = transaction.transactionId,
-                    addresses = transaction.addresses,
+                    addresses = addresses,
                     blockNumber = transaction.blockNumber,
                     type = transaction.type,
                     time = transaction.time,
