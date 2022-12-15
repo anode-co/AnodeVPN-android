@@ -87,18 +87,20 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="26dp"
             android:text="@string/view_transaction"
+            android:visibility="gone"
             app:layout_constraintEnd_toStartOf="@id/doneButton"
             app:layout_constraintStart_toStartOf="@id/transactionIdValue"
             app:layout_constraintTop_toBottomOf="@id/transactionIdValue" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/doneButton"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="@dimen/spacing_horizontal"
             android:text="@string/done"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintStart_toEndOf="@id/viewButton"
             app:layout_constraintTop_toTopOf="@id/viewButton" />
 
