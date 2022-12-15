@@ -26,6 +26,8 @@ class VpnViewModel @Inject constructor(
     val timerUiState: Flow<Int> by lazy { _timerUiState }
 
     private var timerJob: Job? = null
+    private var pollingJob: Job? = null
+    private val pollingInterval = 10000L //10sec polling IPs
 
     init {
         invokeLoadingAction {
@@ -155,6 +157,11 @@ class VpnViewModel @Inject constructor(
                 }.collect()
             }
         }
+        startPolling()
+    }
+
+    fun onPause() {
+        stopPolling()
     }
 
     fun cjdnsInit() {
@@ -162,5 +169,37 @@ class VpnViewModel @Inject constructor(
         viewModelScope.launch {
             cjdnsRepository.init()
         }
+    }
+
+    private fun startPolling() {
+        stopPolling()
+        pollingJob = viewModelScope.launch {
+            while (true) {
+                if (!isActive) return@launch
+                updateIPs()
+                delay(pollingInterval)
+            }
+        }
+    }
+
+    private suspend fun updateIPs() {
+        kotlin.runCatching {
+            val ipv4 = vpnRepository.getIPv4Address().getOrNull()
+            val ipv6 = vpnRepository.getIPv6Address().getOrNull()
+            Pair(ipv4, ipv6)
+        }.onSuccess {  (ipv4, ipv6) ->
+            sendState {
+                copy(
+                    ipV4 = ipv4,
+                    ipV6 = ipv6,
+                )
+            }
+        }.onFailure {
+            Timber.e(it, "VpnViewModel updateIPs| Failed")
+        }
+    }
+
+    private fun stopPolling() {
+        pollingJob?.cancel()
     }
 }

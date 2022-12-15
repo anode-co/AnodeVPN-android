@@ -123,6 +123,11 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
         viewModel.onResume()
     }
 
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
+
     private fun startVPNService() {
         val intent = VpnService.prepare(context)
         if (intent != null) {
