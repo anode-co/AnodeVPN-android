@@ -34,6 +34,10 @@ class TransactionDetailsBottomSheet : StateBottomSheet<TransactionDetailsState>(
                 viewModel.onCopyClick()
             }
 
+            viewButton.doOnClick {
+                viewModel.onViewClick()
+            }
+
             seeMoreLessButton.doOnClick {
                 viewModel.onSeeMoreLessClick()
             }

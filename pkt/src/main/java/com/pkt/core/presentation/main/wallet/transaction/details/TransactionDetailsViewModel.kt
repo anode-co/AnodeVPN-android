@@ -25,4 +25,8 @@ class TransactionDetailsViewModel @Inject constructor(
     fun onSeeMoreLessClick() {
         sendState { copy(moreVisible = !moreVisible) }
     }
+
+    fun onViewClick() {
+        sendEvent(CommonEvent.WebUrl("https://explorer.pkt.cash/tx/${extra.transactionId}"))
+    }
 }
