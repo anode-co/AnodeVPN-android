@@ -205,8 +205,16 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             }
 
             balanceUsdLabel.text = state.balanceUsd.formatUsd()
-
-            addressValue.text = state.walletAddress
+            //reduce address size to display in one line
+            var strippedAddress = state.walletAddress
+            var toDisplay = state.walletAddress
+            while(addressValue.paint.measureText(toDisplay) > addressValue.width) {
+                val firstHalf = strippedAddress.substring(0, (strippedAddress.length/2) - 1)
+                val secondHalf = strippedAddress.substring(strippedAddress.length - (strippedAddress.length/2) + 1)
+                strippedAddress = firstHalf + secondHalf
+                toDisplay = "$firstHalf...$secondHalf"
+            }
+            addressValue.text = toDisplay
             adapter.items = state.items
 
             selectPeriodButton.text = if (state.startDate != null && state.endDate != null) {

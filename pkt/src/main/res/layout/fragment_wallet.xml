@@ -114,12 +114,15 @@
         android:id="@+id/addressValue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:clickable="true"
         android:textAppearance="?textAppearance16Regular"
+        android:textColor="@color/btn_text_color_selector_inverse"
         app:layout_constraintEnd_toEndOf="@id/addressLabel"
         app:layout_constraintStart_toStartOf="@id/addressLabel"
-        app:layout_constraintTop_toBottomOf="@id/addressLabel"
-        tools:text="pkdfvdsv1kliblh5kihi3nn24inkklk5353kkjbl" />
+        app:layout_constraintTop_toTopOf="@+id/qrButton"
+        app:layout_constraintBottom_toBottomOf="@+id/qrButton"
+        android:singleLine="true"
+        tools:text="pkdfvdsv1kliblh5fdkjp445nkfdjfdnfjkdfk5353kkjbl" />
 
     <ImageButton
         android:id="@+id/qrButton"
