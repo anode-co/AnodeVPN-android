@@ -42,9 +42,13 @@ class VpnRepositoryDummy : VpnRepository {
         return Result.success(listOf())
     }
 
-    override suspend fun setCurrentVpn(vpn: Vpn): Result<Unit> {
+    override fun setCurrentVpn(vpn: Vpn): Result<Unit> {
         _currentVpnNameFlow.tryEmit(vpn.name)
         return Result.success(Unit)
+    }
+
+    override fun connectFromExits(vpn: Vpn) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun connect(node: String): Result<Boolean> {

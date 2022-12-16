@@ -73,14 +73,8 @@ class VpnExitsViewModel @Inject constructor(
     fun onVpnExitItemClick(item: VpnExitItem) {
         invokeAction {
             vpnRepository.disconnect()
-            vpnRepository.setCurrentVpn(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey))
-                .onSuccess {
-                    vpnRepository.connect(item.publicKey)
-                    navigateBack()
-                }
-                .onFailure {
-                    sendError(it)
-                }
         }
+        vpnRepository.connectFromExits(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey))
+        navigateBack()
     }
 }

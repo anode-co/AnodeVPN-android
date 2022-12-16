@@ -138,6 +138,11 @@ class VpnViewModel @Inject constructor(
                     vpnRepository.disconnect()
                 }
             }
+            com.pkt.domain.dto.VpnState.CONNECT -> {
+                viewModelScope.launch {
+                    currentState.vpn?.let { vpnRepository.connect(it.publicKey) }
+                }
+            }
         }
     }
 

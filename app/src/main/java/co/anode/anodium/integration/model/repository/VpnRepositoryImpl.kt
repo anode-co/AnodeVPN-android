@@ -58,10 +58,16 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return Result.success(emptyList())
     }
 
-    override suspend fun setCurrentVpn(vpn: Vpn): Result<Unit> {
+    override fun setCurrentVpn(vpn: Vpn): Result<Unit> {
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("LastServerPubkey", vpn.publicKey)?.apply()
         _currentVpnFlow.tryEmit(vpn)
         return Result.success(Unit)
+    }
+
+    override fun connectFromExits(vpn: Vpn) {
+        Timber.d("VpnRepositoryImpl connectFromExits")
+        setCurrentVpn(vpn).getOrNull()
+        _vpnState.tryEmit(VpnState.CONNECT)
     }
 
     fun cjdnsConnectVPN(node: String) {
