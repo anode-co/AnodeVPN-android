@@ -66,6 +66,7 @@
                 android:text="@string/sender_address"
                 android:textAppearance="?textAppearance14Regular"
                 android:textColor="?android:textColorSecondary"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -76,6 +77,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:visibility="gone"
                 android:textAppearance="?textAppearance16Regular"
                 app:layout_constraintEnd_toEndOf="@id/senderAddressLabel"
                 app:layout_constraintStart_toStartOf="@id/senderAddressLabel"
@@ -83,14 +85,46 @@
                 tools:text="pkdfvdsv1kliblh5kihi3nn24inkklk5353kkjbl" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:id="@+id/addressesLayout"
+                android:id="@+id/senderaddressesLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@id/senderAddressLabel"
                 app:layout_constraintStart_toStartOf="@id/senderAddressLabel"
                 app:layout_constraintTop_toBottomOf="@id/senderAddressValue" />
+
+            <TextView
+                android:id="@+id/recipientAddressLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:text="@string/recipient_address"
+                android:textAppearance="?textAppearance14Regular"
+                android:textColor="?android:textColorSecondary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/senderaddressesLayout" />
+
+            <TextView
+                android:id="@+id/recipientAddressValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?textAppearance16Regular"
+                app:layout_constraintEnd_toEndOf="@id/recipientAddressLabel"
+                app:layout_constraintStart_toStartOf="@id/recipientAddressLabel"
+                app:layout_constraintTop_toBottomOf="@id/recipientAddressLabel"
+                tools:text="pkdfvdsv1kliblh5kihi3nn24inkklk5353kkjbl" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/recipientaddressesLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/recipientAddressLabel"
+                app:layout_constraintStart_toStartOf="@id/recipientAddressLabel"
+                app:layout_constraintTop_toBottomOf="@id/recipientAddressValue" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/seeMoreLessButton"
@@ -104,7 +138,7 @@
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/addressesLayout"
+                app:layout_constraintTop_toBottomOf="@id/recipientaddressesLayout"
                 app:minHeight="24dp"
                 tools:text="@string/see_more" />
 
