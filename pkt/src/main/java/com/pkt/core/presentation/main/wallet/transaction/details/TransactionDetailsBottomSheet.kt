@@ -41,6 +41,11 @@ class TransactionDetailsBottomSheet : StateBottomSheet<TransactionDetailsState>(
             seeMoreLessButton.doOnClick {
                 viewModel.onSeeMoreLessClick()
             }
+
+            senderAddressValue.doOnClick {
+                viewModel.onSenderAddressClick()
+            }
+
         }
     }
 
