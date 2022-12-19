@@ -24,6 +24,7 @@ import com.pkt.core.presentation.main.wallet.qr.QrBottomSheet
 import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
+import kotlin.math.floor
 
 @AndroidEntryPoint
 class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core) {
@@ -205,17 +206,10 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             }
 
             balanceUsdLabel.text = state.balanceUsd.formatUsd()
-            //reduce address size to display in one line
-            if (state.walletAddress.length > 1) {
-                var strippedAddress = state.walletAddress
-                var toDisplay = state.walletAddress
-                while(addressValue.paint.measureText(toDisplay) > addressValue.width) {
-                    val firstHalf = strippedAddress.substring(0, (strippedAddress.length/2) - 1)
-                    val secondHalf = strippedAddress.substring(strippedAddress.length - (strippedAddress.length/2) + 1)
-                    strippedAddress = firstHalf + secondHalf
-                    toDisplay = "$firstHalf...$secondHalf"
-                }
-                addressValue.text = toDisplay
+            if (state.walletAddress.length > 10) {
+                addressValue.text = state.walletAddress.substring(0, 12) + "..." + state.walletAddress.substring(state.walletAddress.length - 8)
+            } else {
+                addressValue.text = state.walletAddress
             }
             adapter.items = state.items
 
