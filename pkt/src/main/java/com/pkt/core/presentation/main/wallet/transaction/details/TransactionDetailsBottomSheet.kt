@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.textview.MaterialTextView
 import com.pkt.core.R
 import com.pkt.core.databinding.BottomSheetTransactionDetailsBinding
 import com.pkt.core.extensions.doOnClick
@@ -42,8 +43,8 @@ class TransactionDetailsBottomSheet : StateBottomSheet<TransactionDetailsState>(
                 viewModel.onSeeMoreLessClick()
             }
 
-            senderAddressValue.doOnClick {
-                viewModel.onSenderAddressClick()
+            recipientAddressValue.doOnClick {
+                viewModel.onAddressClick(recipientAddressValue.text.toString())
             }
 
         }
@@ -70,8 +71,8 @@ class TransactionDetailsBottomSheet : StateBottomSheet<TransactionDetailsState>(
                 text = if (state.extra.type == TransactionType.SENT) "-%s".format(state.extra.amountPkt) else state.extra.amountPkt
             }
 
+            recipientAddressValue.text = state.extra.addresses.firstOrNull()
             amountUsdLabel.text = state.extra.amountUsd.formatUsd()
-            senderAddressValue.text = state.extra.addresses.firstOrNull()
             transactionIdValue.text = state.extra.transactionId
             blockNumberValue.text = state.extra.blockNumber.toString()
 
@@ -80,14 +81,17 @@ class TransactionDetailsBottomSheet : StateBottomSheet<TransactionDetailsState>(
                 setText(if (state.moreVisible) R.string.see_less else R.string.see_more)
             }
 
-            addressesLayout.isVisible = state.moreVisible
+            recipientaddressesLayout.isVisible = state.moreVisible
 
-            addressesLayout.removeAllViews()
+            recipientaddressesLayout.removeAllViews()
             state.extra.addresses.takeIf { it.size > 1 }?.subList(1, state.extra.addresses.size)?.forEach {
                 val addressView = (layoutInflater.inflate(R.layout.view_address, null) as TextView).apply {
                     text = it
                 }
-                addressesLayout.addView(addressView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                addressView.setOnClickListener {
+                    viewModel.onAddressClick((it as MaterialTextView).text.toString())
+                }
+                recipientaddressesLayout.addView(addressView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             }
         }
     }

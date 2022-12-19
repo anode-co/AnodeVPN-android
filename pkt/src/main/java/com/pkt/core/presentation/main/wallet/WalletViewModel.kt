@@ -327,14 +327,11 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onTransactionClick(transaction: TransactionItem) {
-        //remove our address from sender's addresses
-        val addresses = transaction.addresses.toMutableList()
-        addresses.remove(currentState.walletAddress)
         sendEvent(
             WalletEvent.OpenTransactionDetails(
                 TransactionDetailsExtra(
                     transactionId = transaction.transactionId,
-                    addresses = addresses,
+                    addresses = transaction.addresses,
                     blockNumber = transaction.blockNumber,
                     type = transaction.type,
                     time = transaction.time,

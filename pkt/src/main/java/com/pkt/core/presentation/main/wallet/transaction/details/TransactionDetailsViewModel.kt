@@ -30,9 +30,9 @@ class TransactionDetailsViewModel @Inject constructor(
         sendEvent(CommonEvent.WebUrl("https://explorer.pkt.cash/tx/${extra.transactionId}"))
     }
 
-    fun onSenderAddressClick() {
-        if (extra.addresses.isNotEmpty()) {
-            sendEvent(CommonEvent.CopyToBuffer(R.string.address, extra.addresses[0]))
+    fun onAddressClick(address: String) {
+        if (address.isNotEmpty()) {
+            sendEvent(CommonEvent.CopyToBuffer(R.string.address, address))
             sendEvent(CommonEvent.Info(R.string.address_copied))
         }
     }
