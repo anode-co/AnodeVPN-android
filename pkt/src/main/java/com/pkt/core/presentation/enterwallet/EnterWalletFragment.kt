@@ -2,6 +2,7 @@ package com.pkt.core.presentation.enterwallet
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -24,6 +25,17 @@ class EnterWalletFragment : StateFragment<EnterWalletState>(R.layout.fragment_en
     private val viewBinding by viewBinding(FragmentEnterWalletBinding::bind)
 
     override val viewModel: EnterWalletViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                //capture back press and do nothing, to avoid returning to MainActivity
+                //should be removed once the launch activity becomes the PktMainActivity
+                return
+            }
+        })
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

@@ -17,7 +17,6 @@ class SettingsViewModel @Inject constructor(
     @VersionName private val versionName: String,
     @Username private val id: String,
     private val walletRepository: WalletRepository,
-    private val vpnRepository: VpnRepository,
     private val generalRepository: GeneralRepository,
 ) : StateViewModel<SettingsState>() {
 
