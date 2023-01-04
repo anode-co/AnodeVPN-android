@@ -4,8 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.net.*
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -95,18 +94,17 @@ object AnodeUtil {
         Log.i(BuildConfig.APPLICATION_ID, "Creating files directory")
         context!!.filesDir.mkdir()
         //Create symbolic link for cjdroute
-        val filesdir = "data/data/${BuildConfig.APPLICATION_ID}/files"
         val nativelibdir = context!!.applicationInfo.nativeLibraryDir.toString()
-        val cjdrouteFile = File("$filesdir/cjdroute")
+        val cjdrouteFile = File("$filesDirectory/cjdroute")
         cjdrouteFile.delete()
         var oldPath = "$nativelibdir/libcjdroute.so"
-        var newPath = "$filesdir/cjdroute"
+        var newPath = "$filesDirectory/cjdroute"
         Os.symlink(oldPath, newPath)
         //Create symbolic link for pld
-        val pldfile = File("$filesdir/pld")
+        val pldfile = File("$filesDirectory/pld")
         pldfile.delete()
         oldPath = "$nativelibdir/libpld.so"
-        newPath = "$filesdir/pld"
+        newPath = "$filesDirectory/pld"
         Os.symlink(oldPath,newPath)
         //Create needed directories
         val pktwalletdir = File("$filesDirectory/pkt")
@@ -315,20 +313,17 @@ object AnodeUtil {
             initializeCjdrouteConfFile(prefs?.getString("wallet_secret","").toString())
         }
         try {
-            Log.i(
-                LOGTAG, "Launching cjdroute (file size: " +
-                    File("$filesDirectory/$CJDROUTE_BINFILE").length() + ")")
-            val processBuilder = ProcessBuilder()
-            //Run cjdroute with existing conf file
-            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE")
-                    .redirectInput(File(filesDirectory, CJDROUTE_CONFFILE))
-                    .redirectOutput(File(filesDirectory, CJDROUTE_LOG))
-                    .redirectErrorStream(true)
-            pb.environment()["TMPDIR"] = filesDirectory
+            Log.i(LOGTAG, "Launching cjdroute (file size: " + File("$filesDirectory/$CJDROUTE_BINFILE").length() + ")")
+            val processBuilder = ProcessBuilder("$filesDirectory/$CJDROUTE_BINFILE")
+                .redirectInput(File(filesDirectory, CJDROUTE_CONFFILE))
+                .redirectOutput(File(filesDirectory, CJDROUTE_LOG))
+                .redirectErrorStream(true)
+            processBuilder.environment()["TMPDIR"] = filesDirectory
+            processBuilder.directory(File(filesDirectory))
             cjdns_pb = processBuilder.start()
             cjdns_pb.waitFor()
             Log.e(LOGTAG, "cjdns exited with " + cjdns_pb.exitValue())
-            CjdnsSocket.init(filesDirectory + "/" + CJDROUTE_SOCK)
+            CjdnsSocket.init("$filesDirectory/$CJDROUTE_SOCK")
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
@@ -404,6 +399,7 @@ object AnodeUtil {
             val security = json.getJSONArray("security")
             if (security.getJSONObject(3).has("noforks"))
                 security.getJSONObject(3).put("noforks", 0)
+            json.put("pipe","$filesDirectory/$CJDROUTE_SOCK")
             //Save file
             val writer = BufferedWriter(FileWriter("$filesDirectory/$CJDROUTE_CONFFILE"))
             val out = json.toString().replace("\\/", "/")
@@ -1011,6 +1007,17 @@ object AnodeUtil {
         }
     }
 
+    fun updateDNS(dnsServer: String) {
+        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = cm.activeNetwork
+        //Set DNS servers
+        val dnsServers = listOf(InetAddress.getByName("1.1.1.1"), InetAddress.getByName("208.67.222.222"))
+
+        val linkProperties = LinkProperties()
+        linkProperties.setDnsServers(dnsServers)
+
+
+    }
 
 }
 
