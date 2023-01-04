@@ -136,7 +136,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
             }
             address
         }.onSuccess { address ->
-            Timber.d("getWalletAddress: success: $address")
+            Timber.d("getWalletAddress: success")
             address
         }.onFailure {
             Timber.e(it, "getWalletAddress: failure")
