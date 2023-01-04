@@ -256,7 +256,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="20dp"
                             android:paddingVertical="10dp"
-                            android:text="Switch to new UI (requires restart)"/>
+                            android:text="@string/switch_to_old_ui_screens"/>
                 </LinearLayout>
         </androidx.core.widget.NestedScrollView>
         <TextView

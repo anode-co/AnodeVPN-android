@@ -61,6 +61,7 @@
 
     <!--fragment_recover_wallet-->
     <string name="recover_title">Enter your 15 word seed phrase and  the wallet password you created below</string>
+    <string name="recover_wallet_warning">Due to memory limitations, mining wallets are not supported.</string>
     <string name="seed">Seed</string>
     <string name="password">Password</string>
     <string name="recover_wallet">Recover Wallet</string>
@@ -219,6 +220,7 @@
     <string name="error_send_transaction_amount">Invalid amount</string>
     <string name="error_pkt_address">Invalid PKT address</string>
     <string name="switch_to_new_ui_screens">Switch to new UI (requires restart)</string>
+    <string name="switch_to_old_ui_screens">Use old UI (requires restart)</string>
     <string name="error_seed_length">Invalid seed length. Must be 15 words</string>
     <string name="address_copied">Address copied</string>
     <string name="confirm_with_password">Confirm with Password</string>
