@@ -164,7 +164,8 @@
     <string name="done">Done</string>
     <string name="transaction_id_copied">Transaction Id copied</string>
     <string name="consent">Consent</string>
-    <string name="consent_description">Anode collects data to optimize the app and improve the experience. We would like to ask your consent.</string>
+    <string name="consent_description">Technical data such as errors and crashes are automatically reported so that the development team can improve the app and diagnose problems. Private information such as passwords, keys, and browsing history is never shared. You may opt out of this but it will make technical support more difficult.</string>
+    <string name="consent_opt_out">Opt out</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="vpn_exits">VPN Exits</string>

@@ -187,7 +187,11 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             }
 
             is SettingsEvent.OpenConsent -> {
-                ConsentBottomSheet().show(parentFragmentManager, ConsentBottomSheet.TAG)
+                val consent = ConsentBottomSheet()
+                val bundle = Bundle()
+                bundle.putBoolean("optOut", event.optOut)
+                consent.arguments = bundle
+                consent.show(parentFragmentManager, ConsentBottomSheet.TAG)
             }
 
             is SettingsEvent.OpenRenameWallet -> {

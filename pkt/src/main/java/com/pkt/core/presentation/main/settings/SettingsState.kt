@@ -19,7 +19,7 @@ sealed class SettingsEvent : UiEvent {
     object OpenCjdnsInfo : SettingsEvent()
 
     object OpenShowSeed : SettingsEvent()
-    object OpenConsent : SettingsEvent()
+    data class OpenConsent(val optOut: Boolean) : SettingsEvent()
     object OpenRenameWallet : SettingsEvent()
     object OpenExportWallet : SettingsEvent()
     object OpenDeleteWallet : SettingsEvent()

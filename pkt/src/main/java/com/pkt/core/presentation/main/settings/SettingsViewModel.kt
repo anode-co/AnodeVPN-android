@@ -58,7 +58,7 @@ class SettingsViewModel @Inject constructor(
                 sendEvent(SettingsEvent.OpenWalletInfo)
             }
             MenuItem.Type.DATA_CONSENT -> {
-                sendEvent(SettingsEvent.OpenConsent)
+                sendEvent(SettingsEvent.OpenConsent(!generalRepository.getDataConsent()))
             }
         }
     }
@@ -91,7 +91,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onConsentResult(value: Boolean) {
-        generalRepository.setDataConsent(value)
+        //value return from consent dialog is for opting out
+        generalRepository.setDataConsent(!value)
     }
 
     fun onNewWallet(name: String?, mode: CreateWalletMode) {
