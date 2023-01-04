@@ -80,6 +80,7 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
         val b = avpn.builder().setSession("AnodeVpnService")
                 .addAddress("fc00::", 128)
                 .addRoute("fc00::",8)
+                .addDnsServer("1.1.1.1")
                 //.allowFamily(AF_INET)
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
