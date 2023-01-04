@@ -9,6 +9,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
 import com.pkt.core.databinding.BottomSheetConsentBinding
 import com.pkt.core.presentation.common.BaseBottomSheet
+import com.pkt.domain.repository.GeneralRepository
 
 class ConsentBottomSheet : BaseBottomSheet(R.layout.bottom_sheet_consent) {
 
@@ -24,12 +25,12 @@ class ConsentBottomSheet : BaseBottomSheet(R.layout.bottom_sheet_consent) {
         super.onViewCreated(view, savedInstanceState)
 
         with(viewBinding) {
+            checkboxOptOut.isChecked = arguments?.getBoolean("optOut") ?: false
             okButton.setOnClickListener {
-                setFragmentResult(REQUEST_KEY, bundleOf(RESULT_KEY to true))
+                setFragmentResult(REQUEST_KEY, bundleOf(RESULT_KEY to checkboxOptOut.isChecked))
                 dismiss()
             }
             cancelButton.setOnClickListener {
-                setFragmentResult(REQUEST_KEY, bundleOf(RESULT_KEY to false))
                 dismiss()
             }
         }
