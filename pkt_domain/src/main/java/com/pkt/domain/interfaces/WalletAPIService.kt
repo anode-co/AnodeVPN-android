@@ -30,9 +30,9 @@ class WalletAPIService {
     private val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
 
     private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(2, TimeUnit.SECONDS)
-        .readTimeout(50, TimeUnit.SECONDS)//needed for creating wallet
-        .writeTimeout(20, TimeUnit.SECONDS)
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(90, TimeUnit.SECONDS)//needed for creating wallet
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(interceptor)
         .build()
     private val api = Retrofit.Builder()
