@@ -4,6 +4,7 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.util.Log
 import co.anode.anodium.BuildConfig
+import timber.log.Timber
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.InetAddress
@@ -35,12 +36,10 @@ object CjdnsSocket {
         var tries = 0
         while (tries < 10) {
             try {
-                Log.i(BuildConfig.APPLICATION_ID, "Connecting to socket...")
+                Timber.i(BuildConfig.APPLICATION_ID, "Connecting to socket...")
                 ls.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
-            } catch (e: java.lang.Exception) {
-                if (tries > 100) {
-                    throw CjdnsException("Unable to establish socket to cjdns")
-                }
+            } catch (e: Exception) {
+                Timber.e(e)
             }
             if (ls.isConnected) {
                 ls.sendBufferSize = 1024
