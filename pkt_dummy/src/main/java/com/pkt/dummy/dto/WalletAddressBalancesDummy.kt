@@ -10,7 +10,7 @@ data class WalletAddressBalancesDummy(
 @Serializable
 data class AddrDummy(
     val address: String,
-    val immaturereward: Int,
+    val immaturereward: Double,
     val outputcount: Int,
     val simmaturereward: String,
     val spendable: Double,

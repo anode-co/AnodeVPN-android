@@ -17,7 +17,7 @@ data class Addr(
     val stotal: String,
     val spendable: Double,
     val sspendable: String,
-    val immaturereward: Int,
+    val immaturereward: Double,
     val simmaturereward: String,
     val unconfirmed: Int,
     val sunconfirmed: String,
