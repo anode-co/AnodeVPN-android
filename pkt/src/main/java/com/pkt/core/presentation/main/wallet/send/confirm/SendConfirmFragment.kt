@@ -46,6 +46,14 @@ class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_se
             confirmWithPinButton.doOnClick {
                 viewModel.onConfirmWithPinClick()
             }
+
+            nextButton.doOnClick {
+                if (confirmWithPasswordButton.isVisible) {
+                    pinInputLayout.editText?.text?.toString()?.let { it1 -> viewModel.onPinDone(it1) }
+                } else {
+                    passwordInputLayout.editText?.text?.toString()?.let { it1 -> viewModel.onPasswordDone(it1) }
+                }
+            }
         }
     }
 
