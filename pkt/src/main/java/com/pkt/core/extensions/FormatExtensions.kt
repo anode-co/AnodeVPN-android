@@ -67,9 +67,9 @@ private val TIME_FORMATTER by lazy {
 }
 
 fun Double.formatPkt(): String {
-    val long = this*1000000000
+    val long = this*1073741824
     val unit = PKT_UNITS.entries.find { long >= it.value } ?: PKT_UNITS.entries.last()
-    val value = BigDecimal(this)
+    val value = BigDecimal(long).divide(BigDecimal(unit.value),2, RoundingMode.HALF_EVEN)
     return (PKT_FORMATTER.clone() as DecimalFormat).apply {
         decimalFormatSymbols = decimalFormatSymbols.apply {
             positiveSuffix = " ${unit.key}"
