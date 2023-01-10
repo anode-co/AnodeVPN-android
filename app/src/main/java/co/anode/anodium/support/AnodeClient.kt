@@ -58,7 +58,7 @@ object AnodeClient {
     private var apiUsernameGenerate = "https://vpn.anode.co/api/$apiVersion/vpn/accounts/username/"
     private const val buttonStateConnected = 0
     private const val buttonStateConnecting = 1
-    private const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
+    const val Auth_TIMEOUT = 1000*60*60 //1 hour in millis
     var downloadFails = 0
     var downloadingUpdate = false
     private const val PostMessageInterval = 60000

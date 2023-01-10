@@ -3,6 +3,7 @@ package co.anode.anodium.integration.model.repository
 import android.content.Context
 import android.content.Intent
 import co.anode.anodium.AnodeVpnService
+import co.anode.anodium.BuildConfig
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
@@ -11,12 +12,18 @@ import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.interfaces.VpnAPIService
 import com.pkt.domain.repository.VpnRepository
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.json.JSONObject
 import timber.log.Timber
+import java.lang.Runnable
 import java.security.MessageDigest
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,6 +36,8 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     override val vpnStateFlow: Flow<VpnState>
         get() = _vpnState
 
+    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+
     private var _startConnectionTime: Long = 0L
     override val startConnectionTime: Long
         get() = _startConnectionTime
@@ -40,6 +49,9 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     private val _currentVpnFlow: MutableStateFlow<Vpn> by lazy { MutableStateFlow(Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")) }
     override val currentVpnFlow: Flow<Vpn>
         get() = _currentVpnFlow
+
+    private val pollingCjdnsInterval = 10L //10sec polling IPs
+    private var cjdnsPollingJob: ScheduledFuture<*>? = null
 
     override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
         Timber.d("VpnRepositoryImpl fetchVpnList")
@@ -102,13 +114,13 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
                 _startConnectionTime = System.currentTimeMillis()
                 _vpnState.tryEmit(VpnState.CONNECTED)
                 //Start Thread for checking connection
-                //AnodeClient.h.postDelayed(AnodeClient.runnableConnection, 10000)
+                startCjdnsPolling()
             } else {
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 _startConnectionTime = 0L
                 _vpnState.tryEmit(VpnState.DISCONNECTED)
                 //Stop UI thread
-                //AnodeClient.h.removeCallbacks(AnodeClient.runnableConnection)
+                stopCjdnsPolling()
             }
         }, "VpnRepository.cjdnsConnectVPN").start()
     }
@@ -129,6 +141,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
                 cjdnsConnectVPN(node)
             }
             AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("ServerPublicKey", node)?.apply()
+            AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putLong("LastAuthorized", System.currentTimeMillis())?.apply()
             return Result.success(true)
         } else {
             Timber.d("authorizeVPN failed")
@@ -200,12 +213,39 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return AnodeUtil.getUsernameFromSharedPrefs()
     }
 
+    override fun updateCjdnsIps(coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            if (!CjdnsSocket.getCjdnsRoutes()) {
+                Timber.d("runnableCjdnsConnection: CjdnsSocket.getCjdnsRoutes() failed")
+                disconnect().getOrNull()
+            }
+            val newip4address = CjdnsSocket.ipv4Address
+            val newip6address = CjdnsSocket.ipv6Address
+            //Reset VPN with new address
+            if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
+                _vpnState.tryEmit(VpnState.CONNECTING)
+                //Restart Service
+                CjdnsSocket.Core_stopTun()
+                AnodeUtil.context?.startService(Intent(AnodeClient.mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
+                AnodeUtil.context?.startService(Intent(AnodeClient.mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.START"))
+            } else if (CjdnsSocket.VPNipv6Address != "") {
+                _vpnState.tryEmit(VpnState.CONNECTED)
+            }
+            //Check for needed authorization call
+            val prefs = AnodeClient.mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
+            val Authtimestamp = prefs.getLong("LastAuthorized",0)
+            if ((System.currentTimeMillis() - Authtimestamp) > AnodeClient.Auth_TIMEOUT) {
+                authorizeVPN()
+            }
+        }
+    }
+
     override suspend fun disconnect(): Result<Boolean> {
         Timber.d("VpnRepositoryImpl disconnect")
         _startConnectionTime = 0L
         _vpnState.tryEmit(VpnState.DISCONNECTED)
         AnodeClient.AuthorizeVPN().cancel(true)
-        AnodeClient.stopThreads()
+        stopCjdnsPolling()
         CjdnsSocket.IpTunnel_removeAllConnections()
         CjdnsSocket.Core_stopTun()
         CjdnsSocket.clearRoutes()
@@ -229,5 +269,16 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return Result.success(vpnAPI.getIPv6Address())
     }
 
-
+    private val pollintTask = object : Runnable {
+        override fun run() {
+            updateCjdnsIps(CoroutineScope(Dispatchers.IO))
+        }
+    }
+    fun startCjdnsPolling() {
+        stopCjdnsPolling()
+        cjdnsPollingJob = scheduler.scheduleAtFixedRate(pollintTask, 0, pollingCjdnsInterval, TimeUnit.SECONDS)
+    }
+    private fun stopCjdnsPolling() {
+        cjdnsPollingJob?.cancel(true)
+    }
 }
