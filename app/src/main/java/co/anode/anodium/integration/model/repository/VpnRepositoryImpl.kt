@@ -114,7 +114,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
                 _startConnectionTime = System.currentTimeMillis()
                 _vpnState.tryEmit(VpnState.CONNECTED)
                 //Start Thread for checking connection
-                startCjdnsPolling()
+                //startCjdnsPolling()
             } else {
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 _startConnectionTime = 0L
