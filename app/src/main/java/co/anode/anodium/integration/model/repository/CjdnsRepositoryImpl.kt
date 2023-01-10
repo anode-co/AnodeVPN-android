@@ -45,7 +45,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
 
     override suspend fun getCjdnsConnections(): Result<List<CjdnsConnection>> {
         val list = CjdnsSocket.IpTunnel_listConnections()
-        var result: MutableList<CjdnsConnection> = mutableListOf()
+        val result: MutableList<CjdnsConnection> = mutableListOf()
         try {
             for (i in 0 until list.size) {
                 val ipv4Address = list[i]["ip4Address"].toString().trim('"')
@@ -108,11 +108,9 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         }
 
         val key = AnodeUtil.getPubKey()
-        var username = AnodeUtil.getUsername()
-        var vpnExit = AnodeUtil.getServerPublicKeyFromSharedPrefs()
 
         val nodeUrl = "http://h.snode.cjd.li/#" + cjdnsNodeInfo["myIp6"].str()
-        val response = CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection,cjdnsPeers,key,username,nodeUrl,vpnExit)
+        val response = CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection,cjdnsPeers,key,nodeUrl)
         Result.success(response)
     }
 

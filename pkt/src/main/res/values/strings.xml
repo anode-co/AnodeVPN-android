@@ -200,6 +200,7 @@
     <string name="qr_scan_code">QR Scan Code</string>
     <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
     <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
+    <string name="not_on_vpn">Not on VPN</string>
     <!--Wallet Status messages-->
     <string name="wallet_status_locked">Wallet is locked</string>
     <string name="wallet_status_notexisting">Wallet can not be found</string>

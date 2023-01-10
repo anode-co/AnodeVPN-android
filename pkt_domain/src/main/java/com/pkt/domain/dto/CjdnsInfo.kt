@@ -11,9 +11,7 @@ data class CjdnsInfo(
     val connection: CjdnsConnection,
     val peers: List<CjdnsPeer>,
     val key: String,
-    val username: String,
     val nodeUrl: String,
-    val vpnExit: String,
 )
 
 @Keep
