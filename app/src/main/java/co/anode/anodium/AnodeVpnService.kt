@@ -3,11 +3,10 @@ package co.anode.anodium
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import co.anode.anodium.support.CjdnsSocket
+import timber.log.Timber
 import java.io.FileDescriptor
 import java.lang.Exception
-
 
 class AnodeVpnService : VpnService() {
     var mInterface: ParcelFileDescriptor? = null
@@ -65,7 +64,6 @@ class AnodeVpnService : VpnService() {
 }
 
 class VpnThread(private val avpn: AnodeVpnService) : Runnable {
-    private val LOGTAG = BuildConfig.APPLICATION_ID
     private var myIp6: String = "fc00::1"
 
     private fun configVpn() {
@@ -78,10 +76,10 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
         }*/
 
         val b = avpn.builder().setSession("AnodeVpnService")
-                .addAddress("fc00::", 128)
-                .addRoute("fc00::",8)
-                .addDnsServer("1.1.1.1")
-                //.allowFamily(AF_INET)
+            .addAddress("fc00::", 128)
+            .addRoute("fc00::", 8)
+            .addDnsServer("1.1.1.1")
+        //.allowFamily(AF_INET)
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
             CjdnsSocket.VPNipv4Address = CjdnsSocket.ipv4Address
@@ -95,22 +93,21 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
         }
 
         avpn.mInterface = b.establish()
-        Log.i(LOGTAG, "interface vpn")
+        Timber.i("interface vpn")
         if (avpn.mInterface != null) {
             val fdNum = CjdnsSocket.Admin_importFd(avpn.mInterface!!.fileDescriptor)
-            Log.i(LOGTAG, "imported vpn fd $fdNum")
-            Log.i(LOGTAG, CjdnsSocket.Core_initTunfd(fdNum).toString())
-            Log.i(LOGTAG, "vpn launched")
+            Timber.i("imported vpn fd $fdNum")
+            CjdnsSocket.Core_initTunfd(fdNum)
         }
     }
 
     private fun init() {
         val info = CjdnsSocket.Core_nodeInfo()
         myIp6 = info["myIp6"].str()
-        Log.i(LOGTAG, info.toString())
+        Timber.i( "AndeVpnService init with IP6: $info")
         CjdnsSocket.cjdnsFd = CjdnsSocket.Admin_exportFd(CjdnsSocket.UDPInterface_getFd(0))
         val protectFd = fdGetInt(CjdnsSocket.cjdnsFd!!)
-        Log.i(LOGTAG, "got local fd to protect $protectFd")
+        Timber.i( "got local fd to protect $protectFd")
         avpn.protect(protectFd)
     }
 
