@@ -304,6 +304,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         AnodeUtil.storeWalletPin(pin,activeWallet)
     }
 
+    override fun getPin(): String {
+        return AnodeUtil.getWalletPin(activeWallet)
+    }
+
     override suspend fun generateQr(address: String): Result<Bitmap> {
         val qrgEncoder = QRGEncoder(address, null, QRGContents.Type.TEXT, 600)
         qrgEncoder.colorBlack = Color.WHITE

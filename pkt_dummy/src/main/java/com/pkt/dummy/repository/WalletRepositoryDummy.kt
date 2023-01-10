@@ -185,6 +185,10 @@ class WalletRepositoryDummy constructor(
         delay(1000L)
     }
 
+    override fun getPin(): String {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun generateQr(address: String): Result<Bitmap> = withContext(Dispatchers.IO) {
         delay(1000L)
         Result.success(BitmapFactory.decodeResource(context.resources, R.drawable.qr_code))
