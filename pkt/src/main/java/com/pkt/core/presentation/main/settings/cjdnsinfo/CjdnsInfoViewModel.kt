@@ -1,6 +1,5 @@
 package com.pkt.core.presentation.main.settings.cjdnsinfo
 
-import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.domain.dto.CjdnsInfo
 import com.pkt.core.R
@@ -46,9 +45,9 @@ class CjdnsInfoViewModel @Inject constructor(
     override fun createInitialState() = CjdnsInfoState()
 
     fun onFindYourselfClick() {
-        currentState.info?.nodeUrl?.let { url ->
+        /*currentState.info?.nodeUrl?.let { url ->
             openWebUrl(url)
-        }
+        }*/
     }
 
     fun onSubmitLogsClick() {
@@ -64,18 +63,28 @@ class CjdnsInfoViewModel @Inject constructor(
         val connection = info.connection
         val peers = info.peers
         return mutableListOf<DisplayableItem>().apply {
-            addAll(
-                listOf(
-                    KeyValueHorizontalItem(R.string.app_version, versionName),
-                    KeyValueHorizontalItem(R.string.ipv4, info.ipv4),
-                    KeyValueHorizontalItem(R.string.internet_ipv6, info.internetipv6),
-                    KeyValueHorizontalItem(R.string.cjdns_ipv6, connection.ip6Address),
-                    KeyValueHorizontalItem(R.string.public_key, info.key),
-                    KeyValueClickableItem(R.string.node_map, R.string.find_your_self),
-                    KeyValueHorizontalItem(R.string.username, info.username),
-                    KeyValueHorizontalItem(R.string.vpn_exit_key, info.vpnExit),
+            if (connection.key.isEmpty()) {//Not on VPN
+                addAll(
+                    listOf(
+                        KeyValueHorizontalItem(R.string.app_version, versionName),
+                        KeyValueHorizontalItem(R.string.ipv4, "Not on VPN"),
+                        KeyValueHorizontalItem(R.string.internet_ipv6, "Not on VPN"),
+                        KeyValueHorizontalItem(R.string.cjdns_ipv6, "Not on VPN"),
+                        KeyValueHorizontalItem(R.string.public_key, info.key),
+                    )
                 )
-            )
+            } else {
+                addAll(
+                    listOf(
+                        KeyValueHorizontalItem(R.string.app_version, versionName),
+                        KeyValueHorizontalItem(R.string.ipv4, info.ipv4),
+                        KeyValueHorizontalItem(R.string.internet_ipv6, info.internetipv6),
+                        KeyValueHorizontalItem(R.string.cjdns_ipv6, info.ipv6),
+                        KeyValueHorizontalItem(R.string.public_key, info.key),
+                        KeyValueClickableItem(R.string.node_map, R.string.find_your_self),
+                    )
+                )
+            }
 
             if (peers.isNotEmpty()) {
                 add(TitleItem(R.string.peers))
@@ -88,21 +97,36 @@ class CjdnsInfoViewModel @Inject constructor(
                     }
                 )
             }
-
-            addAll(
-                listOf(
-                    TitleItem(R.string.connection),
-                    KeyValueHorizontalItem(R.string.server, connection.key),
-                    KeyValueHorizontalItem(
-                        R.string.ipv4,
-                        "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"
-                    ),
-                    KeyValueHorizontalItem(
-                        R.string.ipv6,
-                        "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"
-                    ),
+            if (connection.key.isEmpty()) {//Not on VPN
+                addAll(
+                    listOf(
+                        TitleItem(R.string.connection),
+                        KeyValueHorizontalItem(R.string.server, "Not on VPN"),
+                        KeyValueHorizontalItem(
+                            R.string.ipv4, "Not on VPN"
+                        ),
+                        KeyValueHorizontalItem(
+                            R.string.ipv6, "Not on VPN"
+                        ),
+                    )
                 )
-            )
+            } else {
+                addAll(
+                    listOf(
+                        TitleItem(R.string.connection),
+                        KeyValueHorizontalItem(R.string.server, connection.key),
+                        KeyValueHorizontalItem(
+                            R.string.ipv4,
+                            "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"
+                        ),
+                        KeyValueHorizontalItem(
+                            R.string.ipv6,
+                            "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"
+                        ),
+                    )
+                )
+            }
+
         }
     }
 

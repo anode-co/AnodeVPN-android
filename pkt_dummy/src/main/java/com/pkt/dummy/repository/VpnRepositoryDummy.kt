@@ -2,9 +2,9 @@ package com.pkt.dummy.repository
 
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
-import com.pkt.domain.dto.VpnServer
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.repository.VpnRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,6 +94,10 @@ class VpnRepositoryDummy : VpnRepository {
     }
 
     override fun getUsername(): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateCjdnsIps(coroutineScope: CoroutineScope) {
         TODO("Not yet implemented")
     }
 

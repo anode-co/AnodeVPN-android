@@ -54,56 +54,44 @@ class SendConfirmViewModel @Inject constructor(
 
     fun onPinDone(pin: String) {
         pin.takeIf { it.isNotBlank() } ?: return
-
         invokeAction {
-            runCatching {
-                val isPinCorrect = walletRepository.checkPin(pin).getOrThrow()
-                if (isPinCorrect) {
-                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).getOrThrow()
-                } else {
-                    null
-                }
-            }.onSuccess { sendResponse ->
+            walletRepository.checkPin(pin).onSuccess {
                 Timber.d("SendConfirmViewModel onPinDone| Success")
-                sendResponse?.let {
+                walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
+                    Timber.i("SendConfirmViewModel sendCoins| Success")
                     sendNavigation(AppNavigation.NavigateBack)
                     sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
-                } ?: run {
-                    sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
-                    sendEvent(SendConfirmEvent.ClearInputs)
-                    sendEvent(SendConfirmEvent.OpenKeyboard)
+                }.onFailure {
+                    Timber.e(it, "SendConfirmViewModel sendCoins| Error")
+                    sendError(it)
                 }
             }.onFailure {
                 Timber.e(it, "SendConfirmViewModel onPinDone| Error")
-                sendError(it)
+                sendEvent(CommonEvent.Warning(R.string.error_pin_incorrect))
+                sendEvent(SendConfirmEvent.ClearInputs)
+                sendEvent(SendConfirmEvent.OpenKeyboard)
             }
         }
     }
 
     fun onPasswordDone(password: String) {
         password.takeIf { it.isNotBlank() } ?: return
-
         invokeAction {
-            runCatching {
-                val isPinCorrect = walletRepository.checkWalletPassphrase(password).getOrThrow()
-                if (isPinCorrect) {
-                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).getOrThrow()
-                } else {
-                    null
-                }
-            }.onSuccess { sendResponse ->
+            walletRepository.checkWalletPassphrase(password).onSuccess {
                 Timber.d("SendConfirmViewModel onPasswordDone| Success")
-                sendResponse?.let {
+                walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
+                    Timber.i("SendConfirmViewModel sendCoins| Success")
                     sendNavigation(AppNavigation.NavigateBack)
                     sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
-                } ?: run {
-                    sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
-                    sendEvent(SendConfirmEvent.ClearInputs)
-                    sendEvent(SendConfirmEvent.OpenKeyboard)
+                }.onFailure {
+                    Timber.e(it, "SendConfirmViewModel sendCoins| Error")
+                    sendError(it)
                 }
             }.onFailure {
                 Timber.e(it, "SendConfirmViewModel onPasswordDone| Error")
-                sendError(it)
+                sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
+                sendEvent(SendConfirmEvent.ClearInputs)
+                sendEvent(SendConfirmEvent.OpenKeyboard)
             }
         }
     }

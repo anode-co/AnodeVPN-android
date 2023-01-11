@@ -37,13 +37,24 @@ class ChangePasswordViewModel @Inject constructor(
             else -> {
                 invokeAction {
                     Timber.d("ChangePasswordViewModel onChangeClick. Trying to change password")
+                    //check first if pin is available, before changing password
+                    //changing password removes stored values
+                    var pin: String? = null
+                    if (walletRepository.isPinAvailable().getOrNull() == true) {
+                        pin = walletRepository.getPin()
+                    }
                     walletRepository.changePassword(enterCurrentPassword, enterPassword)
                         .onSuccess {
                             Timber.d("Password changed successfully")
                             sendEvent(CommonEvent.Info(R.string.success))
                             delay(1000)
-                            //Ask user to reset PIN
-                            sendNavigation(AppNavigation.OpenChangePinFromChangePassword)
+                            //if user had a PIN, re used it for new password
+                            if (pin!!.isNotEmpty()) {
+                                Timber.d("PIN is available, update for changed password")
+                                walletRepository.changePin(enterPassword, pin)
+                            }
+
+                            navigateBack() //to settings
                         }
                         .onFailure {
                             Timber.e(it, "Password change failed")

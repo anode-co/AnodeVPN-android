@@ -56,7 +56,7 @@
     <!--fragment_creating_wallet-->
     <string name="congratulations">Congratulations!</string>
     <string name="congratulations_description_1">You\'ve successfully set up your wallet. Remember to keep your seed phrase and password safe.</string>
-    <string name="congratulations_description_2">Anode cannot recover your wallet if you lose your seed phrase or password. You can\'t find your password in settings, but you can change your password is settings.</string>
+    <string name="congratulations_description_2">Anode cannot recover your wallet if you lose your seed phrase or password. You can\'t find your password in settings, but you can change your password in settings.</string>
     <string name="go_to_your_wallet">Go to your wallet</string>
 
     <!--fragment_recover_wallet-->
@@ -200,6 +200,7 @@
     <string name="qr_scan_code">QR Scan Code</string>
     <string name="scan_this_code_with_your_camera">Scan this code with your camera</string>
     <string name="my_pkt_wallet_address">My PKT Wallet address:</string>
+    <string name="not_on_vpn">Not on VPN</string>
     <!--Wallet Status messages-->
     <string name="wallet_status_locked">Wallet is locked</string>
     <string name="wallet_status_notexisting">Wallet can not be found</string>

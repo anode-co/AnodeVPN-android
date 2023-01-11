@@ -60,7 +60,11 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
     override suspend fun checkPin(pin: String): Result<Boolean> {
         val storedPin = AnodeUtil.getWalletPin(activeWallet)
-        return Result.success(pin == storedPin)
+        if (pin == storedPin) {
+            return Result.success(true)
+        } else {
+            return Result.failure(Exception("Pin incorrect"))
+        }
     }
 
     //Get the wallet balance from all available addresses
@@ -177,7 +181,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                 wallet = walletName
             }
 
-            val response = walletAPI.recoverWallet(password, seedPassword, seed.split(" "), "$wallet.db")
+            val response = walletAPI.recoverWallet(password, seedPassword, seed.lowercase().split(" "), "$wallet.db")
             return if (response.message.isNotEmpty()) {
                 Timber.e("Failed to recover wallet: ${response.message}")
                 Result.failure(Exception("Failed to recover wallet: ${response.message}"))
@@ -302,6 +306,10 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         AnodeUtil.storeWalletPassword(encryptedPassword,activeWallet)
         //Store PIN in encrypted shared preferences
         AnodeUtil.storeWalletPin(pin,activeWallet)
+    }
+
+    override fun getPin(): String {
+        return AnodeUtil.getWalletPin(activeWallet)
     }
 
     override suspend fun generateQr(address: String): Result<Bitmap> {

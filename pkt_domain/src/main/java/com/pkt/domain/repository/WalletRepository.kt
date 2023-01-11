@@ -51,6 +51,8 @@ interface WalletRepository {
     suspend fun changePassword(oldPassword: String, newPassword: String): Result<Boolean>
     //Change active wallet PIN
     suspend fun changePin(password: String, pin: String)
+
+    fun getPin(): String
     //Generate QR code for given address
     suspend fun generateQr(address: String): Result<Bitmap>
     //Check if passphrase is correct against active wallet

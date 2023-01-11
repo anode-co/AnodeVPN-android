@@ -37,7 +37,7 @@ class ChangePinViewModel @Inject constructor(
                             walletRepository.changePin(enterPassword, enterPin)
                             sendEvent(CommonEvent.Info(R.string.success))
                             delay(1000)
-                            sendNavigation(AppNavigation.OpenMain)
+                            navigateBack() // to settings
                         }.onFailure {
                             Timber.e(it, "Error changing pin, password incorrect")
                             sendEvent(CommonEvent.Warning(R.string.error_password_incorrect))
