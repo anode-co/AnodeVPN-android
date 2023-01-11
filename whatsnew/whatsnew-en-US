@@ -1,3 +1,13 @@
+# v0.3.12
+- Wallet bug fixes
+- Better error handling for send transactions
+- Increased timeouts for creating/recovering wallets
+- Warning to avoid recovering mining wallets (phones can not handle the memory requirements for this)
+- Improve CjdnsInfo page
+- Fix seed handling capital letters
+- Fix showing correct PKT units when sending PKT
+- other minor fixes
+
 # v0.3.3
 New UI
 
