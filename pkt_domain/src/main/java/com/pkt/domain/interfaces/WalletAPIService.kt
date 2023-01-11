@@ -27,13 +27,13 @@ class WalletAPIService {
     @OptIn(ExperimentalSerializationApi::class)
     private val converter = Json.asConverterFactory("application/json".toMediaType())
     //OkhttpClient to introduce timeout
-    private val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+    //private val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(1, TimeUnit.HOURS)
         .writeTimeout(30, TimeUnit.MINUTES)
-        .addInterceptor(interceptor)
+        //.addInterceptor(interceptor)
         .build()
     private val api = Retrofit.Builder()
         .client(httpClient)
@@ -89,12 +89,22 @@ class WalletAPIService {
 
     suspend fun createSeed(seed_passphrase: String): CreateSeedResponse {
         val request = CreateSeedRequest(seed_passphrase)
-        return api.createSeed(request)
+        try {
+            return api.createSeed(request)
+        } catch (e: Exception) {
+            Timber.d("createSeed: failed with message ${e.message}")
+            return CreateSeedResponse(listOf(), "${e.message}", e.stackTraceToString())
+        }
     }
 
     suspend fun createWallet(wallet_passphrase: String, seed_passphrase: String, wallet_seed: List<String>, wallet_name: String): CreateWalletResponse {
         val request = CreateWalletRequest(wallet_passphrase, seed_passphrase, wallet_seed, wallet_name)
-        return api.createWallet(request)
+        try {
+            return api.createWallet(request)
+        } catch (e: Exception) {
+            Timber.d("createWallet: failed with message ${e.message}")
+            return CreateWalletResponse("${e.message}", e.stackTraceToString())
+        }
     }
 
     suspend fun recoverWallet(wallet_passphrase: String, seed_passphrase: String, wallet_seed: List<String>, wallet_name: String): CreateWalletResponse {
@@ -109,7 +119,12 @@ class WalletAPIService {
     }
 
     suspend fun sendTransaction(request: SendTransactionRequest): SendTransactionResponse {
-        return api.sendTransaction(request)
+        try {
+            return api.sendTransaction(request)
+        } catch (e: Exception) {
+            Timber.d("sendTransaction: failed with message ${e.message}")
+            return SendTransactionResponse("","${e.message}", e.stackTraceToString())
+        }
     }
 
     suspend fun checkPassphrase(request: CheckPassphraseRequest): CheckPassphraseResponse {
