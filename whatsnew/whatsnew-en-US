@@ -1,3 +1,6 @@
+# v0.3.13
+- Bug fix switching UI layouts
+  
 # v0.3.12
 - Wallet bug fixes
 - Better error handling for send transactions
