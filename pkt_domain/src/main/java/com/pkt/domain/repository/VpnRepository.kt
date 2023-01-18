@@ -3,7 +3,6 @@ package com.pkt.domain.repository
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 interface VpnRepository {
@@ -27,5 +26,4 @@ interface VpnRepository {
     suspend fun generateUsername(): Result<String>
     fun setUsername(username: String)
     fun getUsername(): String
-    fun updateCjdnsIps(coroutineScope: CoroutineScope)
 }

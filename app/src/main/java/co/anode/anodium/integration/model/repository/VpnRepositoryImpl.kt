@@ -2,6 +2,7 @@ package co.anode.anodium.integration.model.repository
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
 import co.anode.anodium.AnodeVpnService
 import co.anode.anodium.BuildConfig
 import co.anode.anodium.support.AnodeClient
@@ -52,6 +53,8 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     private val pollingCjdnsInterval = 10L //10sec polling IPs
     private var cjdnsPollingJob: ScheduledFuture<*>? = null
+
+    private val handler = Handler()
 
     override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
         Timber.d("VpnRepositoryImpl fetchVpnList")
@@ -114,7 +117,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
                 _startConnectionTime = System.currentTimeMillis()
                 _vpnState.tryEmit(VpnState.CONNECTED)
                 //Start Thread for checking connection
-                //startCjdnsPolling()
+                startCjdnsPolling()
             } else {
                 CjdnsSocket.IpTunnel_removeAllConnections()
                 _startConnectionTime = 0L
@@ -213,33 +216,6 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return AnodeUtil.getUsernameFromSharedPrefs()
     }
 
-    override fun updateCjdnsIps(coroutineScope: CoroutineScope) {
-        coroutineScope.launch {
-            if (!CjdnsSocket.getCjdnsRoutes()) {
-                Timber.d("runnableCjdnsConnection: CjdnsSocket.getCjdnsRoutes() failed")
-                disconnect().getOrNull()
-            }
-            val newip4address = CjdnsSocket.ipv4Address
-            val newip6address = CjdnsSocket.ipv6Address
-            //Reset VPN with new address
-            if ((CjdnsSocket.VPNipv4Address != newip4address) || (CjdnsSocket.VPNipv6Address != newip6address)){
-                _vpnState.tryEmit(VpnState.CONNECTING)
-                //Restart Service
-                CjdnsSocket.Core_stopTun()
-                AnodeUtil.context?.startService(Intent(AnodeClient.mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.DISCONNECT"))
-                AnodeUtil.context?.startService(Intent(AnodeClient.mycontext, AnodeVpnService::class.java).setAction("co.anode.anodium.START"))
-            } else if (CjdnsSocket.VPNipv6Address != "") {
-                _vpnState.tryEmit(VpnState.CONNECTED)
-            }
-            //Check for needed authorization call
-            val prefs = AnodeClient.mycontext.getSharedPreferences(BuildConfig.APPLICATION_ID,Context.MODE_PRIVATE)
-            val Authtimestamp = prefs.getLong("LastAuthorized",0)
-            if ((System.currentTimeMillis() - Authtimestamp) > AnodeClient.Auth_TIMEOUT) {
-                authorizeVPN()
-            }
-        }
-    }
-
     override suspend fun disconnect(): Result<Boolean> {
         Timber.d("VpnRepositoryImpl disconnect")
         _startConnectionTime = 0L
@@ -269,16 +245,13 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return Result.success(vpnAPI.getIPv6Address())
     }
 
-    private val pollintTask = object : Runnable {
-        override fun run() {
-            updateCjdnsIps(CoroutineScope(Dispatchers.IO))
-        }
-    }
     fun startCjdnsPolling() {
         stopCjdnsPolling()
-        cjdnsPollingJob = scheduler.scheduleAtFixedRate(pollintTask, 0, pollingCjdnsInterval, TimeUnit.SECONDS)
+        AnodeClient.runnableConnection.init(handler)
+        handler.postDelayed(AnodeClient.runnableConnection, 10000)
+        //cjdnsPollingJob = scheduler.scheduleAtFixedRate(pollintTask, 0, pollingCjdnsInterval, TimeUnit.SECONDS)
     }
     private fun stopCjdnsPolling() {
-        cjdnsPollingJob?.cancel(true)
+        handler.removeCallbacks(AnodeClient.runnableConnection)
     }
 }

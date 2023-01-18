@@ -97,9 +97,6 @@ class VpnRepositoryDummy : VpnRepository {
         TODO("Not yet implemented")
     }
 
-    override fun updateCjdnsIps(coroutineScope: CoroutineScope) {
-        TODO("Not yet implemented")
-    }
 
     private companion object {
         val VPN_LIST = listOf(
