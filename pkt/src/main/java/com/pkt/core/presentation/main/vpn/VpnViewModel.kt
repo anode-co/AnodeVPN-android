@@ -31,38 +31,23 @@ class VpnViewModel @Inject constructor(
 
     init {
         invokeLoadingAction {
-            //Set default VPN
-            var vpn = Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")
             if (!generalRepository.hasInternetConnection()) {
                 return@invokeLoadingAction Result.success("")
             }
-            runCatching {
-                val ipv4 = vpnRepository.getIPv4Address().getOrNull()
-                val ipv6 = vpnRepository.getIPv6Address().getOrNull()
-                val list = vpnRepository.fetchVpnList().getOrNull()
-
-                //Check list for default VPN
-                if (!list.isNullOrEmpty()) {
-                    for (item in list) {
+            vpnRepository.fetchVpnList().onSuccess { vpnList ->
+                if (vpnList.isNotEmpty()) {
+                    for (item in vpnList) {
                         if (item.publicKey == "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k") {
-                            vpn = item
-                            vpnRepository.setCurrentVpn(vpn).getOrThrow()
+                            vpnRepository.setCurrentVpn(item).getOrThrow()
+                            sendState {
+                                copy(
+                                    vpn = item,
+                                )
+                            }
                             break
                         }
                     }
                 }
-                Triple(ipv4,ipv6, vpn)
-            }.onSuccess { (ipv4, ipv6, vpn) ->
-                Timber.i("VpnViewModel init| Success")
-                sendState {
-                    copy(
-                        vpn = vpn,
-                        ipV4 = ipv4,
-                        ipV6 = ipv6,
-                    )
-                }
-            }.onFailure {
-                Timber.e(it, "VpnViewModel init| Failed")
             }
         }
 
