@@ -109,7 +109,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
 
         val key = AnodeUtil.getPubKey()
 
-        val nodeUrl = "http://h.snode.cjd.li/#" + cjdnsNodeInfo["myIp6"].str()
+        val nodeUrl = "https://routeserver.cjd.li/#" + cjdnsNodeInfo["myIp6"].str()
         val response = CjdnsInfo(BuildConfig.VERSION_NAME, ipv4,ipv6,internetipv6,cjdnsConnection,cjdnsPeers,key,nodeUrl)
         Result.success(response)
     }
