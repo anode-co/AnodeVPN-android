@@ -45,9 +45,7 @@ class CjdnsInfoViewModel @Inject constructor(
     override fun createInitialState() = CjdnsInfoState()
 
     fun onFindYourselfClick() {
-        /*currentState.info?.nodeUrl?.let { url ->
-            openWebUrl(url)
-        }*/
+        currentState.info?.nodeUrl?.let { url -> openWebUrl(url) }
     }
 
     fun onSubmitLogsClick() {
@@ -69,8 +67,9 @@ class CjdnsInfoViewModel @Inject constructor(
                         KeyValueHorizontalItem(R.string.app_version, versionName),
                         KeyValueHorizontalItem(R.string.ipv4, "Not on VPN"),
                         KeyValueHorizontalItem(R.string.internet_ipv6, "Not on VPN"),
-                        KeyValueHorizontalItem(R.string.cjdns_ipv6, "Not on VPN"),
+                        KeyValueHorizontalItem(R.string.cjdns_ipv6, info.ipv6),
                         KeyValueHorizontalItem(R.string.public_key, info.key),
+                        KeyValueClickableItem(R.string.node_map, R.string.find_your_self),
                     )
                 )
             } else {
@@ -102,12 +101,8 @@ class CjdnsInfoViewModel @Inject constructor(
                     listOf(
                         TitleItem(R.string.connection),
                         KeyValueHorizontalItem(R.string.server, "Not on VPN"),
-                        KeyValueHorizontalItem(
-                            R.string.ipv4, "Not on VPN"
-                        ),
-                        KeyValueHorizontalItem(
-                            R.string.ipv6, "Not on VPN"
-                        ),
+                        KeyValueHorizontalItem(R.string.ipv4, "Not on VPN"),
+                        KeyValueHorizontalItem(R.string.ipv6, "Not on VPN"),
                     )
                 )
             } else {
