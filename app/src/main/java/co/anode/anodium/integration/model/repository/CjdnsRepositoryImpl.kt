@@ -29,9 +29,9 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
                 val port = peers[i]["lladdr"].toString().split(":")[1].trim('"').toInt()
                 val key = peers[i]["addr"].toString()
                 val status = peers[i]["state"].toString()
-                val bytesIn: Long = peers[i]["recvKbps"].toString().trim('"').toLong()
-                val bytesOut: Long = peers[i]["sendKbps"].toString().trim('"').toLong()
-                val bytesLost: Long = 0
+                val bytesIn: Long = peers[i]["bytesIn"].toString().trim('"').toLong()
+                val bytesOut: Long = peers[i]["bytesOut"].toString().trim('"').toLong()
+                val bytesLost: Long = peers[i]["lostPackets"].toString().trim('"').toLong()
                 result.add(CjdnsPeer(ipv4, port, key, status, bytesIn, bytesOut, bytesLost))
             }
             Timber.e("getCjdnsPeers Success")
