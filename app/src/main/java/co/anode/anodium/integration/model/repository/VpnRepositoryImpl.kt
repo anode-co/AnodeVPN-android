@@ -47,7 +47,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     override val vpnListFlow: Flow<List<Vpn>>
         get() = _vpnListFlow
 
-    private val _currentVpnFlow: MutableStateFlow<Vpn> by lazy { MutableStateFlow(Vpn("goofy14-vpn.anode.co","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")) }
+    private val _currentVpnFlow: MutableStateFlow<Vpn> by lazy { MutableStateFlow(Vpn("PKT Pal Montreal","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")) }
     override val currentVpnFlow: Flow<Vpn>
         get() = _currentVpnFlow
 
