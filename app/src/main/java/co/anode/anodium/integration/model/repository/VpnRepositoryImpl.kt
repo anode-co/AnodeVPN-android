@@ -143,8 +143,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
             if ((!node.isNullOrEmpty()) && ((!AnodeClient.isVpnActive()) || (node != connectedNode))) {
                 cjdnsConnectVPN(node)
             }
-            AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("ServerPublicKey", node)?.apply()
-            AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putLong("LastAuthorized", System.currentTimeMillis())?.apply()
+            setLastConnectedVPN(node)
             return Result.success(true)
         } else {
             Timber.d("authorizeVPN failed")
@@ -253,5 +252,15 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
     private fun stopCjdnsPolling() {
         handler.removeCallbacks(AnodeClient.runnableConnection)
+    }
+
+    //function to store the last connected node
+    private fun setLastConnectedVPN(node: String) {
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("ServerPublicKey", node)?.apply()
+        AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putLong("LastAuthorized", System.currentTimeMillis())?.apply()
+    }
+
+    override fun getLastConnectedVPN(): String {
+        return AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","") ?: ""
     }
 }

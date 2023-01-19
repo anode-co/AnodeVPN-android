@@ -26,4 +26,6 @@ interface VpnRepository {
     suspend fun generateUsername(): Result<String>
     fun setUsername(username: String)
     fun getUsername(): String
+
+    fun getLastConnectedVPN(): String
 }

@@ -35,9 +35,10 @@ class VpnViewModel @Inject constructor(
                 return@invokeLoadingAction Result.success("")
             }
             vpnRepository.fetchVpnList().onSuccess { vpnList ->
+                val lastConnectedKey = vpnRepository.getLastConnectedVPN()
                 if (vpnList.isNotEmpty()) {
                     for (item in vpnList) {
-                        if (item.publicKey == "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k") {
+                        if (item.publicKey == lastConnectedKey) {
                             vpnRepository.setCurrentVpn(item).getOrThrow()
                             sendState {
                                 copy(

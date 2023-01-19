@@ -97,6 +97,10 @@ class VpnRepositoryDummy : VpnRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getLastConnectedVPN(): String {
+        TODO("Not yet implemented")
+    }
+
 
     private companion object {
         val VPN_LIST = listOf(
