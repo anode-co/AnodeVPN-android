@@ -33,6 +33,7 @@ object CjdnsSocket {
     var peers:ArrayList<Benc.Bdict> = ArrayList()
 
     fun init(path:String ) {
+        Timber.i("Initializing cjdns socket")
         var tries = 0
         while (tries < 10) {
             try {
@@ -75,7 +76,7 @@ object CjdnsSocket {
                 } else {
                     Benc.dict("q", name)
                 }
-        Log.i(BuildConfig.APPLICATION_ID,benc.toString())
+        //Timber.i(benc.toString())
         //Check if socket has connected, in case cjdns has not been initialized yet
         while (!ls.isConnected) {
             init(cjdnsPath)
@@ -113,7 +114,7 @@ object CjdnsSocket {
     }
 
     fun UDPInterface_getFd(ifNum: Int): Int {
-        Log.i(BuildConfig.APPLICATION_ID, "getUdpFd")
+        Timber.i( "getUdpFd")
         val dec = call("UDPInterface_getFd", Benc.dict("interfaceNumber", ifNum))
         val fd = dec["fd"]
         if (fd !is Benc.Bint) {
@@ -123,7 +124,7 @@ object CjdnsSocket {
     }
 
     fun Admin_exportFd(fd: Int): FileDescriptor {
-        Log.i(BuildConfig.APPLICATION_ID, "Admin_exportFd $fd")
+        Timber.i("Admin_exportFd $fd")
         call("Admin_exportFd", Benc.dict("fd", fd))
         val fds = ls.ancillaryFileDescriptors
         if (fds == null || fds.isEmpty()) {
@@ -133,7 +134,7 @@ object CjdnsSocket {
     }
 
     fun Admin_importFd(fd: FileDescriptor): Int {
-        Log.i(BuildConfig.APPLICATION_ID, "Admin_importFd $fd")
+        Timber.i( "Admin_importFd $fd")
         ls.setFileDescriptorsForSend(arrayOf(fd))
         val result = call("Admin_importFd", null)["fd"].num().toInt()
         ls.setFileDescriptorsForSend(null)
@@ -145,9 +146,10 @@ object CjdnsSocket {
     fun Core_stopTun(): Benc.Bdict = call("Core_stopTun", null) as Benc.Bdict
 
     fun Core_initTunfd(fd: Int): Benc.Bdict =
-            call("Core_initTunfd", Benc.dict("tunfd", fd)) as Benc.Bdict
+            call("Core_initTunfd", Benc.dict("tunfd", fd, "type", 1)) as Benc.Bdict
 
     fun InterfaceController_peerStats(): ArrayList<Benc.Bdict> {
+        Timber.i( "InterfaceController_peerStats")
         var peerStats: Benc.Obj
         val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
         var i = 0
@@ -174,6 +176,7 @@ object CjdnsSocket {
     }
 
     fun getIpTunnelConnectionIDs(): MutableList<Int> {
+        Timber.i( "getIpTunnelConnectionIDs")
         var connection: Benc.Obj
         val out:MutableList<Int> = mutableListOf()
         val list= call("IpTunnel_listConnections", null)
@@ -191,6 +194,7 @@ object CjdnsSocket {
     }
 
     fun IpTunnel_listConnections(): ArrayList<Benc.Bdict> {
+        Timber.i( "IpTunnel_listConnections")
         var connection: Benc.Obj
         val out:ArrayList<Benc.Bdict> = ArrayList<Benc.Bdict>()
         val list= call("IpTunnel_listConnections", null)
@@ -219,7 +223,7 @@ object CjdnsSocket {
     }
 
     fun ipTunnelConnectTo(node: String) {
-        Log.i(BuildConfig.APPLICATION_ID,"ipTunnelConnectTo: $node")
+        Timber.i("ipTunnelConnectTo: $node")
         call("IpTunnel_connectTo", Benc.dict("publicKeyOfNodeToConnectTo", node))
     }
 
@@ -231,7 +235,7 @@ object CjdnsSocket {
     }
 
     fun IpTunnel_removeConnection(num: Int) {
-        Log.i(BuildConfig.APPLICATION_ID,"IpTunnel_removeConnection: $num")
+        Timber.i("IpTunnel_removeConnection: $num")
         call("IpTunnel_removeConnection", Benc.dict("connection", num))
     }
 
@@ -242,6 +246,7 @@ object CjdnsSocket {
             call("Sign_sign", Benc.dict("msgHash", b64Digest))
 
     fun getCjdnsRoutes(): Boolean {
+        Timber.i( "getCjdnsRoutes")
         val connectionIDs:MutableList<Int> = getIpTunnelConnectionIDs()
         if (connectionIDs.size > 0) {
             val connection = IpTunnel_showConnection(connectionIDs[0])
@@ -277,7 +282,7 @@ object CjdnsSocket {
     }
 
     fun clearRoutes() {
-        Log.i(BuildConfig.APPLICATION_ID, "clear routes")
+        Timber.i( "clear routes")
         ipv4Address = ""
         ipv4Route = ""
         ipv4RoutePrefix = 0
@@ -288,7 +293,7 @@ object CjdnsSocket {
         ipv6AddressPrefix = 0
     }
 
-    fun trimBitsforRoute(addr: String, prefix: Int): String {
+    private fun trimBitsforRoute(addr: String, prefix: Int): String {
         //Log.i(LOGTAG, "trimBitsforRoute $addr with $prefix")
         val a = InetAddress.getByName(addr)
         val bytes = a.address
@@ -302,15 +307,17 @@ object CjdnsSocket {
             }
             return@thread
         }.run()
-        return InetAddress.getByAddress(bytes).hostAddress
+        return InetAddress.getByAddress(bytes).hostAddress!!
     }
 
     fun UDPInterface_beginConnection(publickey:String, ip:String, port:Int, password:String,login:String) {
+        Timber.i( "UDPInterface_beginConnection for: $publickey")
         val address = "$ip:$port"
         call("UDPInterface_beginConnection", Benc.dict("publicKey",publickey,"address", address,"peerName", "", "password",password,"login", login, "interfaceNumber",0))
     }
 
     fun InterfaceController_disconnectPeer(pubKey:String) {
+        Timber.i( "InterfaceController_disconnectPeer for: $pubKey")
         call("InterfaceController_disconnectPeer", Benc.dict("pubkey",pubKey))
     }
 
@@ -322,12 +329,13 @@ object CjdnsSocket {
         SwitchPinger_ping(path)
     }
 
-    fun SwitchPinger_ping(path:String) {
-        Log.i(BuildConfig.APPLICATION_ID, "SwitchPinger_ping for path: "+path)
+    private fun SwitchPinger_ping(path:String) {
+        Timber.i("SwitchPinger_ping for path: "+path)
         call("SwitchPinger_ping", Benc.dict("path",path))
     }
 
     fun UDPInterface_beacon(interfaceNumber: Benc.Obj) {
+        Timber.i("UDPInterface_beacon")
         val number = interfaceNumber["interfaceNumber"].num().toInt()
         call("UDPInterface_beacon", Benc.dict("interfaceNumber", number, "state", InterfaceController_beaconState_newState_SEND))
     }

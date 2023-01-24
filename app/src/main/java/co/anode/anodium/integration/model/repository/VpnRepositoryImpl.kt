@@ -136,7 +136,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         }
 
         _vpnState.tryEmit(VpnState.CONNECTING)
-        AnodeUtil.addCjdnsPeers()
+        //addCjdnsPeers() //Should not addpeers again
         if(authorizeVPN().isSuccess){
             Timber.d("authorizeVPN success")
             val connectedNode = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","")

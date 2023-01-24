@@ -71,8 +71,24 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
 
     override suspend fun addCjdnsPeers(peers: List<CjdnsPeeringLine>): Boolean {
         try {
+            //add only peers who do not already exist
+            val currentPeers = CjdnsSocket.InterfaceController_peerStats()
             for (i in peers.indices) {
-                CjdnsSocket.UDPInterface_beginConnection(peers[i].publicKey, peers[i].ip, peers[i].port, peers[i].password, peers[i].login)
+                if (currentPeers.size > 0) {
+                    //if (currentPeers[p]["addr"].toString().trim('"') == peers[i].publicKey) {
+                    var found = false
+                    for (j in 0 until currentPeers.size) {
+                        if (currentPeers[j]["addr"].toString().trim('"') == peers[i].publicKey) {
+                            found = true
+                            break
+                        }
+                    }
+                    if (!found) {
+                        CjdnsSocket.UDPInterface_beginConnection(peers[i].publicKey, peers[i].ip, peers[i].port, peers[i].password, peers[i].login)
+                    }
+                } else {
+                    CjdnsSocket.UDPInterface_beginConnection(peers[i].publicKey, peers[i].ip, peers[i].port, peers[i].password, peers[i].login)
+                }
             }
             Timber.d("addCjdnsPeers Success")
             return true

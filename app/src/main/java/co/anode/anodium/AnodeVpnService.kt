@@ -69,17 +69,19 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
     private fun configVpn() {
         /* Remove check because we want to allow creating the VPN tun with empty addresses
          * for when trying to connect cjdns to Pkt.cube */
-        /*
+
         if (CjdnsSocket.ipv4Address.isEmpty() && CjdnsSocket.ipv6Address.isEmpty()) {
-            Log.i(LOGTAG, "AnodeVPNService: At least one address must be specified")
+            Timber.i("AnodeVPNService: At least one address must be specified")
             return
-        }*/
+        }
 
         val b = avpn.builder().setSession("AnodeVpnService")
-            .addAddress("fc00::", 128)
-            .addRoute("fc00::", 8)
+            /* Uncomment to allow creating VPN tun with empty addresses
+            * for cjdns connecting to Pkt.cube (wifi sharing)*/
+            /*.addAddress("fc00::", 128)
+            .addRoute("fc00::", 8)*/
             .addDnsServer("1.1.1.1")
-        //.allowFamily(AF_INET)
+            //.allowFamily(AF_INET)
 
         if (CjdnsSocket.ipv4Address.isNotEmpty() && CjdnsSocket.ipv4Address != "") {
             CjdnsSocket.VPNipv4Address = CjdnsSocket.ipv4Address
@@ -97,7 +99,8 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
         if (avpn.mInterface != null) {
             val fdNum = CjdnsSocket.Admin_importFd(avpn.mInterface!!.fileDescriptor)
             Timber.i("imported vpn fd $fdNum")
-            CjdnsSocket.Core_initTunfd(fdNum)
+            val response = CjdnsSocket.Core_initTunfd(fdNum)
+            Timber.i("initTunfd response: $response[0]")
         }
     }
 
