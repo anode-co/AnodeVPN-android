@@ -1,6 +1,7 @@
 package com.pkt.core.presentation.main.settings.cjdnsinfo
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.pkt.domain.dto.CjdnsInfo
 import com.pkt.core.R
 import com.pkt.core.di.qualifier.VersionName
@@ -11,6 +12,10 @@ import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,6 +25,9 @@ class CjdnsInfoViewModel @Inject constructor(
     private val cjdnsRepository: CjdnsRepository,
     private val repository: GeneralRepository,
 ) : StateViewModel<CjdnsInfoState>() {
+
+    private var pollingJob: Job? = null
+    private val pollingInterval = 1000L
 
     init {
         invokeLoadingAction {
@@ -91,7 +99,7 @@ class CjdnsInfoViewModel @Inject constructor(
                 addAll(
                     peers.mapIndexed { index, peer ->
                         PeerItem(peer, index < peers.size - 1).apply {
-                            expanded = checkExpanded(id, index == 0)
+                            expanded = checkExpanded(id, index == -1)
                         }
                     }
                 )
@@ -123,6 +131,29 @@ class CjdnsInfoViewModel @Inject constructor(
             }
 
         }
+    }
+
+    fun onResume() {
+        startPolling()
+    }
+
+    fun onPause() {
+        stopPolling()
+    }
+
+    private fun startPolling() {
+        stopPolling()
+        pollingJob = viewModelScope.launch {
+            while (true) {
+                if (!isActive) return@launch
+                loadCjdnsInfo()
+                delay(pollingInterval)
+            }
+        }
+    }
+
+    private fun stopPolling() {
+        pollingJob?.cancel()
     }
 
     private fun checkExpanded(id: String, default: Boolean = false) =

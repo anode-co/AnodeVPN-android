@@ -85,7 +85,7 @@ class PeerView @JvmOverloads constructor(
                 toggle()
             }
 
-            val statusValue = peer.status.statusValue()
+            val statusValue = peer.status.statusValue().replace("\"", "")
             val bytesInValue = "${peer.bytesIn.formatBytes(context)}/${context.getString(R.string.per_second)}"
             val bytesOutValue = "${peer.bytesOut.formatBytes(context)}/${context.getString(R.string.per_second)}"
 
@@ -94,8 +94,8 @@ class PeerView @JvmOverloads constructor(
 
             adapter.items = listOf(
                 KeyValueHorizontalItem(R.string.ip, "${peer.ipv4}:${peer.port}"),
-                KeyValueHorizontalItem(R.string.key, peer.key),
-                StatusItem(statusValue, peer.status.statusColorResId()),
+                KeyValueHorizontalItem(R.string.key, peer.key.replace("\"", "")),
+                StatusItem(statusValue, statusValue.statusColorResId()),
                 KeyValueHorizontalItem(R.string.key_in, bytesInValue),
                 KeyValueHorizontalItem(R.string.out, bytesOutValue),
                 KeyValueHorizontalItem(R.string.loss, peer.bytesLost.toString()),
@@ -119,12 +119,12 @@ class PeerView @JvmOverloads constructor(
 
     @ColorRes
     private fun String.statusColorResId(): Int = when (uppercase()) {
-        "INIT" -> R.color.yellow
-        "SENT_HELLO", "RECEIVED_HELLO", "SENT_KEY", "RECEIVED_KEY" -> R.color.yellow
+        //"INIT" -> R.color.yellow
+        //"SENT_HELLO", "RECEIVED_HELLO", "SENT_KEY", "RECEIVED_KEY" -> R.color.yellow
         "ESTABLISHED" -> R.color.green
         "UNRESPONSIVE" -> R.color.red
-        "UNAUTHENTICATED" -> R.color.red
-        "INCOMPATIBLE" -> R.color.red
+        //"UNAUTHENTICATED" -> R.color.red
+        //"INCOMPATIBLE" -> R.color.red
         else -> R.color.yellow
     }
 

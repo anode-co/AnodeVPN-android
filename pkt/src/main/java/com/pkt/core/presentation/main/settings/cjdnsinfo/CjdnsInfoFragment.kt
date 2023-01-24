@@ -44,4 +44,15 @@ class CjdnsInfoFragment : StateFragment<CjdnsInfoState>(R.layout.fragment_cjdns_
     override fun handleState(state: CjdnsInfoState) {
         adapter.items = state.items
     }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
+
 }
