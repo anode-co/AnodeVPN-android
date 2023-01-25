@@ -29,7 +29,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
                 val port = peers[i]["lladdr"].toString().split(":")[1].trim('"').toInt()
                 val key = peers[i]["addr"].toString()
                 val status = peers[i]["state"].toString()
-                val noise = peers[i]["noiseProto"].toString().toInt()
+                val noise = 0//val noise = peers[i]["noiseProto"].toString().toInt()
                 val bytesIn: Long = peers[i]["bytesIn"].toString().trim('"').toLong()
                 val bytesOut: Long = peers[i]["bytesOut"].toString().trim('"').toLong()
                 val bytesLost: Long = peers[i]["lostPackets"].toString().trim('"').toLong()
