@@ -28,9 +28,10 @@ class FileLoggingTree() : Timber.DebugTree() {
             } else {
                 logFile.appendText("$logTimeStamp| $tag| $message\n")
             }
-
+            if (BuildConfig.DEBUG) {
+                Log.i(tag, message)
+            }
         } catch (e: Exception) {
-
             Log.e(BuildConfig.APPLICATION_ID, "Error while logging into file : $e")
         }
     }

@@ -2,7 +2,6 @@ package com.pkt.core.presentation.main.vpn
 
 import androidx.lifecycle.viewModelScope
 import com.pkt.core.presentation.common.state.StateViewModel
-import com.pkt.domain.dto.Vpn
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
@@ -39,7 +38,7 @@ class VpnViewModel @Inject constructor(
                 if (vpnList.isNotEmpty()) {
                     for (item in vpnList) {
                         if (item.publicKey == lastConnectedKey) {
-                            vpnRepository.setCurrentVpn(item).getOrThrow()
+                            vpnRepository.setCurrentVpn(item)
                             sendState {
                                 copy(
                                     vpn = item,
