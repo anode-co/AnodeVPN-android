@@ -30,7 +30,7 @@ import javax.inject.Singleton
 
 @Singleton
 class VpnRepositoryImpl @Inject constructor() : VpnRepository {
-    private val defaultNode = "1y7k7zb64f242hvv8mht54ssvgcqdfzbxrng5uz7qpgu7fkjudd0.k"
+    private val defaultNode = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
     private val vpnAPI = VpnAPIService()
     private val _vpnState: MutableStateFlow<VpnState> by lazy { MutableStateFlow(VpnState.DISCONNECTED) }
 
@@ -74,6 +74,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override fun setCurrentVpn(vpn: Vpn): Result<Unit> {
+        Timber.i("VpnRepositoryImpl setCurrentVpn ${vpn.name}")
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.edit()?.putString("LastServerPubkey", vpn.publicKey)?.apply()
         _currentVpnFlow.tryEmit(vpn)
         return Result.success(Unit)
@@ -81,11 +82,11 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override fun connectFromExits(vpn: Vpn) {
         Timber.d("VpnRepositoryImpl connectFromExits")
-        setCurrentVpn(vpn).getOrNull()
+        setCurrentVpn(vpn)
         _vpnState.tryEmit(VpnState.CONNECT)
     }
 
-    fun cjdnsConnectVPN(node: String) {
+    private fun cjdnsConnectVPN(node: String) {
         Timber.d("VpnRepositoryImpl cjdnsConnectVPN")
         if (!AnodeUtil.internetConnection()) {
             Timber.d("cjdnsConnectVPN: No internet connection")
@@ -138,7 +139,6 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         _vpnState.tryEmit(VpnState.CONNECTING)
         //addCjdnsPeers() //Should not addpeers again
         if(authorizeVPN().isSuccess){
-            Timber.d("authorizeVPN success")
             val connectedNode = AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","")
             if ((!node.isNullOrEmpty()) && ((!AnodeClient.isVpnActive()) || (node != connectedNode))) {
                 cjdnsConnectVPN(node)
@@ -261,6 +261,6 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override fun getLastConnectedVPN(): String {
-        return AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey","") ?: ""
+        return AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey", defaultNode) ?: defaultNode
     }
 }
