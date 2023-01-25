@@ -26,9 +26,11 @@ import co.anode.anodium.BuildConfig
 import co.anode.anodium.R
 import co.anode.anodium.volley.APIController
 import co.anode.anodium.volley.ServiceVolley
+import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.*
 import java.net.*
 import java.nio.file.Files
@@ -49,7 +51,6 @@ import javax.crypto.spec.SecretKeySpec
 
 
 object AnodeUtil {
-    private val LOGTAG = BuildConfig.APPLICATION_ID
     var context: Context? = null
     val ApplicationID = BuildConfig.APPLICATION_ID
     val DEFAULT_WALLET_NAME = "wallet"
@@ -91,7 +92,7 @@ object AnodeUtil {
 
     fun initializeApp() {
         //Create files folder
-        Log.i(BuildConfig.APPLICATION_ID, "Creating files directory")
+        Timber.i( "Creating files directory")
         context!!.filesDir.mkdir()
         //Create symbolic link for cjdroute
         val nativelibdir = context!!.applicationInfo.nativeLibraryDir.toString()
@@ -215,7 +216,7 @@ object AnodeUtil {
     }
 
     private fun generateUsernameHandler(result: String, textview:TextView?) {
-        Log.i(BuildConfig.APPLICATION_ID,"Received from API: $result")
+        Timber.i("Received from API: $result")
         if ((result.isBlank())) {
             return
         } else if (result.contains("400") || result.contains("401")) {
@@ -270,7 +271,7 @@ object AnodeUtil {
     }
 
     private fun generateCjdnsConfFile(secret: String) {
-        Log.i(BuildConfig.APPLICATION_ID, "Generating new conf file with cjdroute...")
+        Timber.i( "Generating new conf file with cjdroute...")
         val processBuilder = ProcessBuilder()
         try {
             if (secret.isNotEmpty()) {
@@ -291,18 +292,17 @@ object AnodeUtil {
                     .waitFor(2, TimeUnit.SECONDS)
             }
             //Clean conf
-            Log.i(BuildConfig.APPLICATION_ID, "Clean conf file with cjdroute")
+            Timber.i( "Clean conf file with cjdroute")
             processBuilder.command("$filesDirectory/$CJDROUTE_BINFILE", "--cleanconf")
                     .redirectInput(File(filesDirectory, CJDROUTE_TEMPCONFFILE))
                     .redirectOutput(File(filesDirectory, CJDROUTE_CONFFILE))
                     .start()
                     .waitFor(2, TimeUnit.SECONDS)
-
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to generate new configuration file " + e.message)
         }
         //Delete temp file
-        Log.i(BuildConfig.APPLICATION_ID, "Delete temp conf file")
+        Timber.i( "Delete temp conf file")
         Files.delete(Paths.get("$filesDirectory/$CJDROUTE_TEMPCONFFILE"))
     }
 
@@ -313,7 +313,7 @@ object AnodeUtil {
             initializeCjdrouteConfFile(prefs?.getString("wallet_secret","").toString())
         }
         try {
-            Log.i(LOGTAG, "Launching cjdroute (file size: " + File("$filesDirectory/$CJDROUTE_BINFILE").length() + ")")
+            Timber.i( "Launching cjdroute (file size: " + File("$filesDirectory/$CJDROUTE_BINFILE").length() + ")")
             val processBuilder = ProcessBuilder("$filesDirectory/$CJDROUTE_BINFILE")
                 .redirectInput(File(filesDirectory, CJDROUTE_CONFFILE))
                 .redirectOutput(File(filesDirectory, CJDROUTE_LOG))
@@ -322,7 +322,10 @@ object AnodeUtil {
             processBuilder.directory(File(filesDirectory))
             cjdns_pb = processBuilder.start()
             cjdns_pb.waitFor()
-            Log.e(LOGTAG, "cjdns exited with " + cjdns_pb.exitValue())
+            Timber.i( "cjdns exited with " + cjdns_pb.exitValue())
+            if (cjdns_pb.exitValue() != 0) {
+                AnodeUtilException("cjdroute exited with code:"+ cjdns_pb.exitValue().toString() )
+            }
             CjdnsSocket.init("$filesDirectory/$CJDROUTE_SOCK")
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
@@ -332,7 +335,7 @@ object AnodeUtil {
     fun launchPld() {
         try {
             if (this::pld_pb.isInitialized && pld_pb.isAlive) return
-            Log.i(LOGTAG, "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
+            Timber.i( "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
             val pldLogFile = File(filesDirectory + "/" + PLD_LOG)
             val processBuilder = ProcessBuilder()
             val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt")
@@ -376,7 +379,7 @@ object AnodeUtil {
      */
     @Throws(IOException::class)
     fun readJSONFile(filename: String): String {
-        Log.i(LOGTAG, "reading $filename")
+        Timber.i( "reading $filename")
         val confFile = FileInputStream(filename)
         val fileContent = StringBuffer("")
         val buffer = ByteArray(1024)
@@ -388,24 +391,25 @@ object AnodeUtil {
     }
 
     private fun modifyJSONConfFile() {
-        Log.i(LOGTAG, "modifying conf file")
+        Timber.i( "modifying conf file")
         try {
             val filecontent = readJSONFile("$filesDirectory/$CJDROUTE_CONFFILE")
             val json = JSONObject(filecontent)
+
             //Add tunfd and tunnel socket
             val router = json.getJSONObject("router")
             val interf = router.getJSONObject("interface")
             interf.put("tunfd", "android")
             val security = json.getJSONArray("security")
+            security.getJSONObject(0).put("setuser",0)
+            security.getJSONObject(4).put("seccomp",0)
             if (security.getJSONObject(3).has("noforks"))
                 security.getJSONObject(3).put("noforks", 0)
             json.put("pipe","$filesDirectory/$CJDROUTE_SOCK")
             //Save file
-            val writer = BufferedWriter(FileWriter("$filesDirectory/$CJDROUTE_CONFFILE"))
-            val out = json.toString().replace("\\/", "/")
-            writer.write(out)
-            writer.close()
+            File("$filesDirectory/$CJDROUTE_CONFFILE").writeText(json.toString().replace("\\/", "/"))
         } catch (e: Exception) {
+            Timber.e("Failed to modify cjdroute.conf file " + e.message)
             throw AnodeUtilException("Failed to modify cjdroute.conf file " + e.message)
         }
     }
@@ -754,7 +758,7 @@ object AnodeUtil {
         //Check for event log files daily
         Thread({
             val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
-            Log.i(LOGTAG, "AnodeUtil.UploadEventsThread startup")
+            Timber.i("AnodeUtil.UploadEventsThread startup")
             while (true) {
                 AnodeClient.ignoreErr {
                     //Check if 24 hours have passed since last log file submitted
@@ -765,15 +769,13 @@ object AnodeUtil {
                         val bRatings = File("$filesDirectory/anodium-rating.json").exists()
                         var timetosleep: Long = 60000
                         if ((!bEvents) or (!bRatings)) {
-                            Log.d(LOGTAG, "No events or ratings to report, sleeping")
+                            Timber.i("No events or ratings to report, sleeping")
                             Thread.sleep((60 * 60000).toLong())
                         } else if (!AnodeClient.checkNetworkConnection()) {
                             // try again in 10 seconds, waiting for internet
-                            Log.i(LOGTAG, "Waiting for internet connection to report events")
                             Thread.sleep(10000)
                         } else {
                             if (bEvents) {
-                                Log.i(LOGTAG, "Reporting an events log file")
                                 if (AnodeClient.httpPostEvent(File(filesDirectory)).contains("Error")) {
                                     timetosleep = 60000
                                 } else {
@@ -782,7 +784,6 @@ object AnodeUtil {
                                 }
                             }
                             if (bRatings) {
-                                Log.i(LOGTAG, "Reporting ratings")
                                 if (AnodeClient.httpPostRating().contains("Error")) {
                                     timetosleep = 60000
                                 } else {
@@ -802,25 +803,22 @@ object AnodeUtil {
         }, "AnodeUtil.UploadEventsThread").start()
         //Check for uploading Errors
         Thread({
-            Log.i(LOGTAG, "AnodeUtil.UploadErrorsThread startup")
+            Timber.i("AnodeUtil.UploadErrorsThread startup")
             val arch = System.getProperty("os.arch")
             while (!(arch!!.contains("x86") || arch.contains("i686"))) {
                 AnodeClient.ignoreErr {
                     val erCount = context?.let { AnodeClient.errorCount(it) }
                     if (erCount == 0) {
                         // Wait for errors for 30 seconds
-                        Log.d(LOGTAG, "No errors to report, sleeping")
                         Thread.sleep(30000)
                     } else if (!AnodeClient.checkNetworkConnection()) {
                         // try again in a second, waiting for internet
-                        Log.i(LOGTAG, "Waiting for internet connection to report $erCount errors")
                         Thread.sleep(1000)
                     } else {
-                        Log.i(LOGTAG, "Reporting a random error out of $erCount")
                         if (AnodeClient.httpPostError(File(filesDirectory)).contains("Error")) {
                             // There was an error posting, lets wait 1 minute so as not to generate
                             // tons of crap
-                            Log.i(LOGTAG, "Error reporting error, sleep for 60 seconds")
+                            Timber.e("Error reporting error, sleep for 60 seconds")
                         }
                         Thread.sleep(60000)
                     }
@@ -829,7 +827,7 @@ object AnodeUtil {
         }, "AnodeUtil.UploadErrorsThread").start()
         //Check for updates every 5min
         Thread({
-            Log.i(LOGTAG, "AnodeUtil.CheckUpdates")
+            Timber.i( "AnodeUtil.CheckUpdates")
             while (doUpdateCheck) {
                 AnodeClient.checkNewVersion(false)
                 if (AnodeClient.downloadFails > 1) {
@@ -917,7 +915,7 @@ object AnodeUtil {
             if (`is` != null) {
                 while (`is`.read(buffer) > 0) {
                     os.write(buffer)
-                    Log.d("#DB", "writing>>")
+                    Timber.d("#DB", "writing>>")
                 }
             }
 
@@ -958,7 +956,7 @@ object AnodeUtil {
                 socket.receive(packet)
                 val text = String(message, 0, packet.length)
                 if (text.contains("ponge")) {
-                    Log.i(LOGTAG, "Cjdns is already running")
+                    Timber.i("Cjdns is already running")
                     return@Callable true
                 } else {
                     return@Callable false
