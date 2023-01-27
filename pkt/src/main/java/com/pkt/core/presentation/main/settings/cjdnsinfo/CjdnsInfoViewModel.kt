@@ -64,6 +64,7 @@ class CjdnsInfoViewModel @Inject constructor(
         }
     }
 
+
     private fun CjdnsInfo.toItems(): List<DisplayableItem> {
         val info = this
         val connection = info.connection
@@ -114,18 +115,22 @@ class CjdnsInfoViewModel @Inject constructor(
                     )
                 )
             } else {
+                var noise = "Legacy"
+                if (connection.protocol == 1) {
+                    noise = "Noise"
+                }
                 addAll(
                     listOf(
                         TitleItem(R.string.connection),
                         KeyValueHorizontalItem(R.string.server, connection.key),
-                        KeyValueHorizontalItem(
-                            R.string.ipv4,
-                            "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"
-                        ),
-                        KeyValueHorizontalItem(
-                            R.string.ipv6,
-                            "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"
-                        ),
+                        KeyValueHorizontalItem(R.string.ipv4, "${connection.ip4Address}/${connection.ip4Alloc}/${connection.ip4Prefix}"),
+                        KeyValueHorizontalItem(R.string.ipv6, "${connection.ip6Address}/${connection.ip6Alloc}/${connection.ip6Prefix}"),
+                        KeyValueHorizontalItem(R.string.cjdns_ip, connection.cjdnsIp),
+                        KeyValueHorizontalItem(R.string.addr, connection.addr),
+                        KeyValueHorizontalItem(R.string.metric, connection.metric),
+                        KeyValueHorizontalItem(R.string.protocol, noise),
+                        StatusItem(connection.state),
+                        KeyValueHorizontalItem(R.string.loss, connection.loss.toString()),
                     )
                 )
             }

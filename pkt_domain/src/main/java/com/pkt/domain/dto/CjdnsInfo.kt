@@ -26,6 +26,11 @@ data class CjdnsConnection(
     val ip6Prefix: Int,
     val outgoing: Int,
     val cjdnsIp: String,
+    val addr: String,
+    val metric: String,
+    val protocol: Int,
+    val state: String,
+    val loss: Int,
 )
 
 @Keep
@@ -37,5 +42,6 @@ data class CjdnsPeer(
     val bytesIn: Long,
     val bytesOut: Long,
     val bytesLost: Long,
-    val noiseProto: Int
+    val noiseProto: Int,
+    val cjdnsIp: String,
 )

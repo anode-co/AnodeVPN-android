@@ -321,14 +321,6 @@ object CjdnsSocket {
         call("InterfaceController_disconnectPeer", Benc.dict("pubkey",pubKey))
     }
 
-    fun SessionManager_sessionStatsByIP(address:String) {
-        val result = call("SessionManager_sessionStatsByIP", Benc.dict("ip6",address))
-        //get path
-        val addr = result["addr"].toString().split(".")
-        val path = addr[1]+"."+addr[2]+"."+addr[3]+"."+addr[4]
-        SwitchPinger_ping(path)
-    }
-
     private fun SwitchPinger_ping(path:String) {
         Timber.i("SwitchPinger_ping for path: "+path)
         call("SwitchPinger_ping", Benc.dict("path",path))
@@ -342,6 +334,9 @@ object CjdnsSocket {
 
     fun UDPInterface_new(dscp:Int, address:String, port:Int) : Benc.Obj =
         call("UDPInterface_new", Benc.dict("dscp",dscp,"bindAddress",address,"beaconPort",port))
+
+    fun SessionManager_sessionStatsByIP(address:String) : Benc.Obj =
+        call("SessionManager_sessionStatsByIP", Benc.dict("ip6", address))
 }
 
 class CjdnsException(message:String): Exception(message)

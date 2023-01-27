@@ -1013,8 +1013,66 @@ object AnodeUtil {
 
         val linkProperties = LinkProperties()
         linkProperties.setDnsServers(dnsServers)
+    }
+    fun base32Decode(input: String): ByteArray {
+        val numForAscii = intArrayOf(
+            99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 99, 99, 99, 99, 99, 99,
+            99, 99, 10, 11, 12, 99, 13, 14, 15, 99, 16, 17, 18, 19, 20, 99,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 99, 99, 99, 99, 99,
+            99, 99, 10, 11, 12, 99, 13, 14, 15, 99, 16, 17, 18, 19, 20, 99,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 99, 99, 99, 99, 99
+        )
 
+        val output = ByteArray(input.length * 5 / 8)
+        var outputIndex = 0
+        var inputIndex = 0
+        var nextByte = 0
+        var bits = 0
 
+        while (inputIndex < input.length) {
+            val o = input[inputIndex].toInt()
+            val b = numForAscii[o]
+            inputIndex++
+            if (b > 31) throw IllegalArgumentException("bad character ${input[inputIndex]} in $input")
+            nextByte = nextByte or (b shl bits)
+            bits += 5
+            if (bits >= 8) {
+                output[outputIndex] = nextByte.toByte()
+                outputIndex++
+                bits -= 8
+                nextByte = nextByte shr 8
+            }
+        }
+
+        if (bits >= 5 || nextByte != 0) return ByteArray(0)
+
+        return output
+    }
+
+    fun ByteArray.toHexString(): String {
+        return joinToString(separator = "") {
+            String.format("%02x", it)
+        }
+    }
+
+    fun convertKeyToCjdnsIP(pubKey: String): String {
+        val keyBytes = base32Decode(pubKey)
+        if (keyBytes.size == 0) {
+            //Failed to decode
+            return ""
+        }
+        val md = MessageDigest.getInstance("SHA-512")
+        val hashOneBuff = md.digest(keyBytes)
+        val hashTwo = md.digest(hashOneBuff)
+        val first16 = hashTwo.toHexString().substring(0, 32)
+        val out = ArrayList<String>()
+        for (i in 0..7) {
+            out.add(first16.substring(i*4, i*4+4))
+        }
+        return out.joinToString(":")
     }
 
 }

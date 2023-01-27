@@ -117,8 +117,13 @@
     <string name="ipv4">IPv4:</string>
     <string name="internet_ipv6">Internet IPv6:</string>
     <string name="cjdns_ipv6">Cjdns IPv6:</string>
+    <string name="cjdns_ip">Cjdns IP:</string>
     <string name="public_key">Public Key:</string>
     <string name="node_map">Node Map:</string>
+    <string name="addr">Addr:</string>
+    <string name="metric">Metric:</string>
+    <string name="protocol">Protocol:</string>
+    <string name="state">State:</string>
     <string name="find_your_self">Find Yourself on the map</string>
     <string name="username">Username:</string>
     <string name="vpn_exit_key">VPN exit key:</string>
@@ -136,10 +141,13 @@
     <string name="key_in">In:</string>
     <string name="out">Out:</string>
     <string name="loss">Loss:</string>
+    <string name="noise">Noise</string>
+    <string name="legacy">Legacy</string>
     <string name="connection">Connection</string>
     <string name="server">Server:</string>
     <string name="ipv6">IPv6</string>
     <string name="per_second">s</string>
+    <string name="kb_per_second">Kb/s</string>
     <string name="kb">KB</string>
     <string name="mb">MB</string>
     <string name="logout">Log\nOut</string>

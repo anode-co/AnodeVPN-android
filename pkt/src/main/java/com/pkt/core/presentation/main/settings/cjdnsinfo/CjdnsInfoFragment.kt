@@ -26,6 +26,7 @@ class CjdnsInfoFragment : StateFragment<CjdnsInfoState>(R.layout.fragment_cjdns_
         },
         titleAdapterDelegate(),
         peerAdapterDelegate(),
+        statusAdapterDelegate(),
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
