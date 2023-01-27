@@ -93,6 +93,10 @@ class VpnThread(private val avpn: AnodeVpnService) : Runnable {
             b.addRoute(CjdnsSocket.ipv6Route, CjdnsSocket.ipv6RoutePrefix) //0
             b.addAddress(CjdnsSocket.ipv6Address, CjdnsSocket.ipv6AddressPrefix) //64
         }
+        val nodeInfo = CjdnsSocket.Core_nodeInfo()
+        if (nodeInfo["myIp6"].str().isNotEmpty()) {
+            b.addAddress(nodeInfo["myIp6"].str(), 8)
+        }
 
         avpn.mInterface = b.establish()
         Timber.i("interface vpn")
