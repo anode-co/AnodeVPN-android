@@ -30,8 +30,8 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
                 val key = peers[i]["addr"].toString()
                 val status = peers[i]["state"].toString()
                 val noise = peers[i]["noiseProto"].toString().toInt()
-                val bytesIn: Long = peers[i]["bytesIn"].toString().trim('"').toLong()
-                val bytesOut: Long = peers[i]["bytesOut"].toString().trim('"').toLong()
+                val bytesIn: Long = peers[i]["recvKbps"].toString().trim('"').toLong()
+                val bytesOut: Long = peers[i]["sendKbps"].toString().trim('"').toLong()
                 val bytesLost: Long = peers[i]["lostPackets"].toString().trim('"').toLong()
 
                 val cjdnsip = AnodeUtil.convertKeyToCjdnsIP(key.split(".")[key.split(".").size-2])

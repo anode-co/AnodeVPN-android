@@ -86,8 +86,8 @@ class PeerView @JvmOverloads constructor(
             }
 
             val statusValue = peer.status.statusValue().replace("\"", "")
-            val bytesInValue = "${peer.bytesIn.formatBytes(context)}/${context.getString(R.string.per_second)}"
-            val bytesOutValue = "${peer.bytesOut.formatBytes(context)}/${context.getString(R.string.per_second)}"
+            val bytesInValue = "${peer.bytesIn} ${context.getString(R.string.kb_per_second)}"
+            val bytesOutValue = "${peer.bytesOut} ${context.getString(R.string.kb_per_second)}"
 
             titleLabel.text = peer.ipv4
             statusLabel.text = "$statusValue - $bytesInValue / $bytesOutValue"

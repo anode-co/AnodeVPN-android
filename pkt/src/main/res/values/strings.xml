@@ -147,6 +147,7 @@
     <string name="server">Server:</string>
     <string name="ipv6">IPv6</string>
     <string name="per_second">s</string>
+    <string name="kb_per_second">Kb/s</string>
     <string name="kb">KB</string>
     <string name="mb">MB</string>
     <string name="logout">Log\nOut</string>
