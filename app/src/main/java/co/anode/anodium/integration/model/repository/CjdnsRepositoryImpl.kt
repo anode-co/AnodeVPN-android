@@ -29,11 +29,14 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
                 val port = peers[i]["lladdr"].toString().split(":")[1].trim('"').toInt()
                 val key = peers[i]["addr"].toString()
                 val status = peers[i]["state"].toString()
-                val noise = 0//val noise = peers[i]["noiseProto"].toString().toInt()
+                val noise = peers[i]["noiseProto"].toString().toInt()
                 val bytesIn: Long = peers[i]["bytesIn"].toString().trim('"').toLong()
                 val bytesOut: Long = peers[i]["bytesOut"].toString().trim('"').toLong()
                 val bytesLost: Long = peers[i]["lostPackets"].toString().trim('"').toLong()
-                result.add(CjdnsPeer(ipv4, port, key, status, bytesIn, bytesOut, bytesLost, noise))
+
+                val cjdnsip = AnodeUtil.convertKeyToCjdnsIP(key.split(".")[key.split(".").size-2])
+
+                result.add(CjdnsPeer(ipv4, port, key, status, bytesIn, bytesOut, bytesLost, noise, cjdnsip))
             }
             Timber.e("getCjdnsPeers Success")
             return Result.success(result)
@@ -58,7 +61,15 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
                 val ipv4Prefix = list[i]["ip4Prefix"].toString().trim('"').toInt()
                 val ipv6Prefix = list[i]["ip6Prefix"].toString().trim('"').toInt()
                 val outgoing = list[i]["outgoing"].toString().trim('"').toInt()
-                result.add(CjdnsConnection(ipv4Address, ipv6Address, key, ipv4Alloc, error, ipv6Alloc, ipv4Prefix, ipv6Prefix, outgoing, ""))
+
+                val cjdnsip = AnodeUtil.convertKeyToCjdnsIP(key.split(".")[key.split(".").size-2])
+                val stats = CjdnsSocket.SessionManager_sessionStatsByIP(cjdnsip)
+                val addr = stats["addr"].toString().trim('"')
+                val metric = stats["metric"].toString().toLong().toString(16)
+                val protocol = stats["noiseProto"].toString().trim('"').toInt()
+                val state = stats["state"].toString().trim('"')
+                val loss = stats["lostPackets"].toString().toInt()
+                result.add(CjdnsConnection(ipv4Address, ipv6Address, key, ipv4Alloc, error, ipv6Alloc, ipv4Prefix, ipv6Prefix, outgoing, cjdnsip, addr, metric, protocol, state, loss))
             }
             Timber.d("getCjdnsConnections Success")
             return Result.success(result)
@@ -107,7 +118,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         val cjdnsNodeInfo = CjdnsSocket.Core_nodeInfo()
         val ipv6 = cjdnsNodeInfo["myIp6"].str()
         val internetipv6 = CjdnsSocket.ipv6Address
-        var cjdnsConnection = CjdnsConnection("","","",0,"",0,0,0,0,"")
+        var cjdnsConnection = CjdnsConnection("","","",0,"",0,0,0,0,"", "", "", 0, "", 0)
         var cjdnsPeers: MutableList<CjdnsPeer> = mutableListOf()
         runCatching {
             val connection = getCjdnsConnections().getOrThrow()
@@ -121,7 +132,7 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
             cjdnsPeers = peers.toMutableList()
         }.onFailure {
             Timber.e("getCjdnsInfo connection or peers Failed: ${it.message}")
-            cjdnsConnection = CjdnsConnection("","","",0,"",0,0,0,0,"")
+            cjdnsConnection = CjdnsConnection("","","",0,"",0,0,0,0,"", "", "", 0, "", 0)
         }
 
         val key = AnodeUtil.getPubKey()
