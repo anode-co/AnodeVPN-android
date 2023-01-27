@@ -91,7 +91,10 @@ class PeerView @JvmOverloads constructor(
 
             titleLabel.text = peer.ipv4
             statusLabel.text = "$statusValue - $bytesInValue / $bytesOutValue"
-
+            var noise = "Legacy"
+            if (peer.noiseProto == 1) {
+                noise = "Noise"
+            }
             adapter.items = listOf(
                 KeyValueHorizontalItem(R.string.ip, "${peer.ipv4}:${peer.port}"),
                 KeyValueHorizontalItem(R.string.key, peer.key.replace("\"", "")),
@@ -99,6 +102,8 @@ class PeerView @JvmOverloads constructor(
                 KeyValueHorizontalItem(R.string.key_in, bytesInValue),
                 KeyValueHorizontalItem(R.string.out, bytesOutValue),
                 KeyValueHorizontalItem(R.string.loss, peer.bytesLost.toString()),
+                KeyValueHorizontalItem(R.string.protocol, noise),
+                KeyValueHorizontalItem(R.string.cjdns_ip, peer.cjdnsIp),
             )
         }
     }
