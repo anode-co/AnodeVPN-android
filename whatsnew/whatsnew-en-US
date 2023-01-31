@@ -1,2 +1,2 @@
-# v0.3.18
-- Upgrade cjdnsinfo
+# v0.3.19
+- Fix for allowing app to launch even without cjdns connection
