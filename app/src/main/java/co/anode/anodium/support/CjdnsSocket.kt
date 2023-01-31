@@ -78,10 +78,15 @@ object CjdnsSocket {
                 }
         //Timber.i(benc.toString())
         //Check if socket has connected, in case cjdns has not been initialized yet
+        var tries = 0
         while (!ls.isConnected) {
             init(cjdnsPath)
+            tries++
+            if (tries > 9) {
+                throw CjdnsException("Can NOT connect to socket.")
+            }
         }
-        var tries = 0
+        tries = 0
         while (true) {
             try {
                 ls.outputStream.write(benc.bytes())
@@ -179,7 +184,7 @@ object CjdnsSocket {
         Timber.i( "getIpTunnelConnectionIDs")
         var connection: Benc.Obj
         val out:MutableList<Int> = mutableListOf()
-        val list= call("IpTunnel_listConnections", null)
+        val list = call("IpTunnel_listConnections", null)
         for (i in 0 until list["connections"].size()) {
             try {
                 connection = IpTunnel_showConnection(list["connections"][0].num().toInt())
