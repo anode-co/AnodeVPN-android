@@ -325,8 +325,9 @@ object AnodeUtil {
             Timber.i( "cjdns exited with " + cjdns_pb.exitValue())
             if (cjdns_pb.exitValue() != 0) {
                 AnodeUtilException("cjdroute exited with code:"+ cjdns_pb.exitValue().toString() )
+            } else {
+                CjdnsSocket.init("$filesDirectory/$CJDROUTE_SOCK")
             }
-            CjdnsSocket.init("$filesDirectory/$CJDROUTE_SOCK")
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
