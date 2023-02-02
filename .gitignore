@@ -102,3 +102,6 @@ app/app.iml
 /.idea/deploymentTargetDropDown.xml
 /.idea/inspectionProfiles/Project_Default.xml
 /app/release/output-metadata.json
+
+# key
+/tools/android_key

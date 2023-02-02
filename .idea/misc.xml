@@ -39,7 +39,7 @@
         <entry key="app/src/main/res/layout/activity_confirm_seed.xml" value="0.16359649122807018" />
         <entry key="app/src/main/res/layout/activity_debug_wallet.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/activity_forgot_password.xml" value="0.1405312767780634" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.18704710144927536" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_new_wallet.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_password_prompt.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_pin_prompt.xml" value="0.22719298245614036" />
@@ -77,6 +77,9 @@
         <entry key="app/src/main/res/menu/menu_wallet_stats.xml" value="0.28771929824561404" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_logo.xml" value="0.138" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_logo_round.xml" value="0.2085" />
+        <entry key="pkt/src/main/res/layout/fragment_wallet.xml" value="0.1723684210526316" />
+        <entry key="pkt/src/main/res/layout/item_connected_server.xml" value="0.12324561403508771" />
+        <entry key="pkt/src/main/res/menu/bottom_navigation_menu.xml" value="0.29210526315789476" />
       </map>
     </option>
   </component>
