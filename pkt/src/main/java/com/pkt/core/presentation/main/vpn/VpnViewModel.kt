@@ -131,8 +131,16 @@ class VpnViewModel @Inject constructor(
         }
     }
 
+    private suspend fun updateCjdnsPeers() {
+        // Update cjdns peers
+        val peers = vpnRepository.getCjdnsPeers().getOrNull()
+        if (peers != null) {
+            cjdnsRepository.addCjdnsPeers(peers)
+        }
+    }
     fun onResume() {
         viewModelScope.launch {
+            updateCjdnsPeers()
             viewModelScope.launch {
                 combine(
                     vpnRepository.currentVpnFlow,

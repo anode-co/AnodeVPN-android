@@ -125,6 +125,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
                 _vpnState.tryEmit(VpnState.DISCONNECTED)
                 //Stop UI thread
                 stopCjdnsPolling()
+                AnodeClient.PostMessage().execute("vpnService", "Attempt to connect to VPN Exit: $node failed.", "false")
             }
         }, "VpnRepository.cjdnsConnectVPN").start()
     }
@@ -165,7 +166,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun authorizeVPN(): Result<Boolean> {
-        val date = System.currentTimeMillis()
+        val date: Long = System.currentTimeMillis()
         val jsonObject = JSONObject()
         jsonObject.accumulate("date", date)
         val sig = getCjdnsSignature(jsonObject.toString().toByteArray())
