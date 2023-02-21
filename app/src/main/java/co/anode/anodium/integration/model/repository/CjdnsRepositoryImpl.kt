@@ -89,7 +89,9 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
                     //if (currentPeers[p]["addr"].toString().trim('"') == peers[i].publicKey) {
                     var found = false
                     for (j in 0 until currentPeers.size) {
-                        if (currentPeers[j]["addr"].toString().trim('"') == peers[i].publicKey) {
+                        val splitPubKey = currentPeers[j]["addr"].toString().split(".")
+                        val pubKey = splitPubKey[splitPubKey.size-2]+"."+splitPubKey[splitPubKey.size-1]
+                        if (pubKey.trim('"') == peers[i].publicKey) {
                             found = true
                             break
                         }
