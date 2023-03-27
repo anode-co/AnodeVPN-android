@@ -521,7 +521,7 @@ object AnodeUtil {
     fun pushNotification(title: String, text: String) {
         if (context != null) {
             var builder = NotificationCompat.Builder(context!!, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_logo_foreground)
+                .setSmallIcon(R.mipmap.ic_logo)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
