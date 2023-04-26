@@ -1,12 +1,13 @@
 package com.pkt.core.presentation.main.settings
 
 import android.net.Uri
+import com.pkt.core.R
 import com.pkt.core.di.qualifier.Username
 import com.pkt.core.di.qualifier.VersionName
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.domain.repository.GeneralRepository
-import com.pkt.domain.repository.VpnRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
@@ -160,6 +161,14 @@ class SettingsViewModel @Inject constructor(
                 wallets = walletRepository.getAllWalletNames(),
                 walletName = walletRepository.getActiveWallet()
             )
+        }
+    }
+
+    fun onSubmitLogsClick() {
+        if (generalRepository.submitErrorLogs()) {
+            sendEvent(CommonEvent.Info(R.string.logs_submitted))
+        } else {
+            sendEvent(CommonEvent.Warning(R.string.logs_submitted_consent))
         }
     }
 }

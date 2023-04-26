@@ -92,7 +92,9 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             addButton.setOnClickListener {
                 showAddPopupMenu(it)
             }
-
+            submitLogsButton.setOnClickListener {
+                viewModel.onSubmitLogsClick()
+            }
             recyclerView.itemAnimator = null
             recyclerView.adapter = adapter
         }

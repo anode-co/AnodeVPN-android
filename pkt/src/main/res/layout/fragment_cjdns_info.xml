@@ -35,27 +35,13 @@
                 android:layout_marginBottom="6dp"
                 android:paddingTop="6dp"
                 android:paddingBottom="24dp"
-                app:layout_constraintBottom_toTopOf="@id/submitLogsButton"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:itemCount="1"
                 tools:listitem="@layout/item_key_value_horizontal" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/submitLogsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="30dp"
-                android:layout_marginBottom="@dimen/bottom_button_margin_bottom"
-                android:text="@string/submit_logs"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
