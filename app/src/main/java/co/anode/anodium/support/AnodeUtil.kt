@@ -1001,13 +1001,9 @@ object AnodeUtil {
     }
 
     fun internetConnection(): Boolean {
-        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
-        return if (activeNetwork?.isConnected == null) {
-            false
-        } else {
-            activeNetwork.isConnected
-        }
+        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm?.activeNetworkInfo
+        return activeNetwork?.isConnected ?: false
     }
 
     fun updateDNS(dnsServer: String) {
