@@ -29,7 +29,6 @@ class SettingsViewModel @Inject constructor(
         id = id,
         version = versionName,
         upgradeChecked = generalRepository.getPreReleaseUpgrade(),
-        switchUiChecked = !generalRepository.getNewUI()
     )
 
     fun onWalletClick() {
@@ -111,12 +110,6 @@ class SettingsViewModel @Inject constructor(
     fun onUpgradeCheckChanged(checked: Boolean) {
         generalRepository.enablePreReleaseUpgrade(checked)
         sendState { copy(upgradeChecked = checked) }
-    }
-
-    fun onSwitchUiCheckChanged(checked: Boolean) {
-        generalRepository.enableNewUI(!checked)
-        sendState { copy(switchUiChecked = !checked) }
-        generalRepository.restartApplication()
     }
 
     fun onWalletChanged(walletName: String?) {

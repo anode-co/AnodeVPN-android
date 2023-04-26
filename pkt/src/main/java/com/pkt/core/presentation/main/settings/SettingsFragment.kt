@@ -166,14 +166,6 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
                     viewModel.onUpgradeCheckChanged(it)
                 }
             }
-
-            switchUiCheckbox.apply {
-                setOnCheckedChangeListener(null)
-                isChecked = state.switchUiChecked
-                doOnCheckChanged {
-                    viewModel.onSwitchUiCheckChanged(it)
-                }
-            }
         }
     }
 

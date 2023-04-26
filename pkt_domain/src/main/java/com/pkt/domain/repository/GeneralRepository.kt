@@ -4,8 +4,6 @@ interface GeneralRepository {
     fun submitErrorLogs(): Boolean
     fun enablePreReleaseUpgrade(value: Boolean)
     fun getPreReleaseUpgrade(): Boolean
-    fun enableNewUI(value:Boolean)
-    fun getNewUI():Boolean
     fun removePIN(walletName: String)
     fun restartApplication()
     fun hasInternetConnection(): Boolean

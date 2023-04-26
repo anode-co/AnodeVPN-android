@@ -24,14 +24,6 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
         return AnodeUtil.getPreReleaseUpgrade()
     }
 
-    override fun enableNewUI(value: Boolean) {
-        AnodeUtil.setUseNewUi(value)
-    }
-
-    override fun getNewUI(): Boolean {
-        return AnodeUtil.getUseNewUi()
-    }
-
     override fun removePIN(walletName: String) {
         Timber.d("removePIN $walletName")
         AnodeUtil.removeEncryptedWalletPreferences(walletName)

@@ -68,24 +68,9 @@ class MainActivity : AppCompatActivity() {
 
         initializeApp()
 
-        val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
-        var newUI = prefs.getBoolean("useNewUI", true)
+        //Launch new UI main activity
+        startActivity(Intent(this, PktMainActivity::class.java))
 
-        if (newUI) {
-            //Launch new UI main acivity
-            startActivity(Intent(this, PktMainActivity::class.java))
-        } else {
-            //Follow old UI process
-            AnodeUtil.addCjdnsPeers()
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-
-            val navView: BottomNavigationView = binding.navView
-            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
-
-            val navController = navHostFragment.navController
-            navView.setupWithNavController(navController)
-        }
         //start thread to look for Pkt.cube wifi
         searchForInternetSharing()
     }
