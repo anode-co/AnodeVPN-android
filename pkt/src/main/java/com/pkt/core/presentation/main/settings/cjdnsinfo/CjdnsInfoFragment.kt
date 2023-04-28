@@ -33,10 +33,6 @@ class CjdnsInfoFragment : StateFragment<CjdnsInfoState>(R.layout.fragment_cjdns_
         super.onViewCreated(view, savedInstanceState)
         Timber.i("CjdnsInfoFragment onViewCreated")
         with(viewBinding) {
-            submitLogsButton.setOnClickListener {
-                viewModel.onSubmitLogsClick()
-            }
-
             recyclerView.itemAnimator = null
             recyclerView.adapter = adapter
         }

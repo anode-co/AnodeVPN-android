@@ -23,7 +23,6 @@ class CjdnsInfoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     @VersionName private val versionName: String,
     private val cjdnsRepository: CjdnsRepository,
-    private val repository: GeneralRepository,
 ) : StateViewModel<CjdnsInfoState>() {
 
     private var pollingJob: Job? = null
@@ -55,15 +54,6 @@ class CjdnsInfoViewModel @Inject constructor(
     fun onFindYourselfClick() {
         currentState.info?.nodeUrl?.let { url -> openWebUrl(url) }
     }
-
-    fun onSubmitLogsClick() {
-        if (repository.submitErrorLogs()) {
-            sendEvent(CommonEvent.Info(R.string.logs_submitted))
-        } else {
-            sendEvent(CommonEvent.Warning(R.string.logs_submitted_consent))
-        }
-    }
-
 
     private fun CjdnsInfo.toItems(): List<DisplayableItem> {
         val info = this

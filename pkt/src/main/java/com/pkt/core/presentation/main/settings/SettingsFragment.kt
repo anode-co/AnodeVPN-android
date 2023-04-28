@@ -92,7 +92,9 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
             addButton.setOnClickListener {
                 showAddPopupMenu(it)
             }
-
+            submitLogsButton.setOnClickListener {
+                viewModel.onSubmitLogsClick()
+            }
             recyclerView.itemAnimator = null
             recyclerView.adapter = adapter
         }
@@ -162,14 +164,6 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
                 isChecked = state.upgradeChecked
                 doOnCheckChanged {
                     viewModel.onUpgradeCheckChanged(it)
-                }
-            }
-
-            switchUiCheckbox.apply {
-                setOnCheckedChangeListener(null)
-                isChecked = state.switchUiChecked
-                doOnCheckChanged {
-                    viewModel.onSwitchUiCheckChanged(it)
                 }
             }
         }

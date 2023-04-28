@@ -220,6 +220,7 @@ class WalletViewModel @Inject constructor(
                         transactionId = transactions[i].txHash,
                         addresses = transactions[i].destAddresses,
                         blockNumber = transactions[i].blockHeight,
+                        confirmations = transactions[i].numConfirmations,
                     )
                 )
             }

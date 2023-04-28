@@ -853,12 +853,16 @@ object AnodeUtil {
     }
 
     fun getWalletFiles():ArrayList<String> {
-        val files = File("$filesDirectory/pkt").listFiles()
         var result = ArrayList<String>()
-        for (file in files!!) {
-            if (file.extension.equals("db") && !file.name.equals("neutrino.db")) {
-                result.add(file.nameWithoutExtension)
+        try {
+            val files = File("$filesDirectory/pkt").listFiles()
+            for (file in files!!) {
+                if (file.extension.equals("db") && !file.name.equals("neutrino.db")) {
+                    result.add(file.nameWithoutExtension)
+                }
             }
+        } catch (e: Exception) {
+            Timber.e("Error getting wallet files: ${e.message}")
         }
         return result
     }
@@ -997,13 +1001,9 @@ object AnodeUtil {
     }
 
     fun internetConnection(): Boolean {
-        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
-        return if (activeNetwork?.isConnected == null) {
-            false
-        } else {
-            activeNetwork.isConnected
-        }
+        val cm = context?.getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm?.activeNetworkInfo
+        return activeNetwork?.isConnected ?: false
     }
 
     fun updateDNS(dnsServer: String) {

@@ -9,7 +9,6 @@ data class SettingsState(
     val id: String,
     val version: String,
     val upgradeChecked: Boolean = false,
-    val switchUiChecked: Boolean = false,
 ) : UiState
 
 sealed class SettingsEvent : UiEvent {
