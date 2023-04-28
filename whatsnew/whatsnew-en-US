@@ -1,2 +1,4 @@
-# v0.3.21
-- Fix for updating Cjdns Peers for new VPN Exits
+# v0.3.23
+- Disable old UI
+- Fix for showing unconfirmed send transaction
+- Move "submit logs" to settings page
