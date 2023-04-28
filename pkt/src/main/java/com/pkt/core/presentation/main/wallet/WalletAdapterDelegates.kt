@@ -86,6 +86,7 @@ data class TransactionItem(
     val transactionId: String,
     val addresses: List<String>,
     val blockNumber: Int,
+    val confirmations: Int,
 ) : DisplayableItem {
     override fun getItemId(): String = id
     override fun getItemHash(): String = hashCode().toString()
@@ -103,8 +104,13 @@ fun transactionAdapterDelegate(
                 when (item.type) {
                     TransactionType.SENT -> {
                         iconImage.setImageResource(R.drawable.ic_transaction_sent)
-                        titleLabel.setText(R.string.sent_pkt)
-                        amountPktLabel.setTextColor(context.getColorByAttribute(android.R.attr.textColorPrimary))
+                        if (item.confirmations == 0) {
+                            titleLabel.setText(R.string.sending_pkt_unconfirmed)
+                            amountPktLabel.setTextColor(context.getColorByAttribute(R.attr.colorProgress))
+                        } else {
+                            titleLabel.setText(R.string.sent_pkt)
+                            amountPktLabel.setTextColor(context.getColorByAttribute(android.R.attr.textColorPrimary))
+                        }
                         amountPktLabel.text = "-${item.amountPkt}"
                         amountUsdLabel.text = item.amountUsd.formatUsd()
                     }
