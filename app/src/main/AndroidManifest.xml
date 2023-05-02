@@ -15,6 +15,9 @@
         android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
     <application
         android:name=".volley.BackendVolley"
         android:extractNativeLibs="true"
@@ -23,12 +26,12 @@
         android:roundIcon="@mipmap/ic_logo_round"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
+        android:banner="@drawable/anode"
         tools:replace="android:theme">
         <activity
             android:name=".PktMainActivity"
             android:exported="false"
             android:theme="@style/Theme.App"
-            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"
             tools:ignore="LockedOrientationActivity,MissingClass" />
         <activity
@@ -90,6 +93,7 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
