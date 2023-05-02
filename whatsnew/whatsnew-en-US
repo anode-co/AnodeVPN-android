@@ -1,4 +1,2 @@
-# v0.3.23
-- Disable old UI
-- Fix for showing unconfirmed send transaction
-- Move "submit logs" to settings page
+# v0.3.24
+- support Android TV
