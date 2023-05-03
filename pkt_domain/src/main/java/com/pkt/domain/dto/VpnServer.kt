@@ -1,6 +1,5 @@
 package com.pkt.domain.dto
 import androidx.annotation.Keep
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Keep
