@@ -94,6 +94,7 @@
     <string name="version">Version:</string>
     <string name="check_for_update">Check for update</string>
     <string name="upgrade_from_pre_release">Upgrade from pre-release versions</string>
+    <string name="show_inactive_servers">Show non active VPN Servers</string>
     <string name="rename">Rename</string>
     <string name="export">Export</string>
     <string name="delete">Delete</string>

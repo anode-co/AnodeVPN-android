@@ -158,6 +158,13 @@ object AnodeUtil {
         }
     }
 
+    fun setShowInactiveServers(value: Boolean) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putBoolean("showInactiveServers", value).apply()
+        }
+    }
+
     fun getLastServerPubkeyFromSharedPrefs(): String {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         if (prefs != null) {
@@ -184,6 +191,11 @@ object AnodeUtil {
     fun getPreReleaseUpgrade(): Boolean {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         return prefs!!.getBoolean("preRelease", false)
+    }
+
+    fun getShowInactiveServers(): Boolean {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        return prefs!!.getBoolean("showInactiveServers", false)
     }
 
     fun setUseNewUi(value: Boolean) {

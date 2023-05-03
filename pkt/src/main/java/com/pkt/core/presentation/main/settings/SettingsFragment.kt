@@ -166,6 +166,14 @@ class SettingsFragment : StateFragment<SettingsState>(R.layout.fragment_settings
                     viewModel.onUpgradeCheckChanged(it)
                 }
             }
+
+            showInactiveServers.apply {
+                setOnCheckedChangeListener(null)
+                isChecked = state.showInactiveServers
+                doOnCheckChanged {
+                    viewModel.onShowInactiveCheckChanged(it)
+                }
+            }
         }
     }
 

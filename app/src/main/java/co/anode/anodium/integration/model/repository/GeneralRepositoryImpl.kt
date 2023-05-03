@@ -64,4 +64,12 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
     override fun getPldLogUrl(): String {
         return "file:///${AnodeUtil.filesDirectory}/pldlog.html"
     }
+
+    override fun setShowInactiveServers(value: Boolean) {
+        AnodeUtil.setShowInactiveServers(value)
+    }
+
+    override fun getShowInactiveServers(): Boolean {
+        return AnodeUtil.getShowInactiveServers()
+    }
 }

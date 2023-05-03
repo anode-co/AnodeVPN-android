@@ -26,7 +26,7 @@
         android:roundIcon="@mipmap/ic_logo_round"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        android:banner="@drawable/anode"
+        android:banner="@mipmap/ic_banner_foreground"
         tools:replace="android:theme">
         <activity
             android:name=".PktMainActivity"

@@ -7,6 +7,7 @@ import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.util.CountryUtil
 import com.pkt.domain.dto.Vpn
 import com.pkt.domain.dto.VpnState
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class VpnExitsViewModel @Inject constructor(
     private val vpnRepository: VpnRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<VpnExitsState>() {
 
     private val _queryFlow: MutableStateFlow<String> by lazy { MutableStateFlow("") }
@@ -46,6 +48,7 @@ class VpnExitsViewModel @Inject constructor(
                                 countryCode = vpn.countryCode,
                                 publicKey = vpn.publicKey,
                                 isConnected = vpnState == VpnState.CONNECTED && vpn.name == currentVpn?.name,
+                                isActive = vpn.isActive,
                             )
                         }.filter {
                             query.isBlank()
@@ -58,7 +61,7 @@ class VpnExitsViewModel @Inject constructor(
         }
 
         invokeLoadingAction {
-            vpnRepository.fetchVpnList(force = true).onFailure {
+            vpnRepository.fetchVpnList(force = true, activeOnly = !generalRepository.getShowInactiveServers()).onFailure {
                 if (it.message == "timeout") {
                     sendEvent(CommonEvent.Warning(R.string.connection_timeout))
                 } else {
@@ -74,7 +77,7 @@ class VpnExitsViewModel @Inject constructor(
         invokeAction {
             vpnRepository.disconnect()
         }
-        vpnRepository.connectFromExits(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey))
+        vpnRepository.connectFromExits(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey, true))
         navigateBack()
     }
 }

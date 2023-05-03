@@ -34,7 +34,7 @@ class VpnRepositoryDummy : VpnRepository {
     override val startConnectionTime: Long
         get() = _startConnectionTime
 
-    override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
+    override suspend fun fetchVpnList(force: Boolean, activeOnly: Boolean): Result<List<Vpn>> {
         if (_vpnListFlow.value.isEmpty() || force) {
             delay(1000L)
             _vpnListFlow.tryEmit(VPN_LIST)
@@ -107,12 +107,14 @@ class VpnRepositoryDummy : VpnRepository {
             Vpn(
                 name = "goofy14-vpn.anode.co",
                 countryCode = "CA",
-                publicKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
+                publicKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+                isActive = true
             ),
             Vpn(
                 name = "2022-virtual.anode.co",
                 countryCode = "US",
-                publicKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k"
+                publicKey = "929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k",
+                isActive = true
             ),
         )
     }

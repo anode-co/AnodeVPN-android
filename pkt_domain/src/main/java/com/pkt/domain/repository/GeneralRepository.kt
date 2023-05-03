@@ -13,4 +13,6 @@ interface GeneralRepository {
     fun savePldLogHtml(html: String)
     fun getWalletInfoUrl(): String
     fun getPldLogUrl(): String
+    fun setShowInactiveServers(value: Boolean)
+    fun getShowInactiveServers(): Boolean
 }

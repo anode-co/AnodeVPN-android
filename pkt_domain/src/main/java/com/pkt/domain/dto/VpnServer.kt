@@ -1,21 +1,23 @@
 package com.pkt.domain.dto
 import androidx.annotation.Keep
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Keep
 @Serializable
 data class VpnServer(
-    val averageRating: String,
+    val average_rating: String,
     val cost: String,
-    val countryCode: String,
-    val createdAt: Int,
-    val isFavorite: Boolean,
-    val lastSeenAt: Int,
-    val lastSeenDatetime: String,
+    val country_code: String,
+    //val created_at: LocalDateTime,
+    val is_favorite: Boolean,
+    //val last_seen_at: LocalDateTime,
+    //val last_seen_datetime: LocalDateTime,
     val load: Int,
     val name: String,
-    val numRatings: Int,
-    val onlineSinceDatetime: String,
-    val publicKey: String,
-    val quality: Int
+    val num_ratings: Int,
+    //val online_since_datetime: LocalDateTime,
+    val public_key: String,
+    val quality: Int,
+    val is_active: Boolean,
 )

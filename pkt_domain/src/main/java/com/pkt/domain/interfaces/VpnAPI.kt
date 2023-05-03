@@ -4,8 +4,10 @@ import com.pkt.domain.dto.*
 import retrofit2.http.*
 
 interface VpnAPI {
-    @GET("vpn/servers/")
+    @GET("vpn/servers/true/")
     suspend fun getVpnServersList(): List<VpnServer>
+    @GET("vpn/servers/false/")
+    suspend fun getAllVpnServersList(): List<VpnServer>
     @GET("vpn/clients/ipaddress/")
     suspend fun getIPv4Address(): IpAddress
     @GET("vpn/clients/ipaddress/")
