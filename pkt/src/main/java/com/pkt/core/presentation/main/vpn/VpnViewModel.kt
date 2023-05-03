@@ -33,7 +33,7 @@ class VpnViewModel @Inject constructor(
             if (!generalRepository.hasInternetConnection()) {
                 return@invokeLoadingAction Result.success("")
             }
-            vpnRepository.fetchVpnList().onSuccess { vpnList ->
+            vpnRepository.fetchVpnList(force = true, activeOnly = !generalRepository.getShowInactiveServers()).onSuccess { vpnList ->
                 val lastConnectedKey = vpnRepository.getLastConnectedVPN()
                 if (vpnList.isNotEmpty()) {
                     for (item in vpnList) {

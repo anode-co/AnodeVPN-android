@@ -47,7 +47,7 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     override val vpnListFlow: Flow<List<Vpn>>
         get() = _vpnListFlow
 
-    private val _currentVpnFlow: MutableStateFlow<Vpn> by lazy { MutableStateFlow(Vpn("PKT Pal Montreal","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k")) }
+    private val _currentVpnFlow: MutableStateFlow<Vpn> by lazy { MutableStateFlow(Vpn("PKT Pal Montreal","CA","929cwrjn11muk4cs5pwkdc5f56hu475wrlhq90pb9g38pp447640.k", true)) }
     override val currentVpnFlow: Flow<Vpn>
         get() = _currentVpnFlow
 
@@ -56,13 +56,13 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     private val handler = Handler()
 
-    override suspend fun fetchVpnList(force: Boolean): Result<List<Vpn>> {
+    override suspend fun fetchVpnList(force: Boolean, activeOnly: Boolean): Result<List<Vpn>> {
         Timber.d("VpnRepositoryImpl fetchVpnList")
-            vpnAPI.getVpnServersList().onSuccess { list ->
+            vpnAPI.getVpnServersList(activeOnly).onSuccess { list ->
             val vpnList: MutableList<Vpn> = mutableListOf()
             for(i in list.indices){
                 val server = list[i]
-                vpnList.add(Vpn(server.name, server.countryCode, server.publicKey))
+                vpnList.add(Vpn(server.name, server.country_code, server.public_key, server.is_active))
             }
             _vpnListFlow.tryEmit(vpnList)
             return Result.success(vpnList)

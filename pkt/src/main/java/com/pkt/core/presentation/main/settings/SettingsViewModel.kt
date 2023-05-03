@@ -29,6 +29,7 @@ class SettingsViewModel @Inject constructor(
         id = id,
         version = versionName,
         upgradeChecked = generalRepository.getPreReleaseUpgrade(),
+        showInactiveServers = generalRepository.getShowInactiveServers(),
     )
 
     fun onWalletClick() {
@@ -110,6 +111,11 @@ class SettingsViewModel @Inject constructor(
     fun onUpgradeCheckChanged(checked: Boolean) {
         generalRepository.enablePreReleaseUpgrade(checked)
         sendState { copy(upgradeChecked = checked) }
+    }
+
+    fun onShowInactiveCheckChanged(checked: Boolean) {
+        generalRepository.setShowInactiveServers(checked)
+        sendState { copy(showInactiveServers = checked) }
     }
 
     fun onWalletChanged(walletName: String?) {

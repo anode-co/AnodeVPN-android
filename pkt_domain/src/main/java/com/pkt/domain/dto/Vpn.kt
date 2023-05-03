@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 data class Vpn(
     val name: String,
     val countryCode: String,
-    val publicKey: String
+    val publicKey: String,
+    val isActive: Boolean
 )
 
 enum class VpnState {

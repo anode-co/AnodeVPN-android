@@ -59,13 +59,17 @@ class VpnAPIService() {
         }
     }
 
-    suspend fun getVpnServersList():Result<List<VpnServer>> {
-        try {
+    suspend fun getVpnServersList(activeOnly: Boolean):Result<List<VpnServer>> {
+        return try {
             Timber.d("getVpnServersList")
-            return Result.success(vpnApi.getVpnServersList())
+            if (activeOnly) {
+                Result.success(vpnApi.getVpnServersList())
+            } else {
+                Result.success(vpnApi.getAllVpnServersList())
+            }
         } catch (e: Exception) {
             Timber.d("getVpnServersList: failed with message ${e.message}")
-            return Result.failure(e)
+            Result.failure(e)
         }
     }
 

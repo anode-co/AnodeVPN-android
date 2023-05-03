@@ -13,7 +13,7 @@ interface VpnRepository {
 
     val startConnectionTime: Long
 
-    suspend fun fetchVpnList(force: Boolean = false): Result<List<Vpn>>
+    suspend fun fetchVpnList(force: Boolean = false, activeOnly: Boolean = true): Result<List<Vpn>>
     fun setCurrentVpn(vpn: Vpn): Result<Unit>
     fun connectFromExits(vpn: Vpn)
     suspend fun connect(node:String): Result<Boolean>
