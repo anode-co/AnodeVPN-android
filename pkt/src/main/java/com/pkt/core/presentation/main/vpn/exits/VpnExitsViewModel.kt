@@ -23,6 +23,7 @@ class VpnExitsViewModel @Inject constructor(
 ) : StateViewModel<VpnExitsState>() {
 
     private val _queryFlow: MutableStateFlow<String> by lazy { MutableStateFlow("") }
+    private var selectedVpn: Vpn = Vpn("", "", "", true, false, false)
 
     var query: String = ""
         set(value) {
@@ -49,6 +50,7 @@ class VpnExitsViewModel @Inject constructor(
                                 publicKey = vpn.publicKey,
                                 isConnected = vpnState == VpnState.CONNECTED && vpn.name == currentVpn?.name,
                                 isActive = vpn.isActive,
+                                isPremium = vpn.isPremium,
                             )
                         }.filter {
                             query.isBlank()
@@ -77,7 +79,25 @@ class VpnExitsViewModel @Inject constructor(
         invokeAction {
             vpnRepository.disconnect()
         }
-        vpnRepository.connectFromExits(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey, true))
+        selectedVpn = Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey, true)
+        if (item.isPremium) {
+            sendEvent(VpnExitsEvent.OpenVpnSelection)
+        } else {
+            vpnRepository.connectFromExits(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey, true), false)
+            navigateBack()
+        }
+    }
+
+    fun onShowVpnPremiumBottomSheetResult(value: Boolean) {
+        if (value) {
+            if (selectedVpn.isPremium) {
+                vpnRepository.connectFromExits(selectedVpn, true)
+            } else {
+                vpnRepository.connectFromExits(selectedVpn, true)
+            }
+        } else {
+            vpnRepository.connectFromExits(selectedVpn, false)
+        }
         navigateBack()
     }
 }
