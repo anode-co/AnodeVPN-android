@@ -212,6 +212,10 @@ class WalletRepositoryDummy constructor(
         return Result.success(SendTransactionResponse("0x0x0x0x0x0x0x0","",""))
     }
 
+    override suspend fun createTransaction(fromAddresses: List<String>, amount: Double, toAddress: String): Result<CreateTransactionResponse> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean> {
         TODO("Not yet implemented")
     }

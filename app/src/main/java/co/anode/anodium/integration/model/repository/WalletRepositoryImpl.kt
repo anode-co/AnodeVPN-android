@@ -354,6 +354,21 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
+    override suspend fun createTransaction(fromAddresses: List<String>, amount: Double, toAddress: String): Result<CreateTransactionResponse> {
+        val request = CreateTransactionRequest(toAddress, amount, fromAddresses, true)
+        val response = walletAPI.createTransaction(request)
+        if (!response.message.isNullOrEmpty()) {
+            Timber.e("createTransaction: Failed: ${response.message}")
+            return Result.failure(Exception("Failed to create transaction: ${response.message}"))
+        } else if (response.transaction.isNotEmpty()){
+            Timber.d("createTransaction: success")
+            return Result.success(response)
+        } else {
+            Timber.e("createTransaction: Failed, empty response")
+            return Result.failure(Exception("Failed to send coins"))
+        }
+    }
+
     override suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean> {
         val request = ChangePassphraseRequest(oldPassphrase, newPassphrase)
         val response = walletAPI.changePassphrase(request)

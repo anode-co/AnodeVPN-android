@@ -127,6 +127,15 @@ class WalletAPIService {
         }
     }
 
+    suspend fun createTransaction(request: CreateTransactionRequest): CreateTransactionResponse {
+        return try {
+            api.createTransaction(request)
+        } catch (e: Exception) {
+            Timber.d("sendTransaction: failed with message ${e.message}")
+            CreateTransactionResponse("","${e.message}", e.stackTraceToString())
+        }
+    }
+
     suspend fun checkPassphrase(request: CheckPassphraseRequest): CheckPassphraseResponse {
         return api.checkPassphrase(request)
     }
