@@ -35,7 +35,7 @@
         app:autoSizeStepGranularity="1sp"
         app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toTopOf="@id/countryLabel"
-        app:layout_constraintEnd_toStartOf="@id/connectedImage"
+        app:layout_constraintEnd_toStartOf="@id/premiumImage"
         app:layout_constraintStart_toEndOf="@id/flagImage"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
@@ -60,6 +60,18 @@
         app:layout_constraintStart_toStartOf="@id/nameLabel"
         app:layout_constraintTop_toBottomOf="@id/nameLabel"
         tools:text="Sweden" />
+
+    <ImageView
+        android:id="@+id/premiumImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/nameLabel"
+        app:layout_constraintEnd_toStartOf="@+id/connectedImage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_speed_24"
+        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/connectedImage"

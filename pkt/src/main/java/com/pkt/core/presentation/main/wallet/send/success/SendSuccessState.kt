@@ -4,4 +4,5 @@ import com.pkt.core.presentation.common.state.UiState
 
 data class SendSuccessState(
     val transactionId: String = "",
+    val address: String = "",
 ) : UiState

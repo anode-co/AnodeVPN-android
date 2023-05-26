@@ -15,10 +15,10 @@ sealed class AppNavigation : UiNavigation {
     data class OpenRecoverWallet(val name: String? = null) : AppNavigation()
     object OpenMain : AppNavigation()
     data class OpenSendTransaction(val fromAddress: String) : AppNavigation()
-    data class OpenSendConfirm(val fromaddress: String, val toaddress:String, val amount: Double, val maxAmount: Boolean) : AppNavigation()
-    data class OpenSendSuccess(val transactionId: String) : AppNavigation()
+    data class OpenConfirmTransactionVPNPremium(val fromAddress: String,val toAddress: String, val amount: Double) : AppNavigation()
+    data class OpenSendConfirm(val fromaddress: String, val toaddress:String, val amount: Double, val maxAmount: Boolean, val premiumVpn: Boolean) : AppNavigation()
+    data class OpenSendSuccess(val transactionId: String, val premiumVpn: Boolean, val address: String) : AppNavigation()
     data class OpenTransactionDetails(val extra: TransactionDetailsExtra) : AppNavigation()
-
     object OpenVpnExits : AppNavigation()
     object OpenChangePassword : AppNavigation()
     object OpenChangePin : AppNavigation()

@@ -173,7 +173,9 @@
     <string name="view_transaction">View Transaction</string>
     <string name="done">Done</string>
     <string name="transaction_id_copied">Transaction Id copied</string>
+    <string name="premium_vpn_requesting">Requesting Premium. Please wait...</string>
     <string name="consent">Consent</string>
+    <string name="choose_vpn">Choose VPN Service</string>
     <string name="consent_description">Technical data such as errors and crashes are automatically reported so that the development team can improve the app and diagnose problems. Private information such as passwords, keys, and browsing history is never shared. You may opt out of this but it will make technical support more difficult.</string>
     <string name="consent_opt_out">Opt out</string>
     <string name="ok">OK</string>
@@ -195,6 +197,10 @@
     <string name="seed_phrase_copied_2">Seed phrase copied</string>
     <string name="rename_wallet">Rename Wallet</string>
     <string name="save">Save</string>
+    <string name="premium">Premium</string>
+    <string name="notification_premium_10min_remaining">10 minutes of Premium VPN remaining…</string>
+    <string name="notification_premium_ended">Premium VPN has ended</string>
+    <string name="free">Free</string>
     <string name="enter_current_wallet_password">Enter current wallet password</string>
     <string name="type_your_new_password">Type your new password</string>
     <string name="success">Success!</string>
@@ -244,4 +250,8 @@
     <string name="see_less">See less</string>
     <string name="in_block_number">In block number</string>
     <string name="transaction_date_time">%1$s at %2$s</string>
+    <string name="premium_no_address">Failed to get VPN Server\'s wallet address. Please try again later.</string>
+    <string name="premium_no_transaction">Failed to create payment transaction. Please try again.</string>
+    <string name="premium_vpn_success">You are now on Premium VPN</string>
+    <string name="premium_vpn_error">Request Premium VPN failed</string>
 </resources>

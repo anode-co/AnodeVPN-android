@@ -14,6 +14,7 @@ data class VpnExitItem(
     val isConnected: Boolean,
     val publicKey: String,
     val isActive: Boolean,
+    val isPremium: Boolean,
 ) : DisplayableItem {
     override fun getItemId(): String = name
     override fun getItemHash(): String = hashCode().toString()
@@ -30,6 +31,11 @@ fun vpnExitAdapterDelegate(
             nameLabel.text = item.name
             countryLabel.text = item.countryName
             connectedImage.isActivated = item.isConnected
+            if (item.isPremium) {
+                premiumImage.visibility = android.view.View.VISIBLE
+            } else {
+                premiumImage.visibility = android.view.View.GONE
+            }
             if (!item.isActive) {
                 nameLabel.setTextColor(ContextCompat.getColor(context, R.color.text1_50))
             } else {

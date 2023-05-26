@@ -22,6 +22,7 @@ class SendConfirmViewModel @Inject constructor(
     private val toaddress: String = savedStateHandle["toaddress"] ?: error("toaddress required")
     private val amount: Double = savedStateHandle.get<Float>("amount")?.toDouble() ?: error("amount required")
     private val maxAmount: Boolean = savedStateHandle["maxAmount"] ?: error("maxAmount required")
+    private val premiumVpn: Boolean? = savedStateHandle["premiumVpn"]
 
     init {
         invokeLoadingAction {
@@ -57,13 +58,24 @@ class SendConfirmViewModel @Inject constructor(
         invokeAction {
             walletRepository.checkPin(pin).onSuccess {
                 Timber.d("SendConfirmViewModel onPinDone| Success")
-                walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
-                    Timber.i("SendConfirmViewModel sendCoins| Success")
-                    sendNavigation(AppNavigation.NavigateBack)
-                    sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
-                }.onFailure {
-                    Timber.e(it, "SendConfirmViewModel sendCoins| Error")
-                    sendError(it)
+                if ((premiumVpn != null) && (premiumVpn == true)){
+                    walletRepository.createTransaction(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
+                        Timber.i("SendConfirmViewModel createTransaction| Success")
+                        sendNavigation(AppNavigation.NavigateBack)
+                        sendNavigation(AppNavigation.OpenSendSuccess(it.transaction, premiumVpn, currentState.address))
+                    }.onFailure {
+                        Timber.e(it, "SendConfirmViewModel createTransaction| Error")
+                        sendError(it)
+                    }
+                } else {
+                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
+                        Timber.i("SendConfirmViewModel sendCoins| Success")
+                        sendNavigation(AppNavigation.NavigateBack)
+                        sendNavigation(AppNavigation.OpenSendSuccess(it.txHash, false, ""))
+                    }.onFailure {
+                        Timber.e(it, "SendConfirmViewModel sendCoins| Error")
+                        sendError(it)
+                    }
                 }
             }.onFailure {
                 Timber.e(it, "SendConfirmViewModel onPinDone| Error")
@@ -79,13 +91,24 @@ class SendConfirmViewModel @Inject constructor(
         invokeAction {
             walletRepository.checkWalletPassphrase(password).onSuccess {
                 Timber.d("SendConfirmViewModel onPasswordDone| Success")
-                walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
-                    Timber.i("SendConfirmViewModel sendCoins| Success")
-                    sendNavigation(AppNavigation.NavigateBack)
-                    sendNavigation(AppNavigation.OpenSendSuccess(it.txHash))
-                }.onFailure {
-                    Timber.e(it, "SendConfirmViewModel sendCoins| Error")
-                    sendError(it)
+                if ((premiumVpn != null) && (premiumVpn == true)){
+                    walletRepository.createTransaction(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
+                        Timber.i("SendConfirmViewModel createTransaction| Success")
+                        sendNavigation(AppNavigation.NavigateBack)
+                        sendNavigation(AppNavigation.OpenSendSuccess(it.transaction, premiumVpn, currentState.address))
+                    }.onFailure {
+                        Timber.e(it, "SendConfirmViewModel createTransaction| Error")
+                        sendError(it)
+                    }
+                } else {
+                    walletRepository.sendCoins(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
+                        Timber.i("SendConfirmViewModel sendCoins| Success")
+                        sendNavigation(AppNavigation.NavigateBack)
+                        sendNavigation(AppNavigation.OpenSendSuccess(it.txHash, false, ""))
+                    }.onFailure {
+                        Timber.e(it, "SendConfirmViewModel sendCoins| Error")
+                        sendError(it)
+                    }
                 }
             }.onFailure {
                 Timber.e(it, "SendConfirmViewModel onPasswordDone| Error")
