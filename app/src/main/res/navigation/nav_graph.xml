@@ -162,6 +162,9 @@
         <argument
             android:name="maxAmount"
             app:argType="boolean" />
+        <argument
+            android:name="premiumVpn"
+            app:argType="boolean" />
 
     </fragment>
 
@@ -170,9 +173,14 @@
         android:name="com.pkt.core.presentation.main.wallet.send.success.SendSuccessBottomSheet"
         android:label="SendSuccess"
         tools:layout="@layout/bottom_sheet_send_success">
-
         <argument
             android:name="transactionId"
+            app:argType="string" />
+        <argument
+            android:name="premiumVpn"
+            app:argType="boolean" />
+        <argument
+            android:name="address"
             app:argType="string" />
 
     </dialog>

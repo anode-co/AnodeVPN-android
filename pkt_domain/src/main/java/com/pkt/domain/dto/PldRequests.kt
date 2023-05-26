@@ -43,8 +43,25 @@ data class SendTransactionRequest(
 
 @Keep
 @Serializable
+data class CreateTransactionRequest(
+    val to_address: String,
+    val amount: Double,
+    val from_address: List<String>,
+    val sign: Boolean
+)
+
+@Keep
+@Serializable
 data class SendTransactionResponse(
     val txHash: String,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Keep
+@Serializable
+data class CreateTransactionResponse(
+    val transaction: String,
     var message: String = "",
     val stack: String = ""
 )

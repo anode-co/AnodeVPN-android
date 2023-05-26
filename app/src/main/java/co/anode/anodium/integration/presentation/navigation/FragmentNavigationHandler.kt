@@ -38,7 +38,7 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openSendTransaction(fragment: Fragment, fromAddress: String) {
-        navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress, "", 0.0F))
+        navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress))
     }
 
     override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromAddress: String, toAddress: String, amount: Double) {
