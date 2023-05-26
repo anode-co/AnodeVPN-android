@@ -2,6 +2,7 @@ package com.pkt.dummy.repository
 
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
+import com.pkt.domain.dto.VpnServerResponsePremiumAddress
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.repository.VpnRepository
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +48,7 @@ class VpnRepositoryDummy : VpnRepository {
         return Result.success(Unit)
     }
 
-    override fun connectFromExits(vpn: Vpn) {
+    override fun connectFromExits(vpn: Vpn, premium: Boolean) {
         TODO("Not yet implemented")
     }
 
@@ -98,6 +99,14 @@ class VpnRepositoryDummy : VpnRepository {
     }
 
     override fun getLastConnectedVPN(): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun requestPremium(transaction: String, address: String): Result<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun requestPremiumAddress(node: String): Result<VpnServerResponsePremiumAddress> {
         TODO("Not yet implemented")
     }
 

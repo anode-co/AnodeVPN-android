@@ -4,6 +4,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.RequestAuthorizeVpn
 import com.pkt.domain.dto.VpnServer
+import com.pkt.domain.dto.VpnServerRequestPremium
+import com.pkt.domain.dto.VpnServerResponsePremiumAddress
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -148,6 +150,68 @@ class VpnAPIService() {
         } else {
             Timber.e("generateUsername Failed: ${response.message}")
             return Result.failure(Exception(response.message))
+        }
+    }
+
+    suspend fun requestPremium(request: VpnServerRequestPremium, pubKey: String): Result<Boolean> {
+        val url = "https://vpn.anode.co/api/0.4/vpn/server/$pubKey/"
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        val httpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        val api = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(httpClient)
+            .build()
+            .create(VpnAPI::class.java)
+        try {
+            val response = api.requestPremium(request)
+
+            if (response.status == "success") {
+                Timber.d("requestPremium Success")
+                return Result.success(true)
+            } else {
+                Timber.e("requestPremium Failed: ${response.message}")
+                return Result.failure(Exception(response.message))
+            }
+        } catch (e: Exception) {
+            Timber.e("requestPremium Failed: ${e.message}")
+            return Result.failure(e)
+        }
+    }
+
+    suspend fun requestPremiumAddress(pubKey: String): Result<VpnServerResponsePremiumAddress> {
+        val url = "https://vpn.anode.co/api/0.4/vpn/server/$pubKey/"
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        val httpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        val api = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(httpClient)
+            .build()
+            .create(VpnAPI::class.java)
+        try {
+            val response = api.requestPremiumAddress()
+
+            if (response.address.isNotEmpty()) {
+                Timber.d("requestPremiumAddress Success")
+                return Result.success(response)
+            } else {
+                Timber.e("requestPremiumAddress Failed")
+                return Result.failure(Exception("Failed"))
+            }
+        } catch (e: Exception) {
+            Timber.e("requestPremiumAddress Failed: ${e.message}")
+            return Result.failure(e)
         }
     }
 }
