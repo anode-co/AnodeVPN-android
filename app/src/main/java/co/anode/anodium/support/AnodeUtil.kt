@@ -205,6 +205,18 @@ object AnodeUtil {
         }
     }
 
+    fun getPremiumEndTime(server: String): Long {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        return prefs!!.getLong("Premium_$server", 0)
+    }
+
+    fun setPremiumEndTime(time: Long, server: String) {
+        val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
+        if (prefs != null) {
+            prefs.edit().putLong("Premium_$server", time).apply()
+        }
+    }
+
     fun getUseNewUi(): Boolean {
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         return prefs!!.getBoolean("useNewUI", true)
