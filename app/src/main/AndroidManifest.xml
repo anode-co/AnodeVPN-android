@@ -15,9 +15,6 @@
         android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
-    <uses-feature android:name="android.software.leanback" android:required="true" />
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-
     <application
         android:name=".volley.BackendVolley"
         android:extractNativeLibs="true"
