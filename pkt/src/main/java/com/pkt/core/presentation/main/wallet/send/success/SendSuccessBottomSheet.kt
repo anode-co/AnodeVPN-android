@@ -31,7 +31,13 @@ class SendSuccessBottomSheet : StateBottomSheet<SendSuccessState>(R.layout.botto
             }
 
             doneButton.doOnClick {
-                dismiss()
+                if (viewModel.isPremiumVpn()) {
+                    viewBinding.doneButton.isEnabled = false
+                    viewBinding.titleLabel.text = getString(R.string.premium_vpn_requesting)
+                    viewModel.requestPremium()
+                } else {
+                    dismiss()
+                }
             }
         }
     }

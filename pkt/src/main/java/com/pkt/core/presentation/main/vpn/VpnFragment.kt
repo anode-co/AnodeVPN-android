@@ -114,13 +114,23 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                 nameLabel.text = vpn.name
                 countryLabel.text = CountryUtil.getCountryName(vpn.countryCode)
             }
+
+            if (state.vpn?.requestPremium == true) {
+                state.vpn.requestPremium = false
+                state.vpn.let {
+                    viewModel.requestPremiumAddress(it.publicKey)
+                }
+            }
         }
     }
 
     override fun handleEvent(event: UiEvent) {
         when (event) {
-            VpnEvent.OpenConsent -> {
+            is VpnEvent.OpenConsent -> {
                 ConsentBottomSheet().show(parentFragmentManager, ConsentBottomSheet.TAG)
+            }
+            is VpnEvent.OpenConfirmTransactionVPNPremium -> {
+                mainViewModel.openSendConfirmPremiumVPN(event.fromaddress, event.address, event.amount)
             }
 
             else -> super.handleEvent(event)

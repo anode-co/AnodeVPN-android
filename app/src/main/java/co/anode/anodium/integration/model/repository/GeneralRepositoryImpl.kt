@@ -72,4 +72,12 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
     override fun getShowInactiveServers(): Boolean {
         return AnodeUtil.getShowInactiveServers()
     }
+
+    override fun setPremiumEndTime(value: Long, server: String) {
+        AnodeUtil.setPremiumEndTime(value, server)
+    }
+
+    override fun getPremiumEndTime(server: String): Long {
+        return AnodeUtil.getPremiumEndTime(server)
+    }
 }

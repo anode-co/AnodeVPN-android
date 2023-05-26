@@ -22,4 +22,8 @@ interface VpnAPI {
     @Headers("Content-Type: application/json; charset=utf-8")
     @GET("vpn/accounts/username/")
     suspend fun generateUsername(@Header("Authorization") signature: String): UsernameResponse
+    @POST("premium/")
+    suspend fun requestPremium(@Body request: VpnServerRequestPremium): VpnServerResponsePremium
+    @GET("premium/address/")
+    suspend fun requestPremiumAddress(): VpnServerResponsePremiumAddress
 }

@@ -47,7 +47,7 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         TODO("Not yet implemented")
     }
 
-    override fun openSendSuccess(fragment: Fragment, transactionId: String) {
+    override fun openSendSuccess(fragment: Fragment, transactionId: String, premiumVpn: Boolean, address: String) {
         TODO("Not yet implemented")
     }
 
@@ -70,6 +70,11 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openSendTransaction(fragment: Fragment, fromaddress: String) {
         TODO("Not yet implemented")
     }
+
+    override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromaddress: String, toAddress: String, amount: Double) {
+        TODO("Not yet implemented")
+    }
+
 
     override fun openEnterWallet(fragment: Fragment) {
         TODO("Not yet implemented")

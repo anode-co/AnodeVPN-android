@@ -4,12 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import co.anode.anodium.AnodeVpnService
-import co.anode.anodium.BuildConfig
 import co.anode.anodium.support.AnodeClient
 import co.anode.anodium.support.AnodeUtil
 import co.anode.anodium.support.CjdnsSocket
 import com.pkt.domain.dto.CjdnsPeeringLine
 import com.pkt.domain.dto.Vpn
+import com.pkt.domain.dto.VpnServerRequestPremium
+import com.pkt.domain.dto.VpnServerResponsePremiumAddress
 import com.pkt.domain.dto.VpnState
 import com.pkt.domain.interfaces.VpnAPIService
 import com.pkt.domain.repository.VpnRepository
@@ -24,7 +25,6 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,7 +62,16 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
             val vpnList: MutableList<Vpn> = mutableListOf()
             for(i in list.indices){
                 val server = list[i]
-                vpnList.add(Vpn(server.name, server.country_code, server.public_key, server.is_active))
+                var isPremium = false
+                if (server.cost > 0) {
+                    isPremium = true
+                }
+                //Handle servers with no country code, set default to Canada
+                if (server.country_code.isNullOrEmpty()) {
+                    vpnList.add(Vpn(server.name, "CA", server.public_key, server.is_active, isPremium, false))
+                } else {
+                    vpnList.add(Vpn(server.name, server.country_code, server.public_key, server.is_active, isPremium, false))
+                }
             }
             _vpnListFlow.tryEmit(vpnList)
             return Result.success(vpnList)
@@ -80,8 +89,10 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
         return Result.success(Unit)
     }
 
-    override fun connectFromExits(vpn: Vpn) {
+    override fun connectFromExits(vpn: Vpn, premium: Boolean) {
         Timber.d("VpnRepositoryImpl connectFromExits")
+        vpn.isPremium = premium
+        vpn.requestPremium = premium
         setCurrentVpn(vpn)
         _vpnState.tryEmit(VpnState.CONNECT)
     }
@@ -263,5 +274,34 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
 
     override fun getLastConnectedVPN(): String {
         return AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("ServerPublicKey", defaultNode) ?: defaultNode
+    }
+
+    override suspend fun requestPremium(transaction: String, address: String): Result<Boolean> {
+        val timeoutMillis = 5000L
+        val startTime = System.currentTimeMillis()
+        // Introduce a timeout to wait for the Cjdns IP address to be available
+        while (CjdnsSocket.ipv4Address.isEmpty()) {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - startTime >= timeoutMillis) {
+                break
+            }
+            delay(100)
+        }
+        var pubKey = AnodeUtil.getLastServerPubkeyFromSharedPrefs()
+        if (pubKey.isNotEmpty()) {
+            Timber.d("authorizeVPN: pubKey: $pubKey")
+        } else {
+            Timber.d("authorizeVPN: pubKey with defaultNode $defaultNode")
+            pubKey = defaultNode
+        }
+        if (CjdnsSocket.ipv4Address.isEmpty()) {
+            return Result.failure(Exception("No IP address"))
+        }
+        val request = VpnServerRequestPremium(ip = CjdnsSocket.ipv4Address, transaction, address)
+        return (vpnAPI.requestPremium(request, pubKey))
+    }
+
+    override suspend fun requestPremiumAddress(node: String): Result<VpnServerResponsePremiumAddress> {
+        return vpnAPI.requestPremiumAddress(node)
     }
 }

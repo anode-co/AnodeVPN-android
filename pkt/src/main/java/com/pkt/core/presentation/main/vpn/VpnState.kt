@@ -14,4 +14,9 @@ data class VpnState(
 
 sealed class VpnEvent : UiEvent {
     object OpenConsent : VpnEvent()
+    data class OpenConfirmTransactionVPNPremium(
+        val fromaddress: String,
+        val address: String,
+        val amount: Double
+    ): VpnEvent()
 }

@@ -41,6 +41,10 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress))
     }
 
+    override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromAddress: String, toAddress: String, amount: Double) {
+        navigate(fragment, NavGraphDirections.toSendConfirm(fromAddress, toAddress, amount.toFloat(), false, true))
+    }
+
     override fun openEnterWallet(fragment: Fragment) {
         navigate(fragment, NavGraphDirections.toEnterWallet())
     }
@@ -50,11 +54,11 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openSendConfirm(fragment: Fragment, fromAddress:String, toAddress: String, amount: Double, maxAmount: Boolean) {
-        navigate(fragment, NavGraphDirections.toSendConfirm(fromAddress, toAddress, amount.toFloat(), maxAmount))
+        navigate(fragment, NavGraphDirections.toSendConfirm(fromAddress, toAddress, amount.toFloat(), maxAmount, false))
     }
 
-    override fun openSendSuccess(fragment: Fragment, transactionId: String) {
-        navigate(fragment, NavGraphDirections.toSendSuccess(transactionId))
+    override fun openSendSuccess(fragment: Fragment, transactionId: String, premiumVpn: Boolean, address: String) {
+        navigate(fragment, NavGraphDirections.toSendSuccess(transactionId, premiumVpn, address))
     }
 
     override fun openVpnExits(fragment: Fragment) {

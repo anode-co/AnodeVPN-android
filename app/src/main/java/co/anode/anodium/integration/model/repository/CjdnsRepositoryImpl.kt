@@ -144,5 +144,8 @@ class CjdnsRepositoryImpl @Inject constructor() : CjdnsRepository {
         Result.success(response)
     }
 
+    override fun getCjdnsIpv4(): String {
+        return CjdnsSocket.ipv4Address
+    }
 
 }

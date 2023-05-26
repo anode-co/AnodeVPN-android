@@ -1,10 +1,13 @@
 package com.pkt.core.presentation.main.vpn
 
 import androidx.lifecycle.viewModelScope
+import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
+import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,6 +22,7 @@ class VpnViewModel @Inject constructor(
     private val vpnRepository: VpnRepository,
     private val cjdnsRepository: CjdnsRepository,
     private val generalRepository: GeneralRepository,
+    private val walletRepository: WalletRepository
 ) : StateViewModel<VpnState>() {
 
     private val _timerUiState: MutableStateFlow<Int> by lazy { MutableStateFlow(0) }
@@ -199,5 +203,18 @@ class VpnViewModel @Inject constructor(
 
     private fun stopPolling() {
         pollingJob?.cancel()
+    }
+
+    fun requestPremiumAddress(node: String) {
+        viewModelScope.launch {
+            // Get PKT Wallet address from VPN Server
+            val result = vpnRepository.requestPremiumAddress(node).getOrNull()
+            if (result != null) {
+                val walletAddress = walletRepository.getWalletAddress().getOrThrow()
+                sendEvent(VpnEvent.OpenConfirmTransactionVPNPremium(walletAddress, result.address, result.amount))
+            } else {
+                sendEvent(CommonEvent.Warning(R.string.premium_no_address))
+            }
+        }
     }
 }

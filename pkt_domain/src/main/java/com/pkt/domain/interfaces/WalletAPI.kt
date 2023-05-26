@@ -28,6 +28,8 @@ interface WalletAPI {
     suspend fun createWallet(@Body recoverWalletRequest: RecoverWalletRequest): CreateWalletResponse
     @POST("wallet/transaction/sendfrom")
     suspend fun sendTransaction(@Body sendRequest: SendTransactionRequest): SendTransactionResponse
+    @POST("wallet/transaction/create")
+    suspend fun createTransaction(@Body createRequest: CreateTransactionRequest): CreateTransactionResponse
     @POST("wallet/checkpassphrase")
     suspend fun checkPassphrase(@Body checkPassphraseRequest: CheckPassphraseRequest): CheckPassphraseResponse
     @POST("wallet/changepassphrase")

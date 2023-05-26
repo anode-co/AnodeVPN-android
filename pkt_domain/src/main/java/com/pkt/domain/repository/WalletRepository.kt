@@ -59,6 +59,7 @@ interface WalletRepository {
     suspend fun checkWalletPassphrase(passphrase: String): Result<Boolean>
     //Send PKT to an address
     suspend fun sendCoins(fromAddresses: List<String>, amount: Double, toAddress: String): Result<SendTransactionResponse>
+    suspend fun createTransaction(fromAddresses: List<String>, amount: Double, toAddress: String): Result<CreateTransactionResponse>
     //Change the active wallet's passphrase
     suspend fun changePassphrase(oldPassphrase: String, newPassphrase: String): Result<Boolean>
     //Get secret

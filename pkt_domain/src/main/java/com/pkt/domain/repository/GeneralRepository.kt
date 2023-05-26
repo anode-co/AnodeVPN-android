@@ -15,4 +15,6 @@ interface GeneralRepository {
     fun getPldLogUrl(): String
     fun setShowInactiveServers(value: Boolean)
     fun getShowInactiveServers(): Boolean
+    fun setPremiumEndTime(value: Long, server: String)
+    fun getPremiumEndTime(server: String): Long
 }
