@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.*
+import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -545,7 +546,7 @@ object AnodeUtil {
     fun pushNotification(title: String, text: String) {
         if (context != null) {
             var builder = NotificationCompat.Builder(context!!, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_logo)
+                .setSmallIcon(R.drawable.ic_menu_vpn_active)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
