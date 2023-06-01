@@ -12,6 +12,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -28,6 +32,7 @@ class PktMainActivity : AppCompatActivity() {
     private val CHECK_PREMIUM_INTERVAL = 2 * 60 * 1000L // 2 minutes in milliseconds
     private val scope = MainScope()
     private var job: Job? = null
+    private var notification10MinShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,28 +91,24 @@ class PktMainActivity : AppCompatActivity() {
     }
 
     private fun checkPremium() {
-        // Retrieve the SharedPreferences
         val sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
-
-        // Retrieve the PremiumTime value
         val allEntries = sharedPreferences.all
         for ((key, value) in allEntries) {
             if (key.startsWith("Premium_")) {
                 val premiumTime = sharedPreferences.getLong(key, 0L)
-                // Get the current system time
                 val currentTime = Calendar.getInstance().timeInMillis
-
                 if (premiumTime > currentTime) {
                     // Calculate the remaining time in milliseconds
                     val remainingTime = premiumTime - currentTime
-
                     // Check if there are 10 minutes remaining
-                    if (remainingTime <= TimeUnit.MINUTES.toMillis(10)) {
-                        AnodeUtil.pushNotification("AnodeVPN", getString(R.string.notification_premium_10min_remaining))
+                    if (!notification10MinShown && (remainingTime <= TimeUnit.MINUTES.toMillis(10))) {
+                        val localDateTime = LocalDateTime.ofEpochSecond((premiumTime/1000), 0, ZoneOffset.systemDefault().rules.getOffset(Instant.now()) )
+                        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+                        AnodeUtil.pushNotification("AnodeVPN", "${getString(com.pkt.core.R.string.premium_ends)} ${localDateTime.format(formatter)}")
+                        notification10MinShown = true
                     }
                 } else {
                     AnodeUtil.pushNotification("AnodeVPN", getString(R.string.notification_premium_ended))
-                    // Delete key
                     sharedPreferences.edit().remove(key).apply()
                 }
             }
