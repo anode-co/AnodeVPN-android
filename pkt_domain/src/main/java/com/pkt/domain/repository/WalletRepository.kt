@@ -74,4 +74,6 @@ interface WalletRepository {
     suspend fun stopPld()
 
     fun getActiveWalletUri(): Uri?
+
+    suspend fun decodeTransaction(binTx: String): String
 }

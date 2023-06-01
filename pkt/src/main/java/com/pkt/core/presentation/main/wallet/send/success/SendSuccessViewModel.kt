@@ -5,10 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
-import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
+import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -16,13 +17,35 @@ import javax.inject.Inject
 class SendSuccessViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val vpnRepository: VpnRepository,
-    private val generalRepository: GeneralRepository,
+    private val walletRepository: WalletRepository,
 ) : StateViewModel<SendSuccessState>() {
 
     private val transactionId: String = savedStateHandle["transactionId"] ?: error("transactionId required")
     private val address: String = savedStateHandle["address"] ?: ""
     private val isPremiumVpn: Boolean = savedStateHandle["premiumVpn"] ?: false
-    override fun createInitialState() = SendSuccessState(transactionId = this.transactionId)
+
+    init {
+        invokeLoadingAction {
+            runCatching {
+                if (isPremiumVpn) {
+                    runCatching {
+                        walletRepository.decodeTransaction(transactionId)
+                    }.onSuccess {
+                        sendState {
+                            copy(transactionId = it)
+                        }
+                    }.onFailure {
+                        Timber.d("Failed to decode transaction: ${it.message}")
+                    }
+                } else {
+                    sendState {
+                        copy(transactionId = transactionId)
+                    }
+                }
+            }
+        }
+    }
+    override fun createInitialState() = SendSuccessState()
 
     fun onCopyClick() {
         sendEvent(CommonEvent.CopyToBuffer(R.string.transaction_id, transactionId))

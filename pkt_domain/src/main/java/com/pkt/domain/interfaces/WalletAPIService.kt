@@ -1,5 +1,6 @@
 package com.pkt.domain.interfaces
 
+import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.pkt.domain.dto.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -9,7 +10,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -40,7 +40,7 @@ class WalletAPIService {
         .baseUrl(baseUrl)
         .addConverterFactory(converter)
         .addConverterFactory(NullOnEmptyConverterFactory())
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
         .create(WalletAPI::class.java)
@@ -176,6 +176,19 @@ class WalletAPIService {
         } else {
             Timber.d("resyncWallet: failed with message ${response.message}")
         }
+    }
+
+    suspend fun decodeTransaction(binTx: String): String {
+        val converterFactory = Json{ignoreUnknownKeys = true}.asConverterFactory("application/json".toMediaType())
+        val rawApi = Retrofit.Builder()
+            .baseUrl("http://localhost:8080/api/v1/")
+            .addConverterFactory(converterFactory)
+            .build()
+            .create(WalletAPI::class.java)
+
+        val request = DecodeTransactionRequest(binTx)
+        val response = rawApi.decodeTransaction(request)
+        return response.txid
     }
 
 }

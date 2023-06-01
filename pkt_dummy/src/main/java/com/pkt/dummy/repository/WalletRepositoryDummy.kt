@@ -243,4 +243,8 @@ class WalletRepositoryDummy constructor(
     override fun getActiveWalletUri(): Uri? {
         TODO("Not yet implemented")
     }
+
+    override suspend fun decodeTransaction(binTx: String): String {
+        TODO("Not yet implemented")
+    }
 }

@@ -1,6 +1,7 @@
 package com.pkt.domain.dto
 
 import androidx.annotation.Keep
+import kotlinx.serialization.Transient
 import kotlinx.serialization.Serializable
 
 @Keep
@@ -58,6 +59,46 @@ data class SendTransactionResponse(
     val stack: String = ""
 )
 
+@Keep
+@Serializable
+data class DecodeTransactionRequest(
+    val bin_tx: String
+)
+
+@Keep
+@Serializable
+data class DecodeTransactionResponse(
+    val locktime: Int,
+    @Transient val payers: List<Payer> = listOf(),
+    val sfee: String,
+    val size: Int,
+    val txid: String,
+    val version: Int,
+    @Transient val vinDetail: Any? = null,
+    val vout: List<Vout>,
+    val vsize: Int,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Keep
+@Serializable
+data class Vout(
+    val address: String,
+    val n: Int,
+    val svalue: String,
+    val valueCoins: Float,
+    @Transient val vote: Any? = null
+)
+
+@Keep
+@Serializable
+data class Payer(
+    val address: String,
+    val inputs: Int,
+    val svalue: String,
+    val valueCoins: Double
+)
 @Keep
 @Serializable
 data class CreateTransactionResponse(

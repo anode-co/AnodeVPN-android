@@ -438,4 +438,8 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return AnodeUtil.context?.let { FileProvider.getUriForFile(it, AnodeUtil.ApplicationID +".provider", File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")) }
     }
 
+    override suspend fun decodeTransaction(binTx: String): String {
+        return walletAPI.decodeTransaction(binTx)
+    }
+
 }

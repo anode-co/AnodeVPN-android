@@ -3,7 +3,6 @@ package com.pkt.domain.interfaces
 import com.pkt.domain.dto.WalletInfo
 import com.pkt.domain.dto.*
 import okhttp3.RequestBody
-import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -42,4 +41,6 @@ interface WalletAPI {
     suspend fun getPktToUSD(): PktPrice
     @POST
     suspend fun resyncWallet(@Body empty: RequestBody): ResyncWalletResponse
+    @POST("util/transaction/decode")
+    suspend fun decodeTransaction(@Body decodeTransactionRequest: DecodeTransactionRequest): DecodeTransactionResponse
 }
