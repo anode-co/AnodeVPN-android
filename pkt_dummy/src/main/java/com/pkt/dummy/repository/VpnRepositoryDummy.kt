@@ -110,6 +110,10 @@ class VpnRepositoryDummy : VpnRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getPremiumEndTime(pubKey: String): Long {
+        TODO("Not yet implemented")
+    }
+
 
     private companion object {
         val VPN_LIST = listOf(

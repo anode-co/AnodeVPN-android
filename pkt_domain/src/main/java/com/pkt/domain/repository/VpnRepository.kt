@@ -30,4 +30,5 @@ interface VpnRepository {
     fun getLastConnectedVPN(): String
     suspend fun requestPremium(transaction: String, address: String): Result<Boolean>
     suspend fun requestPremiumAddress(node:String): Result<VpnServerResponsePremiumAddress>
+    fun getPremiumEndTime(pubKey: String): Long
 }

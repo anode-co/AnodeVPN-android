@@ -14,7 +14,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -132,6 +134,12 @@ class VpnViewModel @Inject constructor(
                     currentState.vpn?.let { vpnRepository.connect(it.publicKey) }
                 }
             }
+
+            com.pkt.domain.dto.VpnState.CONNECTED_PREMIUM -> {
+                viewModelScope.launch {
+                    vpnRepository.disconnect()
+                }
+            }
         }
     }
 
@@ -179,7 +187,34 @@ class VpnViewModel @Inject constructor(
             while (true) {
                 if (!isActive) return@launch
                 updateIPs()
+                checkPremiumRemainingTime()
                 delay(pollingInterval)
+            }
+        }
+    }
+
+    private suspend fun checkPremiumRemainingTime() {
+        vpnRepository.currentVpnFlow.collect() {vpn ->
+            if (vpn != null) {
+                val endTime = vpnRepository.getPremiumEndTime(vpn.publicKey)
+                val current = System.currentTimeMillis()
+                vpnRepository.vpnStateFlow.collect() { state ->
+                    if ((state == com.pkt.domain.dto.VpnState.CONNECTED) && (endTime > current)) {
+                        sendState {
+                            copy(
+                                vpnState = com.pkt.domain.dto.VpnState.CONNECTED_PREMIUM,
+                                premiumEndTime = endTime
+                            )
+                        }
+                    } else if ((state == com.pkt.domain.dto.VpnState.CONNECTED_PREMIUM) && (endTime <= current)) {
+                        sendState {
+                            copy(
+                                vpnState = com.pkt.domain.dto.VpnState.CONNECTED,
+                                premiumEndTime = 0
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -207,13 +242,24 @@ class VpnViewModel @Inject constructor(
 
     fun requestPremiumAddress(node: String) {
         viewModelScope.launch {
-            // Get PKT Wallet address from VPN Server
-            val result = vpnRepository.requestPremiumAddress(node).getOrNull()
-            if (result != null) {
-                val walletAddress = walletRepository.getWalletAddress().getOrThrow()
-                sendEvent(VpnEvent.OpenConfirmTransactionVPNPremium(walletAddress, result.address, result.amount))
+            // Check if there is remaining time -> Existing active Premium subscription
+            val address = walletRepository.getWalletAddress().getOrNull()
+            val current = System.currentTimeMillis()
+            val endTime = vpnRepository.getPremiumEndTime(node)
+            if ((endTime > current) &&
+                (address != null)) {
+                Timber.d("VpnViewModel requestPremiumAddress| Remaining time > 0 ")
+                //vpnRepository.requestPremium("", address)
             } else {
-                sendEvent(CommonEvent.Warning(R.string.premium_no_address))
+                Timber.d("VpnViewModel requestPremiumAddress| Remaining time < 0: Requesting new address")
+                // Get PKT Wallet address from VPN Server
+                val result = vpnRepository.requestPremiumAddress(node).getOrNull()
+                if (result != null) {
+                    val walletAddress = walletRepository.getWalletAddress().getOrThrow()
+                    sendEvent(VpnEvent.OpenConfirmTransactionVPNPremium(walletAddress, result.address, result.amount))
+                } else {
+                    sendEvent(CommonEvent.Warning(R.string.premium_no_address))
+                }
             }
         }
     }

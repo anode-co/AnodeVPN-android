@@ -10,7 +10,8 @@ data class Vpn(
     val publicKey: String,
     val isActive: Boolean,
     var isPremium: Boolean = false,
-    var requestPremium: Boolean = false
+    var requestPremium: Boolean = false,
+    val cost: Int = 0,
 )
 
 enum class VpnState {
@@ -20,6 +21,7 @@ enum class VpnState {
     GETTING_ROUTES,
     GOT_ROUTES,
     CONNECTED,
+    CONNECTED_PREMIUM,
     NO_INTERNET
 }
 

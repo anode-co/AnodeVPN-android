@@ -17,14 +17,15 @@ class ShowVpnPremiumBottomSheet: BaseBottomSheet(R.layout.bottom_sheet_choose_vp
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return super.onCreateDialog(savedInstanceState).apply {
-            isCancelable = false
+            isCancelable = true
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val cost = arguments?.getInt(COST) ?: 0
         with(viewBinding) {
+            premiumDescription.text = "${getString(R.string.premium_description)} $cost PKT"
             vpnFreeButton.setOnClickListener {
                 setFragmentResult(REQUEST_KEY, bundleOf(RESULT_KEY to false))
                 dismiss()
@@ -40,5 +41,12 @@ class ShowVpnPremiumBottomSheet: BaseBottomSheet(R.layout.bottom_sheet_choose_vp
         const val TAG = "showVpnPremium_dialog"
         const val REQUEST_KEY = "vpnPremium_request"
         const val RESULT_KEY = "result"
+        const val COST = "vpnPremium_cost"
+
+        fun newInstance(cost: Int): ShowVpnPremiumBottomSheet {
+            return ShowVpnPremiumBottomSheet().apply {
+                arguments = bundleOf(COST to cost)
+            }
+        }
     }
 }

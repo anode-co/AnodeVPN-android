@@ -1,5 +1,6 @@
 package com.pkt.core.presentation.main.vpn
 
+import android.annotation.SuppressLint
 import android.net.VpnService
 import android.os.Bundle
 import android.view.View
@@ -18,6 +19,11 @@ import com.pkt.core.presentation.main.MainViewModel
 import com.pkt.core.presentation.main.common.consent.ConsentBottomSheet
 import com.pkt.core.util.CountryUtil
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 @AndroidEntryPoint
 class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
@@ -63,6 +69,7 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     override fun handleState(state: VpnState) {
         with(viewBinding) {
             when(state.vpnState) {
@@ -82,6 +89,7 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                         com.pkt.domain.dto.VpnState.GETTING_ROUTES -> R.string.getting_routes
                         com.pkt.domain.dto.VpnState.GOT_ROUTES -> R.string.got_routes
                         com.pkt.domain.dto.VpnState.CONNECTED -> R.string.connected
+                        com.pkt.domain.dto.VpnState.CONNECTED_PREMIUM -> R.string.connected_premium
                     }
                 )
                 applyGradient()
@@ -96,6 +104,7 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                     com.pkt.domain.dto.VpnState.GOT_ROUTES -> R.drawable.ic_connecting
                     com.pkt.domain.dto.VpnState.CONNECTED -> R.drawable.ic_connected_large
                     com.pkt.domain.dto.VpnState.NO_INTERNET -> R.drawable.ic_disconnected
+                    com.pkt.domain.dto.VpnState.CONNECTED_PREMIUM -> R.drawable.ic_connected_large
                 }
             )
 
@@ -120,6 +129,14 @@ class VpnFragment : StateFragment<VpnState>(R.layout.fragment_vpn) {
                 state.vpn.let {
                     viewModel.requestPremiumAddress(it.publicKey)
                 }
+            }
+
+            if (state.vpnState == com.pkt.domain.dto.VpnState.CONNECTED_PREMIUM) {
+                val localDateTime = LocalDateTime.ofEpochSecond((state.premiumEndTime/1000), 0, ZoneOffset.systemDefault().rules.getOffset(Instant.now()) )
+                val formatter = DateTimeFormatter.ofPattern("HH:mm")
+                premiumConnectionTimeLabel.text = "${getString(R.string.premium_ends)} ${localDateTime.format(formatter)}"
+            } else {
+                premiumConnectionTimeLabel.text = ""
             }
         }
     }

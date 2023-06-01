@@ -10,5 +10,5 @@ data class VpnExitsState(
 
 sealed class VpnExitsEvent : UiEvent {
 
-    object OpenVpnSelection : VpnExitsEvent()
+    data class OpenVpnSelection(val cost: Int): VpnExitsEvent()
 }

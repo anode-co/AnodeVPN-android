@@ -10,6 +10,7 @@ data class VpnState(
     val vpnState: VpnState = VpnState.DISCONNECTED,
     val ipV4: String? = null,
     val ipV6: String? = null,
+    val premiumEndTime: Long = 0
 ) : UiState
 
 sealed class VpnEvent : UiEvent {

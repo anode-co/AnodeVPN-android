@@ -68,9 +68,9 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
                 }
                 //Handle servers with no country code, set default to Canada
                 if (server.country_code.isNullOrEmpty()) {
-                    vpnList.add(Vpn(server.name, "CA", server.public_key, server.is_active, isPremium, false))
+                    vpnList.add(Vpn(server.name, "CA", server.public_key, server.is_active, isPremium, false, server.cost))
                 } else {
-                    vpnList.add(Vpn(server.name, server.country_code, server.public_key, server.is_active, isPremium, false))
+                    vpnList.add(Vpn(server.name, server.country_code, server.public_key, server.is_active, isPremium, false, server.cost))
                 }
             }
             _vpnListFlow.tryEmit(vpnList)
@@ -277,16 +277,10 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
     }
 
     override suspend fun requestPremium(transaction: String, address: String): Result<Boolean> {
-        val timeoutMillis = 5000L
+        Timber.d("VpnRepositoryImpl requestPremium")
+        val timeoutMillis = 1000L
         val startTime = System.currentTimeMillis()
-        // Introduce a timeout to wait for the Cjdns IP address to be available
-        while (CjdnsSocket.ipv4Address.isEmpty()) {
-            val currentTime = System.currentTimeMillis()
-            if (currentTime - startTime >= timeoutMillis) {
-                break
-            }
-            delay(100)
-        }
+
         var pubKey = AnodeUtil.getLastServerPubkeyFromSharedPrefs()
         if (pubKey.isNotEmpty()) {
             Timber.d("authorizeVPN: pubKey: $pubKey")
@@ -294,14 +288,29 @@ class VpnRepositoryImpl @Inject constructor() : VpnRepository {
             Timber.d("authorizeVPN: pubKey with defaultNode $defaultNode")
             pubKey = defaultNode
         }
+        // Introduce a timeout to wait for the Cjdns IP address to be available
+        while (CjdnsSocket.ipv4Address.isEmpty()) {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - startTime >= timeoutMillis) {
+                break
+            }
+            delay(50)
+        }
         if (CjdnsSocket.ipv4Address.isEmpty()) {
             return Result.failure(Exception("No IP address"))
         }
         val request = VpnServerRequestPremium(ip = CjdnsSocket.ipv4Address, transaction, address)
+        // Save Premium end time (now + 1 hour)
+        AnodeUtil.setPremiumEndTime(System.currentTimeMillis() + 3600000L, pubKey)
         return (vpnAPI.requestPremium(request, pubKey))
     }
 
+    override fun getPremiumEndTime(pubKey: String): Long {
+        return AnodeUtil.getPremiumEndTime(pubKey)
+    }
+
     override suspend fun requestPremiumAddress(node: String): Result<VpnServerResponsePremiumAddress> {
+        Timber.d("VpnRepositoryImpl requestPremiumAddress")
         return vpnAPI.requestPremiumAddress(node)
     }
 }

@@ -50,8 +50,6 @@ class SendSuccessViewModel @Inject constructor(
             }.onFailure {
                 sendEvent(CommonEvent.Warning(R.string.premium_vpn_error))
             }
-            //TODO: pass the Server's Name, or do this in VpnFragment
-            generalRepository.setPremiumEndTime(System.currentTimeMillis() + 3600000L, "ServerName")
             navigateBack()
         }
     }

@@ -58,7 +58,8 @@ class VpnExitsFragment : StateFragment<VpnExitsState>(R.layout.fragment_vpn_exit
         super.handleEvent(event)
         when (event) {
             is VpnExitsEvent.OpenVpnSelection -> {
-                ShowVpnPremiumBottomSheet().show(parentFragmentManager, ShowVpnPremiumBottomSheet.TAG)
+                ShowVpnPremiumBottomSheet.newInstance(event.cost).show(parentFragmentManager, ShowVpnPremiumBottomSheet.TAG)
+                //ShowVpnPremiumBottomSheet().show(parentFragmentManager, ShowVpnPremiumBottomSheet.TAG)
             }
         }
     }

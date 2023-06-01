@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,6 +43,7 @@ class VpnExitsViewModel @Inject constructor(
                 sendState {
                     copy(
                         items = vpnList.map { vpn ->
+                            val endTime = vpnRepository.getPremiumEndTime(vpn.publicKey)
                             VpnExitItem(
                                 name = vpn.name,
                                 countryFlag = CountryUtil.getCountryFlag(vpn.countryCode),
@@ -51,6 +53,8 @@ class VpnExitsViewModel @Inject constructor(
                                 isConnected = vpnState == VpnState.CONNECTED && vpn.name == currentVpn?.name,
                                 isActive = vpn.isActive,
                                 isPremium = vpn.isPremium,
+                                premiumEndTime = endTime,
+                                cost = vpn.cost,
                             )
                         }.filter {
                             query.isBlank()
@@ -80,8 +84,10 @@ class VpnExitsViewModel @Inject constructor(
             vpnRepository.disconnect()
         }
         selectedVpn = Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey, true)
-        if (item.isPremium) {
-            sendEvent(VpnExitsEvent.OpenVpnSelection)
+        val endTime = vpnRepository.getPremiumEndTime(item.publicKey)
+        val current = System.currentTimeMillis()
+        if ((item.isPremium) && (endTime < current)) {
+            sendEvent(VpnExitsEvent.OpenVpnSelection(item.cost))
         } else {
             vpnRepository.connectFromExits(Vpn(name = item.name, countryCode = item.countryCode, publicKey = item.publicKey, true), false)
             navigateBack()
