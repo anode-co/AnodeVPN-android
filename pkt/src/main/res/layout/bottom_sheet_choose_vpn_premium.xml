@@ -40,4 +40,18 @@
         app:layout_constraintStart_toEndOf="@id/vpnPaidButton"
         app:layout_constraintTop_toTopOf="@id/vpnPaidButton" />
 
+    <TextView
+        android:id="@+id/premiumDescription"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/vpnPaidButton"
+        app:layout_constraintEnd_toEndOf="@id/vpnPaidButton"
+        app:layout_constraintTop_toBottomOf="@+id/vpnPaidButton"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearance14Regular"
+        android:textColor="?android:textColorSecondary"
+        android:layout_marginTop="10dp"
+        android:text="@string/premium_description"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

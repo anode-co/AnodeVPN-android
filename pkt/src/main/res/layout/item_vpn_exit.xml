@@ -64,14 +64,33 @@
     <ImageView
         android:id="@+id/premiumImage"
         android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_height="0dp"
         android:scaleType="centerInside"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="20dp"
         app:layout_constraintStart_toEndOf="@+id/nameLabel"
         app:layout_constraintEnd_toStartOf="@+id/connectedImage"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/connectedImage"
+        app:layout_constraintBottom_toBottomOf="@id/connectedImage"
         app:srcCompat="@drawable/baseline_speed_24"
         tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/premiumEndTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/premiumImage"
+        app:layout_constraintEnd_toEndOf="@+id/premiumImage"
+        app:layout_constraintStart_toStartOf="@+id/premiumImage"
+        android:layout_marginTop="-10dp"
+        android:text="12 min left"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearance14Regular"
+        android:textColor="?android:textColorSecondary"
+        app:autoSizeMaxTextSize="14sp"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"/>
 
     <ImageView
         android:id="@+id/connectedImage"

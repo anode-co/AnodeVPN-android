@@ -29,7 +29,18 @@
         app:layout_constraintTop_toBottomOf="@id/connectionStateLabel"
         tools:ignore="ContentDescription"
         tools:srcCompat="@drawable/ic_disconnected" />
-
+    <TextView
+        android:id="@+id/premiumConnectionTimeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:includeFontPadding="false"
+        android:textAppearance="?textAppearance14Medium"
+        android:textColor="@color/text1_50"
+        app:layout_constraintEnd_toEndOf="@id/connectionButton"
+        app:layout_constraintStart_toStartOf="@id/connectionButton"
+        app:layout_constraintTop_toBottomOf="@id/connectionButton"
+        tools:text="00:00:00" />
     <TextView
         android:id="@+id/connectionStateLabel"
         android:layout_width="0dp"

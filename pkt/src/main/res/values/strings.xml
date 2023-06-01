@@ -189,6 +189,7 @@
     <string name="getting_routes">Getting routes</string>
     <string name="got_routes">Got routes</string>
     <string name="connected">Connected</string>
+    <string name="connected_premium">Connected Premium</string>
     <string name="public_ipv4">Public IPv4: %s</string>
     <string name="public_ipv6">IPv6: %s</string>
     <string name="your_seed_phrase_2">Your seed phrase</string>
@@ -198,7 +199,6 @@
     <string name="rename_wallet">Rename Wallet</string>
     <string name="save">Save</string>
     <string name="premium">Premium</string>
-    <string name="notification_premium_10min_remaining">10 minutes of Premium VPN remaining…</string>
     <string name="notification_premium_ended">Premium VPN has ended</string>
     <string name="free">Free</string>
     <string name="enter_current_wallet_password">Enter current wallet password</string>
@@ -254,4 +254,8 @@
     <string name="premium_no_transaction">Failed to create payment transaction. Please try again.</string>
     <string name="premium_vpn_success">You are now on Premium VPN</string>
     <string name="premium_vpn_error">Request Premium VPN failed</string>
+    <string name="minutes_left"> min left</string>
+    <string name="premium_ends">Premium VPN until </string>
+    <string name="premium_ends_short">until </string>
+    <string name="premium_description">1h of Fast VPN for</string>
 </resources>
