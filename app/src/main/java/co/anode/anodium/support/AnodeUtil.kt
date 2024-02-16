@@ -207,6 +207,8 @@ object AnodeUtil {
     }
 
     fun getPremiumEndTime(server: String): Long {
+        // Ignore for Test server
+        if (server == "6mg9hq1n8nmt54x7p5v1zqpvyhy285sj1mkhb7ucgu1w0ytgybw0.k") return 0
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         return prefs!!.getLong("Premium_$server", 0)
     }

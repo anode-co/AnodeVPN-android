@@ -38,6 +38,10 @@
         app:destination="@id/sendTransaction" />
 
     <action
+        android:id="@+id/toVote"
+        app:destination="@id/vote" />
+
+    <action
         android:id="@+id/toEnterWallet"
         app:destination="@id/enterWallet"
         app:popUpTo="@id/navGraph"
@@ -139,6 +143,17 @@
         android:name="com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet"
         android:label="SendTransaction"
         tools:layout="@layout/bottom_sheet_send_transaction">
+        <argument
+            android:name="fromaddress"
+            app:argType="string" />
+
+    </dialog>
+
+    <dialog
+        android:id="@+id/vote"
+        android:name="com.pkt.core.presentation.main.wallet.vote.VoteBottomSheet"
+        android:label="Vote"
+        tools:layout="@layout/bottom_sheet_vote">
         <argument
             android:name="fromaddress"
             app:argType="string" />

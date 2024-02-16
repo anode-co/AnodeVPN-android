@@ -70,7 +70,9 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openSendTransaction(fragment: Fragment, fromaddress: String) {
         TODO("Not yet implemented")
     }
-
+    override fun openVote(fragment: Fragment, fromaddress: String) {
+        TODO("Not yet implemented")
+    }
     override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromaddress: String, toAddress: String, amount: Double) {
         TODO("Not yet implemented")
     }

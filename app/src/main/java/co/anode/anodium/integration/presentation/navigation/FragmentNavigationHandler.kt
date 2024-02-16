@@ -41,6 +41,10 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress))
     }
 
+    override fun openVote(fragment: Fragment, fromAddress: String) {
+        navigate(fragment, NavGraphDirections.toVote(fromAddress))
+    }
+
     override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromAddress: String, toAddress: String, amount: Double) {
         navigate(fragment, NavGraphDirections.toSendConfirm(fromAddress, toAddress, amount.toFloat(), false, true))
     }

@@ -74,6 +74,9 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             sendButton.setOnClickListener {
                 viewModel.onSendClick()
             }
+            voteButton.setOnClickListener {
+                viewModel.onVoteClick()
+            }
             qrButton.setOnClickListener {
                 showQrDialog()
             }
@@ -253,6 +256,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 datePicker.show(childFragmentManager, "date_picker")
             }
             is WalletEvent.OpenSendTransaction -> mainViewModel.openSendTransaction(viewModel.walletAddress)
+            is WalletEvent.OpenVote -> mainViewModel.openVote(viewModel.walletAddress)
             //is WalletEvent.ScrollToTop -> viewBinding.recyclerView.scrollToPosition(0)
             is WalletEvent.OpenTransactionDetails -> mainViewModel.openTransactionDetails(event.extra)
             else -> super.handleEvent(event)

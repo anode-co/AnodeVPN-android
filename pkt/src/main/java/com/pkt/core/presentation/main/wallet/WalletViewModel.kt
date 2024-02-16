@@ -267,6 +267,17 @@ class WalletViewModel @Inject constructor(
         }
     }
 
+    fun onVoteClick() {
+        /*if (balance > 1) {
+            Timber.i("WalletViewModel onVoteClick")
+            sendEvent(WalletEvent.OpenVote)
+        } else {
+            Timber.i("WalletViewModel onVoteClick. Balance is too low $balance")
+            sendEvent(CommonEvent.Warning(R.string.error_insufficient_balance))
+        }*/
+        sendEvent(WalletEvent.OpenVote)
+    }
+
     fun onRetryClick() {
 
     }

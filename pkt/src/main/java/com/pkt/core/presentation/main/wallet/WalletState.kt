@@ -36,6 +36,7 @@ data class WalletState(
 sealed class WalletEvent : UiEvent {
 
     object OpenSendTransaction: WalletEvent()
+    object OpenVote: WalletEvent()
 
     data class OpenDatePicker(
         val startDate: Long?,

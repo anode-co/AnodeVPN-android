@@ -47,6 +47,10 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenSendTransaction(fromaddress))
     }
 
+    fun openVote(fromaddress: String) {
+        sendNavigation(AppNavigation.OpenVote(fromaddress))
+    }
+
     fun openSendConfirm(fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean) {
         sendNavigation(AppNavigation.OpenSendConfirm(fromaddress, toaddress, amount, maxAmount, false))
     }

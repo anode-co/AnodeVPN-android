@@ -37,7 +37,8 @@ data class PKT(
     val symbol: String,
     val tags: List<String>,
     val total_supply: Long,
-    val tvl_ratio: Long?
+    val tvl_ratio: Long?,
+    val infinite_supply: Boolean
 )
 
 @Keep
