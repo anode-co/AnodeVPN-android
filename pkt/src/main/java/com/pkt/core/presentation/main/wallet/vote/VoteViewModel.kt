@@ -65,6 +65,7 @@ class SendTransactionViewModel @Inject constructor(
             toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
         }.onSuccess {
             Timber.i("VoteViewModel onVoteClick| PKT address is valid")
+
             //TODO: update this event
             /*sendNavigation(
                 AppNavigation.OpenSendConfirm(

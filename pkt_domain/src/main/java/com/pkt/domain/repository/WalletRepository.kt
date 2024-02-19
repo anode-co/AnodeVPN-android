@@ -76,4 +76,6 @@ interface WalletRepository {
     fun getActiveWalletUri(): Uri?
 
     suspend fun decodeTransaction(binTx: String): String
+
+    suspend fun sendVote(fromAddresses: List<String>, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse>
 }

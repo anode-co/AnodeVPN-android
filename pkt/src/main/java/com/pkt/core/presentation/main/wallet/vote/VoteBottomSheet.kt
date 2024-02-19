@@ -37,8 +37,6 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
             voteButton.doOnClick {
                 viewModel.onVoteClick()
             }
-
-            updateAmountInputPadding()
         }
     }
 
@@ -50,21 +48,6 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
                 addressInput.hasFocus() -> addressInput.showKeyboardDelayed()
                 else -> addressInput.showKeyboardDelayed()
             }
-        }
-    }
-
-    private fun updateAmountInputPadding() {
-        with(viewBinding) {
-            /*if (maxCheckbox.width > 0) {
-                val newPadding = amountInput.paddingStart + maxCheckbox.width
-                Timber.d("newPadding: $newPadding")
-
-                amountInput.updatePaddingRelative(end = newPadding)
-            } else {
-                maxCheckbox.doOnNextLayout {
-                    updateAmountInputPadding()
-                }
-            }*/
         }
     }
 
@@ -98,7 +81,6 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
                     viewModel.onWithdrawVoteCheckChanged(isChecked)
                 }
             }
-//            maxLabel.isVisible = state.maxValueSelected
             voteButton.isEnabled = state.voteButtonEnabled
         }
 

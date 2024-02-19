@@ -354,6 +354,21 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
+    override suspend fun sendVote(fromAddresses: List<String>, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse> {
+        val request = SendVoteRequest(voteFor, fromAddresses, isCandidate)
+        val response = walletAPI.sendVote(request)
+        if (response.message.isNotEmpty()) {
+            Timber.e("sendVote: Failed: ${response.message}")
+            return Result.failure(Exception("Failed to send vote: ${response.message}"))
+        } else if (response.txHash.isNotEmpty()){
+            Timber.d("sendVote: success")
+            return Result.success(response)
+        } else {
+            Timber.e("sendVote: Failed, empty response")
+            return Result.failure(Exception("Failed to send vote"))
+        }
+    }
+
     override suspend fun createTransaction(fromAddresses: List<String>, amount: Double, toAddress: String): Result<CreateTransactionResponse> {
         val request = CreateTransactionRequest(toAddress, amount, fromAddresses, true)
         val response = walletAPI.createTransaction(request)
@@ -441,5 +456,4 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     override suspend fun decodeTransaction(binTx: String): String {
         return walletAPI.decodeTransaction(binTx)
     }
-
 }

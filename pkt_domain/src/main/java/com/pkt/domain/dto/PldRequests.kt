@@ -44,6 +44,14 @@ data class SendTransactionRequest(
 
 @Keep
 @Serializable
+data class SendVoteRequest(
+    val vote_for: String,
+    val from_address: List<String>,
+    val is_candidate: Boolean
+)
+
+@Keep
+@Serializable
 data class CreateTransactionRequest(
     val to_address: String,
     val amount: Double,
@@ -54,6 +62,14 @@ data class CreateTransactionRequest(
 @Keep
 @Serializable
 data class SendTransactionResponse(
+    val txHash: String,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Keep
+@Serializable
+data class SendVoteResponse(
     val txHash: String,
     var message: String = "",
     val stack: String = ""
