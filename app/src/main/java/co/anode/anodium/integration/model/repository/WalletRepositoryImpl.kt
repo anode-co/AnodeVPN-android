@@ -199,7 +199,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
         Timber.d("unlockWallet")
-        val request = UnlockWalletRequest(passphrase, "$activeWallet.db")
+        val request = UnlockWalletRequest(passphrase)
         val response = walletAPI.unlockWalletAPI(request)
         return Result.success(response)
     }
@@ -249,9 +249,12 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun renameWallet(name: String): Result<String?> {
+    override suspend fun renameWallet(name: String, srcName: String): Result<String?> {
         Timber.d("renameWallet: $name")
         checkWalletName(name).onSuccess {
+            if (srcName.isNotEmpty()) {
+                activeWallet = srcName
+            }
             val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
             walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
             //update stored PIN
@@ -354,8 +357,8 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
     }
 
-    override suspend fun sendVote(fromAddresses: List<String>, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse> {
-        val request = SendVoteRequest(voteFor, fromAddresses, isCandidate)
+    override suspend fun sendVote(fromAddress: String, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse> {
+        val request = SendVoteRequest(voteFor, fromAddress, isCandidate)
         val response = walletAPI.sendVote(request)
         if (response.message.isNotEmpty()) {
             Timber.e("sendVote: Failed: ${response.message}")

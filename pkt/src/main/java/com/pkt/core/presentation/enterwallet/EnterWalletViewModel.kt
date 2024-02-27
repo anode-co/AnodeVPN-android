@@ -39,6 +39,7 @@ class EnterWalletViewModel @Inject constructor(
     init {
         invokeLoadingAction {
             runCatching {
+                generalRepository.launchPLD()
                 val currentWallet = walletRepository.getActiveWallet()
                 val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
 

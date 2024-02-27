@@ -248,6 +248,7 @@
     <string name="address_copied">Address copied</string>
     <string name="confirm_with_password">Confirm with Password</string>
     <string name="confirm_with_pin">Confirm with PIN</string>
+    <string name="vote_submitted">Vote has been cast</string>
 
     <string name="error_insufficient_balance">Insufficient balance</string>
     <string name="sender_address">Sender address</string>

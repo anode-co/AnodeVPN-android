@@ -2,7 +2,6 @@ package com.pkt.core.presentation.main.wallet.send.confirm
 
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
-import com.pkt.core.extensions.formatPkt
 import com.pkt.core.extensions.toPKT
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent

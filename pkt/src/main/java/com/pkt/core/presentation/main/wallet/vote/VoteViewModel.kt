@@ -2,9 +2,8 @@ package com.pkt.core.presentation.main.wallet.vote
 
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
-import com.pkt.core.extensions.toPKT
 import com.pkt.core.presentation.common.state.StateViewModel
-import com.pkt.core.presentation.navigation.AppNavigation
+import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
@@ -55,28 +54,33 @@ class SendTransactionViewModel @Inject constructor(
     }
 
     fun onVoteClick() {
-        if (currentState.candidateSelected) {
-            Timber.d("VoteViewModel onVoteClick| Candidate selected")
-        }
-        if (currentState.withdrawVoteSelected) {
-            Timber.d("VoteViewModel onVoteClick| withdrawVote selected")
-        }
-        runCatching {
-            toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
-        }.onSuccess {
-            Timber.i("VoteViewModel onVoteClick| PKT address is valid")
-
-            //TODO: update this event
-            /*sendNavigation(
-                AppNavigation.OpenSendConfirm(
-                    fromaddress = fromaddress,
-                    toaddress = toaddress,
-
-                )
-            )*/
-        }.onFailure {
-            Timber.i("VoteViewModel onVoteClick| PKT address is invalid")
-            sendEvent(VoteEvent.AddressError(it.message))
+        invokeAction {
+            if (currentState.candidateSelected) {
+                Timber.d("VoteViewModel onVoteClick| Candidate selected")
+            }
+            if (currentState.withdrawVoteSelected) {
+                Timber.d("VoteViewModel onVoteClick| withdrawVote selected")
+            }
+            runCatching {
+                toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
+            }.onSuccess {
+                Timber.i("VoteViewModel onVoteClick| PKT address is valid")
+                walletRepository.sendVote(
+                    fromAddress = fromaddress,
+                    voteFor = toaddress,
+                    isCandidate = currentState.candidateSelected
+                ).onSuccess {
+                    Timber.i("VoteViewModel onVoteClick| Success")
+                    sendEvent(CommonEvent.Info(R.string.vote_submitted))
+                    navigateBack()
+                }.onFailure {
+                    Timber.e(it, "VoteViewModel onVoteClick| Error")
+                    sendError(it)
+                }
+            }.onFailure {
+                Timber.i("VoteViewModel onVoteClick| PKT address is invalid")
+                sendEvent(VoteEvent.AddressError(it.message))
+            }
         }
     }
 

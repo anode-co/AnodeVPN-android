@@ -62,6 +62,7 @@ object AnodeUtil {
     val CJDROUTE_LOG = "cjdroute.log"
     val PLD_LOG = "pldlog.txt"
     val PLD_BINFILE = "pld"
+    val REST_PORT = 53199
     lateinit var pld_pb: Process
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
@@ -360,13 +361,17 @@ object AnodeUtil {
         }
     }
 
-    fun launchPld() {
+    fun launchPld(walletName: String) {
+        var walletParam = ""
+        if (walletName.isNotEmpty()) {
+            walletParam = "--wallet=$walletName"
+        }
         try {
             if (this::pld_pb.isInitialized && pld_pb.isAlive) return
             Timber.i( "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
             val pldLogFile = File(filesDirectory + "/" + PLD_LOG)
             val processBuilder = ProcessBuilder()
-            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt")
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt","--restlisten=$REST_PORT", walletParam)
                     .redirectOutput(File(filesDirectory, PLD_LOG))
                     .redirectErrorStream(true)
             pb.environment()["TMPDIR"] = filesDirectory
@@ -395,7 +400,7 @@ object AnodeUtil {
                 }
                 //Wait before restarting pld
                 Thread.sleep(500)
-                launchPld()
+                launchPld(walletName)
             }).start()
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute pld " + e.message)
@@ -1101,6 +1106,58 @@ object AnodeUtil {
             out.add(first16.substring(i*4, i*4+4))
         }
         return out.joinToString(":")
+    }
+
+    fun createPldWallet(passphrase: String, name: String): String {
+        var walletParam = ""
+        if (name.isNotEmpty()) {
+            walletParam = "--wallet=$name"
+        }
+        //Check if wallet.db already exists
+        val walletFile = File("$filesDirectory/pkt/wallet.db")
+        if (walletFile.exists()) {
+            Timber.i("Wallet already exists")
+            return ""
+        }
+        val walletJsonFilename = "wallet.json"
+        val seedJsonFilename = "seed.json"
+        //Save passphrase to json file
+        val jsonObject = JSONObject()
+        jsonObject.put("passphrase", passphrase)
+        val walletJsonFile = File(filesDirectory, walletJsonFilename)
+        walletJsonFile.writeText(jsonObject.toString())
+        val seedFile = File(filesDirectory, seedJsonFilename)
+        var seed = ""
+        try {
+            if (this::pld_pb.isInitialized && pld_pb.isAlive) return ""
+            Timber.i( "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
+            val processBuilder = ProcessBuilder()
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt", "--create", walletParam)
+                .redirectInput(File(filesDirectory, walletJsonFilename))
+                .redirectOutput(File(filesDirectory, seedJsonFilename))
+            pb.environment()["TMPDIR"] = filesDirectory
+            pld_pb = processBuilder.start()
+            pld_pb.waitFor()
+            val seedJson = JSONObject(seedFile.readText())
+            seed = seedJson.getString("seed")
+        } catch (e: Exception) {
+            pld_pb.destroy()
+            if (walletJsonFile.exists()) {
+                walletJsonFile.delete()
+            }
+            if (seedFile.exists()) {
+                seedFile.delete()
+            }
+            throw AnodeUtilException("Failed to execute pld " + e.message)
+        }
+        pld_pb.destroy()
+        if (walletJsonFile.exists()) {
+            walletJsonFile.delete()
+        }
+        if (seedFile.exists()) {
+            seedFile.delete()
+        }
+        return seed
     }
 
 }

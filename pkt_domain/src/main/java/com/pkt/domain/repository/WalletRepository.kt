@@ -42,7 +42,7 @@ interface WalletRepository {
     //Get the seed words of the active wallet
     suspend fun getSeed(): Result<String>
     //Rename the active wallet file in the device
-    suspend fun renameWallet(name: String): Result<String?>
+    suspend fun renameWallet(name: String, srcName: String = ""): Result<String?>
     //Check if wallet name exists
     suspend fun checkWalletName(name: String): Result<String?>
     //Delete wallet name from device
@@ -77,5 +77,5 @@ interface WalletRepository {
 
     suspend fun decodeTransaction(binTx: String): String
 
-    suspend fun sendVote(fromAddresses: List<String>, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse>
+    suspend fun sendVote(fromAddress: String, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse>
 }

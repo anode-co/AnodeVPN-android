@@ -150,7 +150,7 @@ class WalletRepositoryDummy constructor(
     override suspend fun getSeed(): Result<String> =
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
 
-    override suspend fun renameWallet(name: String): Result<String?> {
+    override suspend fun renameWallet(name: String, srcName: String): Result<String?> {
         delay(1000)
         return Result.success(
             if (name.any { !it.isLetterOrDigit() && !it.isWhitespace() }) {
@@ -245,6 +245,10 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun decodeTransaction(binTx: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun sendVote(fromAddress: String, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse> {
         TODO("Not yet implemented")
     }
 }

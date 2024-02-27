@@ -17,4 +17,7 @@ interface GeneralRepository {
     fun getShowInactiveServers(): Boolean
     fun setPremiumEndTime(value: Long, server: String)
     fun getPremiumEndTime(server: String): Long
+    suspend fun createPldWallet(password: String, pin: String, name: String ): Result<String>
+
+    fun launchPLD()
 }

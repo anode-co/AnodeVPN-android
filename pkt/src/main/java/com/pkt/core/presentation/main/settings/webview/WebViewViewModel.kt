@@ -1,18 +1,11 @@
 package com.pkt.core.presentation.main.settings.webview
 
-import android.webkit.WebView
 import androidx.lifecycle.SavedStateHandle
 import com.google.gson.Gson
-import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
-import com.pkt.core.presentation.common.state.event.CommonEvent
-import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
-import java.io.*
 import javax.inject.Inject
 
 @HiltViewModel

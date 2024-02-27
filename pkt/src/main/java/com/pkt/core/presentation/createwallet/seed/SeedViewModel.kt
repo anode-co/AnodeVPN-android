@@ -5,6 +5,7 @@ import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.domain.repository.WalletRepository
+import com.pkt.domain.repository.GeneralRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
 import javax.inject.Inject
@@ -13,6 +14,7 @@ import javax.inject.Inject
 class SeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<SeedState>() {
 
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
@@ -21,14 +23,19 @@ class SeedViewModel @Inject constructor(
 
     init {
         invokeLoadingAction {
-            walletRepository.generateSeed(password, pin)
-                .onSuccess {
-                    Timber.d("SeedViewModel| Seed generated successfully")
-                    sendState { copy(seed = it) }
-                }.onFailure {
-                    Timber.e(it, "SeedViewModel| Seed generation failed")
-                    sendError(it)
-                }
+            var walletName = "wallet"
+            if (name != null) {
+                walletName = name
+            }
+            generalRepository.createPldWallet(password, pin , walletName)
+               .onSuccess {
+                   Timber.d("SeedViewModel| Seed generated successfully")
+                   walletRepository.setActiveWallet(walletName)
+                   sendState { copy(seed = it) }
+               }.onFailure {
+                   Timber.e(it, "SeedViewModel| Seed generation failed")
+                   sendError(it)
+               }
         }
     }
 

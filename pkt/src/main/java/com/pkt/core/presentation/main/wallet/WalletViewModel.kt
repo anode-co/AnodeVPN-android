@@ -13,7 +13,6 @@ import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.main.wallet.transaction.TransactionType
 import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
-import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.dto.Transaction
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
@@ -170,14 +169,14 @@ class WalletViewModel @Inject constructor(
             if (transactions.isNotEmpty()) {
                 for (j in 0 until transactions.size) {
                     for (i in tempList.indices) {
-                        if (tempList[i].txHash == transactions[j].txHash) {
+                        if (tempList[i].tx.txid == transactions[j].tx.txid) {
                             tempList.removeAt(i)
                             break
                         }
                     }
                 }
             }
-            transactions.sortByDescending { it.timeStamp }
+            transactions.sortByDescending { it.time.toLong() }
             transactions.addAll(tempList)
             val items: MutableList<DisplayableItem> = mutableListOf()
             /*//Do not add loading, error and footer items from current list
@@ -195,7 +194,7 @@ class WalletViewModel @Inject constructor(
             }
             for (i in 0 until transactions.size) {
                 //Add date
-                val date = LocalDateTime.ofEpochSecond(transactions[i].timeStamp.toLong(), 0, ZonedDateTime.now().offset)
+                val date = LocalDateTime.ofEpochSecond(transactions[i].time.toLong(), 0, ZonedDateTime.now().offset)
                 if ((lastDateInTxnsList.dayOfMonth != date.dayOfMonth) ||
                     (lastDateInTxnsList.month != date.month) ||
                     (lastDateInTxnsList.year != date.year)
@@ -204,12 +203,13 @@ class WalletViewModel @Inject constructor(
                 }
                 lastDateInTxnsList = date
 
-                var amount = transactions[i].amount.toLong()
+                var amount = transactions[i].tx.vout[0].svalue.toLong()
                 var type = TransactionType.RECEIVE
                 if (amount < 0)
                     type = TransactionType.SENT
                 amount = amount.absoluteValue
 
+                val addresses = transactions[i].tx.vout.map { it.address }
                 items.add(
                     TransactionItem(
                         id = i.toString(),
@@ -217,8 +217,8 @@ class WalletViewModel @Inject constructor(
                         time = date,
                         amountPkt = amount.formatPkt(),
                         amountUsd = amount.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
-                        transactionId = transactions[i].txHash,
-                        addresses = transactions[i].destAddresses,
+                        transactionId = transactions[i].tx.txid,
+                        addresses = addresses,
                         blockNumber = transactions[i].blockHeight,
                         confirmations = transactions[i].numConfirmations,
                     )
@@ -268,14 +268,13 @@ class WalletViewModel @Inject constructor(
     }
 
     fun onVoteClick() {
-        /*if (balance > 1) {
+        if (balance > 1) {
             Timber.i("WalletViewModel onVoteClick")
             sendEvent(WalletEvent.OpenVote)
         } else {
             Timber.i("WalletViewModel onVoteClick. Balance is too low $balance")
             sendEvent(CommonEvent.Warning(R.string.error_insufficient_balance))
-        }*/
-        sendEvent(WalletEvent.OpenVote)
+        }
     }
 
     fun onRetryClick() {

@@ -22,12 +22,15 @@ import java.util.concurrent.TimeUnit
 
 
 class WalletAPIService {
+    val REST_PORT = 53199
 
-    private val baseUrl = "http://localhost:8080/api/v1/"
+    private val baseUrl = "http://localhost:${REST_PORT}/api/v1/"
+
     @OptIn(ExperimentalSerializationApi::class)
-    private val converter = Json.asConverterFactory("application/json".toMediaType())
-    //OkhttpClient to introduce timeout
-    //private val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+    private val converter = Json{ignoreUnknownKeys = true}.asConverterFactory("application/json".toMediaType())
+    // Debugging
+//    OkhttpClient to introduce timeout
+//    private val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -136,6 +139,7 @@ class WalletAPIService {
         }
     }
 
+
     suspend fun createTransaction(request: CreateTransactionRequest): CreateTransactionResponse {
         return try {
             api.createTransaction(request)
@@ -190,7 +194,7 @@ class WalletAPIService {
     suspend fun decodeTransaction(binTx: String): String {
         val converterFactory = Json{ignoreUnknownKeys = true}.asConverterFactory("application/json".toMediaType())
         val rawApi = Retrofit.Builder()
-            .baseUrl("http://localhost:8080/api/v1/")
+            .baseUrl("http://localhost:${REST_PORT}/api/v1/")
             .addConverterFactory(converterFactory)
             .build()
             .create(WalletAPI::class.java)

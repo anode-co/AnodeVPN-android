@@ -83,7 +83,8 @@ class MainActivity : AppCompatActivity() {
         initTimber()
         AnodeUtil.initializeApp()
         AnodeUtil.launchCJDNS()
-        AnodeUtil.launchPld()
+        //PLD will be launched after creating a wallet
+//        AnodeUtil.launchPld()
         AnodeUtil.serviceThreads()
 
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)

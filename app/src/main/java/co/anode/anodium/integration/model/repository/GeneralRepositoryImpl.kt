@@ -80,4 +80,26 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
     override fun getPremiumEndTime(server: String): Long {
         return AnodeUtil.getPremiumEndTime(server)
     }
+
+    override suspend fun createPldWallet(password: String, pin: String, wallet: String): Result<String> {
+        runCatching {
+            val seed = AnodeUtil.createPldWallet(password, wallet)
+            if (seed.isEmpty()) {
+                return Result.failure(Exception("Wallet creation failed"))
+            }
+            val encryptedPassword = AnodeUtil.encrypt(password, pin)
+            AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
+            if (pin.isNotEmpty()) {
+                AnodeUtil.storeWalletPin(pin, wallet)
+            }
+
+            Timber.d("createWallet: success")
+            return Result.success(seed)
+        }
+        return Result.failure(Exception("Wallet creation failed"))
+    }
+
+    override fun launchPLD() {
+        AnodeUtil.launchPld("")
+    }
 }
