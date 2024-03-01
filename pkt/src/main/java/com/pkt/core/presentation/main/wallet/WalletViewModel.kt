@@ -14,6 +14,7 @@ import com.pkt.core.presentation.common.state.event.CommonEvent
 import com.pkt.core.presentation.main.wallet.transaction.TransactionType
 import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 import com.pkt.domain.dto.Transaction
+import com.pkt.domain.dto.Vote
 import com.pkt.domain.repository.CjdnsRepository
 import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.VpnRepository
@@ -39,6 +40,14 @@ class WalletViewModel @Inject constructor(
     val walletName = walletRepository.getActiveWallet()
     var walletAddress = ""
     var balance: Long = 0
+    var vote: Vote = Vote(
+        estimatedExpirationSec = "",
+        expirationBlock = 0,
+        isCandidate = false,
+        voteBlock = 0,
+        voteFor = "",
+        voteTxid = ""
+    )
     private var PKTtoUSD = 0f
     private var transactions: MutableList<Transaction> = mutableListOf()
     private var lastDateInTxnsList: LocalDateTime = LocalDateTime.ofEpochSecond(0, 0, ZonedDateTime.now().offset)
@@ -87,8 +96,13 @@ class WalletViewModel @Inject constructor(
                 }
             }
             balance = walletRepository.getTotalWalletBalance().getOrThrow()
-            Triple(walletInfo, walletAddress, balance)
-        }.onSuccess { (info, address, balance) ->
+            vote = walletRepository.getVote(walletAddress).getOrThrow()
+            Pair(Triple(walletInfo, walletAddress, balance), vote)
+        }.onSuccess { (w, v) ->
+            val info = w.first
+            val address = w.second
+            val balance = w.third
+
             val wallet = info.wallet
             val neutrino = info.neutrino
             val peerCount = neutrino.peers.size
@@ -136,7 +150,8 @@ class WalletViewModel @Inject constructor(
                     walletName = walletName,
                     balancePkt = balance.formatPkt(),
                     balanceUsd = balance.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
-                    walletAddress = address
+                    walletAddress = address,
+                    vote = v,
                 )
             }
             return Result.success(true)
@@ -173,6 +188,17 @@ class WalletViewModel @Inject constructor(
                             tempList.removeAt(i)
                             break
                         }
+                    }
+                }
+            }
+            // Remove vote transaction
+            if (tempList.isNotEmpty()) {
+                for (i in tempList.indices.reversed()) {
+                    if ((tempList[i].tx.vout.isNotEmpty() &&
+                                tempList[i].tx.vout[0].address.startsWith("script:")) ||
+                        ((tempList[i].tx.vout[1] != null) &&
+                                tempList[i].tx.vout[1].address.startsWith("script:"))) {
+                        tempList.removeAt(i)
                     }
                 }
             }
@@ -249,6 +275,14 @@ class WalletViewModel @Inject constructor(
             balancePkt = "",
             balanceUsd = "",
             walletAddress = "",
+            vote = Vote(
+                estimatedExpirationSec = "",
+                expirationBlock = 0,
+                isCandidate = false,
+                voteBlock = 0,
+                voteFor = "",
+                voteTxid = ""
+            ),
             items = listOf(),
         )
     }
@@ -335,6 +369,13 @@ class WalletViewModel @Inject constructor(
     fun onAddressClick() {
         sendEvent(CommonEvent.CopyToBuffer(R.string.address, currentState.walletAddress))
         sendEvent(CommonEvent.Info(R.string.address_copied))
+    }
+
+    fun onVoteAddressClick() {
+        if (vote != null) {
+            Timber.i("WalletViewModel onVoteClick")
+            sendEvent(WalletEvent.OpenVoteDetails(vote!!))
+        }
     }
 
     fun onTransactionClick(transaction: TransactionItem) {

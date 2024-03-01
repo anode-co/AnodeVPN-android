@@ -10,27 +10,25 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class SendTransactionViewModel @Inject constructor(
+class VoteViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
 ) : StateViewModel<VoteState>() {
 
     private val fromaddress: String = savedStateHandle["fromaddress"]
         ?: throw IllegalArgumentException("fromAddress is required")
+
+    private val isCandidate: Boolean = savedStateHandle["isCandidate"]
+        ?: false
+
     var toaddress: String = ""
         set(value) {
             field = value
             invalidateVoteButtonState()
         }
 
-    private var balance = 0L
-
     init {
-        invokeLoadingAction {
-            runCatching {
-                balance = walletRepository.getWalletBalance(fromaddress).getOrNull()!!
-            }
-        }
+        sendState { copy(candidateSelected = isCandidate) }
     }
 
     override fun createInitialState() = VoteState()
@@ -38,19 +36,11 @@ class SendTransactionViewModel @Inject constructor(
     fun onCandidateCheckChanged(checked: Boolean) {
         sendState { copy(candidateSelected = checked) }
         invalidateVoteButtonState()
-
-        /*if (!checked) {
-            sendEvent(SendTransactionEvent.OpenKeyboard)
-        }*/
     }
 
     fun onWithdrawVoteCheckChanged(checked: Boolean) {
         sendState { copy(withdrawVoteSelected = checked) }
         invalidateVoteButtonState()
-
-        if (!checked) {
-            sendEvent(VoteEvent.OpenKeyboard)
-        }
     }
 
     fun onVoteClick() {
@@ -62,7 +52,9 @@ class SendTransactionViewModel @Inject constructor(
                 Timber.d("VoteViewModel onVoteClick| withdrawVote selected")
             }
             runCatching {
-                toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
+                if (!currentState.withdrawVoteSelected) {
+                    toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
+                }
             }.onSuccess {
                 Timber.i("VoteViewModel onVoteClick| PKT address is valid")
                 walletRepository.sendVote(
@@ -87,8 +79,9 @@ class SendTransactionViewModel @Inject constructor(
     private fun invalidateVoteButtonState() {
         sendState {
             copy(
-                voteButtonEnabled = toaddress.isNotBlank()
+                voteButtonEnabled = toaddress.isNotBlank() || currentState.withdrawVoteSelected
             )
         }
+
     }
 }

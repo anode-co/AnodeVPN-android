@@ -6,7 +6,9 @@ import androidx.navigation.fragment.findNavController
 import co.anode.anodium.NavGraphDirections
 import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
+import com.pkt.core.presentation.main.wallet.vote.details.VoteDetails
 import com.pkt.core.presentation.navigation.AppNavigationHandler
+import com.pkt.domain.dto.Vote
 import javax.inject.Inject
 
 class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
@@ -41,8 +43,8 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
         navigate(fragment, NavGraphDirections.toSendTransaction(fromAddress))
     }
 
-    override fun openVote(fragment: Fragment, fromAddress: String) {
-        navigate(fragment, NavGraphDirections.toVote(fromAddress))
+    override fun openVote(fragment: Fragment, fromAddress: String, isCandidate: Boolean) {
+        navigate(fragment, NavGraphDirections.toVote(fromAddress, isCandidate))
     }
 
     override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromAddress: String, toAddress: String, amount: Double) {
@@ -83,6 +85,18 @@ class FragmentNavigationHandler @Inject constructor() : AppNavigationHandler() {
 
     override fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra) {
         navigate(fragment, NavGraphDirections.toTransactionDetails(extra))
+    }
+
+    override fun openVoteDetails(fragment: Fragment, vote: Vote) {
+        val v = VoteDetails(
+            vote.estimatedExpirationSec,
+            vote.expirationBlock,
+            vote.isCandidate,
+            vote.voteBlock,
+            vote.voteFor,
+            vote.voteTxid
+        )
+        navigate(fragment, NavGraphDirections.toVoteDetails(v))
     }
 
     override fun openWebView(fragment: Fragment, html: String) {

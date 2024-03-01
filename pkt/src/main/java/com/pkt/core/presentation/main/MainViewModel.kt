@@ -5,6 +5,7 @@ import com.pkt.core.presentation.common.state.state.CommonState
 import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 import com.pkt.core.presentation.navigation.AppNavigation
+import com.pkt.domain.dto.Vote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -47,8 +48,8 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenSendTransaction(fromaddress))
     }
 
-    fun openVote(fromaddress: String) {
-        sendNavigation(AppNavigation.OpenVote(fromaddress))
+    fun openVote(fromaddress: String, isCandidate: Boolean) {
+        sendNavigation(AppNavigation.OpenVote(fromaddress, isCandidate))
     }
 
     fun openSendConfirm(fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean) {
@@ -67,5 +68,9 @@ class MainViewModel @Inject constructor(
 
     fun openTransactionDetails(extra: TransactionDetailsExtra) {
         sendNavigation(AppNavigation.OpenTransactionDetails(extra))
+    }
+
+    fun openVoteDetails(vote: Vote) {
+        sendNavigation(AppNavigation.OpenVoteDetails(vote))
     }
 }

@@ -6,7 +6,18 @@ import kotlinx.serialization.Serializable
 @Keep
 @Serializable
 data class WalletAddressBalances(
-    val addrs: List<Addr>,
+    val addrs: List<Addr>
+)
+
+@Keep
+@Serializable
+data class Vote(
+    val estimatedExpirationSec: String,
+    val expirationBlock: Int,
+    val isCandidate: Boolean,
+    val voteBlock: Int,
+    val voteFor: String,
+    val voteTxid: String
 )
 
 @Keep
@@ -17,9 +28,10 @@ data class Addr(
     val stotal: String,
     val spendable: Double,
     val sspendable: String,
-    val immaturereward: Double,
+    val immaturereward: Int,
     val simmaturereward: String,
     val unconfirmed: Int,
     val sunconfirmed: String,
     val outputcount: Int,
+    val vote: Vote
 )

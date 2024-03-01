@@ -1,16 +1,11 @@
 package com.pkt.core.presentation.main.wallet.vote
 
 import android.os.Bundle
+import android.text.Editable
 import android.view.View
-import androidx.core.os.bundleOf
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.isVisible
-import androidx.core.view.updatePaddingRelative
-import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
-import com.pkt.core.databinding.BottomSheetSendTransactionBinding
 import com.pkt.core.databinding.BottomSheetVoteBinding
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.StateBottomSheet
@@ -24,7 +19,7 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
 
     private val viewBinding by viewBinding(BottomSheetVoteBinding::bind)
 
-    override val viewModel: SendTransactionViewModel by viewModels()
+    override val viewModel: VoteViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -55,7 +50,6 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
         with(viewBinding) {
             candidateVoteCheckbox.apply {
                 setOnCheckedChangeListener(null)
-
                 candidateVoteCheckbox.isChecked = state.candidateSelected
 
                 doOnCheckChanged {
@@ -69,7 +63,6 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
             }
             withdrawVoteCheckbox.apply {
                 setOnCheckedChangeListener(null)
-
                 withdrawVoteCheckbox.isChecked = state.withdrawVoteSelected
 
                 doOnCheckChanged {
@@ -77,8 +70,15 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
                         it.clearFocus()
                         UIUtil.hideKeyboard(it.context, it)
                     }
-
                     viewModel.onWithdrawVoteCheckChanged(isChecked)
+                }
+                if (state.withdrawVoteSelected) {
+                    addressInput.hint = getString(R.string.vote_nobody)
+                    addressInput.isEnabled = false
+                    addressInput.text = Editable.Factory.getInstance().newEditable("")
+                } else {
+                    addressInput.hint = getString(R.string.vote_for_address)
+                    addressInput.isEnabled = true
                 }
             }
             voteButton.isEnabled = state.voteButtonEnabled
@@ -88,26 +88,7 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
 
     override fun handleEvent(event: UiEvent) {
         when (event) {
-            /*is VoteEvent.OpenKeyboard -> {
-                viewBinding.amountInput.showKeyboardDelayed()
-            }*/
 
-            /*is VoteEvent.OpenSendConfirm -> {
-                setFragmentResult(
-                    REQUEST_KEY,
-                    bundleOf(
-                        KEY_FROM_ADDRESS to event.fromaddress,
-                        KEY_TO_ADDRESS to event.toaddress,
-                    )
-                )
-                dismiss()
-            }*/
-
-            /*is VoteEvent.AmountError -> {
-                viewBinding.amountInputLayout.error = getString(event.errorResId)
-                viewBinding.amountInput.showKeyboardDelayed()
-            }*/
-            
             is VoteEvent.AddressError -> {
                 viewBinding.addressInputLayout.error = event.error
                 viewBinding.addressInput.showKeyboardDelayed()

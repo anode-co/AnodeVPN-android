@@ -163,8 +163,9 @@
     <string name="send_transaction">Send Transaction</string>
     <string name="max">Max</string>
     <string name="vote_candidate">Candidate</string>
-    <string name="vote_for_address">Vote for address...</string>
+    <string name="vote_for_address">Vote for address</string>
     <string name="vote_nobody">Withdraw vote</string>
+    <string name="vote_withdrawn">Vote withdrawn</string>
     <string name="vote">Vote</string>
     <string name="amount">Amount</string>
     <string name="send_pkt">Send PKT</string>
@@ -249,6 +250,7 @@
     <string name="confirm_with_password">Confirm with Password</string>
     <string name="confirm_with_pin">Confirm with PIN</string>
     <string name="vote_submitted">Vote has been cast</string>
+    <string name="no_vote">no vote submitted…</string>
 
     <string name="error_insufficient_balance">Insufficient balance</string>
     <string name="sender_address">Sender address</string>

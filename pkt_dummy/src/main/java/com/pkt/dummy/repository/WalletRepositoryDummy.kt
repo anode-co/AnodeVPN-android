@@ -10,7 +10,6 @@ import com.pkt.dummy.AddrMapper
 import com.pkt.dummy.CjdnsInfoMapper
 import com.pkt.dummy.R
 import com.pkt.dummy.WalletInfoMapper
-import com.pkt.dummy.dto.WalletAddressBalancesDummy
 import com.pkt.dummy.dto.WalletInfoDummy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -59,12 +58,7 @@ class WalletRepositoryDummy constructor(
         Result.success("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
     private suspend fun getWallets(): Result<List<Addr>> = withContext(Dispatchers.IO) {
-        runCatching {
-            delay(1000L)
-            context.resources.openRawResource(R.raw.wallets).use {
-                json.decodeFromStream<WalletAddressBalancesDummy>(it)
-            }.addrs.map { addrMapper.map(it) }
-        }
+        TODO("Not yet implemented")
     }
 
     override suspend fun isPinAvailable(): Result<Boolean> {
@@ -94,6 +88,10 @@ class WalletRepositoryDummy constructor(
 
     override suspend fun getTotalWalletBalance(): Result<Long> =
         getWalletBalance("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
+
+    override suspend fun getVote(address: String): Result<Vote> {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO) {
         runCatching {

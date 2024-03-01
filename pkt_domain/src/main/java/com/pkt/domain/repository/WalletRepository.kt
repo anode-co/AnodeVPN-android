@@ -19,6 +19,8 @@ interface WalletRepository {
     suspend fun checkPin(pin: String): Result<Boolean>
     //Get the total available balance of PKT in all the addresses of the wallet
     suspend fun getTotalWalletBalance(): Result<Long>
+
+    suspend fun getVote(address: String): Result<Vote>
     //Get the wallet balance of a specific address
     suspend fun getWalletBalance(address: String): Result<Long>
     //Get the wallet info

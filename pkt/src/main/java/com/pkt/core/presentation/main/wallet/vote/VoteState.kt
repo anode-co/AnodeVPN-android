@@ -13,8 +13,5 @@ data class VoteState(
 sealed class VoteEvent : UiEvent {
     object OpenKeyboard : VoteEvent()
 
-    //TODO: update this event
-    data class OpenSendConfirm(val fromaddress: String, val toaddress: String, val amount: Double, val maxAmount: Boolean) : VoteEvent()
-
     data class AddressError(val error: String?) : VoteEvent()
 }

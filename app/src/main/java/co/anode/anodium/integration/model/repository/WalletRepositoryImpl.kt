@@ -78,6 +78,16 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return Result.success(balance)
     }
 
+    override suspend fun getVote(address: String): Result<Vote> {
+        val addresses = walletAPI.getWalletBalances(true)
+        for (addr in addresses.addrs) {
+            if (addr.address == address) {
+                return Result.success(addr.vote)
+            }
+        }
+        return Result.failure(Exception("Address not found"))
+    }
+
     //Get wallet balance, if address is empty then return total balance of all addresses
     override suspend fun getWalletBalance(address: String): Result<Long> =
         runCatching {

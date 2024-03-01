@@ -60,6 +60,10 @@
         app:destination="@id/transactionDetails" />
 
     <action
+        android:id="@+id/toVoteDetails"
+        app:destination="@id/voteDetails" />
+
+    <action
         android:id="@+id/toWebView"
         app:destination="@id/WebView" />
 
@@ -157,7 +161,9 @@
         <argument
             android:name="fromaddress"
             app:argType="string" />
-
+        <argument
+            android:name="isCandidate"
+            app:argType="boolean" />
     </dialog>
 
     <fragment
@@ -208,6 +214,16 @@
         <argument
             android:name="extra"
             app:argType="com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/voteDetails"
+        android:name="com.pkt.core.presentation.main.wallet.vote.details.VoteDetailsBottomSheet"
+        android:label="VoteDetails"
+        tools:layout="@layout/bottom_sheet_vote_details">
+        <argument
+            android:name="vote"
+            app:argType="com.pkt.core.presentation.main.wallet.vote.details.VoteDetails" />
     </dialog>
 
     <fragment
