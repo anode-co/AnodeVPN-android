@@ -1,0 +1,4 @@
+# v0.4.01
+- Update PKT wallet backend service
+- Added functionality for Voting
+- Bug fix for getting PKT/USD price
