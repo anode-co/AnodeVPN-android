@@ -33,5 +33,5 @@ data class Addr(
     val unconfirmed: Int,
     val sunconfirmed: String,
     val outputcount: Int,
-    val vote: Vote
+    @Transient val vote: Vote? = null
 )

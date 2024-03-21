@@ -9,6 +9,7 @@ data class SendConfirmState(
     val isPinVisible: Boolean = false,
     val confirmWithPasswordButtonVisible: Boolean = false,
     val confirmWithPinButtonVisible: Boolean = false,
+    val isVote : Boolean = false,
 ) : UiState
 
 sealed class SendConfirmEvent : UiEvent {

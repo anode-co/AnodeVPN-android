@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.common.state.event.CommonEvent
+import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
@@ -56,19 +57,19 @@ class VoteViewModel @Inject constructor(
                     toaddress = walletRepository.isPKTAddressValid(toaddress).getOrThrow()
                 }
             }.onSuccess {
-                Timber.i("VoteViewModel onVoteClick| PKT address is valid")
-                walletRepository.sendVote(
-                    fromAddress = fromaddress,
-                    voteFor = toaddress,
-                    isCandidate = currentState.candidateSelected
-                ).onSuccess {
-                    Timber.i("VoteViewModel onVoteClick| Success")
-                    sendEvent(CommonEvent.Info(R.string.vote_submitted))
-                    navigateBack()
-                }.onFailure {
-                    Timber.e(it, "VoteViewModel onVoteClick| Error")
-                    sendError(it)
-                }
+                Timber.i("SendTransactionViewModel onSendClick| PKT address is valid")
+                sendNavigation(
+                    AppNavigation.OpenSendConfirm(
+                        fromaddress = fromaddress,
+                        toaddress = toaddress,
+                        amount = 0.0,
+                        maxAmount = false,
+                        premiumVpn = false,
+                        isVote = true,
+                        isVoteCandidate = isCandidate
+                    )
+                )
+
             }.onFailure {
                 Timber.i("VoteViewModel onVoteClick| PKT address is invalid")
                 sendEvent(VoteEvent.AddressError(it.message))

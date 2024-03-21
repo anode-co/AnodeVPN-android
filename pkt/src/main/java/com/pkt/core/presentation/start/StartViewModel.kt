@@ -1,10 +1,14 @@
 package com.pkt.core.presentation.start
 
+import androidx.lifecycle.viewModelScope
 import com.pkt.core.presentation.common.state.StateViewModel
 import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.navigation.AppNavigation
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -13,20 +17,25 @@ class StartViewModel @Inject constructor(
 ) : StateViewModel<StartState>() {
 
     init {
-        invokeLoadingAction {
-            runCatching {
-                val wallets = walletRepository.getAllWalletNames()
-                if (wallets.isEmpty()) {
-                    wallets to null
-                } else {
-                    wallets to walletRepository.getWalletInfo().map { it.wallet }.getOrNull()
-                }
-            }.onSuccess { (wallets, wallet) ->
-                if (wallets.isNotEmpty() && wallet == null) {
-                    sendNavigation(AppNavigation.OpenEnterWallet)
-                } else {
-                    sendState { copy(contentVisible = true) }
-                }
+        fetchWallets()
+    }
+
+    fun fetchWallets() {
+        viewModelScope.launch {
+            var wallets = emptyList<String>()
+            var attempts = 0
+            while (wallets.isEmpty() && (attempts < 10)) {
+                Timber.i("Wallets empty will try again attempt: $attempts")
+                wallets = walletRepository.getAllWalletNames()
+                delay(100)
+                attempts++
+            }
+            if (wallets.isNotEmpty()) {
+                Timber.i("Wallets found")
+                sendNavigation(AppNavigation.OpenEnterWallet)
+            } else {
+                Timber.i("Wallets not found")
+                sendState { copy(contentVisible = true) }
             }
         }
     }

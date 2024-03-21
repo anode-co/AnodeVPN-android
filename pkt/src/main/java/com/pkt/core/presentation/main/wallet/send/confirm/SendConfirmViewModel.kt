@@ -22,9 +22,14 @@ class SendConfirmViewModel @Inject constructor(
     private val amount: Double = savedStateHandle.get<Float>("amount")?.toDouble() ?: error("amount required")
     private val maxAmount: Boolean = savedStateHandle["maxAmount"] ?: error("maxAmount required")
     private val premiumVpn: Boolean? = savedStateHandle["premiumVpn"]
+    private val isVote: Boolean? = savedStateHandle["isVote"]
+    private val isVoteCandidate: Boolean? = savedStateHandle["isVoteCandidate"]
 
     init {
         invokeLoadingAction {
+            if (isVote == true) {
+                sendState { copy(isVote = true) }
+            }
             runCatching {
                 val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
                 var amountToPass = amount
@@ -33,7 +38,6 @@ class SendConfirmViewModel @Inject constructor(
                 }
                 isPinAvailable to amountToPass
             }.onSuccess { (isPinAvailable, amount) ->
-
                 sendState {
                     copy(
                         address = this@SendConfirmViewModel.toaddress,
@@ -55,7 +59,8 @@ class SendConfirmViewModel @Inject constructor(
     fun onPinDone(pin: String) {
         pin.takeIf { it.isNotBlank() } ?: return
         invokeAction {
-            walletRepository.checkPin(pin).onSuccess {
+//            walletRepository.checkPin(pin).onSuccess {
+            walletRepository.unlockWalletWithPIN(pin).onSuccess {
                 Timber.d("SendConfirmViewModel onPinDone| Success")
                 if ((premiumVpn != null) && (premiumVpn == true)){
                     walletRepository.createTransaction(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
@@ -64,6 +69,20 @@ class SendConfirmViewModel @Inject constructor(
                         sendNavigation(AppNavigation.OpenSendSuccess(it.transaction, premiumVpn, currentState.address))
                     }.onFailure {
                         Timber.e(it, "SendConfirmViewModel createTransaction| Error")
+                        sendError(it)
+                    }
+                } else if (isVote == true) {
+                    Timber.i("VoteViewModel onVoteClick| PKT address is valid")
+                    walletRepository.sendVote(
+                        fromAddress = fromaddress,
+                        voteFor = toaddress,
+                        isCandidate = isVoteCandidate ?: false
+                    ).onSuccess {
+                        Timber.i("VoteViewModel onVoteClick| Success")
+                        sendEvent(CommonEvent.Info(R.string.vote_submitted))
+                        navigateBack()
+                    }.onFailure {
+                        Timber.e(it, "VoteViewModel onVoteClick| Error")
                         sendError(it)
                     }
                 } else {
@@ -88,7 +107,8 @@ class SendConfirmViewModel @Inject constructor(
     fun onPasswordDone(password: String) {
         password.takeIf { it.isNotBlank() } ?: return
         invokeAction {
-            walletRepository.checkWalletPassphrase(password).onSuccess {
+//            walletRepository.checkWalletPassphrase(password).onSuccess {
+            walletRepository.unlockWallet(password).onSuccess {
                 Timber.d("SendConfirmViewModel onPasswordDone| Success")
                 if ((premiumVpn != null) && (premiumVpn == true)){
                     walletRepository.createTransaction(listOf(fromaddress), currentState.amount, currentState.address).onSuccess {
@@ -97,6 +117,20 @@ class SendConfirmViewModel @Inject constructor(
                         sendNavigation(AppNavigation.OpenSendSuccess(it.transaction, premiumVpn, currentState.address))
                     }.onFailure {
                         Timber.e(it, "SendConfirmViewModel createTransaction| Error")
+                        sendError(it)
+                    }
+                } else if (isVote == true) {
+                    Timber.i("VoteViewModel onVoteClick| PKT address is valid")
+                    walletRepository.sendVote(
+                        fromAddress = fromaddress,
+                        voteFor = toaddress,
+                        isCandidate = isVoteCandidate ?: false
+                    ).onSuccess {
+                        Timber.i("VoteViewModel onVoteClick| Success")
+                        sendEvent(CommonEvent.Info(R.string.vote_submitted))
+                        navigateBack()
+                    }.onFailure {
+                        Timber.e(it, "VoteViewModel onVoteClick| Error")
                         sendError(it)
                     }
                 } else {

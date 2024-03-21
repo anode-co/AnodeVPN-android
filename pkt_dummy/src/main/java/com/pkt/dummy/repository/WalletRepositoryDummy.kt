@@ -89,7 +89,7 @@ class WalletRepositoryDummy constructor(
     override suspend fun getTotalWalletBalance(): Result<Long> =
         getWalletBalance("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
-    override suspend fun getVote(address: String): Result<Vote> {
+    override suspend fun getVote(address: String): Result<Vote?> {
         TODO("Not yet implemented")
     }
 

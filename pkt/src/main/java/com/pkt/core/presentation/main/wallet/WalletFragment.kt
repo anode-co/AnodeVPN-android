@@ -67,7 +67,7 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             val fromaddress = bundle.getString(SendTransactionBottomSheet.KEY_FROM_ADDRESS)!!
             val amount = bundle.getDouble(SendTransactionBottomSheet.KEY_AMOUNT)
             val maxAmount = bundle.getBoolean(SendTransactionBottomSheet.KEY_MAX_AMOUNT)
-            mainViewModel.openSendConfirm(fromaddress, toaddress, amount, maxAmount)
+            mainViewModel.openSendConfirm(fromaddress, toaddress, amount, maxAmount, isVote = false,isVoteCandidate = false)
         }
         Timber.i("WalletFragment onViewCreated")
         with(viewBinding) {

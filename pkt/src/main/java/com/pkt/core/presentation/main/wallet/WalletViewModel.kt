@@ -37,7 +37,7 @@ class WalletViewModel @Inject constructor(
 ) : StateViewModel<WalletState>() {
 
     private val refreshInterval: Long = 5000
-    val walletName = walletRepository.getActiveWallet()
+    var walletName = walletRepository.getActiveWallet()
     var walletAddress = ""
     var balance: Long = 0
     var vote: Vote = Vote(
@@ -63,6 +63,8 @@ class WalletViewModel @Inject constructor(
             if (wallets.isEmpty()) {
                 sendState { copy(syncState = WalletState.SyncState.NOTEXISTING) }
                 return@invokeLoadingAction Result.failure<Unit>(IllegalStateException("No wallets"))
+            } else {
+                walletName = walletRepository.getActiveWallet()
             }
             try {
                 val peers = vpnRepository.getCjdnsPeers().getOrThrow()
@@ -86,7 +88,7 @@ class WalletViewModel @Inject constructor(
                 }
                 throw IllegalStateException("Wallet is locked")
             } else {
-                walletAddress = walletRepository.getWalletAddress().getOrThrow()
+                walletAddress = walletRepository.getWalletAddress().getOrNull() ?: ""
                 //If no address, then create one
                 if (walletAddress.isEmpty()) {
                     val response = walletRepository.createAddress().getOrThrow()
@@ -96,7 +98,14 @@ class WalletViewModel @Inject constructor(
                 }
             }
             balance = walletRepository.getTotalWalletBalance().getOrThrow()
-            vote = walletRepository.getVote(walletAddress).getOrThrow()
+            vote = walletRepository.getVote(walletAddress).getOrNull() ?: Vote(
+                estimatedExpirationSec = "",
+                expirationBlock = 0,
+                isCandidate = false,
+                voteBlock = 0,
+                voteFor = "",
+                voteTxid = ""
+            )
             Pair(Triple(walletInfo, walletAddress, balance), vote)
         }.onSuccess { (w, v) ->
             val info = w.first
@@ -147,7 +156,7 @@ class WalletViewModel @Inject constructor(
                     neutrinoTop = neutrinoTop,
                     walletHeight = wallet!!.currentHeight,
                     peersCount = peerCount,
-                    walletName = walletName,
+                    walletName = walletName.removePrefix("wallet_"),
                     balancePkt = balance.formatPkt(),
                     balanceUsd = balance.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
                     walletAddress = address,
@@ -174,7 +183,7 @@ class WalletViewModel @Inject constructor(
             val hasMoreTxns = t.transactions.size > txnsPerPage-1
             val tempList = mutableListOf<Transaction>()
             //reverse the list, drop last if > txnsPerPage
-            if (hasMoreTxns) {
+            if (hasMoreTxns && t.transactions.isNotEmpty()) {
                 tempList.addAll(t.transactions.reversed().dropLast(1))
             } else {
                 tempList.addAll(t.transactions.reversed())
@@ -193,12 +202,13 @@ class WalletViewModel @Inject constructor(
             }
             // Remove vote transaction
             if (tempList.isNotEmpty()) {
-                for (i in tempList.indices.reversed()) {
-                    if ((tempList[i].tx.vout.isNotEmpty() &&
-                                tempList[i].tx.vout[0].address.startsWith("script:")) ||
-                        ((tempList[i].tx.vout[1] != null) &&
-                                tempList[i].tx.vout[1].address.startsWith("script:"))) {
-                        tempList.removeAt(i)
+                val tempListCopy = tempList.toList() // Create a copy of tempList
+                for (i in tempListCopy.indices.reversed()) {
+                    if ((tempListCopy[i].tx.vout.isNotEmpty() &&
+                                tempListCopy[i].tx.vout[0].address.startsWith("script:")) ||
+                        ((tempListCopy[i].tx.vout.size > 1) && // Check if tempListCopy[i].tx.vout[1] exists before accessing it
+                                tempListCopy[i].tx.vout[1].address.startsWith("script:"))) {
+                        tempList.remove(tempListCopy[i]) // Remove the element from the original list
                     }
                 }
             }
@@ -228,27 +238,31 @@ class WalletViewModel @Inject constructor(
                     items.add(DateItem(date))
                 }
                 lastDateInTxnsList = date
+                if (transactions[i].tx.vout.isNotEmpty()) {
+                    var amount = transactions[i].tx.vout[0].svalue.toLong()
+                    var type = TransactionType.RECEIVE
+                    if (amount < 0)
+                        type = TransactionType.SENT
+                    amount = amount.absoluteValue
 
-                var amount = transactions[i].tx.vout[0].svalue.toLong()
-                var type = TransactionType.RECEIVE
-                if (amount < 0)
-                    type = TransactionType.SENT
-                amount = amount.absoluteValue
+                    val addresses = transactions[i].tx.vout.map { it.address }
 
-                val addresses = transactions[i].tx.vout.map { it.address }
-                items.add(
-                    TransactionItem(
-                        id = i.toString(),
-                        type = type,
-                        time = date,
-                        amountPkt = amount.formatPkt(),
-                        amountUsd = amount.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
-                        transactionId = transactions[i].tx.txid,
-                        addresses = addresses,
-                        blockNumber = transactions[i].blockHeight,
-                        confirmations = transactions[i].numConfirmations,
+                    items.add(
+                        TransactionItem(
+                            id = i.toString(),
+                            type = type,
+                            time = date,
+                            amountPkt = amount.formatPkt(),
+                            amountUsd = amount.toPKT().multiply(PKTtoUSD.toBigDecimal()).toString(),
+                            transactionId = transactions[i].tx.txid,
+                            addresses = addresses,
+                            blockNumber = transactions[i].blockHeight,
+                            confirmations = transactions[i].numConfirmations,
+                        )
                     )
-                )
+                } else {
+                    Timber.e("No vout in transaction: ${transactions[i].tx.txid}")
+                }
             }
             if (!hasMoreTxns) {
                 items.add(FooterItem())
@@ -271,7 +285,7 @@ class WalletViewModel @Inject constructor(
             syncTimeDiff = 0,
             walletHeight = 0,
             peersCount = 0,
-            walletName = walletName,
+            walletName = walletName.removePrefix("wallet_"),
             balancePkt = "",
             balanceUsd = "",
             walletAddress = "",

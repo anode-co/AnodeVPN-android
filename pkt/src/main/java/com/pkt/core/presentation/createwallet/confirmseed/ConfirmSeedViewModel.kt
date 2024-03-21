@@ -48,7 +48,6 @@ class ConfirmSeedViewModel @Inject constructor(
 
             else -> {
                 //Launch pld
-                generalRepository.launchPLD()
                 invokeLoadingAction {
                     walletRepository.unlockWallet(password)
                         .onSuccess {

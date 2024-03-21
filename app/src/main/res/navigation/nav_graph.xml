@@ -186,7 +186,12 @@
         <argument
             android:name="premiumVpn"
             app:argType="boolean" />
-
+        <argument
+            android:name="isVote"
+            app:argType="boolean" />
+        <argument
+            android:name="isVoteCandidate"
+            app:argType="boolean" />
     </fragment>
 
     <dialog

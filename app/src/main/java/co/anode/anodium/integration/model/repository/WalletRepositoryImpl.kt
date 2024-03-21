@@ -25,21 +25,25 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     private var activeWallet = AnodeUtil.DEFAULT_WALLET_NAME
 
     override fun getAllWalletNames(): List<String> {
-        return AnodeUtil.getWalletFiles()
+        val wallets = AnodeUtil.getWalletFiles()
+        return wallets.map { it.removePrefix("wallet_") }
     }
 
     override fun getActiveWallet(): String {
         AnodeUtil.context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("activeWallet", "wallet")?.let {
             activeWallet = it
         }
+        Timber.i("getActiveWallet: $activeWallet")
         //Check if wallet file exists, otherwise choose other available wallet
-        if (!AnodeUtil.getWalletFiles().contains(activeWallet)) {
+        if ((!AnodeUtil.getWalletFiles().contains(activeWallet)) && (!AnodeUtil.getWalletFiles().contains("wallet_$activeWallet"))) {
+            Timber.e("Active wallet file not found, choosing another wallet")
             activeWallet = AnodeUtil.getWalletFiles().firstOrNull() ?: AnodeUtil.DEFAULT_WALLET_NAME
         }
         return activeWallet
     }
 
     override suspend fun setActiveWallet(walletName: String) {
+        Timber.i("setActiveWallet: $walletName")
         //delete existing chain back up file when changing active wallet
         if (walletName != activeWallet) {
             AnodeUtil.deleteWalletChainBackupFile()
@@ -78,11 +82,15 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         return Result.success(balance)
     }
 
-    override suspend fun getVote(address: String): Result<Vote> {
+    override suspend fun getVote(address: String): Result<Vote?> {
         val addresses = walletAPI.getWalletBalances(true)
         for (addr in addresses.addrs) {
             if (addr.address == address) {
-                return Result.success(addr.vote)
+                return if (addr.vote != null) {
+                    Result.success(addr.vote!!)
+                } else {
+                    Result.success(null)
+                }
             }
         }
         return Result.failure(Exception("Address not found"))
@@ -149,9 +157,9 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
                 }
             }
             address
-        }.onSuccess { address ->
+        }.onSuccess {
             Timber.d("getWalletAddress: success")
-            address
+            return Result.success(it)
         }.onFailure {
             Timber.e(it, "getWalletAddress: failure")
         }
@@ -208,10 +216,25 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
         }
 
     override suspend fun unlockWallet(passphrase: String): Result<Boolean> {
-        Timber.d("unlockWallet")
+        // For new pld, we need to restart it
+//        AnodeUtil.stopPld()
+//        AnodeUtil.launchPld(activeWallet)
         val request = UnlockWalletRequest(passphrase)
-        val response = walletAPI.unlockWalletAPI(request)
-        return Result.success(response)
+        Timber.d("unlockWallet")
+        var attempts = 0
+        var response: Boolean
+        do {
+            response = walletAPI.unlockWalletAPI(request)
+            attempts++
+        } while (!response && attempts < 3)
+
+        return if (response) {
+            Timber.d("unlockWallet: success")
+            Result.success(true)
+        } else {
+            Timber.e("unlockWallet: failed")
+            Result.failure(Exception("Failed to unlock wallet"))
+        }
     }
 
     override suspend fun unlockWalletWithPIN(pin: String): Result<Boolean> {
@@ -260,17 +283,32 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun renameWallet(name: String, srcName: String): Result<String?> {
-        Timber.d("renameWallet: $name")
-        checkWalletName(name).onSuccess {
+        var dstName = name
+        if (name != AnodeUtil.DEFAULT_WALLET_NAME) {
+            dstName = "wallet_$name"
+        }
+        Timber.d("renameWallet: $dstName")
+        checkWalletName(dstName).onSuccess {
             if (srcName.isNotEmpty()) {
                 activeWallet = srcName
+
             }
-            val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
-            walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$name.db"))
+
+            if ((activeWallet != AnodeUtil.DEFAULT_WALLET_NAME) && (!activeWallet.startsWith("wallet_"))) {
+                Timber.i("renameWallet: add wallet_ prefix to activeWallet name")
+                val walletFile = File("${AnodeUtil.filesDirectory}/pkt/wallet_$activeWallet.db")
+                walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$dstName.db"))
+                Timber.i("renameWallet: renaming wallet wallet_$activeWallet to $dstName")
+            } else {
+                Timber.i("renameWallet: renaming wallet $activeWallet to $dstName")
+                val walletFile = File("${AnodeUtil.filesDirectory}/pkt/$activeWallet.db")
+                walletFile.renameTo(File("${AnodeUtil.filesDirectory}/pkt/$dstName.db"))
+            }
+
             //update stored PIN
-            AnodeUtil.renameEncryptedWalletPreferences(activeWallet,name)
-            setActiveWallet(name)
-            return Result.success(name)
+            AnodeUtil.renameEncryptedWalletPreferences(activeWallet,dstName)
+            setActiveWallet(dstName)
+            return Result.success(dstName)
         }.onFailure {
             Timber.e(it, "renameWallet: failed")
             return Result.failure(Exception("A wallet already exists with this name"))

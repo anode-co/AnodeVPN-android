@@ -26,7 +26,9 @@ abstract class AppNavigationHandler : NavigationHandler {
                         navigation.fromaddress,
                         navigation.toaddress,
                         navigation.amount,
-                        navigation.maxAmount
+                        navigation.maxAmount,
+                        navigation.isVote,
+                        navigation.isVoteCandidate
                     )
                     is AppNavigation.OpenSendSuccess -> openSendSuccess(fragment, navigation.transactionId, navigation.premiumVpn, navigation.address)
                     is AppNavigation.OpenTransactionDetails -> openTransactionDetails(fragment, navigation.extra)
@@ -66,7 +68,7 @@ abstract class AppNavigationHandler : NavigationHandler {
     abstract fun openCreateWallet(fragment: Fragment, name: String?, mode: CreateWalletMode)
     abstract fun openRecoverWallet(fragment: Fragment, name: String?)
     abstract fun openMain(fragment: Fragment)
-    abstract fun openSendConfirm(fragment: Fragment, fromaddress: String, toaddress:String, amount: Double, maxAmount: Boolean)
+    abstract fun openSendConfirm(fragment: Fragment, fromaddress: String, toaddress:String, amount: Double, maxAmount: Boolean, isVote: Boolean, isVoteCandidate: Boolean)
     abstract fun openSendSuccess(fragment: Fragment, transactionId: String, premiumVpn: Boolean, address: String)
     abstract fun openVpnExits(fragment: Fragment)
     abstract fun openChangePassword(fragment: Fragment)

@@ -3,6 +3,8 @@ package com.pkt.core.presentation.main.wallet.vote
 import android.os.Bundle
 import android.text.Editable
 import android.view.View
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.pkt.core.R
@@ -10,6 +12,8 @@ import com.pkt.core.databinding.BottomSheetVoteBinding
 import com.pkt.core.extensions.*
 import com.pkt.core.presentation.common.state.StateBottomSheet
 import com.pkt.core.presentation.common.state.UiEvent
+import com.pkt.core.presentation.main.wallet.send.send.SendTransactionBottomSheet
+import com.pkt.core.presentation.main.wallet.send.send.SendTransactionEvent
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import timber.log.Timber
@@ -92,6 +96,19 @@ class VoteBottomSheet : StateBottomSheet<VoteState>(R.layout.bottom_sheet_vote) 
             is VoteEvent.AddressError -> {
                 viewBinding.addressInputLayout.error = event.error
                 viewBinding.addressInput.showKeyboardDelayed()
+            }
+
+            is VoteEvent.OpenSendConfirm -> {
+                setFragmentResult(
+                    SendTransactionBottomSheet.REQUEST_KEY,
+                    bundleOf(
+                        SendTransactionBottomSheet.KEY_FROM_ADDRESS to event.fromaddress,
+                        SendTransactionBottomSheet.KEY_TO_ADDRESS to event.toaddress,
+                        SendTransactionBottomSheet.KEY_AMOUNT to event.amount,
+                        SendTransactionBottomSheet.KEY_MAX_AMOUNT to event.maxAmount
+                    )
+                )
+                dismiss()
             }
 
             else -> super.handleEvent(event)

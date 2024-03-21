@@ -158,7 +158,7 @@ class WalletAPIService {
     }
 
     suspend fun getWalletSeed(): GetSeedResponse {
-        return api.getWalletSeed()
+        return api.getWalletSeed("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
     }
 
     suspend fun getSecret(): GetSecretResponse {

@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -41,6 +42,7 @@ class PktMainActivity : AppCompatActivity() {
         checkPermissions()
 
         startNotificationsCheck()
+        Timber.i("PktMainActivity onCreate")
     }
 
     private fun startNotificationsCheck() {
@@ -59,6 +61,7 @@ class PktMainActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
+        Timber.i("PktMainActivity onResume")
         startNotificationsCheck()
     }
     override fun onPause() {

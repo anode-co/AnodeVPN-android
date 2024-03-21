@@ -25,7 +25,7 @@ class SettingsViewModel @Inject constructor(
 
     override fun createInitialState() = SettingsState(
         wallets = walletRepository.getAllWalletNames(),
-        walletName = walletRepository.getActiveWallet(),
+        walletName = walletRepository.getActiveWallet().removePrefix("wallet_"),
         id = id,
         version = versionName,
         upgradeChecked = generalRepository.getPreReleaseUpgrade(),
@@ -78,7 +78,7 @@ class SettingsViewModel @Inject constructor(
         sendState {
             copy(
                 wallets = walletRepository.getAllWalletNames(),
-                walletName = walletRepository.getActiveWallet()
+                walletName = walletRepository.getActiveWallet().removePrefix("wallet_")
             )
         }
     }
@@ -140,7 +140,7 @@ class SettingsViewModel @Inject constructor(
         sendState {
             copy(
                 wallets = walletRepository.getAllWalletNames(),
-                walletName = walletRepository.getActiveWallet()
+                walletName = walletRepository.getActiveWallet().removePrefix("wallet_")
             )
         }
     }
@@ -158,7 +158,7 @@ class SettingsViewModel @Inject constructor(
         sendState {
             copy(
                 wallets = walletRepository.getAllWalletNames(),
-                walletName = walletRepository.getActiveWallet()
+                walletName = walletRepository.getActiveWallet().removePrefix("wallet_")
             )
         }
     }

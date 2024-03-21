@@ -82,24 +82,38 @@ class GeneralRepositoryImpl @Inject constructor() : GeneralRepository {
     }
 
     override suspend fun createPldWallet(password: String, pin: String, wallet: String): Result<String> {
-        runCatching {
-            val seed = AnodeUtil.createPldWallet(password, wallet)
-            if (seed.isEmpty()) {
-                return Result.failure(Exception("Wallet creation failed"))
-            }
-            val encryptedPassword = AnodeUtil.encrypt(password, pin)
-            AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
-            if (pin.isNotEmpty()) {
-                AnodeUtil.storeWalletPin(pin, wallet)
-            }
-
-            Timber.d("createWallet: success")
-            return Result.success(seed)
+        val seed = AnodeUtil.createPldWallet(password, wallet)
+        if (seed.isEmpty()) {
+            return Result.failure(Exception("Wallet creation failed"))
         }
-        return Result.failure(Exception("Wallet creation failed"))
+        val encryptedPassword = AnodeUtil.encrypt(password, pin)
+        AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
+        if (pin.isNotEmpty()) {
+            AnodeUtil.storeWalletPin(pin, wallet)
+        }
+
+        Timber.d("createWallet: success")
+        return Result.success(seed)
     }
 
-    override fun launchPLD() {
-        AnodeUtil.launchPld("")
+    override suspend fun recoverPldWallet(password: String, seed: String, seedPassword:String, pin: String, wallet: String): Result<String> {
+        if (seed.isEmpty()) {
+            return Result.failure(Exception("Seed is empty"))
+        }
+        val returnedSeed = AnodeUtil.recoverPldWallet(password, wallet, seed, seedPassword)
+        if (returnedSeed.isEmpty()) {
+            return Result.failure(Exception("Wallet creation failed"))
+        }
+        val encryptedPassword = AnodeUtil.encrypt(password, pin)
+        AnodeUtil.storeWalletPassword(encryptedPassword, wallet)
+        if (pin.isNotEmpty()) {
+            AnodeUtil.storeWalletPin(pin, wallet)
+        }
+
+        Timber.d("createWallet: success")
+        return Result.success(seed)
+    }
+    override fun launchPLD(wallet: String) {
+        AnodeUtil.launchPld(wallet)
     }
 }

@@ -52,8 +52,8 @@ class MainViewModel @Inject constructor(
         sendNavigation(AppNavigation.OpenVote(fromaddress, isCandidate))
     }
 
-    fun openSendConfirm(fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean) {
-        sendNavigation(AppNavigation.OpenSendConfirm(fromaddress, toaddress, amount, maxAmount, false))
+    fun openSendConfirm(fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean, isVote: Boolean, isVoteCandidate: Boolean) {
+        sendNavigation(AppNavigation.OpenSendConfirm(fromaddress, toaddress, amount, maxAmount, premiumVpn = false, isVote,isVoteCandidate))
     }
     fun openSendConfirmPremiumVPN(fromaddress: String,toaddress: String, amount: Double) {
         sendNavigation(AppNavigation.OpenConfirmTransactionVPNPremium(fromaddress, toaddress, amount))
