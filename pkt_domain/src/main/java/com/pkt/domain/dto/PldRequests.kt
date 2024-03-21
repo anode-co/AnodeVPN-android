@@ -44,6 +44,14 @@ data class SendTransactionRequest(
 
 @Keep
 @Serializable
+data class SendVoteRequest(
+    val vote_for: String,
+    val from_address: String,
+    val is_candidate: Boolean
+)
+
+@Keep
+@Serializable
 data class CreateTransactionRequest(
     val to_address: String,
     val amount: Double,
@@ -54,6 +62,14 @@ data class CreateTransactionRequest(
 @Keep
 @Serializable
 data class SendTransactionResponse(
+    val txHash: String,
+    var message: String = "",
+    val stack: String = ""
+)
+
+@Keep
+@Serializable
+data class SendVoteResponse(
     val txHash: String,
     var message: String = "",
     val stack: String = ""
@@ -87,8 +103,22 @@ data class Vout(
     val address: String,
     val n: Int,
     val svalue: String,
-    val valueCoins: Float,
-    @Transient val vote: Any? = null
+    val valueCoins: Double,
+    @Transient val vote: Any? = null,
+)
+
+@Keep
+@Serializable
+data class Tx(
+    val locktime: Int,
+    val payers: List<Payer>,
+    val sfee: String,
+    val size: Int,
+    val txid: String,
+    val version: Int,
+    @Transient val vinDetail: Any? = null,
+    val vout: List<Vout>,
+    val vsize: Int
 )
 
 @Keep
@@ -97,8 +127,9 @@ data class Payer(
     val address: String,
     val inputs: Int,
     val svalue: String,
-    val valueCoins: Double
+    val valueCoins: String
 )
+
 @Keep
 @Serializable
 data class CreateTransactionResponse(
@@ -124,8 +155,7 @@ data class CheckPassphraseResponse(
 @Keep
 @Serializable
 data class UnlockWalletRequest (
-    var wallet_passphrase: String,
-    val wallet_name: String,
+    var wallet_passphrase: String
 )
 
 @Keep

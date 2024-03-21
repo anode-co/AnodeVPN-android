@@ -12,7 +12,7 @@ data class SendTransactionState(
 sealed class SendTransactionEvent : UiEvent {
     object OpenKeyboard : SendTransactionEvent()
 
-    data class OpenSendConfirm(val fromaddress: String, val toaddress: String, val amount: Double, val maxAmount: Boolean) : SendTransactionEvent()
+    data class OpenSendConfirm(val fromaddress: String, val toaddress: String, val amount: Double, val maxAmount: Boolean, val isVote: Boolean, val isVoteCandidate: Boolean) : SendTransactionEvent()
 
     data class AmountError(@StringRes val errorResId: Int) : SendTransactionEvent()
     data class AddressError(val error: String?) : SendTransactionEvent()

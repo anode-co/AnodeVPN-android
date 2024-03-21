@@ -3,8 +3,12 @@ package com.pkt.core.presentation.createwallet.recoverwallet
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.R
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -12,6 +16,7 @@ import javax.inject.Inject
 class RecoverWalletViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<RecoverWalletState>() {
 
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
@@ -52,17 +57,26 @@ class RecoverWalletViewModel @Inject constructor(
     private fun String.seedLength() = split(" ").map { it.trim() }.count { it.isNotBlank() }
 
     fun onNextClick() {
-        invokeAction {
-            //val walletName = walletRepository.getActiveWallet()
-            walletRepository.recoverWallet(password, pin, seed, seedPassword, name)
-                .onSuccess {
-                    Timber.i("RecoverWalletViewModel| Wallet recovery successful")
-                    sendNavigation(RecoverWalletNavigation.ToCongratulations)
-                }
-                .onFailure {
-                    Timber.e(it,"RecoverWalletViewModel| Wallet recovery failed")
-                    sendError(it)
-                }
+        invokeLoadingAction {
+            withContext(Dispatchers.IO) {
+                generalRepository.recoverPldWallet(password, seed, seedPassword, pin, name)
+                    .onSuccess {
+                        Timber.i("RecoverWalletViewModel| Wallet recovery successful")
+                        generalRepository.launchPLD(name)
+                        delay(1000)
+                        walletRepository.unlockWallet(password)
+                        withContext(Dispatchers.Main) {
+                            sendNavigation(RecoverWalletNavigation.ToCongratulations)
+                        }
+                    }
+                    .onFailure {
+                        Timber.e(it, "RecoverWalletViewModel| Wallet recovery failed")
+                        generalRepository.launchPLD(name)
+                        withContext(Dispatchers.Main) {
+                            sendError(it)
+                        }
+                    }
+            }
         }
     }
 

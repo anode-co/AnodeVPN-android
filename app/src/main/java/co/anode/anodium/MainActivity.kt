@@ -75,6 +75,12 @@ class MainActivity : AppCompatActivity() {
         searchForInternetSharing()
     }
 
+    override fun onResume() {
+        super.onResume()
+        Timber.i("MainActivity onResume starting PktMainActivity")
+        startActivity(Intent(this, PktMainActivity::class.java))
+    }
+
     private fun initializeApp() {
         //Initialize Util before Client
         AnodeUtil.init(applicationContext)
@@ -83,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         initTimber()
         AnodeUtil.initializeApp()
         AnodeUtil.launchCJDNS()
-        AnodeUtil.launchPld()
+        AnodeUtil.launchPld("")
         AnodeUtil.serviceThreads()
 
         val prefs = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)

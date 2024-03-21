@@ -4,6 +4,7 @@ import com.pkt.core.presentation.common.adapter.DisplayableItem
 import com.pkt.core.presentation.common.state.UiEvent
 import com.pkt.core.presentation.common.state.UiState
 import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
+import com.pkt.domain.dto.Vote
 
 data class WalletState(
     val syncState: SyncState,
@@ -19,6 +20,7 @@ data class WalletState(
     val items: List<DisplayableItem>,
     val startDate: Long? = null,
     val endDate: Long? = null,
+    val vote: Vote,
 ) : UiState {
 
     enum class SyncState {
@@ -36,6 +38,7 @@ data class WalletState(
 sealed class WalletEvent : UiEvent {
 
     object OpenSendTransaction: WalletEvent()
+    object OpenVote: WalletEvent()
 
     data class OpenDatePicker(
         val startDate: Long?,
@@ -45,4 +48,5 @@ sealed class WalletEvent : UiEvent {
     //object ScrollToTop: WalletEvent()
 
     data class OpenTransactionDetails(val extra: TransactionDetailsExtra) : WalletEvent()
+    data class OpenVoteDetails(val vote: Vote) : WalletEvent()
 }

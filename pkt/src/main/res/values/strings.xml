@@ -74,6 +74,7 @@
     <!--fragment_wallet-->
     <string name="block">Block:</string>
     <string name="my_wallet_address">My PKT Wallet address</string>
+    <string name="my_vote">My vote</string>
     <string name="transactions">Transactions</string>
     <string name="select_period">Select period</string>
     <string name="received_pkt">Received PKT</string>
@@ -161,6 +162,11 @@
     <string name="choose_wallet">Choose wallet</string>
     <string name="send_transaction">Send Transaction</string>
     <string name="max">Max</string>
+    <string name="vote_candidate">Candidate</string>
+    <string name="vote_for_address">Vote for address</string>
+    <string name="vote_nobody">Withdraw vote</string>
+    <string name="vote_withdrawn">Vote withdrawn</string>
+    <string name="vote">Vote</string>
     <string name="amount">Amount</string>
     <string name="send_pkt">Send PKT</string>
     <string name="send_as_much_pkt_as_possible">Send as much PKT as possible</string>
@@ -243,6 +249,8 @@
     <string name="address_copied">Address copied</string>
     <string name="confirm_with_password">Confirm with Password</string>
     <string name="confirm_with_pin">Confirm with PIN</string>
+    <string name="vote_submitted">Vote has been cast</string>
+    <string name="no_vote">no vote submitted…</string>
 
     <string name="error_insufficient_balance">Insufficient balance</string>
     <string name="sender_address">Sender address</string>

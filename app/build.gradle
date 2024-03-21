@@ -54,6 +54,22 @@ android {
                 buildConfigField "String", "BUILD_PLATFORM", "\"playstore\""
                 applicationIdSuffix ".playstore"
                 versionNameSuffix "-playstore"
+            } else if (System.getenv("ANDROIDTV_BUILD") == "true") {
+                def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
+                def allFilesFromDir = new File(tmpFilePath).listFiles()
+
+                if (allFilesFromDir != null) {
+                    def keystoreFile = allFilesFromDir.first()
+                    keystoreFile.renameTo("keystore/your_keystore.jks")
+                }
+                println("Building ANDROID TV build")
+                signingConfigs.release.storeFile = file("../../../_temp/keystore/your_keystore.jks")
+                signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
+                signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
+                signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
+                buildConfigField "String", "BUILD_PLATFORM", "\"playstore\""
+                applicationIdSuffix ".androidtv"
+                versionNameSuffix "-androidtv"
             } else if (System.getenv("CI") == "true") {
                 println("Building AutoUpdate build")
                 signingConfigs.release.storeFile = file("../tools/android_key")
@@ -63,13 +79,16 @@ android {
                 buildConfigField "String", "BUILD_PLATFORM", "\"travis\""
             } else {
                 println("Building local release build")
-                buildConfigField "String", "BUILD_PLATFORM", "\"local\""
-                signingConfigs.release.storeFile = file("../tools/android_key")
-                signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
-                signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
-                signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
-                applicationIdSuffix ".release"
-                versionNameSuffix "-release"
+//                buildConfigField "String", "BUILD_PLATFORM", "\"local\""
+//                signingConfigs.release.storeFile = file("../tools/android_key")
+//                signingConfigs.release.storePassword = System.getenv("KEYSTORE_PASSWORD")
+//                signingConfigs.release.keyAlias = System.getenv("KEY_ALIAS")
+//                signingConfigs.release.keyPassword = System.getenv("KEY_PASSWORD")
+//                applicationIdSuffix ".release"
+//                versionNameSuffix "-release"
+
+                applicationIdSuffix ".androidtv"
+                versionNameSuffix "-androidtv"
             }
             //Disable minify,
             // check this: https://developer.android.com/guide/navigation/navigation-pass-data#proguard_considerations
@@ -78,10 +97,10 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-            signingConfigs.debug.storeFile = file("../tools/android_key")
+            /*signingConfigs.debug.storeFile = file("../tools/android_key")
             signingConfigs.debug.storePassword = System.getenv("KEYSTORE_PASSWORD")
             signingConfigs.debug.keyAlias = System.getenv("KEY_ALIAS")
-            signingConfigs.debug.keyPassword = System.getenv("KEY_PASSWORD")
+            signingConfigs.debug.keyPassword = System.getenv("KEY_PASSWORD")*/
             println("Building local debug build")
             buildConfigField "String", "BUILD_PLATFORM", "\"local\""
             applicationIdSuffix ".debug"

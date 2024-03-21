@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.App.ScrollView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_rounded_top_20dp"
+    android:backgroundTint="@color/bg3">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/dateLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_horizontal"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:textAppearance="?textAppearance16Regular"
+            tools:text="" />
+
+        <TextView
+            android:id="@+id/voteLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_horizontal"
+            android:layout_marginTop="24dp"
+            android:drawablePadding="22dp"
+            android:gravity="center"
+            android:textAppearance="?textAppearance20SemiBold"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:drawableTopCompat="@drawable/ic_vote_green"
+            tools:text="Vote"
+            tools:textColor="?colorSuccess" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:background="@color/bg1"
+            android:paddingVertical="24dp">
+
+            <TextView
+                android:id="@+id/senderAddressLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:text="@string/sender_address"
+                android:textAppearance="?textAppearance14Regular"
+                android:textColor="?android:textColorSecondary"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/senderAddressValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:visibility="gone"
+                android:textAppearance="?textAppearance16Regular"
+                app:layout_constraintEnd_toEndOf="@id/senderAddressLabel"
+                app:layout_constraintStart_toStartOf="@id/senderAddressLabel"
+                app:layout_constraintTop_toBottomOf="@id/senderAddressLabel"
+                tools:text="pkdfvdsv1kliblh5kihi3nn24inkklk5353kkjbl" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/senderaddressesLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/senderAddressLabel"
+                app:layout_constraintStart_toStartOf="@id/senderAddressLabel"
+                app:layout_constraintTop_toBottomOf="@id/senderAddressValue" />
+
+            <TextView
+                android:id="@+id/recipientAddressLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:text="@string/vote_for_address"
+                android:textAppearance="?textAppearance14Regular"
+                android:textColor="?android:textColorSecondary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/senderaddressesLayout" />
+
+            <TextView
+                android:id="@+id/recipientAddressValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?textAppearance16Regular"
+                app:layout_constraintEnd_toEndOf="@id/recipientAddressLabel"
+                app:layout_constraintStart_toStartOf="@id/recipientAddressLabel"
+                app:layout_constraintTop_toBottomOf="@id/recipientAddressLabel"
+                tools:text="pkdfvdsv1kliblh5kihi3nn24inkklk5353kkjbl" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/recipientaddressesLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/recipientAddressLabel"
+                app:layout_constraintStart_toStartOf="@id/recipientAddressLabel"
+                app:layout_constraintTop_toBottomOf="@id/recipientAddressValue" />
+
+
+            <TextView
+                android:id="@+id/transactionIdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="@string/transaction_id"
+                android:textAppearance="?textAppearance14Regular"
+                android:textColor="?android:textColorSecondary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recipientaddressesLayout" />
+
+            <TextView
+                android:id="@+id/transactionIdValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?textAppearance16Regular"
+                app:layout_constraintEnd_toStartOf="@id/copyButton"
+                app:layout_constraintStart_toStartOf="@id/transactionIdLabel"
+                app:layout_constraintTop_toBottomOf="@id/transactionIdLabel"
+                tools:text="0bd1574c52a1621e4b522e9a45226eff2" />
+
+            <ImageView
+                android:id="@+id/overlayImage"
+                android:layout_width="152dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@id/transactionIdValue"
+                app:layout_constraintEnd_toEndOf="@id/transactionIdValue"
+                app:layout_constraintTop_toTopOf="@id/transactionIdValue"
+                app:srcCompat="@drawable/ic_overlay_address"
+                tools:ignore="ContentDescription"
+                android:forceDarkAllowed="false"/>
+
+            <ImageButton
+                android:id="@+id/copyButton"
+                style="@style/Widget.App.ImageButton.Oval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="26dp"
+                android:background="@drawable/ripple_mask_oval"
+                android:minWidth="30dp"
+                android:minHeight="30dp"
+                app:layout_constraintBottom_toBottomOf="@id/transactionIdValue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/transactionIdValue"
+                app:srcCompat="@drawable/ic_copy"
+                app:tint="?colorPrimary"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/blockNumberLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_horizontal"
+                android:layout_marginTop="20dp"
+                android:text="@string/in_block_number"
+                android:textAppearance="?textAppearance14Regular"
+                android:textColor="?android:textColorSecondary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/transactionIdValue" />
+
+            <TextView
+                android:id="@+id/blockNumberValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?textAppearance16Regular"
+                app:layout_constraintEnd_toEndOf="@id/blockNumberLabel"
+                app:layout_constraintStart_toStartOf="@id/blockNumberLabel"
+                app:layout_constraintTop_toBottomOf="@id/blockNumberLabel"
+                tools:text="1234567" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewButton"
+                style="@style/Widget.App.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/view_transaction"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/blockNumberValue" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.core.widget.NestedScrollView>

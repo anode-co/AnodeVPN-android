@@ -27,8 +27,6 @@ class ServiceVolley : ServiceInterface {
                     jsonError.put("error", errorString)
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
-                    //pls is not running try to launch it
-                    //AnodeUtil.launchPld()
                     jsonError.put("error", "pld not responding")
                     completionHandler(jsonError)
                 } else {
@@ -55,8 +53,6 @@ class ServiceVolley : ServiceInterface {
                     jsonError.put(jsonObj)
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
-                    //pls is not running try to launch it
-                    //AnodeUtil.launchPld()
                     val jsonObj = JSONObject().put("error", "pld not responding")
                     jsonError.put(jsonObj)
                     completionHandler(jsonError)
@@ -84,8 +80,6 @@ class ServiceVolley : ServiceInterface {
                     jsonError.put("error", errorString)
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("java.net.ConnectException: Failed to connect to localhost/127.0.0.1:8080"))) {
-                    //pls is not running try to launch it
-                    //AnodeUtil.launchPld()
                     jsonError.put("error", "pld not responding")
                     completionHandler(jsonError)
                 } else if ((!error.message.isNullOrEmpty()) && (error.message!!.contains("End of input at character 0"))) {

@@ -1,10 +1,11 @@
 package co.anode.anodium.volley
 
+import co.anode.anodium.support.AnodeUtil
 import org.json.JSONArray
 import org.json.JSONObject
 
 class APIController constructor(serviceInjection: ServiceInterface): ServiceInterface {
-    private val baseRestAPIURL = "http://localhost:8080/api/v1"
+    private val baseRestAPIURL = "http://localhost:${AnodeUtil.REST_PORT}/api/v1"
     //Create seed
     val createSeedURL = "$baseRestAPIURL/util/seed/create"
     //Wallet endpoints

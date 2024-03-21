@@ -29,9 +29,8 @@ class DeleteWalletViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val activeWallet = walletRepository.getActiveWallet()
             sendState { copy(
-                walletName = activeWallet,
+                walletName = walletRepository.getActiveWallet().removePrefix("wallet_"),
                 deleteButtonEnabled = false
             ) }
         }

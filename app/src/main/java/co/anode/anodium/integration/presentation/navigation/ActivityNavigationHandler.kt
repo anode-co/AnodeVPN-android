@@ -8,6 +8,7 @@ import co.anode.anodium.integration.presentation.settings.WalletInfoActivity
 import com.pkt.core.presentation.createwallet.CreateWalletMode
 import com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra
 import com.pkt.core.presentation.navigation.AppNavigationHandler
+import com.pkt.domain.dto.Vote
 import javax.inject.Inject
 
 class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
@@ -43,7 +44,7 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
         fragment.startActivity(walletActivity)
     }
 
-    override fun openSendConfirm(fragment: Fragment, fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean) {
+    override fun openSendConfirm(fragment: Fragment, fromaddress: String,toaddress: String, amount: Double, maxAmount: Boolean, isVote: Boolean, isVoteCandidate: Boolean) {
         TODO("Not yet implemented")
     }
 
@@ -70,7 +71,9 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     override fun openSendTransaction(fragment: Fragment, fromaddress: String) {
         TODO("Not yet implemented")
     }
-
+    override fun openVote(fragment: Fragment, fromaddress: String, isCandidate: Boolean) {
+        TODO("Not yet implemented")
+    }
     override fun openConfirmTransactionVPNPremium(fragment: Fragment, fromaddress: String, toAddress: String, amount: Double) {
         TODO("Not yet implemented")
     }
@@ -85,6 +88,10 @@ class ActivityNavigationHandler @Inject constructor() : AppNavigationHandler() {
     }
 
     override fun openTransactionDetails(fragment: Fragment, extra: TransactionDetailsExtra) {
+        TODO("Not yet implemented")
+    }
+
+    override fun openVoteDetails(fragment: Fragment, vote: Vote) {
         TODO("Not yet implemented")
     }
 

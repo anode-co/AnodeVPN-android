@@ -67,12 +67,18 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
             val fromaddress = bundle.getString(SendTransactionBottomSheet.KEY_FROM_ADDRESS)!!
             val amount = bundle.getDouble(SendTransactionBottomSheet.KEY_AMOUNT)
             val maxAmount = bundle.getBoolean(SendTransactionBottomSheet.KEY_MAX_AMOUNT)
-            mainViewModel.openSendConfirm(fromaddress, toaddress, amount, maxAmount)
+            mainViewModel.openSendConfirm(fromaddress, toaddress, amount, maxAmount, isVote = false,isVoteCandidate = false)
         }
         Timber.i("WalletFragment onViewCreated")
         with(viewBinding) {
             sendButton.setOnClickListener {
                 viewModel.onSendClick()
+            }
+            voteButton.setOnClickListener {
+                viewModel.onVoteClick()
+            }
+            voteButtonCandidate.setOnClickListener {
+                viewModel.onVoteClick()
             }
             qrButton.setOnClickListener {
                 showQrDialog()
@@ -100,6 +106,12 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
 
             addressValue.doOnClick {
                 viewModel.onAddressClick()
+            }
+
+            voteValue.doOnClick {
+                if (voteValue.text != getString(R.string.no_vote)) {
+                    viewModel.onVoteAddressClick()
+                }
             }
         }
     }
@@ -216,6 +228,26 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 applyGradient()
             }
 
+            voteValue.apply {
+                if (state.vote.voteFor.isEmpty()) {
+                    text = getString(R.string.no_vote)
+                } else if (state.vote.voteFor.startsWith("script:")) {
+                    text = getString(R.string.vote_withdrawn)
+                } else if (state.vote.voteFor.length > 10) {
+                    voteValue.text = state.vote.voteFor.substring(0, 12) + "..." + state.vote.voteFor.substring(state.vote.voteFor.length - 8)
+                } else {
+                    voteValue.text = state.vote.voteFor
+                }
+            }
+
+            if (state.vote.isCandidate) {
+                voteButton.visibility = View.INVISIBLE
+                voteButtonCandidate.visibility = View.VISIBLE
+            } else {
+                voteButton.visibility = View.VISIBLE
+                voteButtonCandidate.visibility = View.INVISIBLE
+            }
+
             balanceUsdLabel.text = state.balanceUsd.formatUsd()
             if (state.walletAddress.length > 10) {
                 addressValue.text = state.walletAddress.substring(0, 12) + "..." + state.walletAddress.substring(state.walletAddress.length - 8)
@@ -253,8 +285,10 @@ class WalletFragment : StateFragment<WalletState>(R.layout.fragment_wallet_core)
                 datePicker.show(childFragmentManager, "date_picker")
             }
             is WalletEvent.OpenSendTransaction -> mainViewModel.openSendTransaction(viewModel.walletAddress)
+            is WalletEvent.OpenVote -> mainViewModel.openVote(viewModel.walletAddress, viewModel.vote.isCandidate)
             //is WalletEvent.ScrollToTop -> viewBinding.recyclerView.scrollToPosition(0)
             is WalletEvent.OpenTransactionDetails -> mainViewModel.openTransactionDetails(event.extra)
+            is WalletEvent.OpenVoteDetails -> mainViewModel.openVoteDetails(event.vote)
             else -> super.handleEvent(event)
         }
     }

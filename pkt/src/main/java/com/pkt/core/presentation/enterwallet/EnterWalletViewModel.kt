@@ -39,7 +39,7 @@ class EnterWalletViewModel @Inject constructor(
     init {
         invokeLoadingAction {
             runCatching {
-                val currentWallet = walletRepository.getActiveWallet()
+                val currentWallet = walletRepository.getActiveWallet().removePrefix("wallet_")
                 val isPinAvailable = walletRepository.isPinAvailable().getOrThrow()
 
                 val wallets = walletRepository.getAllWalletNames()
@@ -50,7 +50,7 @@ class EnterWalletViewModel @Inject constructor(
                 )
             }.onSuccess { (currentWallet, isPinAvailable, wallets) ->
                 this.isPinAvailable = isPinAvailable
-
+                Timber.i("[EnterWalletViewModel] currentWallet: $currentWallet, isPinAvailable: $isPinAvailable")
                 sendState {
                     copy(
                         wallets = wallets,
@@ -105,6 +105,7 @@ class EnterWalletViewModel @Inject constructor(
 
     private fun checkPin() {
         invokeAction {
+            //walletRepository.checkPin(currentState.pin)
             walletRepository.unlockWalletWithPIN(currentState.pin)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
@@ -129,6 +130,7 @@ class EnterWalletViewModel @Inject constructor(
     fun onLoginClick() {
         invokeAction {
             walletRepository.unlockWallet(password)
+//            walletRepository.checkWalletPassphrase(password)
                 .onSuccess { isCorrect ->
                     if (isCorrect) {
                         Timber.i("Unlocked wallet using password. Going to main screen...")

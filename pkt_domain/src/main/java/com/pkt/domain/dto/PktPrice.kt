@@ -2,12 +2,13 @@ package com.pkt.domain.dto
 
 import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Keep
 @Serializable
 data class PktPrice(
     val `data`: Data,
-    val status: Status
+    @Transient val status: Status = Status(0, 0, 0, "", "", "")
 )
 
 @Keep
@@ -19,25 +20,26 @@ data class Data(
 @Keep
 @Serializable
 data class PKT(
-    val circulating_supply: Double,
-    val cmc_rank: Int,
-    val date_added: String,
-    val id: Int,
-    val is_active: Int,
-    val is_fiat: Int,
-    val last_updated: String,
-    val max_supply: Long,
-    val name: String,
-    val num_market_pairs: Int,
-    val platform: String?,
+    @Transient val circulating_supply: Double = 0.0,
+    @Transient val cmc_rank: Int = 0,
+    @Transient val date_added: String = "",
+    @Transient val id: Int = 0,
+    @Transient val is_active: Int = 0,
+    @Transient val is_fiat: Int = 0,
+    @Transient val last_updated: String = "",
+    @Transient val max_supply: Long  = 0,
+    @Transient val name: String = "",
+    @Transient val num_market_pairs: Int = 0,
+    @Transient val platform: String = "",
     val quote: Quote,
-    val self_reported_circulating_supply: Long?,
-    val self_reported_market_cap: Long?,
-    val slug: String,
-    val symbol: String,
-    val tags: List<String>,
-    val total_supply: Long,
-    val tvl_ratio: Long?
+    @Transient val self_reported_circulating_supply: Long = 0,
+    @Transient val self_reported_market_cap: Long = 0,
+    @Transient val slug: String = "",
+    @Transient val symbol: String = "",
+    @Transient val tags: List<String> = emptyList(),
+    @Transient val total_supply: Long = 0,
+    @Transient val tvl_ratio: Long = 0,
+    @Transient val infinite_supply: Boolean = false
 )
 
 @Keep
@@ -49,20 +51,20 @@ data class Quote(
 @Keep
 @Serializable
 data class USD(
-    val fully_diluted_market_cap: Double,
-    val last_updated: String,
-    val market_cap: Double,
-    val market_cap_dominance: Int,
-    val percent_change_1h: Double,
-    val percent_change_24h: Double,
-    val percent_change_30d: Double,
-    val percent_change_60d: Double,
-    val percent_change_7d: Double,
-    val percent_change_90d: Double,
+    @Transient val fully_diluted_market_cap: Double = 0.0,
+    @Transient val last_updated: String = "",
+    @Transient val market_cap: Double = 0.0,
+    @Transient val market_cap_dominance: Int = 0,
+    @Transient val percent_change_1h: Double = 0.0,
+    @Transient val percent_change_24h: Double = 0.0,
+    @Transient val percent_change_30d: Double = 0.0,
+    @Transient val percent_change_60d: Double = 0.0,
+    @Transient val percent_change_7d: Double = 0.0,
+    @Transient val percent_change_90d: Double = 0.0,
     val price: Double,
-    val tvl: Long?,
-    val volume_24h: Double,
-    val volume_change_24h: Double
+    @Transient val tvl: Long = 0,
+    @Transient val volume_24h: Double = 0.0,
+    @Transient val volume_change_24h: Double = 0.0
 )
 
 @Keep

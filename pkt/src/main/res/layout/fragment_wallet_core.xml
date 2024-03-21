@@ -97,18 +97,70 @@
         app:layout_constraintTop_toBottomOf="@id/balanceUsdLabel" />
 
     <TextView
+        android:id="@+id/voteLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="15dp"
+        android:includeFontPadding="false"
+        android:text="@string/my_vote"
+        android:textAppearance="?textAppearance14Regular"
+        android:textColor="?android:textColorSecondary"
+        app:layout_constraintEnd_toStartOf="@id/qrButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider" />
+
+    <TextView
+        android:id="@+id/voteValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:textAppearance="?textAppearance16Regular"
+        android:textColor="@color/btn_text_color_selector_inverse"
+        app:layout_constraintEnd_toEndOf="@id/addressLabel"
+        app:layout_constraintStart_toStartOf="@id/voteLabel"
+        app:layout_constraintTop_toTopOf="@+id/voteButton"
+        app:layout_constraintBottom_toBottomOf="@+id/voteButton"
+        android:singleLine="true"
+        tools:text="pkt1dlskjdfsf834jdfs4rfdsdsfds4..." />
+
+    <ImageButton
+        android:id="@+id/voteButton"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/shareButton"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        app:srcCompat="@drawable/ic_vote"
+        tools:ignore="ContentDescription" />
+    <ImageButton
+        android:id="@+id/voteButtonCandidate"
+        style="@style/Widget.App.ImageButton.Oval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/shareButton"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        app:srcCompat="@drawable/candidate_wave"
+        tools:ignore="ContentDescription" />
+    <TextView
         android:id="@+id/addressLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/spacing_horizontal"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="15dp"
         android:includeFontPadding="false"
         android:text="@string/my_wallet_address"
         android:textAppearance="?textAppearance14Regular"
         android:textColor="?android:textColorSecondary"
         app:layout_constraintEnd_toStartOf="@id/qrButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider" />
+        app:layout_constraintTop_toBottomOf="@id/voteValue" />
 
     <TextView
         android:id="@+id/addressValue"
@@ -140,10 +192,10 @@
         style="@style/Widget.App.ImageButton.Oval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="38dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="@dimen/spacing_horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:layout_constraintTop_toBottomOf="@id/voteButton"
         app:srcCompat="@drawable/ic_share"
         tools:ignore="ContentDescription" />
 

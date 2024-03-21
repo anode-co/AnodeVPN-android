@@ -10,7 +10,6 @@ import com.pkt.dummy.AddrMapper
 import com.pkt.dummy.CjdnsInfoMapper
 import com.pkt.dummy.R
 import com.pkt.dummy.WalletInfoMapper
-import com.pkt.dummy.dto.WalletAddressBalancesDummy
 import com.pkt.dummy.dto.WalletInfoDummy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -59,12 +58,7 @@ class WalletRepositoryDummy constructor(
         Result.success("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
 
     private suspend fun getWallets(): Result<List<Addr>> = withContext(Dispatchers.IO) {
-        runCatching {
-            delay(1000L)
-            context.resources.openRawResource(R.raw.wallets).use {
-                json.decodeFromStream<WalletAddressBalancesDummy>(it)
-            }.addrs.map { addrMapper.map(it) }
-        }
+        TODO("Not yet implemented")
     }
 
     override suspend fun isPinAvailable(): Result<Boolean> {
@@ -94,6 +88,10 @@ class WalletRepositoryDummy constructor(
 
     override suspend fun getTotalWalletBalance(): Result<Long> =
         getWalletBalance("pkt1q282zvfztp00nrelpw0lmy7pwz0lvz6vlmzwgzm")
+
+    override suspend fun getVote(address: String): Result<Vote?> {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun getWalletInfo(): Result<WalletInfo> = withContext(Dispatchers.IO) {
         runCatching {
@@ -150,7 +148,7 @@ class WalletRepositoryDummy constructor(
     override suspend fun getSeed(): Result<String> =
         Result.success("Tail net similar exercise scan sting buddy oil during museum outside cluster extra aim")
 
-    override suspend fun renameWallet(name: String): Result<String?> {
+    override suspend fun renameWallet(name: String, srcName: String): Result<String?> {
         delay(1000)
         return Result.success(
             if (name.any { !it.isLetterOrDigit() && !it.isWhitespace() }) {
@@ -245,6 +243,10 @@ class WalletRepositoryDummy constructor(
     }
 
     override suspend fun decodeTransaction(binTx: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun sendVote(fromAddress: String, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse> {
         TODO("Not yet implemented")
     }
 }

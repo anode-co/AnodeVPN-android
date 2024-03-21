@@ -2,6 +2,7 @@ package com.pkt.core.presentation.createwallet.confirmseed
 
 import androidx.lifecycle.SavedStateHandle
 import com.pkt.core.presentation.common.state.StateViewModel
+import com.pkt.domain.repository.GeneralRepository
 import com.pkt.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
@@ -11,6 +12,7 @@ import javax.inject.Inject
 class ConfirmSeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
+    private val generalRepository: GeneralRepository,
 ) : StateViewModel<ConfirmSeedState>() {
 
     private val password: String = savedStateHandle["password"] ?: throw IllegalArgumentException("password required")
@@ -45,8 +47,9 @@ class ConfirmSeedViewModel @Inject constructor(
             }
 
             else -> {
-                invokeAction {
-                    walletRepository.createWallet(password, pin, seed, name)
+                //Launch pld
+                invokeLoadingAction {
+                    walletRepository.unlockWallet(password)
                         .onSuccess {
                             Timber.d("ConfirmSeedViewModel | Wallet created successfully")
                             sendNavigation(ConfirmSeedNavigation.ToCongratulations)

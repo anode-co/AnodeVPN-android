@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_rounded_top_20dp"
+    android:backgroundTint="@color/bg3">
+
+    <TextView
+        android:id="@+id/titleLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/vote"
+        android:textAppearance="?textAppearance20SemiBold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/addressInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_horizontal"
+        android:layout_marginTop="20dp"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/addressInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/vote_for_address"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:paddingVertical="13dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/candidateVoteCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/spacing_horizontal"
+        android:background="@drawable/bg_checkbox"
+        android:button="@null"
+        android:gravity="center"
+        android:minHeight="48dp"
+        android:paddingHorizontal="15dp"
+        android:text="@string/vote_candidate"
+        android:textAppearance="?textAppearance14Medium"
+        android:textColor="@color/checkbox_text_color_selector"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addressInputLayout"
+        tools:checked="true" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/withdrawVoteCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/spacing_horizontal"
+        android:background="@drawable/bg_checkbox"
+        android:button="@null"
+        android:gravity="center"
+        android:minHeight="48dp"
+        android:paddingHorizontal="15dp"
+        android:text="@string/vote_nobody"
+        android:textAppearance="?textAppearance14Medium"
+        android:textColor="@color/checkbox_text_color_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addressInputLayout"
+        tools:checked="true" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/voteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="@dimen/bottom_button_margin_bottom"
+        android:text="@string/vote"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/candidateVoteCheckbox" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,9 +29,16 @@ class StartFragment : StateFragment<StartState>(R.layout.fragment_start) {
                 viewModel.onRecoverClick()
             }
         }
+        viewModel.fetchWallets()
     }
 
     override fun handleState(state: StartState) {
         viewBinding.contentGroup.isVisible = state.contentVisible
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Timber.i("StartFragment onResume")
+        viewModel.fetchWallets()
     }
 }

@@ -75,7 +75,9 @@ class SendTransactionViewModel @Inject constructor(
                     toaddress = toaddress,
                     amount = amountToSend ,
                     maxAmount = currentState.maxValueSelected,
-                    premiumVpn = false
+                    premiumVpn = false,
+                    isVote = false,
+                    isVoteCandidate = false
                 )
             )
         }.onFailure {

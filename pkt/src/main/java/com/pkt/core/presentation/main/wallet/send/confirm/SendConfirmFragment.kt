@@ -54,6 +54,7 @@ class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_se
                     passwordInputLayout.editText?.text?.toString()?.let { it1 -> viewModel.onPasswordDone(it1) }
                 }
             }
+
         }
     }
 
@@ -80,6 +81,9 @@ class SendConfirmFragment : StateFragment<SendConfirmState>(R.layout.fragment_se
                     R.string.please_confirm_password
                 }
             )
+
+            amountLabel.visibility = if (state.isVote) View.INVISIBLE else View.VISIBLE
+            amountValue.visibility = if (state.isVote) View.INVISIBLE else View.VISIBLE
         }
     }
 

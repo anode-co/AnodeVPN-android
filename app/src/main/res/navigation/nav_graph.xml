@@ -38,6 +38,10 @@
         app:destination="@id/sendTransaction" />
 
     <action
+        android:id="@+id/toVote"
+        app:destination="@id/vote" />
+
+    <action
         android:id="@+id/toEnterWallet"
         app:destination="@id/enterWallet"
         app:popUpTo="@id/navGraph"
@@ -54,6 +58,10 @@
     <action
         android:id="@+id/toTransactionDetails"
         app:destination="@id/transactionDetails" />
+
+    <action
+        android:id="@+id/toVoteDetails"
+        app:destination="@id/voteDetails" />
 
     <action
         android:id="@+id/toWebView"
@@ -145,6 +153,19 @@
 
     </dialog>
 
+    <dialog
+        android:id="@+id/vote"
+        android:name="com.pkt.core.presentation.main.wallet.vote.VoteBottomSheet"
+        android:label="Vote"
+        tools:layout="@layout/bottom_sheet_vote">
+        <argument
+            android:name="fromaddress"
+            app:argType="string" />
+        <argument
+            android:name="isCandidate"
+            app:argType="boolean" />
+    </dialog>
+
     <fragment
         android:id="@+id/sendConfirm"
         android:name="com.pkt.core.presentation.main.wallet.send.confirm.SendConfirmFragment"
@@ -165,7 +186,12 @@
         <argument
             android:name="premiumVpn"
             app:argType="boolean" />
-
+        <argument
+            android:name="isVote"
+            app:argType="boolean" />
+        <argument
+            android:name="isVoteCandidate"
+            app:argType="boolean" />
     </fragment>
 
     <dialog
@@ -193,6 +219,16 @@
         <argument
             android:name="extra"
             app:argType="com.pkt.core.presentation.main.wallet.transaction.details.TransactionDetailsExtra" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/voteDetails"
+        android:name="com.pkt.core.presentation.main.wallet.vote.details.VoteDetailsBottomSheet"
+        android:label="VoteDetails"
+        tools:layout="@layout/bottom_sheet_vote_details">
+        <argument
+            android:name="vote"
+            app:argType="com.pkt.core.presentation.main.wallet.vote.details.VoteDetails" />
     </dialog>
 
     <fragment

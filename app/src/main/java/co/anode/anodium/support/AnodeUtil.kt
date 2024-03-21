@@ -62,6 +62,7 @@ object AnodeUtil {
     val CJDROUTE_LOG = "cjdroute.log"
     val PLD_LOG = "pldlog.txt"
     val PLD_BINFILE = "pld"
+    val REST_PORT = 53199
     lateinit var pld_pb: Process
     lateinit var cjdns_pb: Process
     private val CJDROUTE_TEMPCONFFILE = "tempcjdroute.conf"
@@ -74,6 +75,7 @@ object AnodeUtil {
     var isInternetSharingAvailable = false
     const val CHANNEL_ID = "anodium_channel_01"
     private var doUpdateCheck = false
+    private var creatingNewWallet = false
 
     fun init(c: Context) {
         context = c
@@ -207,6 +209,8 @@ object AnodeUtil {
     }
 
     fun getPremiumEndTime(server: String): Long {
+        // Ignore for Test server
+        if (server == "6mg9hq1n8nmt54x7p5v1zqpvyhy285sj1mkhb7ucgu1w0ytgybw0.k") return 0
         val prefs = context?.getSharedPreferences(BuildConfig.APPLICATION_ID, AppCompatActivity.MODE_PRIVATE)
         return prefs!!.getLong("Premium_$server", 0)
     }
@@ -276,11 +280,16 @@ object AnodeUtil {
     }
 
     fun stopPld() {
-        pld_pb.destroy()
+        if (this::pld_pb.isInitialized && pld_pb.isAlive) {
+            pld_pb.destroyForcibly()
+            pld_pb.waitFor()
+        }
     }
 
     fun stopCjdns() {
-        cjdns_pb.destroy()
+        if (this::cjdns_pb.isInitialized && cjdns_pb.isAlive) {
+            cjdns_pb.destroy()
+        }
     }
 
     fun deleteNeutrino() {
@@ -357,17 +366,41 @@ object AnodeUtil {
             throw AnodeUtilException("Failed to execute cjdroute " + e.message)
         }
     }
+    
+    fun launchPld(walletName: String) {
+        if (creatingNewWallet) {
+            Timber.i("Creating new wallet. Can not launchPld")
+            return
+        }
+        if (getWalletFiles().isEmpty()) {
+            Timber.i("No wallet files found. Can not launchPld")
+            return
+        }
 
-    fun launchPld() {
+        var walletParam = ""
+        if (walletName.isNotEmpty() && walletName != DEFAULT_WALLET_NAME) {
+            //Remove "wallet_" from name when it is coming from getwalletnames
+            //There is the case we are creating a new wallet and the wallet name
+            // is given by the user without default wallet_ prefix
+            if ((walletName.split("_").size > 1) && (walletName.split("_")[0] == DEFAULT_WALLET_NAME)) {
+                walletParam = "--wallet=" + walletName.split("_")[1]
+            } else {
+                walletParam = "--wallet=" + walletName
+            }
+        }
         try {
-            if (this::pld_pb.isInitialized && pld_pb.isAlive) return
-            Timber.i( "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
+            while (this::pld_pb.isInitialized && pld_pb.isAlive) {
+                Timber.i("[launchpld] Restarting pld")
+                stopPld()
+                Thread.sleep(500)
+            }
+            Timber.i( "Launching pld for wallet $walletName")
             val pldLogFile = File(filesDirectory + "/" + PLD_LOG)
-            val processBuilder = ProcessBuilder()
-            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt")
+
+            val processBuilder: ProcessBuilder = ProcessBuilder().command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt","--restlisten=$REST_PORT", walletParam)
                     .redirectOutput(File(filesDirectory, PLD_LOG))
                     .redirectErrorStream(true)
-            pb.environment()["TMPDIR"] = filesDirectory
+            processBuilder.environment()["TMPDIR"] = filesDirectory
             pld_pb = processBuilder.start()
             Thread( Runnable {
                 //If pld fails, send error msg and relaunch it
@@ -376,7 +409,7 @@ object AnodeUtil {
                 if (pldLogFile.exists()) {
                     var pldLines = pldLogFile.readLines()
                     //Check if pld is already running
-                    if (pldLines.contains("127.0.0.1:8080: bind: address already in use")) {
+                    if (pldLines.contains("127.0.0.1:$REST_PORT: bind: address already in use")) {
                        return@Runnable
                     }
                     if (pldLines.size > 100) {
@@ -392,8 +425,10 @@ object AnodeUtil {
                     pldLogFile.delete()
                 }
                 //Wait before restarting pld
-                Thread.sleep(500)
-                launchPld()
+                Thread.sleep(2500)
+                // get active wallet, might have changed
+                var activeWalletName = context?.getSharedPreferences(AnodeUtil.ApplicationID, Context.MODE_PRIVATE)?.getString("activeWallet", "wallet").toString()
+                launchPld(activeWalletName)
             }).start()
         } catch (e: Exception) {
             throw AnodeUtilException("Failed to execute pld " + e.message)
@@ -871,7 +906,11 @@ object AnodeUtil {
     }
 
     fun deleteWallet(walletName: String) {
-        val walletFile = File("$filesDirectory/pkt/$walletName.db")
+        var walletFileName = walletName
+        if (!walletName.startsWith("wallet_") && (walletName != DEFAULT_WALLET_NAME)) {
+            walletFileName = "wallet_$walletName"
+        }
+        val walletFile = File("$filesDirectory/pkt/$walletFileName.db")
         if (walletFile.exists()) {
             walletFile.delete()
         }
@@ -1101,6 +1140,131 @@ object AnodeUtil {
         return out.joinToString(":")
     }
 
+    fun createPldWallet(passphrase: String, name: String): String {
+        creatingNewWallet = true
+        stopPld()
+        var waiting = 0
+
+        while (this::pld_pb.isInitialized && (pld_pb.isAlive && waiting < 5)) {
+            Timber.i("Waiting for pld to stop")
+            Thread.sleep(1000)
+            waiting++
+        }
+        var walletParam = ""
+        if (name.isNotEmpty() && (name != DEFAULT_WALLET_NAME)) {
+            walletParam = "--wallet=$name"
+        }
+        //Check if wallet.db already exists
+        val walletFile = File("$filesDirectory/pkt/$name.db")
+        if (walletFile.exists()) {
+            Timber.e("Wallet $name already exists")
+            creatingNewWallet = false
+            return ""
+        }
+        val walletJsonFilename = "wallet.json"
+        val seedJsonFilename = "seed.json"
+        //Save passphrase to json file
+        val jsonObject = JSONObject()
+        jsonObject.put("passphrase", passphrase)
+        val walletJsonFile = File(filesDirectory, walletJsonFilename)
+        walletJsonFile.writeText(jsonObject.toString())
+        val seedFile = File(filesDirectory, seedJsonFilename)
+        var seed = ""
+        try {
+            Timber.i( "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
+            val processBuilder = ProcessBuilder()
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt", "--create", walletParam)
+                .redirectInput(File(filesDirectory, walletJsonFilename))
+                .redirectOutput(File(filesDirectory, seedJsonFilename))
+            pb.environment()["TMPDIR"] = filesDirectory
+            pld_pb = processBuilder.start()
+            pld_pb.waitFor()
+            val seedJson = JSONObject(seedFile.readText())
+            seed = seedJson.getString("seed")
+        } catch (e: Exception) {
+            creatingNewWallet = false
+            pld_pb.destroyForcibly()
+            if (walletJsonFile.exists()) {
+                walletJsonFile.delete()
+            }
+            if (seedFile.exists()) {
+                seedFile.delete()
+            }
+            throw AnodeUtilException("Failed to execute pld " + e.message)
+        }
+        if (walletJsonFile.exists()) {
+            walletJsonFile.delete()
+        }
+        if (seedFile.exists()) {
+            seedFile.delete()
+        }
+        creatingNewWallet = false
+        return seed
+    }
+
+    fun recoverPldWallet(passphrase: String, name: String, seed:String, seedPassword: String): String {
+        creatingNewWallet = true
+        stopPld()
+        var waiting = 0
+
+        while (this::pld_pb.isInitialized && (pld_pb.isAlive && waiting < 5)) {
+            Timber.i("Waiting for pld to stop")
+            Thread.sleep(1000)
+            waiting++
+        }
+        var walletParam = ""
+        if (name.isNotEmpty() && (name != DEFAULT_WALLET_NAME)) {
+            walletParam = "--wallet=$name"
+        }
+        //Check if wallet.db already exists
+        val walletFile = File("$filesDirectory/pkt/$name.db")
+        if (walletFile.exists()) {
+            Timber.e("Wallet $name already exists")
+            creatingNewWallet = false
+            return ""
+        }
+        val walletJsonFilename = "wallet.json"
+        val seedJsonFilename = "seed.json"
+        //Save passphrase to json file
+        val jsonObject = JSONObject()
+        jsonObject.put("passphrase", passphrase)
+        jsonObject.put("seed", seed)
+        jsonObject.put("seedpassphrase", seedPassword)
+        val walletJsonFile = File(filesDirectory, walletJsonFilename)
+        walletJsonFile.writeText(jsonObject.toString())
+        val seedFile = File(filesDirectory, seedJsonFilename)
+        var newseed = ""
+        try {
+            Timber.i( "Launching pld (file size: " + File("$filesDirectory/$PLD_BINFILE").length() + ")")
+            val processBuilder = ProcessBuilder()
+            val pb: ProcessBuilder = processBuilder.command("$filesDirectory/$PLD_BINFILE","--lnddir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt/lnd","--pktdir=/data/data/${BuildConfig.APPLICATION_ID}/files/pkt", "--create", walletParam)
+                .redirectInput(File(filesDirectory, walletJsonFilename))
+                .redirectOutput(File(filesDirectory, seedJsonFilename))
+            pb.environment()["TMPDIR"] = filesDirectory
+            pld_pb = processBuilder.start()
+            pld_pb.waitFor()
+            val seedJson = JSONObject(seedFile.readText())
+            newseed = seedJson.getString("seed")
+        } catch (e: Exception) {
+            creatingNewWallet = false
+            pld_pb.destroyForcibly()
+            if (walletJsonFile.exists()) {
+                walletJsonFile.delete()
+            }
+            if (seedFile.exists()) {
+                seedFile.delete()
+            }
+            throw AnodeUtilException("Failed to execute pld " + e.message)
+        }
+        if (walletJsonFile.exists()) {
+            walletJsonFile.delete()
+        }
+        if (seedFile.exists()) {
+            seedFile.delete()
+        }
+        creatingNewWallet = false
+        return newseed
+    }
 }
 
 class AnodeUtilException(message: String): Exception(message)

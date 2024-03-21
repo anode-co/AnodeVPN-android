@@ -27,14 +27,16 @@ interface WalletAPI {
     suspend fun createWallet(@Body recoverWalletRequest: RecoverWalletRequest): CreateWalletResponse
     @POST("wallet/transaction/sendfrom")
     suspend fun sendTransaction(@Body sendRequest: SendTransactionRequest): SendTransactionResponse
+    @POST("wallet/transaction/sendvote")
+    suspend fun sendVote(@Body sendRequest: SendVoteRequest): SendVoteResponse
     @POST("wallet/transaction/create")
     suspend fun createTransaction(@Body createRequest: CreateTransactionRequest): CreateTransactionResponse
     @POST("wallet/checkpassphrase")
     suspend fun checkPassphrase(@Body checkPassphraseRequest: CheckPassphraseRequest): CheckPassphraseResponse
     @POST("wallet/changepassphrase")
     suspend fun changePassphrase(@Body changePassphraseRequest: ChangePassphraseRequest): ChangePassphraseResponse
-    @GET("wallet/seed")
-    suspend fun getWalletSeed(): GetSeedResponse
+    @POST("wallet/seed")
+    suspend fun getWalletSeed(@Body empty: RequestBody): GetSeedResponse
     @POST
     suspend fun getSecret(@Body empty: RequestBody): GetSecretResponse
     @GET("api/cmc-price")

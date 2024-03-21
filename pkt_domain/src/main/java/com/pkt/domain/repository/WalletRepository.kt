@@ -19,6 +19,8 @@ interface WalletRepository {
     suspend fun checkPin(pin: String): Result<Boolean>
     //Get the total available balance of PKT in all the addresses of the wallet
     suspend fun getTotalWalletBalance(): Result<Long>
+
+    suspend fun getVote(address: String): Result<Vote?>
     //Get the wallet balance of a specific address
     suspend fun getWalletBalance(address: String): Result<Long>
     //Get the wallet info
@@ -42,7 +44,7 @@ interface WalletRepository {
     //Get the seed words of the active wallet
     suspend fun getSeed(): Result<String>
     //Rename the active wallet file in the device
-    suspend fun renameWallet(name: String): Result<String?>
+    suspend fun renameWallet(name: String, srcName: String = ""): Result<String?>
     //Check if wallet name exists
     suspend fun checkWalletName(name: String): Result<String?>
     //Delete wallet name from device
@@ -76,4 +78,6 @@ interface WalletRepository {
     fun getActiveWalletUri(): Uri?
 
     suspend fun decodeTransaction(binTx: String): String
+
+    suspend fun sendVote(fromAddress: String, voteFor: String, isCandidate: Boolean): Result<SendVoteResponse>
 }
